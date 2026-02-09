@@ -56,7 +56,6 @@ export function DocumentPreview({
       return;
     }
 
-    // If a direct URL is provided, use it without an API call
     if (directUrl) {
       setViewUrl(directUrl);
       setDownloadUrl(directUrl);
@@ -101,14 +100,19 @@ export function DocumentPreview({
     };
   }, [open, documentId, directUrl]);
 
-  // Render DOCX when we have a URL and container
+  // Render DOCX via server proxy to avoid S3 CORS issues
   const renderDocx = useCallback(async () => {
-    if (!viewUrl || !docxContainerRef.current || docxRendered) return;
+    if (!documentId || !docxContainerRef.current || docxRendered) return;
 
     setLoading(true);
+    setError(null);
     try {
-      const response = await fetch(viewUrl);
-      if (!response.ok) throw new Error("Failed to fetch document");
+      // Fetch DOCX through our API proxy (avoids S3 CORS)
+      const response = await fetch(`/api/generated-documents/${documentId}/content`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to load document");
+      }
       const blob = await response.blob();
 
       const { renderAsync } = await import("docx-preview");
@@ -130,13 +134,13 @@ export function DocumentPreview({
     } finally {
       setLoading(false);
     }
-  }, [viewUrl, docxRendered]);
+  }, [documentId, docxRendered]);
 
   useEffect(() => {
-    if (open && viewUrl && isDocx(fileName) && !docxRendered) {
+    if (open && isDocx(fileName) && !docxRendered && !error) {
       renderDocx();
     }
-  }, [open, viewUrl, fileName, docxRendered, renderDocx]);
+  }, [open, fileName, docxRendered, error, renderDocx]);
 
   const canPreviewInline = isPdf(fileName) || isImage(fileName);
 
@@ -185,7 +189,7 @@ export function DocumentPreview({
             </div>
           )}
 
-          {error && (
+          {error && !loading && (
             <div className="flex flex-col items-center justify-center h-full gap-3 px-6">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
                 <AlertCircle className="h-6 w-6 text-destructive" />
@@ -221,11 +225,11 @@ export function DocumentPreview({
             </div>
           )}
 
-          {/* DOCX inline render */}
-          {viewUrl && isDocx(fileName) && (
+          {/* DOCX inline render — fetched via server proxy */}
+          {isDocx(fileName) && !error && (
             <div
               ref={docxContainerRef}
-              className={`docx-container bg-white ${loading ? "hidden" : ""}`}
+              className={`docx-container bg-white ${loading || !docxRendered ? "hidden" : ""}`}
             />
           )}
 
