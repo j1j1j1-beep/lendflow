@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Loader2, Download, FileText, AlertCircle, ImageIcon } from "lucide-react";
 import {
   Dialog,
@@ -16,7 +16,7 @@ type DocumentPreviewProps = {
   fileName: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** If provided, skip the API call and use this URL directly */
+  /** If provided, use this URL for download (S3 presigned) */
   directUrl?: string | null;
 };
 
@@ -39,108 +39,89 @@ export function DocumentPreview({
   onOpenChange,
   directUrl,
 }: DocumentPreviewProps) {
-  const [viewUrl, setViewUrl] = useState<string | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [viewUrl, setViewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [docxRendered, setDocxRendered] = useState(false);
-  const docxContainerRef = useRef<HTMLDivElement>(null);
+  const [docxBlob, setDocxBlob] = useState<Blob | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  // Reset state when dialog closes
   useEffect(() => {
     if (!open) {
-      setViewUrl(null);
       setDownloadUrl(null);
+      setViewUrl(null);
       setError(null);
       setLoading(false);
-      setDocxRendered(false);
+      setDocxBlob(null);
       return;
     }
 
+    // For non-DOCX files: use directUrl for viewing
     if (directUrl) {
       setViewUrl(directUrl);
       setDownloadUrl(directUrl);
-      setLoading(false);
-      return;
     }
 
-    if (!documentId) {
-      setViewUrl(null);
-      setDownloadUrl(null);
-      setLoading(false);
-      return;
+    // For DOCX files: fetch blob through proxy
+    if (isDocx(fileName) && documentId) {
+      setLoading(true);
+      setDownloadUrl(directUrl ?? null);
+      fetch(`/api/generated-documents/${documentId}/content`)
+        .then(async (res) => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.error || "Failed to load document");
+          }
+          return res.blob();
+        })
+        .then((blob) => {
+          setDocxBlob(blob);
+        })
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : "Failed to load document");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
+  }, [open, documentId, directUrl, fileName]);
+
+  // Render DOCX blob into container when both are ready
+  useEffect(() => {
+    if (!docxBlob || !containerRef.current) return;
 
     let cancelled = false;
 
-    async function fetchUrl() {
-      setLoading(true);
-      setError(null);
+    async function render() {
       try {
-        const res = await fetch(`/api/documents/${documentId}`);
-        if (!res.ok) throw new Error("Failed to load document");
-        const data = await res.json();
-        if (cancelled) return;
-        if (data.viewUrl) {
-          setViewUrl(data.viewUrl);
-          setDownloadUrl(data.downloadUrl ?? data.viewUrl);
-        } else {
-          setError("No preview available for this document.");
-        }
+        const { renderAsync } = await import("docx-preview");
+        if (cancelled || !containerRef.current) return;
+        containerRef.current.innerHTML = "";
+        await renderAsync(docxBlob!, containerRef.current, undefined, {
+          className: "docx-preview",
+          inWrapper: true,
+          ignoreWidth: false,
+          ignoreHeight: true,
+          ignoreFonts: false,
+          breakPages: true,
+          renderHeaders: true,
+          renderFooters: true,
+          renderFootnotes: true,
+        });
       } catch (err) {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Failed to load document");
-      } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to render document");
+        }
       }
     }
 
-    fetchUrl();
+    render();
+
     return () => {
       cancelled = true;
     };
-  }, [open, documentId, directUrl]);
-
-  // Render DOCX via server proxy to avoid S3 CORS issues
-  const renderDocx = useCallback(async () => {
-    if (!documentId || !docxContainerRef.current || docxRendered) return;
-
-    setLoading(true);
-    setError(null);
-    try {
-      // Fetch DOCX through our API proxy (avoids S3 CORS)
-      const response = await fetch(`/api/generated-documents/${documentId}/content`);
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error || "Failed to load document");
-      }
-      const blob = await response.blob();
-
-      const { renderAsync } = await import("docx-preview");
-      docxContainerRef.current.innerHTML = "";
-      await renderAsync(blob, docxContainerRef.current, undefined, {
-        className: "docx-preview",
-        inWrapper: true,
-        ignoreWidth: false,
-        ignoreHeight: true,
-        ignoreFonts: false,
-        breakPages: true,
-        renderHeaders: true,
-        renderFooters: true,
-        renderFootnotes: true,
-      });
-      setDocxRendered(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to render document");
-    } finally {
-      setLoading(false);
-    }
-  }, [documentId, docxRendered]);
-
-  useEffect(() => {
-    if (open && isDocx(fileName) && !docxRendered && !error) {
-      renderDocx();
-    }
-  }, [open, fileName, docxRendered, error, renderDocx]);
+  }, [docxBlob]);
 
   const canPreviewInline = isPdf(fileName) || isImage(fileName);
 
@@ -225,11 +206,12 @@ export function DocumentPreview({
             </div>
           )}
 
-          {/* DOCX inline render — fetched via server proxy */}
-          {isDocx(fileName) && !error && (
+          {/* DOCX render target — always in DOM so ref is ready */}
+          {isDocx(fileName) && (
             <div
-              ref={docxContainerRef}
-              className={`docx-container bg-white ${loading || !docxRendered ? "hidden" : ""}`}
+              ref={containerRef}
+              className="docx-container bg-white"
+              style={{ display: loading || error || !docxBlob ? "none" : "block" }}
             />
           )}
 
