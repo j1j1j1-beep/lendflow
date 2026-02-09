@@ -202,22 +202,21 @@
 .docx-container {
   padding: 0;
   min-height: 100%;
+  overflow: auto;
 }
 .docx-container .docx-wrapper {
-  background: white !important;
-  padding: 1.5rem !important;
-  max-width: 100%;
+  background: #f8f9fa !important;
+  padding: 1rem !important;
 }
 .docx-container .docx-wrapper > section.docx {
-  box-shadow: none !important;
-  margin-bottom: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
-  min-width: 0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+  margin: 0 auto 1rem !important;
   max-width: 100% !important;
+  overflow: hidden !important;
+  transform-origin: top center;
+  zoom: 0.75;
 }
 .docx-container table {
-  max-width: 100%;
-  table-layout: fixed;
+  max-width: 100% !important;
   word-wrap: break-word;
 }
