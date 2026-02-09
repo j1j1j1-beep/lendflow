@@ -17,6 +17,41 @@ model Organization {
   updatedAt  DateTime @updatedAt
   users      User[]
   deals      Deal[]
+  subscription Subscription?
+  usageLogs  UsageLog[]
+}
+
+// ─── Billing ──────────────────────────────────────────────────────────────────
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  orgId                String    @unique
+  org                  Organization @relation(fields: [orgId], references: [id])
+  stripeCustomerId     String    @unique
+  stripeSubscriptionId String?   @unique
+  licensePaid          Boolean   @default(false)
+  licensePaymentId     String?
+  plan                 String    @default("trial") // "trial", "active", "canceled"
+  status               String    @default("trialing") // "trialing", "active", "past_due", "canceled", "unpaid"
+  maxSeats             Int       @default(25)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model UsageLog {
+  id             String       @id @default(cuid())
+  orgId          String
+  org            Organization @relation(fields: [orgId], references: [id])
+  month          String       // "2026-02" format
+  dealsProcessed Int          @default(0)
+  docsGenerated  Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([orgId, month])
 }
 
 model User {

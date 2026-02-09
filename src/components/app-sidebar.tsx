@@ -10,6 +10,7 @@ import {
   Moon,
   Sun,
   FileText,
+  Settings,
 } from "lucide-react";
 import {
   Sidebar,
@@ -36,6 +37,11 @@ const NAV_ITEMS = [
     label: "New Deal",
     href: "/dashboard/deals/new",
     icon: FilePlus,
+  },
+  {
+    label: "Settings",
+    href: "/dashboard/settings",
+    icon: Settings,
   },
 ];
 
