@@ -2,6 +2,7 @@
 // npm install --save-dev prisma dotenv
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
+dotenv.config(); // also load .env for Vercel
 import { defineConfig } from "prisma/config";
 
 export default defineConfig({
