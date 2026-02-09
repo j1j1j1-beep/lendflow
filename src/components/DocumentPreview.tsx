@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Loader2, Download, FileText, AlertCircle, ImageIcon } from "lucide-react";
 import {
   Dialog,
@@ -29,7 +29,7 @@ function isImage(fileName: string): boolean {
 }
 
 function isDocx(fileName: string): boolean {
-  return /\.docx?$/i.test(fileName);
+  return /\.docx$/i.test(fileName);
 }
 
 export function DocumentPreview({
@@ -43,6 +43,8 @@ export function DocumentPreview({
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [docxRendered, setDocxRendered] = useState(false);
+  const docxContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) {
@@ -50,6 +52,7 @@ export function DocumentPreview({
       setDownloadUrl(null);
       setError(null);
       setLoading(false);
+      setDocxRendered(false);
       return;
     }
 
@@ -98,6 +101,43 @@ export function DocumentPreview({
     };
   }, [open, documentId, directUrl]);
 
+  // Render DOCX when we have a URL and container
+  const renderDocx = useCallback(async () => {
+    if (!viewUrl || !docxContainerRef.current || docxRendered) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(viewUrl);
+      if (!response.ok) throw new Error("Failed to fetch document");
+      const blob = await response.blob();
+
+      const { renderAsync } = await import("docx-preview");
+      docxContainerRef.current.innerHTML = "";
+      await renderAsync(blob, docxContainerRef.current, undefined, {
+        className: "docx-preview",
+        inWrapper: true,
+        ignoreWidth: false,
+        ignoreHeight: true,
+        ignoreFonts: false,
+        breakPages: true,
+        renderHeaders: true,
+        renderFooters: true,
+        renderFootnotes: true,
+      });
+      setDocxRendered(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to render document");
+    } finally {
+      setLoading(false);
+    }
+  }, [viewUrl, docxRendered]);
+
+  useEffect(() => {
+    if (open && viewUrl && isDocx(fileName) && !docxRendered) {
+      renderDocx();
+    }
+  }, [open, viewUrl, fileName, docxRendered, renderDocx]);
+
   const canPreviewInline = isPdf(fileName) || isImage(fileName);
 
   return (
@@ -137,7 +177,7 @@ export function DocumentPreview({
         </DialogHeader>
 
         {/* Content */}
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-auto">
           {loading && (
             <div className="flex flex-col items-center justify-center h-full gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -181,18 +221,12 @@ export function DocumentPreview({
             </div>
           )}
 
-          {!loading && !error && viewUrl && !canPreviewInline && isDocx(fileName) && (
-            <div className="flex flex-col items-center justify-center h-full gap-4 px-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                <FileText className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-medium">Word Document</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Word documents must be downloaded to view. Click Download above.
-                </p>
-              </div>
-            </div>
+          {/* DOCX inline render */}
+          {viewUrl && isDocx(fileName) && (
+            <div
+              ref={docxContainerRef}
+              className={`docx-container bg-white ${loading ? "hidden" : ""}`}
+            />
           )}
 
           {!loading && !error && viewUrl && !canPreviewInline && !isDocx(fileName) && (
