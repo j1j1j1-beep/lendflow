@@ -101,7 +101,7 @@ export function DocumentPreview({
         await renderAsync(docxBlob!, containerRef.current, undefined, {
           className: "docx-preview",
           inWrapper: true,
-          ignoreWidth: false,
+          ignoreWidth: true,
           ignoreHeight: true,
           ignoreFonts: false,
           breakPages: true,

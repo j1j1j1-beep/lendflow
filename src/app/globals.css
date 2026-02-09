@@ -200,16 +200,24 @@
 
 /* docx-preview rendered document styling */
 .docx-container {
-  padding: 1rem;
+  padding: 0;
   min-height: 100%;
 }
 .docx-container .docx-wrapper {
-  background: white;
+  background: white !important;
+  padding: 1.5rem !important;
   max-width: 100%;
 }
 .docx-container .docx-wrapper > section.docx {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  margin-bottom: 1rem;
-  padding: 1in;
-  overflow-x: auto;
+  box-shadow: none !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+.docx-container table {
+  max-width: 100%;
+  table-layout: fixed;
+  word-wrap: break-word;
 }
