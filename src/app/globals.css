@@ -205,18 +205,27 @@
   overflow: auto;
 }
 .docx-container .docx-wrapper {
-  background: #f8f9fa !important;
-  padding: 1rem !important;
+  background: white !important;
+  padding: 1.5rem !important;
 }
 .docx-container .docx-wrapper > section.docx {
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
-  margin: 0 auto 1rem !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+.docx-container .docx-wrapper > section.docx > * {
   max-width: 100% !important;
-  overflow: hidden !important;
-  transform-origin: top center;
-  zoom: 0.75;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 .docx-container table {
   max-width: 100% !important;
-  word-wrap: break-word;
+  width: 100% !important;
+  table-layout: fixed;
+}
+.docx-container td, .docx-container th {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
