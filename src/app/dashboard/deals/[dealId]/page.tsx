@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -18,6 +18,9 @@ import {
   CheckCircle2,
   Shield,
   Trash2,
+  Pencil,
+  Save,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -266,17 +269,24 @@ function formatFileSize(bytes: number): string {
   return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
 
-function DocumentComplianceCard({ doc, onPreview }: {
+function DocumentComplianceCard({ doc, onRefresh }: {
   doc: GeneratedDocument;
-  onPreview: () => void;
+  onRefresh: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [docxBlob, setDocxBlob] = useState<Blob | null>(null);
+  const [docLoading, setDocLoading] = useState(false);
+  const [docError, setDocError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const checks = doc.complianceChecks ?? [];
   const passedCount = checks.filter(c => c.passed).length;
   const totalCount = checks.length;
   const hasChecks = totalCount > 0;
+  const hasIssues = (doc.legalIssues && doc.legalIssues.length > 0) || checks.some(c => !c.passed);
 
-  // Group checks by category
   const grouped = {
     required: checks.filter(c => c.category === "required"),
     standard: checks.filter(c => c.category === "standard"),
@@ -290,6 +300,105 @@ function DocumentComplianceCard({ doc, onPreview }: {
     regulatory: "Regulatory Compliance",
     cross_document: "Cross-Document Consistency",
   };
+
+  // Fetch DOCX when expanded
+  useEffect(() => {
+    if (!expanded) {
+      setDocxBlob(null);
+      setDocError(null);
+      setEditing(false);
+      return;
+    }
+    setDocLoading(true);
+    fetch(`/api/generated-documents/${doc.id}/content`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || "Failed to load document");
+        }
+        return res.blob();
+      })
+      .then(setDocxBlob)
+      .catch((err) => setDocError(err instanceof Error ? err.message : "Failed to load"))
+      .finally(() => setDocLoading(false));
+  }, [expanded, doc.id]);
+
+  // Render DOCX blob
+  useEffect(() => {
+    if (!docxBlob || !containerRef.current) return;
+    let cancelled = false;
+    async function render() {
+      try {
+        const { renderAsync } = await import("docx-preview");
+        if (cancelled || !containerRef.current) return;
+        containerRef.current.innerHTML = "";
+        await renderAsync(docxBlob!, containerRef.current, undefined, {
+          className: "docx-preview",
+          inWrapper: true,
+          ignoreWidth: true,
+          ignoreHeight: true,
+          ignoreFonts: false,
+          breakPages: true,
+          renderHeaders: true,
+          renderFooters: true,
+          renderFootnotes: true,
+        });
+      } catch (err) {
+        if (!cancelled) setDocError(err instanceof Error ? err.message : "Render failed");
+      }
+    }
+    render();
+    return () => { cancelled = true; };
+  }, [docxBlob]);
+
+  const handleEdit = useCallback(() => {
+    if (!containerRef.current) return;
+    containerRef.current.contentEditable = "true";
+    containerRef.current.classList.add("doc-viewer-editable");
+    containerRef.current.focus();
+    setEditing(true);
+  }, []);
+
+  const handleCancelEdit = useCallback(async () => {
+    if (!containerRef.current || !docxBlob) return;
+    containerRef.current.contentEditable = "false";
+    containerRef.current.classList.remove("doc-viewer-editable");
+    setEditing(false);
+    // Re-render original
+    try {
+      const { renderAsync } = await import("docx-preview");
+      containerRef.current.innerHTML = "";
+      await renderAsync(docxBlob, containerRef.current, undefined, {
+        className: "docx-preview", inWrapper: true, ignoreWidth: true, ignoreHeight: true,
+        ignoreFonts: false, breakPages: true, renderHeaders: true, renderFooters: true, renderFootnotes: true,
+      });
+    } catch { /* ignore */ }
+  }, [docxBlob]);
+
+  const handleSave = useCallback(async () => {
+    if (!containerRef.current) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/generated-documents/${doc.id}/content`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ html: containerRef.current.innerHTML }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Save failed");
+      }
+      containerRef.current.contentEditable = "false";
+      containerRef.current.classList.remove("doc-viewer-editable");
+      setEditing(false);
+      toast.success("Document saved");
+      onRefresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  }, [doc.id, onRefresh]);
 
   return (
     <Card className="transition-shadow duration-200 hover:shadow-md">
@@ -317,93 +426,176 @@ function DocumentComplianceCard({ doc, onPreview }: {
           </div>
           <div className="flex items-center gap-1">
             {doc.downloadUrl && (
-              <>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={onPreview}>
-                  <Eye className="h-4 w-4" />
+              <a href={doc.downloadUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Download className="h-4 w-4" />
                 </Button>
-                <a href={doc.downloadUrl} target="_blank" rel="noopener noreferrer">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </a>
-              </>
+              </a>
             )}
-            {hasChecks && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs gap-1"
-                onClick={() => setExpanded(!expanded)}
-              >
-                {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                Compliance
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 text-xs gap-1"
+              onClick={() => setExpanded(!expanded)}
+            >
+              {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+              {expanded ? "Collapse" : "Review"}
+            </Button>
           </div>
         </div>
 
-        {/* Expandable compliance checklist */}
-        {expanded && hasChecks && (
-          <div className="mt-4 border-t pt-4 space-y-4">
-            {(Object.entries(grouped) as [string, typeof checks][]).map(([cat, items]) => {
-              if (items.length === 0) return null;
-              return (
-                <div key={cat}>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                    {categoryLabels[cat] ?? cat}
-                  </p>
-                  <div className="space-y-1.5">
-                    {items.map((check, i) => (
-                      <div key={i} className="flex items-start gap-2 text-sm">
-                        {check.passed ? (
-                          <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-                        )}
-                        <div className="min-w-0">
-                          <span className={check.passed ? "" : "text-destructive font-medium"}>
-                            {check.name}
-                          </span>
-                          {check.regulation && check.regulation !== "Commercial Lending Standards" && (
-                            <span className="text-xs text-muted-foreground ml-1.5">
-                              ({check.regulation})
-                            </span>
-                          )}
-                          {check.note && !check.passed && (
-                            <p className="text-xs text-muted-foreground mt-0.5">{check.note}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+        {/* Expanded: split view — document left, compliance right */}
+        {expanded && (
+          <div className="mt-4 border-t pt-4">
+            {/* Edit toolbar */}
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Document & Compliance Review</p>
+              <div className="flex items-center gap-1.5">
+                {!editing ? (
+                  <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleEdit} disabled={!docxBlob}>
+                    <Pencil className="h-3 w-3" /> Edit
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="default" size="sm" className="h-7 text-xs gap-1" onClick={handleSave} disabled={saving}>
+                      {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                      Save
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={handleCancelEdit} disabled={saving}>
+                      <X className="h-3 w-3" /> Cancel
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
 
-            {/* Legal review issues (if any) */}
-            {doc.legalIssues && doc.legalIssues.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                  Compliance Notes
-                </p>
-                <div className="space-y-2">
-                  {doc.legalIssues.map((issue, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm rounded-md border p-2.5 bg-muted/30">
-                      <Badge
-                        variant={issue.severity === "critical" ? "destructive" : issue.severity === "warning" ? "outline" : "secondary"}
-                        className="text-[10px] flex-shrink-0 mt-0.5"
-                      >
-                        {issue.severity === "critical" ? "auto-resolved" : issue.severity === "warning" ? "note" : "info"}
-                      </Badge>
-                      <div>
-                        <p>{issue.description}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{issue.recommendation}</p>
+            <div className="doc-viewer-split rounded-lg border overflow-hidden" style={{ height: "600px" }}>
+              {/* Left: Document */}
+              <div className="doc-viewer-content">
+                {docLoading && (
+                  <div className="flex items-center justify-center h-full gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Loading document...</span>
+                  </div>
+                )}
+                {docError && !docLoading && (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-sm text-destructive">{docError}</p>
+                  </div>
+                )}
+                <div
+                  ref={containerRef}
+                  className="docx-container bg-white h-full"
+                  style={{ display: docLoading || docError || !docxBlob ? "none" : "block" }}
+                />
+              </div>
+
+              {/* Right: Compliance panel */}
+              <div className="doc-viewer-panel p-4 space-y-4">
+                {/* Status */}
+                <div className="flex items-center gap-2">
+                  {doc.status === "REVIEWED" ? (
+                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                  ) : (
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                  )}
+                  <span className="font-medium text-sm">
+                    {doc.status === "REVIEWED" ? "All Checks Passed" : "Review Required"}
+                  </span>
+                </div>
+
+                <Separator />
+
+                {/* Compliance checks by category */}
+                {(Object.entries(grouped) as [string, typeof checks][]).map(([cat, items]) => {
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={cat}>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                        {categoryLabels[cat] ?? cat}
+                      </p>
+                      <div className="space-y-1.5">
+                        {items.map((check, i) => (
+                          <div key={i} className="flex items-start gap-2 text-sm">
+                            {check.passed ? (
+                              <CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" />
+                            ) : (
+                              <XCircle className="h-3.5 w-3.5 text-destructive mt-0.5 flex-shrink-0" />
+                            )}
+                            <div className="min-w-0">
+                              <span className={`text-xs ${check.passed ? "" : "text-destructive font-medium"}`}>
+                                {check.name}
+                              </span>
+                              {check.regulation && check.regulation !== "Commercial Lending Standards" && (
+                                <span className="text-[10px] text-muted-foreground ml-1">
+                                  ({check.regulation})
+                                </span>
+                              )}
+                              {check.note && !check.passed && (
+                                <p className="text-[10px] text-muted-foreground mt-0.5">{check.note}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
+
+                {/* Legal issues */}
+                {doc.legalIssues && doc.legalIssues.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                      Compliance Notes
+                    </p>
+                    <div className="space-y-2">
+                      {doc.legalIssues.map((issue, i) => (
+                        <div key={i} className="flex items-start gap-2 text-xs rounded-md border p-2 bg-muted/30">
+                          <Badge
+                            variant={issue.severity === "critical" ? "destructive" : issue.severity === "warning" ? "outline" : "secondary"}
+                            className="text-[9px] flex-shrink-0 mt-0.5"
+                          >
+                            {issue.severity === "critical" ? "auto-resolved" : issue.severity === "warning" ? "note" : "info"}
+                          </Badge>
+                          <div>
+                            <p>{issue.description}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{issue.recommendation}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Verification issues */}
+                {doc.verificationIssues && doc.verificationIssues.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                      Verification Issues
+                    </p>
+                    <div className="space-y-1.5">
+                      {doc.verificationIssues.map((issue, i) => (
+                        <div key={i} className="text-xs rounded-md border p-2 bg-muted/30">
+                          <p className="font-medium">{issue.field}</p>
+                          <div className="flex gap-3 mt-1 text-[10px]">
+                            <span className="text-muted-foreground">Expected: {issue.expected}</span>
+                            <span className="text-destructive">Found: {issue.found}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {!hasIssues && hasChecks && (
+                  <div className="flex flex-col items-center justify-center py-6 text-center">
+                    <CheckCircle2 className="h-8 w-8 text-primary mb-2" />
+                    <p className="text-sm font-medium">All Checks Passed</p>
+                    <p className="text-xs text-muted-foreground mt-1">No issues found in this document.</p>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         )}
       </CardContent>
@@ -1118,18 +1310,7 @@ export default function DealDetailPage() {
                   <DocumentComplianceCard
                     key={doc.id}
                     doc={doc}
-                    onPreview={() => {
-                      const label = GEN_DOC_TYPE_LABELS[doc.docType] ?? doc.docType;
-                      setPreviewDoc({
-                        id: doc.id,
-                        name: `${label}.docx`,
-                        directUrl: doc.downloadUrl!,
-                        status: doc.status,
-                        legalIssues: doc.legalIssues ?? undefined,
-                        complianceChecks: doc.complianceChecks ?? undefined,
-                        verificationIssues: doc.verificationIssues ?? undefined,
-                      });
-                    }}
+                    onRefresh={fetchDeal}
                   />
                 ))}
               </div>
