@@ -1298,9 +1298,36 @@ export default function DealDetailPage() {
                           </p>
                         </div>
                       </div>
-                      <Badge variant={deal.generatedDocuments.every(d => d.status === "REVIEWED") ? "default" : "destructive"}>
-                        {deal.generatedDocuments.every(d => d.status === "REVIEWED") ? "All Checks Passed" : "Review Required"}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={deal.generatedDocuments.every(d => d.status === "REVIEWED") ? "default" : "destructive"}>
+                          {deal.generatedDocuments.every(d => d.status === "REVIEWED") ? "All Checks Passed" : "Review Required"}
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          onClick={async () => {
+                            toast.info("Preparing download...");
+                            try {
+                              const res = await fetch(`/api/deals/${dealId}/download-all`);
+                              if (!res.ok) throw new Error("Download failed");
+                              const blob = await res.blob();
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement("a");
+                              a.href = url;
+                              a.download = `${deal.borrowerName.replace(/\s+/g, "_")}_Loan_Package.zip`;
+                              a.click();
+                              URL.revokeObjectURL(url);
+                              toast.success("Download started");
+                            } catch {
+                              toast.error("Failed to download package");
+                            }
+                          }}
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          Download All
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
