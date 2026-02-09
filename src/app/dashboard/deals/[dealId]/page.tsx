@@ -63,6 +63,7 @@ type Document = {
   docYear: number | null;
   status: string;
   fileSize: number;
+  downloadUrl?: string | null;
 };
 
 type IncomeSource = {
@@ -1161,7 +1162,7 @@ export default function DealDetailPage() {
                             variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0"
-                            onClick={() => setPreviewDoc({ id: doc.id, name: doc.fileName })}
+                            onClick={() => setPreviewDoc({ id: doc.id, name: doc.fileName, directUrl: doc.downloadUrl ?? undefined })}
                           >
                             <Eye className="h-4 w-4" />
                             <span className="sr-only">View {doc.fileName}</span>
@@ -1213,7 +1214,7 @@ export default function DealDetailPage() {
                           variant="ghost"
                           size="sm"
                           className="h-8 w-8 p-0"
-                          onClick={() => setPreviewDoc({ id: doc.id, name: doc.fileName })}
+                          onClick={() => setPreviewDoc({ id: doc.id, name: doc.fileName, directUrl: doc.downloadUrl ?? undefined })}
                         >
                           <Eye className="h-4 w-4" />
                           <span className="sr-only">View {doc.fileName}</span>

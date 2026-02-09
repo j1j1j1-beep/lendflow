@@ -168,9 +168,13 @@ export function buildEnvironmentalIndemnity(
       "Indemnitor represents and warrants to Indemnitee as of the date hereof and at all times while any portion of the Loan remains outstanding:",
     ),
   );
-  prose.representationsAndWarranties.forEach((item) => {
-    children.push(bulletPoint(item));
-  });
+  if (Array.isArray(prose.representationsAndWarranties)) {
+    prose.representationsAndWarranties.forEach((item) => {
+      children.push(bulletPoint(item));
+    });
+  } else {
+    children.push(bodyText(prose.representationsAndWarranties as unknown as string));
+  }
   children.push(spacer(4));
 
   // -----------------------------------------------------------------------
@@ -182,9 +186,13 @@ export function buildEnvironmentalIndemnity(
       "Indemnitor covenants and agrees that, until all obligations under the Loan are fully satisfied:",
     ),
   );
-  prose.covenants.forEach((item) => {
-    children.push(bulletPoint(item));
-  });
+  if (Array.isArray(prose.covenants)) {
+    prose.covenants.forEach((item) => {
+      children.push(bulletPoint(item));
+    });
+  } else {
+    children.push(bodyText(prose.covenants as unknown as string));
+  }
   children.push(spacer(4));
 
   // -----------------------------------------------------------------------
