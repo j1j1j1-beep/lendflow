@@ -421,7 +421,15 @@ export default function DealDetailPage() {
   const [approving, setApproving] = useState(false);
   const [approveError, setApproveError] = useState<string | null>(null);
   const [retrying, setRetrying] = useState(false);
-  const [previewDoc, setPreviewDoc] = useState<{ id: string; name: string; directUrl?: string } | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{
+    id: string;
+    name: string;
+    directUrl?: string;
+    status?: string;
+    legalIssues?: GeneratedDocument["legalIssues"];
+    complianceChecks?: GeneratedDocument["complianceChecks"];
+    verificationIssues?: GeneratedDocument["verificationIssues"];
+  } | null>(null);
   const [retryError, setRetryError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -1112,7 +1120,15 @@ export default function DealDetailPage() {
                     doc={doc}
                     onPreview={() => {
                       const label = GEN_DOC_TYPE_LABELS[doc.docType] ?? doc.docType;
-                      setPreviewDoc({ id: doc.id, name: `${label}.docx`, directUrl: doc.downloadUrl! });
+                      setPreviewDoc({
+                        id: doc.id,
+                        name: `${label}.docx`,
+                        directUrl: doc.downloadUrl!,
+                        status: doc.status,
+                        legalIssues: doc.legalIssues ?? undefined,
+                        complianceChecks: doc.complianceChecks ?? undefined,
+                        verificationIssues: doc.verificationIssues ?? undefined,
+                      });
                     }}
                   />
                 ))}
@@ -1277,6 +1293,11 @@ export default function DealDetailPage() {
         open={!!previewDoc}
         onOpenChange={(open) => { if (!open) setPreviewDoc(null); }}
         directUrl={previewDoc?.directUrl}
+        status={previewDoc?.status}
+        legalIssues={previewDoc?.legalIssues ?? undefined}
+        complianceChecks={previewDoc?.complianceChecks ?? undefined}
+        verificationIssues={previewDoc?.verificationIssues ?? undefined}
+        onSaved={fetchDeal}
       />
     </div>
   );
