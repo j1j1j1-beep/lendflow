@@ -1,0 +1,213 @@
+import { z } from "zod";
+
+// ─── Schedule L Balance Sheet Assets ──────────────────────────────────────────
+
+const scheduleLAssetsSchema = z.object({
+  cash: z.number().nullable(),
+  tradeNotesAndReceivables_gross: z.number().nullable(),
+  tradeNotesAndReceivables_allowance: z.number().nullable(),
+  tradeNotesAndReceivables_net: z.number().nullable(),
+  inventories: z.number().nullable(),
+  usGovernmentObligations: z.number().nullable(),
+  taxExemptSecurities: z.number().nullable(),
+  otherCurrentAssets: z.number().nullable(),
+  mortgageAndRealEstateLoans: z.number().nullable(),
+  otherInvestments: z.number().nullable(),
+  buildingsAndOtherDepreciable_gross: z.number().nullable(),
+  buildingsAndOtherDepreciable_accumulatedDepreciation: z.number().nullable(),
+  buildingsAndOtherDepreciable_net: z.number().nullable(),
+  depletableAssets_gross: z.number().nullable(),
+  depletableAssets_accumulatedDepletion: z.number().nullable(),
+  depletableAssets_net: z.number().nullable(),
+  land: z.number().nullable(),
+  intangibleAssets_gross: z.number().nullable(),
+  intangibleAssets_accumulatedAmortization: z.number().nullable(),
+  intangibleAssets_net: z.number().nullable(),
+  otherAssets: z.number().nullable(),
+  totalAssets: z.number().nullable(),
+}).passthrough();
+
+// ─── Schedule L Liabilities and Capital ───────────────────────────────────────
+
+const scheduleLLiabilitiesAndCapitalSchema = z.object({
+  accountsPayable: z.number().nullable(),
+  mortgagesNotesPayable_lessThan1Year: z.number().nullable(),
+  otherCurrentLiabilities: z.number().nullable(),
+  nonrecourseLoansMortgages: z.number().nullable(),
+  loansFromPartners: z.number().nullable(),
+  mortgagesNotesPayable_1YearOrMore: z.number().nullable(),
+  otherLiabilities: z.number().nullable(),
+  totalLiabilities: z.number().nullable(),
+  partnersCapitalAccounts: z.number().nullable(),
+  totalLiabilitiesAndCapital: z.number().nullable(),
+}).passthrough();
+
+const scheduleLPeriodSchema = z.object({
+  assets: scheduleLAssetsSchema,
+  liabilitiesAndCapital: scheduleLLiabilitiesAndCapitalSchema,
+}).passthrough();
+
+// ─── Main Form 1065 Schema ───────────────────────────────────────────────────
+
+export const form1065Schema = z.object({
+  metadata: z.object({
+    taxYear: z.number().nullable(),
+    partnershipName: z.string().nullable(),
+    ein: z.string().nullable(),
+    address: z.string().nullable(),
+    businessActivityCode: z.string().nullable(),
+    principalProductOrService: z.string().nullable(),
+    dateBusinessStarted: z.string().nullable(),
+    totalAssets: z.number().nullable(),
+    accountingMethod: z.string().nullable(),
+    numberOfPartnersScheduleK1: z.number().nullable(),
+    partnershipType: z.string().nullable(),
+  }).passthrough(),
+  income: z.object({
+    grossReceipts_line1a: z.number().nullable(),
+    returnsAllowances_line1b: z.number().nullable(),
+    netReceipts_line1c: z.number().nullable(),
+    costOfGoodsSold_line2: z.number().nullable(),
+    grossProfit_line3: z.number().nullable(),
+    ordinaryIncomeFromOtherPartnerships_line4: z.number().nullable(),
+    netFarmProfit_line5: z.number().nullable(),
+    netGainForm4797_line6: z.number().nullable(),
+    otherIncome_line7: z.number().nullable(),
+    totalIncome_line8: z.number().nullable(),
+  }).passthrough(),
+  deductions: z.object({
+    salariesAndWages_line9: z.number().nullable(),
+    guaranteedPaymentsToPartners_line10: z.number().nullable(),
+    repairsAndMaintenance_line11: z.number().nullable(),
+    badDebts_line12: z.number().nullable(),
+    rent_line13: z.number().nullable(),
+    taxesAndLicenses_line14: z.number().nullable(),
+    interestExpense_line15: z.number().nullable(),
+    depreciationNotOnForm4562_line16a: z.number().nullable(),
+    depreciationFromForm4562_line16b: z.number().nullable(),
+    netDepreciation_line16c: z.number().nullable(),
+    depletion_line17: z.number().nullable(),
+    retirementPlans_line18: z.number().nullable(),
+    employeeBenefitPrograms_line19: z.number().nullable(),
+    energyEfficientBuildings_line20: z.number().nullable(),
+    otherDeductions_line21: z.number().nullable(),
+    totalDeductions_line22: z.number().nullable(),
+  }).passthrough(),
+  ordinaryBusinessIncome_line23: z.number().nullable(),
+  scheduleK: z.object({
+    incomeAndLoss: z.object({
+      ordinaryBusinessIncome_line1: z.number().nullable(),
+      netRentalRealEstateIncome_line2: z.number().nullable(),
+      otherNetRentalIncome_line3: z.number().nullable(),
+      guaranteedPaymentsToPartners_services_line4a: z.number().nullable(),
+      guaranteedPaymentsToPartners_capital_line4b: z.number().nullable(),
+      totalGuaranteedPayments_line4c: z.number().nullable(),
+      interestIncome_line5: z.number().nullable(),
+      ordinaryDividends_line6a: z.number().nullable(),
+      qualifiedDividends_line6b: z.number().nullable(),
+      royalties_line7: z.number().nullable(),
+      netShortTermCapitalGain_line8: z.number().nullable(),
+      netLongTermCapitalGain_line9a: z.number().nullable(),
+      collectiblesGain_line9b: z.number().nullable(),
+      unrealizedSection1250Gain_line9c: z.number().nullable(),
+      netSection1231Gain_line10: z.number().nullable(),
+      otherIncome_line11: z.number().nullable(),
+    }).passthrough(),
+    deductions: z.object({
+      section179Deduction_line12: z.number().nullable(),
+      charitableContributions_line13a: z.number().nullable(),
+      investmentInterestExpense_line13b: z.number().nullable(),
+      section59e2Expenditures_line13c: z.number().nullable(),
+      otherDeductions_line13d: z.number().nullable(),
+    }).passthrough(),
+    selfEmployment: z.object({
+      netEarningsFromSE_line14a: z.number().nullable(),
+      grossFarmingIncome_line14b: z.number().nullable(),
+      grossNonfarmIncome_line14c: z.number().nullable(),
+    }).passthrough(),
+    credits: z.object({
+      lowIncomeHousingCredit_line15a: z.number().nullable(),
+      lowIncomeHousingCredit_other_line15b: z.number().nullable(),
+      qualifiedRehabExpenses_line15c: z.number().nullable(),
+      otherRentalRealEstateCredits_line15d: z.number().nullable(),
+      otherRentalCredits_line15e: z.number().nullable(),
+      otherCredits_line15f: z.number().nullable(),
+    }).passthrough(),
+    foreignTransactions: z.object({
+      foreignCountry: z.string().nullable(),
+      grossIncomeForeign_line16a: z.number().nullable(),
+      foreignTaxesPaid_line16l: z.number().nullable(),
+      foreignTaxesAccrued_line16m: z.number().nullable(),
+    }).passthrough(),
+    alternativeMinimumTax: z.object({
+      amtAdjustments_line17a: z.number().nullable(),
+      oilGasDeduction_line17b: z.number().nullable(),
+      otherAMTItems_line17c: z.number().nullable(),
+    }).passthrough(),
+    taxExemptIncomeAndExpenses: z.object({
+      taxExemptInterest_line18a: z.number().nullable(),
+      otherTaxExemptIncome_line18b: z.number().nullable(),
+      nondeductibleExpenses_line18c: z.number().nullable(),
+    }).passthrough(),
+    distributions: z.object({
+      cashAndMarketableSecurities_line19a: z.number().nullable(),
+      propertyDistributions_line19b: z.number().nullable(),
+    }).passthrough(),
+    otherInformation: z.object({
+      investmentIncome_line20a: z.number().nullable(),
+      investmentExpenses_line20b: z.number().nullable(),
+    }).passthrough(),
+  }).passthrough(),
+  scheduleL: z.object({
+    beginningOfYear: scheduleLPeriodSchema,
+    endOfYear: scheduleLPeriodSchema,
+  }).passthrough().nullable().default(null),
+  scheduleM1: z.object({
+    netIncomePerBooks_line1: z.number().nullable(),
+    incomeOnScheduleKNotOnBooks_line2: z.number().nullable(),
+    guaranteedPayments_line3: z.number().nullable(),
+    expensesOnBooksNotOnScheduleK_line4a: z.number().nullable(),
+    depreciation_line4a: z.number().nullable(),
+    travelEntertainment_line4b: z.number().nullable(),
+    total_line5: z.number().nullable(),
+    incomeOnBooksNotOnScheduleK_line6: z.number().nullable(),
+    deductionsOnScheduleKNotOnBooks_line7a: z.number().nullable(),
+    depreciation_line7a: z.number().nullable(),
+    total_line8: z.number().nullable(),
+    incomeOnScheduleK_line9: z.number().nullable(),
+  }).passthrough().nullable().default(null),
+  scheduleM2: z.object({
+    balanceBeginningOfYear_line1: z.number().nullable(),
+    netIncome_line2: z.number().nullable(),
+    otherIncreases_line3: z.number().nullable(),
+    total_line4: z.number().nullable(),
+    distributions_cashProperty_line5a: z.number().nullable(),
+    otherDecreases_line6: z.number().nullable(),
+    total_line7: z.number().nullable(),
+    balanceEndOfYear_line8: z.number().nullable(),
+  }).passthrough().nullable().default(null),
+  analysisOfNetIncome: z.object({
+    generalPartners: z.object({
+      netIncome: z.number().nullable(),
+      count: z.number().nullable(),
+    }).passthrough(),
+    limitedPartners: z.object({
+      netIncome: z.number().nullable(),
+      count: z.number().nullable(),
+    }).passthrough(),
+  }).passthrough().nullable().default(null),
+  costOfGoodsSold: z.object({
+    inventoryBeginning_line1: z.number().nullable(),
+    purchases_line2: z.number().nullable(),
+    laborCost_line3: z.number().nullable(),
+    additionalSection263A_line4: z.number().nullable(),
+    otherCosts_line5: z.number().nullable(),
+    total_line6: z.number().nullable(),
+    inventoryEnding_line7: z.number().nullable(),
+    costOfGoodsSold_line8: z.number().nullable(),
+    inventoryMethod: z.string().nullable(),
+  }).passthrough().nullable().default(null),
+  extractionNotes: z.array(z.string()).default([]),
+}).passthrough();
+
+export type Form1065Data = z.infer<typeof form1065Schema>;
