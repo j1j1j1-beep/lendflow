@@ -29,10 +29,7 @@ export async function POST(request: NextRequest) {
     // ── Paywall check ──────────────────────────────────────────────────────
     const paywall = await checkPaywall(org.id);
     if (!paywall.allowed) {
-      return NextResponse.json(
-        { error: paywall.reason },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: paywall.reason }, { status: 403 });
     }
 
     // ── Prevent duplicate sample deals ─────────────────────────────────────
