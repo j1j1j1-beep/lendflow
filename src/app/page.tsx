@@ -129,22 +129,22 @@ export default async function Home() {
             {[
               {
                 icon: Clock,
-                stat: "Weeks",
-                label: "per deal in analyst time",
+                stat: "Slow",
+                label: "Weeks per deal in analyst time",
                 desc: "Manually keying numbers from tax returns, cross-referencing bank statements, catching your own typos. Your best people spend most of their time on data entry.",
                 delay: "100ms",
               },
               {
                 icon: DollarSign,
-                stat: "Tens of thousands",
-                label: "in legal fees per deal",
+                stat: "Expensive",
+                label: "Thousands in legal fees per deal",
                 desc: "Outside counsel drafts the same loan agreement for the hundredth time. You pay partner rates for work that should take minutes, not weeks.",
                 delay: "175ms",
               },
               {
                 icon: AlertTriangle,
-                stat: "Constant",
-                label: "risk of data errors",
+                stat: "Error-prone",
+                label: "Manual entry creates discrepancies",
                 desc: "Manual data entry across documents creates discrepancies that slip through review. One wrong number in a debt-service calculation changes the entire credit decision.",
                 delay: "250ms",
               },
