@@ -143,8 +143,8 @@ export default async function Home() {
               },
               {
                 icon: AlertTriangle,
-                stat: "Constant",
-                label: "risk of data errors",
+                stat: "Error-prone",
+                label: "constant risk of data errors",
                 desc: "Manual data entry across documents creates discrepancies that slip through review. One wrong number in a debt-service calculation changes the entire credit decision.",
                 delay: "250ms",
               },
