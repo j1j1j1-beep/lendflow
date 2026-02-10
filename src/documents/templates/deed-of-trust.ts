@@ -5,7 +5,7 @@
 // default provisions, power of sale, and environmental sections.
 // =============================================================================
 
-import type { DocumentInput } from "../types";
+import type { DocumentInput, DeedOfTrustProse } from "../types";
 import {
   Document,
   Paragraph,
@@ -30,18 +30,7 @@ import {
   COLORS,
 } from "../doc-helpers";
 
-// ---------------------------------------------------------------------------
-// Prose interface
-// ---------------------------------------------------------------------------
-
-export interface DeedOfTrustProse {
-  grantClause: string;
-  borrowerCovenants: string[];
-  defaultProvisions: string;
-  powerOfSale: string;
-  environmentalCovenants: string;
-  governingLaw: string;
-}
+export type { DeedOfTrustProse };
 
 // ---------------------------------------------------------------------------
 // Builder

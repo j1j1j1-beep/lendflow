@@ -1236,7 +1236,7 @@ export async function POST(request: NextRequest) {
         data: { status: "PROCESSING_OCR", errorMessage: null, errorStep: null },
       });
 
-      await inngest.send({ name: "deal/analyze", data: { dealId: deal.id } });
+      await inngest.send({ name: "deal/analyze", data: { dealId: deal.id, triggeredAt: Date.now() } });
 
       results.push({
         scenario: scenario.name,
@@ -1363,14 +1363,14 @@ export async function PATCH() {
       });
 
       // Always send the event — even if 0 items updated (deals stuck with no pending items)
-      await inngest.send({ name: "deal/review-complete", data: { dealId: deal.id } });
+      await inngest.send({ name: "deal/review-complete", data: { dealId: deal.id, triggeredAt: Date.now() } });
       results.push({ dealId: deal.id, action: updated.count > 0 ? `confirmed ${updated.count} review items` : "re-triggered (0 pending)" });
     }
 
     // Auto-approve terms for deals at NEEDS_TERM_REVIEW
     const termDeals = deals.filter((d) => d.status === "NEEDS_TERM_REVIEW");
     for (const deal of termDeals) {
-      await inngest.send({ name: "deal/terms-approved", data: { dealId: deal.id } });
+      await inngest.send({ name: "deal/terms-approved", data: { dealId: deal.id, triggeredAt: Date.now() } });
       results.push({ dealId: deal.id, action: "terms approved" });
     }
 

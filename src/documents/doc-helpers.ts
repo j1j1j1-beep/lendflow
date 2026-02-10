@@ -108,6 +108,7 @@ export function formatCurrency(amount: number): string {
 }
 
 export function formatCurrencyDetailed(amount: number): string {
+  if (isNaN(amount)) return "[Amount TBD]";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -117,10 +118,12 @@ export function formatCurrencyDetailed(amount: number): string {
 }
 
 export function formatPercent(decimal: number): string {
+  if (isNaN(decimal)) return "[Rate TBD]";
   return `${(decimal * 100).toFixed(3)}%`;
 }
 
 export function formatPercentShort(decimal: number): string {
+  if (isNaN(decimal)) return "[Rate TBD]";
   return `${(decimal * 100).toFixed(2)}%`;
 }
 

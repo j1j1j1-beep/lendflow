@@ -30,6 +30,17 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    // Double-click protection: reject if already regenerating
+    if (doc.status === "REGENERATING") {
+      return NextResponse.json({ error: "Document is already being regenerated" }, { status: 409 });
+    }
+
+    // Mark as regenerating to prevent concurrent requests
+    await prisma.generatedDocument.update({
+      where: { id: docId },
+      data: { status: "REGENERATING" },
+    });
+
     // Build the feedback string from existing issues + officer notes
     const feedbackParts: string[] = [];
 
@@ -120,8 +131,8 @@ export async function POST(
         conditions: terms.conditions as any[],
         specialTerms: terms.specialTerms as any[] | null,
         fees: terms.fees as any[],
-        lateFeePercent: 0.05,
-        lateFeeGraceDays: 15,
+        lateFeePercent: program.lateFeePercent,
+        lateFeeGraceDays: program.lateFeeGraceDays,
       },
       programName: program.name,
       programId: program.id,
@@ -171,10 +182,9 @@ export async function POST(
       userId: user.id,
       userEmail: user.email,
       dealId: deal.id,
-      action: "doc.saved",
+      action: "doc.regenerated",
       target: doc.docType,
       metadata: {
-        regenerated: true,
         version: newVersion,
         hadFeedback: !!feedback,
         previousIssueCount: (legalIssues?.length ?? 0) + (complianceChecks?.filter((c: any) => !c.passed).length ?? 0),
@@ -195,6 +205,14 @@ export async function POST(
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    // Reset status from REGENERATING back to previous state on failure
+    const { docId: failedDocId } = await params;
+    try {
+      await prisma.generatedDocument.update({
+        where: { id: failedDocId },
+        data: { status: "FLAGGED" },
+      });
+    } catch { /* best-effort reset */ }
     console.error("POST /api/generated-documents/[docId]/regenerate error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

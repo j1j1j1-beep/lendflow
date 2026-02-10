@@ -264,6 +264,53 @@ Exit strategy documentation must demonstrate viable path to permanent financing 
 Maturity Extension Provisions:
 Extension options must specify: (1) maximum number and duration of extensions (typically 2 x 6 months), (2) extension fee (typically 0.25-0.50% of outstanding balance), (3) conditions precedent (no default, minimum LTV maintained, satisfactory progress on exit strategy), (4) updated appraisal or broker opinion of value required.`;
 
+const COMMERCIAL_CRE_REFS = `Commercial Real Estate Lending Regulations:
+
+FIRREA Appraisal Requirements (12 U.S.C. § 3331 et seq.):
+The Financial Institutions Reform, Recovery, and Enforcement Act requires that federally related transactions involving commercial real estate with a value exceeding the applicable de minimis threshold (currently $1,000,000 per the 2024 interagency rule) must be supported by an appraisal performed by a state-certified or licensed appraiser. The appraisal must conform to the Uniform Standards of Professional Appraisal Practice (USPAP).
+
+CRA — Community Reinvestment Act (12 U.S.C. § 2901 et seq.):
+The Community Reinvestment Act requires regulated financial institutions to help meet the credit needs of the communities in which they do business, including low- and moderate-income neighborhoods. Examiners consider the institution's record of lending, investment, and service in CRA evaluations.
+
+Dodd-Frank Act — Risk Retention (15 U.S.C. § 78o-11):
+For commercial real estate loans that are securitized, the risk retention rules require the sponsor of a securitization to retain not less than 5% of the credit risk of the assets, unless the assets qualify as "qualified commercial real estate loans" under the exemption criteria. Qualifying loan criteria include maximum LTV ratios and minimum DSCR thresholds.`;
+
+const CONVENTIONAL_BUSINESS_REFS = `Commercial Lending Regulatory Framework:
+
+Regulation Z (12 CFR 1026.3(a)(1)) — Commercial Purpose Exemption:
+Extensions of credit primarily for business, commercial, or agricultural purposes are exempt from TILA/Regulation Z disclosure requirements. However, the lender must still comply with the Equal Credit Opportunity Act, flood insurance requirements, and applicable state lending laws.
+
+UCC Article 9 — Secured Transactions:
+Conventional business term loans secured by personal property (equipment, inventory, accounts receivable, or blanket liens) are governed by UCC Article 9 for perfection and priority of security interests. Filing a UCC-1 financing statement with the Secretary of State in the debtor's state of organization is required for perfection.
+
+Prudential Lending Standards — Interagency Guidelines:
+The OCC, FDIC, Federal Reserve, and NCUA have issued interagency guidelines on prudent commercial lending practices, including appropriate underwriting standards, loan administration, and credit risk management. These guidelines emphasize the importance of documented repayment sources, appropriate collateral coverage, and regular portfolio monitoring.`;
+
+const LINE_OF_CREDIT_REFS = `Revolving Credit Facility Regulations:
+
+UCC Article 9 — Floating Liens and Future Advances:
+UCC Section 9-204(c) provides that a security agreement may provide that collateral secures future advances, whether or not the advances are given pursuant to commitment. This is fundamental to revolving credit facilities where the outstanding balance fluctuates. A properly perfected security interest in accounts receivable and inventory under a revolving facility has priority from the date of the initial filing, not the date of each subsequent advance.
+
+UCC Section 9-102(a)(2) and (a)(48) — Accounts and Inventory:
+Revolving credit facilities typically use accounts receivable and inventory as the borrowing base collateral. The advance rate applied to eligible collateral determines the maximum amount available for borrowing at any given time.
+
+Federal Reserve Regulation H — Lending Limits:
+National banks and state member banks are subject to lending limits that restrict the total amount of loans and extensions of credit to any single borrower. The general lending limit is 15% of the bank's unimpaired capital and surplus for unsecured loans and 25% for loans fully secured by readily marketable collateral. Revolving credit commitments count against these limits.`;
+
+const EQUIPMENT_FINANCING_REFS = `Equipment Financing — UCC Article 9 Framework:
+
+UCC Section 9-102(a)(33) — Equipment:
+"Equipment" means goods other than inventory, farm products, or consumer goods. Equipment is the primary collateral in equipment financing transactions. The security interest attaches when the debtor has rights in the collateral and value has been given.
+
+UCC Section 9-311(a) — Perfection by Filing vs. Certificate of Title:
+For most equipment, perfection is achieved by filing a UCC-1 financing statement. However, for equipment that is covered by a certificate of title statute (e.g., motor vehicles, trailers, and certain construction equipment), perfection must be noted on the certificate of title rather than by UCC filing.
+
+UCC Section 9-324(a) — Purchase Money Security Interest (PMSI):
+A perfected purchase money security interest in goods other than inventory has priority over a conflicting security interest in the same goods if the PMSI is perfected when the debtor receives possession of the collateral or within 20 days thereafter. This super-priority is critical for equipment lenders who want priority over an existing blanket lien holder.
+
+IRS Section 179 and Bonus Depreciation:
+Equipment acquisitions may qualify for accelerated depreciation under IRC Section 179 (up to the annual limit) or bonus depreciation provisions. While these are tax provisions rather than lending regulations, they are relevant to the economic analysis of equipment financing transactions and may be referenced in the loan documentation.`;
+
 const PROGRAM_REFS: Record<string, string> = {
   sba_7a: SBA_PROGRAM_REFS,
   sba_504: SBA_PROGRAM_REFS + "\n\n" + SBA_504_ADDITIONAL_REFS,
@@ -271,6 +318,10 @@ const PROGRAM_REFS: Record<string, string> = {
   bank_statement: RESIDENTIAL_REFS,
   crypto_collateral: CRYPTO_REFS,
   bridge: BRIDGE_REFS,
+  commercial_cre: COMMERCIAL_CRE_REFS,
+  conventional_business: CONVENTIONAL_BUSINESS_REFS,
+  line_of_credit: LINE_OF_CREDIT_REFS,
+  equipment_financing: EQUIPMENT_FINANCING_REFS,
 };
 
 // Document types that return empty strings (pure deterministic docs)
@@ -279,6 +330,79 @@ const EMPTY_REFS_TYPES = new Set([
   "compliance_certificate",
   "amortization_schedule",
 ]);
+
+const DEED_OF_TRUST_REFS = `APPLICABLE LEGAL STANDARDS — Reference these when drafting:
+
+State Deed of Trust Statutes — Power of Sale and Foreclosure:
+Deeds of trust are used in "title theory" and many "lien theory" states as the primary real property security instrument. The deed of trust conveys legal title to a trustee who holds it for the benefit of the beneficiary (lender). Upon default, the trustee may exercise the power of sale without judicial proceedings in states that authorize non-judicial foreclosure (e.g., Cal. Civ. Code §§ 2924–2924k; Tex. Prop. Code §§ 51.002–51.005; Va. Code §§ 55.1-320 through 55.1-337). Notice of default and notice of sale periods vary by state (typically 90–120 days for notice of default, 20–30 days for notice of sale). Some states provide a statutory right of reinstatement (cure the default before sale) and/or a right of redemption (redeem after sale).
+
+UCC Section 1-201(b)(35) — Due-on-Sale / Security Interest:
+A security interest includes any interest in personal property or fixtures that secures payment or performance of an obligation. The Garn-St Germain Depository Institutions Act of 1982 (12 U.S.C. § 1701j-3) generally permits lenders to enforce due-on-sale clauses upon transfer of a secured property, preempting state laws that had restricted their enforcement. Certain transfers are exempt (e.g., transfers by devise, descent, or operation of law; transfer to a spouse or children; transfer resulting from a decree of dissolution of marriage).
+
+State Non-Judicial Foreclosure Procedures:
+In non-judicial foreclosure states, the trustee conducts a public sale after complying with statutory notice requirements. The trustee's deed conveys the property to the successful bidder. Anti-deficiency statutes in some states (e.g., Cal. Code Civ. Proc. §§ 580b, 580d; Ariz. Rev. Stat. § 33-814) may bar the lender from obtaining a deficiency judgment after a non-judicial foreclosure sale or for purchase money obligations.`;
+
+const CLOSING_DISCLOSURE_REFS = `APPLICABLE LEGAL STANDARDS — Reference these when drafting:
+
+12 CFR 1026.38 — TRID Closing Disclosure Requirements:
+(a) The Closing Disclosure must be provided using the standard form prescribed by the CFPB (model form H-25). It must include: (1) general information (date issued, closing date, disbursement date, settlement agent, file number, property address); (2) loan terms (loan amount, interest rate, monthly principal and interest, whether prepayment penalty or balloon payment applies); (3) projected payments table (principal and interest, mortgage insurance, estimated escrow, estimated total monthly payment for each applicable period); (4) costs at closing (total closing costs, cash to close).
+
+(b) Loan Calculations: Total of payments, finance charge, amount financed, annual percentage rate (APR), and total interest percentage (TIP) must be disclosed accurately.
+
+(c) Closing Cost Details: Origination charges, services borrower did not shop for, services borrower did shop for, taxes and other government fees, prepaids (homeowner's insurance, mortgage insurance, prepaid interest, property taxes), and initial escrow payment at closing must each be itemized.
+
+12 CFR 1026.19(f) — Timing Requirements:
+The Closing Disclosure must be received by the consumer at least three (3) business days before consummation of the transaction. A new three-day waiting period is required if: (1) the APR increases by more than 1/8 of 1 percentage point for a fixed-rate loan or 1/4 of 1 percentage point for an adjustable-rate loan; (2) a prepayment penalty is added; or (3) the loan product changes (e.g., fixed rate to adjustable rate).`;
+
+const LOAN_ESTIMATE_REFS = `APPLICABLE LEGAL STANDARDS — Reference these when drafting:
+
+12 CFR 1026.37 — TRID Loan Estimate Requirements:
+(a) The Loan Estimate must be provided using the standard form prescribed by the CFPB (model form H-24). It must include: (1) loan terms (loan amount, interest rate, monthly principal and interest, prepayment penalty, balloon payment); (2) projected payments (principal and interest, mortgage insurance, estimated escrow, estimated total monthly payment); (3) costs at closing (estimated total closing costs, estimated cash to close).
+
+(b) Closing Cost Details: Origination charges (points, origination fees), services you cannot shop for (appraisal, credit report, flood determination), services you can shop for (title services, survey, pest inspection), taxes and government fees (recording fees, transfer taxes), prepaids (homeowner's insurance premium, mortgage insurance premium, prepaid interest, property taxes), and initial escrow payment at closing.
+
+(c) Comparisons Section: Must include total cost over the first 5 years, principal paid off in 5 years, APR, and TIP (Total Interest Percentage).
+
+12 CFR 1026.19(e) — Timing and Tolerance:
+The Loan Estimate must be delivered or placed in the mail no later than 3 business days after receiving the consumer's application (defined as receipt of consumer's name, income, SSN, property address, estimated value, and mortgage loan amount sought). Tolerance categories: (1) zero tolerance — fees that cannot increase (lender charges, transfer taxes); (2) 10% cumulative tolerance — fees for services the consumer can shop for but uses the lender's preferred provider; (3) no limit — fees for services the consumer shops for independently, prepaid interest, property insurance.`;
+
+const BORROWING_BASE_AGREEMENT_REFS = `APPLICABLE LEGAL STANDARDS — Reference these when drafting:
+
+UCC Article 9 — Security Interests in Accounts and Inventory:
+UCC Section 9-102(a)(2) — "Account" means a right to payment of a monetary obligation, whether or not earned by performance, for property that has been or is to be sold, leased, licensed, assigned, or otherwise disposed of, for services rendered or to be rendered, for a policy of insurance issued or to be issued, for a secondary obligation incurred or to be incurred, or arising out of the use of a credit or charge card.
+
+UCC Section 9-102(a)(48) — "Inventory" means goods, other than farm products, which: (A) are leased by a person as lessor; (B) are held by a person for sale or lease or to be furnished under a contract of service; (C) are furnished by a person under a contract of service; or (D) consist of raw materials, work in process, or materials used or consumed in a business.
+
+UCC Section 9-204 — After-Acquired Property and Future Advances:
+A security agreement may provide for a security interest in after-acquired collateral and may secure future advances. This is critical for revolving credit facilities where the borrowing base fluctuates as receivables are created and collected and inventory is acquired and sold.
+
+Federal Assignment of Claims Act (41 U.S.C. § 6305):
+Assignments of claims against the United States are generally prohibited unless: (1) made to a bank, trust company, or other financing institution, (2) adequate written notice is provided to the contracting officer, and (3) the assignment covers all amounts payable under the contract. This affects the eligibility of government account debtors in the borrowing base.`;
+
+const DIGITAL_ASSET_PLEDGE_REFS = `APPLICABLE LEGAL STANDARDS — Reference these when drafting:
+
+FinCEN Guidance on Convertible Virtual Currency (FIN-2019-G001):
+Persons that accept and transmit convertible virtual currency are money transmitters under the Bank Secrecy Act unless an exemption applies. Lenders accepting digital assets as collateral must implement a Customer Identification Program (CIP) and Customer Due Diligence (CDD) procedures. Suspicious Activity Reports (SARs) must be filed with FinCEN for transactions exceeding $5,000 that involve potential money laundering or other suspicious activity.
+
+Bank Secrecy Act / AML Requirements (31 CFR 1010, 1020, 1022):
+Financial institutions must: (1) establish an AML compliance program; (2) file Currency Transaction Reports (CTRs) for cash transactions exceeding $10,000; (3) maintain records of funds transfers of $3,000 or more (travel rule); (4) conduct ongoing monitoring of customer relationships for suspicious activity.
+
+State Money Transmitter Laws:
+Most states require licensure for persons engaged in the business of money transmission, which may encompass digital asset custody and transfer activities. Notable frameworks include: New York BitLicense (23 NYCRR Part 200), Wyoming Digital Asset Act (W.S. 34-29-101 et seq.), California Digital Financial Assets Law (effective July 2026 per AB 1934). Lender must ensure that its digital asset collateral activities comply with applicable state money transmitter or digital asset laws in every state where borrowers are located.
+
+UCC Article 12 (Adopted in Select States) — Controllable Electronic Records:
+The 2022 UCC amendments add Article 12, providing a framework for taking a security interest in "controllable electronic records," including certain digital assets. Control is established when the secured party has the power to avail itself of substantially all the benefit of the electronic record and the exclusive power to prevent others from doing so. States that have enacted Article 12 provide a clear perfection-by-control mechanism for digital asset collateral.`;
+
+const CUSTODY_AGREEMENT_REFS = `APPLICABLE LEGAL STANDARDS — Reference these when drafting:
+
+Investment Advisers Act of 1940 — Custody Rule (17 CFR 275.206(4)-2):
+An investment adviser is deemed to have custody of client assets if it holds, directly or indirectly, client funds or securities, or has authority to obtain possession of them. Advisers with custody must: (1) maintain client assets with a "qualified custodian" (banks, registered broker-dealers, futures commission merchants, certain foreign financial institutions); (2) have a reasonable basis for believing the qualified custodian sends quarterly account statements directly to clients; (3) undergo an annual surprise examination by an independent public accountant. The custody rule is designed to safeguard client assets from misuse, loss, or misappropriation.
+
+State Trust Company Laws and Digital Asset Custody:
+Several states have enacted specific trust company or digital asset custody frameworks: Wyoming Special Purpose Depository Institutions (W.S. 13-12-101 et seq.) may provide custodial services for digital assets under state banking supervision; South Dakota and Nevada trust company charters are commonly used for institutional digital asset custody; New York trust companies operating under the NY Banking Law may provide digital asset custody subject to DFS oversight and BitLicense requirements.
+
+SOC 2 Type II Compliance:
+Custodians handling digital assets should maintain a SOC 2 Type II report, which evaluates the design and operating effectiveness of controls relevant to security, availability, processing integrity, confidentiality, and privacy. The report must cover a minimum of six months and be performed by an independent auditing firm. Key controls include segregation of duties, access management, encryption of assets at rest and in transit, disaster recovery, and incident response procedures.`;
 
 const REFS_MAP: Record<string, string> = {
   security_agreement: SECURITY_AGREEMENT_REFS,
@@ -296,6 +420,12 @@ const REFS_MAP: Record<string, string> = {
   assignment_of_leases: ASSIGNMENT_OF_LEASES_REFS,
   estoppel_certificate: ESTOPPEL_CERTIFICATE_REFS,
   borrowers_certificate: BORROWERS_CERTIFICATE_REFS,
+  deed_of_trust: DEED_OF_TRUST_REFS,
+  closing_disclosure: CLOSING_DISCLOSURE_REFS,
+  loan_estimate: LOAN_ESTIMATE_REFS,
+  borrowing_base_agreement: BORROWING_BASE_AGREEMENT_REFS,
+  digital_asset_pledge: DIGITAL_ASSET_PLEDGE_REFS,
+  custody_agreement: CUSTODY_AGREEMENT_REFS,
 };
 
 /**

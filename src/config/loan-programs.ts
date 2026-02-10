@@ -57,6 +57,10 @@ export interface LoanProgram {
   // Compliance checks
   complianceChecks: string[];
 
+  // Late fee structure
+  lateFeePercent: number; // e.g. 0.05 for 5%
+  lateFeeGraceDays: number; // e.g. 15
+
   // Fee structure
   standardFees: Array<{
     name: string;
@@ -141,6 +145,9 @@ const SBA_7A: LoanProgram = {
   ],
   complianceChecks: ["sba_size_standard", "sba_credit_elsewhere", "sba_use_of_proceeds", "ofac_screening", "usury_check", "flood_zone"],
 
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 15,
+
   standardFees: [
     // NOTE: SBA guaranty fee is tiered: 2% (≤$150K), 3% ($150K-$700K), 3.5% ($700K-$1M), 3.75% (>$1M)
     // Using 3.0% as default — should be dynamically calculated based on approved amount in production
@@ -176,7 +183,7 @@ const SBA_504: LoanProgram = {
     spreadRange: [0.005, 0.015],
     maxTerm: 300, // 20-25 years for real estate
     maxAmortization: 300,
-    maxLoanAmount: 5_000_000, // Standard cap; $5.5M exception for manufacturing and energy projects
+    maxLoanAmount: 5_500_000, // $5.5M for manufacturing and energy projects per SBA guidelines
     minLoanAmount: 100_000,
     prepaymentPenalty: true,
     requiresAppraisal: true,
@@ -215,6 +222,9 @@ const SBA_504: LoanProgram = {
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
   complianceChecks: ["sba_size_standard", "sba_504_eligibility", "job_creation", "ofac_screening", "usury_check", "flood_zone"],
+
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 15,
 
   standardFees: [
     { name: "CDC Processing Fee", type: "percent", value: 0.015, description: "1.5% of CDC portion" },
@@ -287,6 +297,9 @@ const COMMERCIAL_CRE: LoanProgram = {
   ],
   complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "environmental_phase1"],
 
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 10,
+
   standardFees: [
     { name: "Origination Fee", type: "percent", value: 0.01, description: "1% of loan amount" },
     { name: "Appraisal Fee", type: "flat", value: 4500, description: "Commercial appraisal" },
@@ -344,13 +357,16 @@ const DSCR_LOAN: LoanProgram = {
   ],
 
   requiredOutputDocs: [
-    "promissory_note", "deed_of_trust", "closing_disclosure", "loan_estimate",
+    "promissory_note", "loan_agreement", "deed_of_trust", "closing_disclosure", "loan_estimate",
     "commitment_letter", "corporate_resolution", "settlement_statement",
     "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
   complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "hpml_check", "atr_check"],
+
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 15,
 
   standardFees: [
     { name: "Origination Fee", type: "percent", value: 0.015, description: "1.5% of loan amount" },
@@ -407,13 +423,16 @@ const BANK_STATEMENT: LoanProgram = {
   ],
 
   requiredOutputDocs: [
-    "promissory_note", "deed_of_trust", "closing_disclosure", "loan_estimate",
+    "promissory_note", "loan_agreement", "deed_of_trust", "closing_disclosure", "loan_estimate",
     "commitment_letter", "corporate_resolution", "settlement_statement",
     "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
   complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "atr_check", "hpml_check"],
+
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 15,
 
   standardFees: [
     { name: "Origination Fee", type: "percent", value: 0.02, description: "2% of loan amount" },
@@ -482,6 +501,9 @@ const CONVENTIONAL_BUSINESS: LoanProgram = {
   ],
   complianceChecks: ["ofac_screening", "usury_check", "flood_zone"],
 
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 10,
+
   standardFees: [
     { name: "Origination Fee", type: "percent", value: 0.01, description: "1% of loan amount" },
     { name: "Documentation Fee", type: "flat", value: 500, description: "Document preparation" },
@@ -545,6 +567,9 @@ const LINE_OF_CREDIT: LoanProgram = {
   ],
   complianceChecks: ["ofac_screening", "usury_check"],
 
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 10,
+
   standardFees: [
     { name: "Commitment Fee", type: "percent", value: 0.0025, description: "0.25% on unused portion" },
     { name: "Annual Renewal Fee", type: "flat", value: 500, description: "Annual line renewal" },
@@ -599,13 +624,16 @@ const EQUIPMENT_FINANCING: LoanProgram = {
   ],
 
   requiredOutputDocs: [
-    "promissory_note", "guaranty", "security_agreement", "ucc_financing_statement",
+    "promissory_note", "loan_agreement", "guaranty", "security_agreement", "ucc_financing_statement",
     "commitment_letter", "corporate_resolution", "settlement_statement",
     "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
   complianceChecks: ["ofac_screening", "usury_check", "ucc_lien_search"],
+
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 10,
 
   standardFees: [
     { name: "Documentation Fee", type: "flat", value: 500, description: "Document preparation" },
@@ -668,6 +696,9 @@ const BRIDGE_LOAN: LoanProgram = {
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
   complianceChecks: ["ofac_screening", "usury_check", "flood_zone"],
+
+  lateFeePercent: 0.06,
+  lateFeeGraceDays: 5,
 
   standardFees: [
     { name: "Origination Fee", type: "percent", value: 0.02, description: "2% of loan amount" },
@@ -732,6 +763,9 @@ const CRYPTO_COLLATERALIZED: LoanProgram = {
     "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
   complianceChecks: ["ofac_screening", "usury_check", "bsa_aml", "source_of_funds"],
+
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 10,
 
   standardFees: [
     { name: "Origination Fee", type: "percent", value: 0.015, description: "1.5% of loan amount" },

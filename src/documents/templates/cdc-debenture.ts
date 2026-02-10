@@ -5,7 +5,7 @@
 // standard conditions + AI prose for project description and CDC terms.
 // =============================================================================
 
-import type { DocumentInput } from "../types";
+import type { DocumentInput, CdcDebentureProse } from "../types";
 import {
   Document,
   Paragraph,
@@ -28,15 +28,7 @@ import {
   COLORS,
 } from "../doc-helpers";
 
-// ---------------------------------------------------------------------------
-// Prose interface
-// ---------------------------------------------------------------------------
-
-export interface CdcDebentureProse {
-  projectDescription: string;
-  cdcTermsAndConditions: string;
-  governingLaw: string;
-}
+export type { CdcDebentureProse };
 
 // ---------------------------------------------------------------------------
 // Builder
@@ -56,8 +48,8 @@ export function buildCdcDebenture(
   const firstLienPortion = totalProjectCost * 0.5;
   const borrowerEquity = totalProjectCost * 0.1;
 
-  // Job creation: 1 job per $75,000 of debenture
-  const jobsRequired = Math.max(1, Math.ceil(cdcPortion / 75_000));
+  // Job creation: 1 job per $95,000 of debenture per 13 CFR 120.861
+  const jobsRequired = Math.max(1, Math.ceil(cdcPortion / 95_000));
 
   const children: (Paragraph | Table)[] = [
     // ---- Title ----
@@ -151,7 +143,7 @@ export function buildCdcDebenture(
     // ---- Job Creation Requirement ----
     sectionHeading("Job Creation / Retention Requirement"),
     bodyText(
-      `For every $75,000 of debenture proceeds, the Borrower must create or retain at least one (1) job within two (2) years of final disbursement. Based on the debenture amount of ${formatCurrency(cdcPortion)}, Borrower must create or retain a minimum of ${jobsRequired} job(s).`,
+      `For every $95,000 of debenture proceeds (per 13 CFR 120.861), the Borrower must create or retain at least one (1) job within two (2) years of final disbursement. Based on the debenture amount of ${formatCurrency(cdcPortion)}, Borrower must create or retain a minimum of ${jobsRequired} job(s).`,
     ),
     spacer(2),
     bodyText(

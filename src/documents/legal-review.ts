@@ -209,7 +209,7 @@ function extractRegulation(provision: string): string {
   if (lower.includes("tila") || lower.includes("regulation z") || lower.includes("12 cfr")) return "Truth in Lending Act (Reg Z)";
   if (lower.includes("ecoa") || lower.includes("equal credit")) return "Equal Credit Opportunity Act";
   if (lower.includes("respa")) return "Real Estate Settlement Procedures Act";
-  if (lower.includes("bankruptcy") || lower.includes("§36") || lower.includes("section 36") || lower.includes("§11") || lower.includes("section 11")) return "U.S. Bankruptcy Code";
+  if (lower.includes("bankruptcy") || lower.includes("11 u.s.c") || lower.includes("§36") || lower.includes("section 36")) return "U.S. Bankruptcy Code";
   if (lower.includes("aba") || lower.includes("american bar")) return "ABA Legal Opinion Accord";
   if (lower.includes("tribar")) return "TriBar Opinion Committee Standards";
   if (lower.includes("usury")) return "State Usury Law";

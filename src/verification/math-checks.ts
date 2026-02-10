@@ -102,17 +102,6 @@ function round4(n: number): number {
   return Math.round(n * 10000) / 10000;
 }
 
-/**
- * Only push a check if the actual field exists (non-zero or explicitly present).
- * This avoids false failures for fields that were not on the document.
- */
-function pushIfPresent(checks: MathCheck[], obj: any, fieldPath: string, check: MathCheck): void {
-  const val = get(obj, fieldPath);
-  if (val !== 0 || hasField(obj, fieldPath)) {
-    checks.push(check);
-  }
-}
-
 function hasField(obj: any, path: string): boolean {
   const parts = path.split(".");
   let current = obj;
@@ -758,7 +747,7 @@ function checkProfitAndLoss(data: any): MathCheck[] {
   const grossProfit = get(data, "grossProfit");
   const operatingExpenses = get(data, "operatingExpenses") || get(data, "totalOperatingExpenses");
   const operatingIncome = get(data, "operatingIncome");
-  const otherIncomeExpense = get(data, "otherIncomeExpense") ?? (get(data, "otherIncome") - get(data, "otherExpense"));
+  const otherIncomeExpense = get(data, "otherIncomeExpense") || (get(data, "otherIncome") - get(data, "otherExpense"));
   const incomeTaxExpense = get(data, "incomeTaxExpense") || get(data, "taxes");
   const netIncome = get(data, "netIncome");
 

@@ -5,7 +5,7 @@
 // special conditions and use of proceeds.
 // =============================================================================
 
-import type { DocumentInput } from "../types";
+import type { DocumentInput, SbaAuthorizationProse } from "../types";
 import {
   Document,
   Paragraph,
@@ -27,15 +27,7 @@ import {
   COLORS,
 } from "../doc-helpers";
 
-// ---------------------------------------------------------------------------
-// Prose interface
-// ---------------------------------------------------------------------------
-
-export interface SbaAuthorizationProse {
-  specialConditions: string[];
-  useOfProceeds: string;
-  governingLaw: string;
-}
+export type { SbaAuthorizationProse };
 
 // ---------------------------------------------------------------------------
 // SBA Guaranty Fee Calculation (per SOP 50 10)

@@ -448,9 +448,6 @@ export function DocumentPreview({
         // Ignore render errors on cancel
       }
     })();
-    return () => {
-      cancelled = true;
-    };
   }, [docxBlob]);
 
   const handleSave = useCallback(async () => {

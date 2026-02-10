@@ -864,6 +864,26 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
         "TRID timing — Loan Estimate within 3 business days of application, Closing Disclosure 3 business days before consummation",
       ],
     },
+    closing_disclosure: {
+      requiredProvisions: [
+        "Non-QM disclosure — loan does not meet QM safe harbor; ATR analysis based on property DSCR rather than personal income",
+        "Investment property designation — property is not borrower's primary residence",
+      ],
+      regulatoryReferences: [
+        "12 CFR 1026.38 — TRID Closing Disclosure form must be provided at least 3 business days before consummation",
+        "HPML escrow requirements apply if APR exceeds APOR + 1.5% (12 CFR 1026.35)",
+      ],
+    },
+    loan_estimate: {
+      requiredProvisions: [
+        "Non-QM disclosure — loan does not meet QM safe harbor; ATR analysis based on property DSCR rather than personal income",
+        "Investment property designation — property is not borrower's primary residence",
+      ],
+      regulatoryReferences: [
+        "12 CFR 1026.37 — TRID Loan Estimate must be delivered within 3 business days of application",
+        "Tolerance categories must be clearly identified per 12 CFR 1026.19(e)(3)",
+      ],
+    },
   },
 
   // ---------------------------------------------------------------------------
@@ -889,6 +909,28 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
     commitment_letter: {
       regulatoryReferences: [
         "TRID timing — Loan Estimate within 3 business days of application, Closing Disclosure 3 business days before consummation",
+      ],
+    },
+    closing_disclosure: {
+      requiredProvisions: [
+        "Non-QM disclosure — loan does not meet QM safe harbor; ATR documented via bank statement deposit analysis",
+        "Alternative income documentation methodology reference (12-24 month bank deposits used in lieu of tax returns)",
+      ],
+      regulatoryReferences: [
+        "12 CFR 1026.38 — TRID Closing Disclosure form must be provided at least 3 business days before consummation",
+        "ATR compliance per 12 CFR 1026.43(c) — ability to repay documented through bank statement analysis",
+        "HPML escrow requirements apply if APR exceeds APOR + 1.5% (12 CFR 1026.35)",
+      ],
+    },
+    loan_estimate: {
+      requiredProvisions: [
+        "Non-QM disclosure — loan does not meet QM safe harbor; ATR documented via bank statement deposit analysis",
+        "Alternative income documentation methodology reference (12-24 month bank deposits used in lieu of tax returns)",
+      ],
+      regulatoryReferences: [
+        "12 CFR 1026.37 — TRID Loan Estimate must be delivered within 3 business days of application",
+        "Tolerance categories must be clearly identified per 12 CFR 1026.19(e)(3)",
+        "ATR compliance per 12 CFR 1026.43(c) — ability to repay documented through bank statement analysis",
       ],
     },
   },

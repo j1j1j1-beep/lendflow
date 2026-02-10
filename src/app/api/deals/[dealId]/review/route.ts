@@ -99,7 +99,7 @@ export async function POST(
     if (allResolved) {
       await inngest.send({
         name: "deal/review-complete",
-        data: { dealId },
+        data: { dealId, triggeredAt: Date.now() },
       });
     }
 

@@ -66,6 +66,18 @@ const TEMPLATE_HANDLED_TYPES = new Set([
   "borrowing_base_agreement",
   "digital_asset_pledge",
   "custody_agreement",
+  // Zero-AI doc types — templates handle everything, no AI prose to verify
+  "sba_form_1919",
+  "sba_form_1920",
+  "sba_form_159",
+  "sba_form_148",
+  "sba_form_1050",
+  "irs_4506c",
+  "irs_w9",
+  "flood_determination",
+  "privacy_notice",
+  "patriot_act_notice",
+  "disbursement_authorization",
 ]);
 
 // ---------------------------------------------------------------------------
@@ -397,9 +409,12 @@ export function verifyDocument(
   checksRun++;
   if (checkTerm(docType, input, proseText, issues)) checksPassed++;
 
-  // 5. Borrower name check (case-insensitive)
-  checksRun++;
-  if (checkBorrowerName(input, proseText, issues)) checksPassed++;
+  // 5. Borrower name check (case-insensitive) — skip for template-handled types
+  //    where the template injects the name deterministically (prose is empty)
+  if (!TEMPLATE_HANDLED_TYPES.has(docType)) {
+    checksRun++;
+    if (checkBorrowerName(input, proseText, issues)) checksPassed++;
+  }
 
   // 6. Fee checks (skipped for template types)
   const feeCount = input.terms.fees.length;

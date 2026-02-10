@@ -241,12 +241,12 @@
 .doc-viewer-panel {
   width: 380px;
   flex-shrink: 0;
-  border-left: 1px solid hsl(var(--border));
+  border-left: 1px solid var(--border);
   overflow-y: auto;
-  background: hsl(var(--background));
+  background: var(--background);
 }
 .doc-viewer-editable {
-  outline: 2px solid hsl(var(--ring));
+  outline: 2px solid var(--ring);
   outline-offset: -2px;
   cursor: text;
 }
@@ -261,7 +261,7 @@
   .doc-viewer-panel {
     width: 100%;
     border-left: none;
-    border-top: 1px solid hsl(var(--border));
+    border-top: 1px solid var(--border);
     max-height: 50%;
   }
 }

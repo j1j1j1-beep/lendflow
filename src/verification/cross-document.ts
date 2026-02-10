@@ -78,7 +78,7 @@ function buildCheck(
   warnThreshold: number = WARNING_THRESHOLD
 ): CrossDocCheck {
   const difference = round2(Math.abs(doc1Value - doc2Value));
-  const percentDiff = round2(calcPercentDiff(doc1Value, doc2Value) * 100) / 100;
+  const percentDiff = round2(calcPercentDiff(doc1Value, doc2Value));
 
   let status: "pass" | "fail" | "warning";
   if (difference <= ABSOLUTE_TOLERANCE) {
@@ -100,7 +100,7 @@ function buildCheck(
     doc2Field,
     doc2Value: round2(doc2Value),
     difference,
-    percentDiff: round2(percentDiff * 100) / 100,
+    percentDiff,
     status,
   };
 }
@@ -381,44 +381,6 @@ function checkK1vsScheduleE(extractions: ExtractionInput[]): CrossDocCheck[] {
   return checks;
 }
 
-function checkPnLvsScheduleC(extractions: ExtractionInput[]): CrossDocCheck[] {
-  const checks: CrossDocCheck[] = [];
-
-  const form1040 = findFirst(extractions, "FORM_1040", "1040", "TAX_RETURN_1040");
-  const pnls = findByType(extractions, "PROFIT_AND_LOSS", "P&L", "PNL", "INCOME_STATEMENT");
-
-  if (!form1040 || pnls.length === 0) return checks;
-
-  const scheduleCs = Array.isArray(form1040.data.scheduleC)
-    ? form1040.data.scheduleC
-    : form1040.data.scheduleC
-      ? [form1040.data.scheduleC]
-      : [];
-
-  if (scheduleCs.length === 0) return checks;
-
-  const pnlNetIncome = get(pnls[0].data, "netIncome");
-  const scNetProfit = get(scheduleCs[0], "netProfit");
-
-  if (pnlNetIncome !== 0 && scNetProfit !== 0) {
-    checks.push(
-      buildCheck(
-        "P&L net income should match 1040 Schedule C net profit (self-employed)",
-        "PROFIT_AND_LOSS",
-        "netIncome",
-        pnlNetIncome,
-        "FORM_1040 (Schedule C)",
-        "scheduleC.netProfit",
-        scNetProfit,
-        WARNING_THRESHOLD,
-        0.10
-      )
-    );
-  }
-
-  return checks;
-}
-
 function checkBalanceSheetEquityVsPnL(extractions: ExtractionInput[]): CrossDocCheck[] {
   const checks: CrossDocCheck[] = [];
 
@@ -550,7 +512,6 @@ export function runCrossDocChecks(
   checks.push(...checkScheduleEvsRentRoll(valid));
   checks.push(...check1120SOfficerCompVsW2(valid));
   checks.push(...checkK1vsScheduleE(valid));
-  checks.push(...checkPnLvsScheduleC(valid));
   checks.push(...checkBalanceSheetEquityVsPnL(valid));
   checks.push(...checkBankStatementChains(valid));
 

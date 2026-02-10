@@ -34,7 +34,7 @@ export async function POST(
     // Send Inngest event to resume pipeline
     await inngest.send({
       name: "deal/terms-approved",
-      data: { dealId },
+      data: { dealId, triggeredAt: Date.now() },
     });
 
     void logAudit({

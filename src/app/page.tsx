@@ -102,11 +102,20 @@ export default async function Home() {
                 See It Live
                 <ArrowRight className="h-4 w-4" />
               </a>
-              <SignInButton mode="modal">
-                <button className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]">
-                  Sign In
-                </button>
-              </SignInButton>
+              {userId ? (
+                <a
+                  href="/dashboard"
+                  className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]"
+                >
+                  Go to Dashboard
+                </a>
+              ) : (
+                <SignInButton mode="modal">
+                  <button className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]">
+                    Sign In
+                  </button>
+                </SignInButton>
+              )}
             </div>
           </div>
         </div>
@@ -508,11 +517,20 @@ export default async function Home() {
                   See It Live
                   <ArrowRight className="h-4 w-4" />
                 </a>
-                <SignInButton mode="modal">
-                  <button className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]">
-                    Sign In
-                  </button>
-                </SignInButton>
+                {userId ? (
+                  <a
+                    href="/dashboard"
+                    className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]"
+                  >
+                    Go to Dashboard
+                  </a>
+                ) : (
+                  <SignInButton mode="modal">
+                    <button className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                )}
               </div>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">

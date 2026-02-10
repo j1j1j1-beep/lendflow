@@ -87,7 +87,7 @@ export async function POST(
     });
 
     // Re-trigger the pipeline
-    await inngest.send({ name: "deal/analyze", data: { dealId } });
+    await inngest.send({ name: "deal/analyze", data: { dealId, triggeredAt: Date.now() } });
 
     void logAudit({
       orgId: org.id,

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -774,7 +774,9 @@ export default function SettingsPage() {
 
         {/* ─── ACTIVITY TAB ──────────────────────────────────────────────────────── */}
         <TabsContent value="activity">
-          <ActivityLog />
+          <Suspense fallback={<div>Loading...</div>}>
+            <ActivityLog />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>
@@ -847,6 +849,7 @@ function UsageHistory() {
 
 function ActivityLog() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const dealIdFilter = searchParams.get("dealId");
 
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -915,10 +918,7 @@ function ActivityLog() {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  const url = new URL(window.location.href);
-                  url.searchParams.delete("dealId");
-                  window.history.replaceState({}, "", url.toString());
-                  window.location.reload();
+                  router.replace("/dashboard/settings?tab=activity");
                 }}
               >
                 Clear filter

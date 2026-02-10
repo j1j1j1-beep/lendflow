@@ -14,6 +14,7 @@ import { evaluateReviewGate } from "@/verification/review-gate";
 import { runFullAnalysis } from "@/analysis/analyze";
 import { generateCreditMemo } from "@/memo/generate";
 import { sendAnalysisComplete, sendReviewNeeded } from "@/lib/resend";
+import { logAudit } from "@/lib/audit";
 import type { DocType } from "@/generated/prisma/client";
 
 // ---------------------------------------------------------------------------
@@ -89,8 +90,8 @@ async function buildDocInput(dealId: string) {
       conditions: terms.conditions as any[],
       specialTerms: terms.specialTerms as any[] | null,
       fees: terms.fees as any[],
-      lateFeePercent: 0.05,
-      lateFeeGraceDays: 15,
+      lateFeePercent: program.lateFeePercent,
+      lateFeeGraceDays: program.lateFeeGraceDays,
     },
     programName: program.name,
     programId: program.id,
@@ -206,11 +207,11 @@ export const analysisPipeline = inngest.createFunction(
     id: "analysis-pipeline",
     name: "Document Analysis Pipeline",
     retries: 2,
-    idempotency: "event.data.dealId",
+    idempotency: "event.data.dealId + '-' + event.data.triggeredAt",
   },
   { event: "deal/analyze" },
   async ({ event, step }) => {
-    const { dealId } = event.data as { dealId: string };
+    const { dealId } = event.data as { dealId: string; triggeredAt?: number };
 
     // Guard: skip if deal is already in a processing state
     const currentDeal = await step.run("check-idempotent", async () => {
@@ -234,9 +235,18 @@ export const analysisPipeline = inngest.createFunction(
       return { success: false, dealId, error: "Deal already being processed" };
     }
 
+    // Look up orgId for audit logging
+    const dealForAudit = await step.run("fetch-deal-for-audit", async () => {
+      return prisma.deal.findUniqueOrThrow({ where: { id: dealId }, select: { orgId: true } });
+    });
+    const orgId = dealForAudit.orgId;
+
     let lastStep = "INIT";
 
     try {
+      // Audit: pipeline started
+      void logAudit({ orgId, dealId, action: "deal.pipeline_started" });
+
       // -----------------------------------------------------------------------
       // Step 1: OCR + Classification via Textract Lending
       // Textract Lending auto-classifies documents AND extracts standardized
@@ -369,6 +379,9 @@ export const analysisPipeline = inngest.createFunction(
         });
         return { success: false, dealId, error: "All documents failed OCR" };
       }
+
+      // Audit: OCR complete
+      void logAudit({ orgId, dealId, action: "deal.ocr_complete", metadata: { successCount: ocrSuccessIds.length, totalCount: documents.length } });
 
       // -----------------------------------------------------------------------
       // Step 2: Classify — Lending-supported types auto-classified by Textract,
@@ -766,6 +779,9 @@ export const analysisPipeline = inngest.createFunction(
 
         return report;
       });
+
+      // Audit: verification complete
+      void logAudit({ orgId, dealId, action: "deal.verification_complete", metadata: { overallStatus: verificationReport.overallStatus } });
 
       // -----------------------------------------------------------------------
       // Step 5: Self-resolve - Attempt to fix failures
@@ -1253,6 +1269,9 @@ export const analysisPipeline = inngest.createFunction(
             })
           )
         );
+
+        // Audit: docs generated
+        void logAudit({ orgId, dealId, action: "deal.docs_generated", metadata: { docCount: docGenSetup.docsToGenerate.length } });
       }
 
       // -----------------------------------------------------------------------
@@ -1277,6 +1296,9 @@ export const analysisPipeline = inngest.createFunction(
         const dealDocs = await prisma.document.findMany({ where: { dealId } });
         const verReport = await prisma.verificationReport.findUnique({ where: { dealId } });
         const vrData = verReport as any;
+        const resolvedCount = await prisma.reviewItem.count({
+          where: { dealId, status: { in: ["CORRECTED", "CONFIRMED"] } },
+        });
         const memoBuffer = await withTimeout(
           generateCreditMemo({
             borrowerName: deal.borrowerName,
@@ -1299,7 +1321,7 @@ export const analysisPipeline = inngest.createFunction(
               crossDocFailed: vrData?.crossDocFailed ?? 0,
               textractAgreed: vrData?.textractAgreed ?? 0,
               textractDisagreed: vrData?.textractDisagreed ?? 0,
-              reviewItemsResolved: 0,
+              reviewItemsResolved: resolvedCount,
             },
             generatedAt: new Date(),
           }),
@@ -1361,6 +1383,9 @@ export const analysisPipeline = inngest.createFunction(
         });
       });
 
+      // Audit: pipeline complete
+      void logAudit({ orgId, dealId, action: "deal.completed" });
+
       return { success: true, dealId };
     } catch (error) {
       // Final error handler: mark deal as ERROR with last known pipeline stage
@@ -1374,6 +1399,9 @@ export const analysisPipeline = inngest.createFunction(
           errorStep: lastStep,
         },
       });
+
+      // Audit: pipeline error
+      void logAudit({ orgId, dealId, action: "deal.pipeline_error", metadata: { errorStep: lastStep, errorMessage: message } });
 
       throw error;
     }
@@ -1389,11 +1417,11 @@ export const resumeAfterReview = inngest.createFunction(
     id: "resume-after-review",
     name: "Resume Analysis After Review",
     retries: 2,
-    idempotency: "event.data.dealId",
+    idempotency: "event.data.dealId + '-' + event.data.triggeredAt",
   },
   { event: "deal/review-complete" },
   async ({ event, step }) => {
-    const { dealId } = event.data as { dealId: string };
+    const { dealId } = event.data as { dealId: string; triggeredAt?: number };
 
     // Guard: only resume if deal is actually in review state
     const currentDeal = await step.run("check-resume-state", async () => {
@@ -1485,7 +1513,17 @@ export const resumeAfterReview = inngest.createFunction(
 
         const mathFailed = allMathChecks.filter((c) => !c.passed).length;
         const crossDocFailed = crossDocResults.filter((c: any) => c.status === "fail").length;
+        const crossDocWarnings = crossDocResults.filter((c: any) => c.status === "warning").length;
         const textractDisagreed = allTextractChecks.filter((c) => !c.agreed).length;
+
+        // Match the same threshold logic as the main pipeline
+        const TEXTRACT_DISAGREE_THRESHOLD = 2;
+        let overallStatus = "PASS";
+        if (mathFailed > 0 || crossDocFailed > 0 || textractDisagreed > TEXTRACT_DISAGREE_THRESHOLD) {
+          overallStatus = "FAIL";
+        } else if (crossDocWarnings > 0 || textractDisagreed > 0) {
+          overallStatus = "WARNING";
+        }
 
         // Update verification report
         await prisma.verificationReport.update({
@@ -1497,11 +1535,11 @@ export const resumeAfterReview = inngest.createFunction(
             crossDocChecks: crossDocResults as any,
             crossDocPassed: crossDocResults.filter((c: any) => c.status === "pass").length,
             crossDocFailed,
-            crossDocWarnings: crossDocResults.filter((c: any) => c.status === "warning").length,
+            crossDocWarnings,
             textractChecks: allTextractChecks as any,
             textractAgreed: allTextractChecks.filter((c) => c.agreed).length,
             textractDisagreed,
-            overallStatus: mathFailed > 0 || crossDocFailed > 0 ? "FAIL" : "PASS",
+            overallStatus,
           },
         });
 
@@ -1533,6 +1571,11 @@ export const resumeAfterReview = inngest.createFunction(
         });
         if (!resumeGateResult.canProceed) {
           await step.run("still-needs-review", async () => {
+            // Delete existing PENDING review items for idempotency on retry
+            await prisma.reviewItem.deleteMany({
+              where: { dealId, status: "PENDING" },
+            });
+
             // Create new review items for remaining issues
             for (const item of resumeGateResult.reviewItems) {
               await prisma.reviewItem.create({
@@ -1834,6 +1877,9 @@ export const resumeAfterReview = inngest.createFunction(
         const dealDocs = await prisma.document.findMany({ where: { dealId } });
         const verReport = await prisma.verificationReport.findUnique({ where: { dealId } });
         const vrData = verReport as any;
+        const resolvedCount = await prisma.reviewItem.count({
+          where: { dealId, status: { in: ["CORRECTED", "CONFIRMED"] } },
+        });
         const memoBuffer = await withTimeout(
           generateCreditMemo({
             borrowerName: deal.borrowerName,
@@ -1856,7 +1902,7 @@ export const resumeAfterReview = inngest.createFunction(
               crossDocFailed: vrData?.crossDocFailed ?? 0,
               textractAgreed: vrData?.textractAgreed ?? 0,
               textractDisagreed: vrData?.textractDisagreed ?? 0,
-              reviewItemsResolved: 0,
+              reviewItemsResolved: resolvedCount,
             },
             generatedAt: new Date(),
           }),
@@ -1962,11 +2008,11 @@ export const resumeAfterTermReview = inngest.createFunction(
     id: "resume-after-term-review",
     name: "Resume Pipeline After Term Review",
     retries: 2,
-    idempotency: "event.data.dealId",
+    idempotency: "event.data.dealId + '-' + event.data.triggeredAt",
   },
   { event: "deal/terms-approved" },
   async ({ event, step }) => {
-    const { dealId } = event.data as { dealId: string };
+    const { dealId } = event.data as { dealId: string; triggeredAt?: number };
 
     // Guard: only resume if deal is actually in term review state
     const currentDeal = await step.run("check-resume-state", async () => {
@@ -2039,6 +2085,9 @@ export const resumeAfterTermReview = inngest.createFunction(
         const dealDocs = await prisma.document.findMany({ where: { dealId } });
         const verReport = await prisma.verificationReport.findUnique({ where: { dealId } });
         const vrData = verReport as any;
+        const resolvedCount = await prisma.reviewItem.count({
+          where: { dealId, status: { in: ["CORRECTED", "CONFIRMED"] } },
+        });
         const memoBuffer = await withTimeout(
           generateCreditMemo({
             borrowerName: deal.borrowerName,
@@ -2061,7 +2110,7 @@ export const resumeAfterTermReview = inngest.createFunction(
               crossDocFailed: vrData?.crossDocFailed ?? 0,
               textractAgreed: vrData?.textractAgreed ?? 0,
               textractDisagreed: vrData?.textractDisagreed ?? 0,
-              reviewItemsResolved: 0,
+              reviewItemsResolved: resolvedCount,
             },
             generatedAt: new Date(),
           }),

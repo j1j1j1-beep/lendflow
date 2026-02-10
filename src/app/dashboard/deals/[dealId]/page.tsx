@@ -310,6 +310,7 @@ function DocumentComplianceCard({ doc, onRefresh }: {
       setDocxBlob(null);
       setDocError(null);
       setEditing(false);
+      setShowRegenDialog(false);
       return;
     }
     setDocLoading(true);
@@ -642,27 +643,29 @@ function DocumentComplianceCard({ doc, onRefresh }: {
       </CardContent>
     </Card>
 
-    {showRegenDialog && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => !regenerating && setShowRegenDialog(false)}>
-        <div className="bg-background rounded-lg border shadow-lg p-6 max-w-lg w-full mx-4" onClick={(e) => e.stopPropagation()}>
-          <h3 className="font-semibold text-base mb-1">Regenerate {GEN_DOC_TYPE_LABELS[doc.docType] ?? doc.docType}</h3>
-          <p className="text-sm text-muted-foreground mb-4">
+    <AlertDialog open={showRegenDialog} onOpenChange={(open) => { if (!regenerating) setShowRegenDialog(open); }}>
+      <AlertDialogContent className="max-w-lg">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Regenerate {GEN_DOC_TYPE_LABELS[doc.docType] ?? doc.docType}</AlertDialogTitle>
+          <AlertDialogDescription>
             The AI will regenerate this document using the flagged issues as correction context. All legal checks will run again on the new version.
-          </p>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
-          {/* Show current issues as context */}
-          {hasIssues && (
-            <div className="mb-4 p-3 rounded-md bg-muted/50 border text-xs space-y-1 max-h-32 overflow-y-auto">
-              <p className="font-medium text-muted-foreground uppercase tracking-wide text-[10px] mb-1">Issues being addressed:</p>
-              {(doc.legalIssues ?? []).map((issue, i) => (
-                <p key={`legal-${i}`} className="text-destructive">• {issue.description}</p>
-              ))}
-              {(doc.complianceChecks ?? []).filter(c => !c.passed).map((check, i) => (
-                <p key={`check-${i}`} className="text-destructive">• {check.name}{check.note ? `: ${check.note}` : ""}</p>
-              ))}
-            </div>
-          )}
+        {/* Show current issues as context */}
+        {hasIssues && (
+          <div className="p-3 rounded-md bg-muted/50 border text-xs space-y-1 max-h-32 overflow-y-auto">
+            <p className="font-medium text-muted-foreground uppercase tracking-wide text-[10px] mb-1">Issues being addressed:</p>
+            {(doc.legalIssues ?? []).map((issue, i) => (
+              <p key={`legal-${i}`} className="text-destructive">• {issue.description}</p>
+            ))}
+            {(doc.complianceChecks ?? []).filter(c => !c.passed).map((check, i) => (
+              <p key={`check-${i}`} className="text-destructive">• {check.name}{check.note ? `: ${check.note}` : ""}</p>
+            ))}
+          </div>
+        )}
 
+        <div>
           <label className="block text-sm font-medium mb-1.5">Additional instructions (optional)</label>
           <textarea
             value={regenNotes}
@@ -671,28 +674,26 @@ function DocumentComplianceCard({ doc, onRefresh }: {
             className="w-full h-24 px-3 py-2 text-sm rounded-md border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
             disabled={regenerating}
           />
-
-          <div className="flex items-center justify-end gap-2 mt-4">
-            <Button variant="ghost" size="sm" onClick={() => setShowRegenDialog(false)} disabled={regenerating}>
-              Cancel
-            </Button>
-            <Button size="sm" onClick={handleRegenerate} disabled={regenerating} className="gap-1.5">
-              {regenerating ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Regenerating...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="h-3.5 w-3.5" />
-                  Regenerate Document
-                </>
-              )}
-            </Button>
-          </div>
         </div>
-      </div>
-    )}
+
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={regenerating}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleRegenerate} disabled={regenerating} className="gap-1.5">
+            {regenerating ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Regenerating...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-3.5 w-3.5" />
+                Regenerate Document
+              </>
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </>
   );
 }
@@ -1409,7 +1410,7 @@ export default function DealDetailPage() {
                               const url = URL.createObjectURL(blob);
                               const a = document.createElement("a");
                               a.href = url;
-                              a.download = `${deal.borrowerName.replace(/\s+/g, "_")}_Loan_Package.zip`;
+                              a.download = `${deal.borrowerName.replace(/[^a-zA-Z0-9_\s-]/g, "").replace(/\s+/g, "_")}_Loan_Package.zip`;
                               a.click();
                               URL.revokeObjectURL(url);
                               toast.success("Download started");

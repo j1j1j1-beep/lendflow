@@ -483,6 +483,11 @@ function generateConditions(input: RulesEngineInput): ConditionItem[] {
 // Projected DSCR with proposed payment
 // ---------------------------------------------------------------------------
 
+/**
+ * Projects borrower payment coverage ratio using qualifying income (not NOI).
+ * This is a borrower-level affordability metric, not a property-level DSCR.
+ * Named projectedDscrWithProposedPayment in the output for downstream compatibility.
+ */
 function projectDscrWithPayment(
   analysis: FullAnalysis,
   monthlyPayment: number

@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     // Send Inngest event to start the pipeline
     await inngest.send({
       name: "deal/analyze",
-      data: { dealId },
+      data: { dealId, triggeredAt: Date.now() },
     });
 
     void logAudit({

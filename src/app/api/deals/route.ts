@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { LOAN_PROGRAMS } from "@/config/loan-programs";
 import { DOC_TYPE_LABELS } from "@/documents/types";
+import { logAudit } from "@/lib/audit";
 
 // Valid DealStatus values for filtering
 const VALID_STATUSES = new Set([
@@ -78,6 +79,15 @@ export async function POST(request: NextRequest) {
         orgId: org.id,
         userId: user.id,
       },
+    });
+
+    void logAudit({
+      orgId: org.id,
+      userId: user.id,
+      userEmail: user.email,
+      dealId: deal.id,
+      action: "deal.created",
+      metadata: { borrowerName: deal.borrowerName, loanProgramId: deal.loanProgramId },
     });
 
     return NextResponse.json({ deal }, { status: 201 });

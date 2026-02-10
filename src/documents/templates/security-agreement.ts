@@ -100,10 +100,16 @@ export function buildSecurityAgreement(
     bodyText(prose.collateralDescription),
     spacer(2),
     sectionSubheading("3.1", "Enumerated Collateral"),
-    bodyText(
-      "The Collateral includes, without limitation, each of the following categories of property:",
-    ),
-    ...input.collateralTypes.map((ct) => bulletPoint(collateralLabel(ct))),
+    ...(input.collateralTypes.length > 0
+      ? [
+          bodyText(
+            "The Collateral includes, without limitation, each of the following categories of property:",
+          ),
+          ...input.collateralTypes.map((ct) => bulletPoint(collateralLabel(ct))),
+        ]
+      : [
+          bodyText("As described in the Loan Agreement."),
+        ]),
     spacer(2),
     sectionSubheading("3.2", "Proceeds and Products"),
     bodyText(
