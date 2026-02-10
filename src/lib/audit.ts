@@ -13,6 +13,8 @@ export type AuditAction =
   | "deal.verification_complete"
   | "deal.docs_generated"
   | "deal.pipeline_error"
+  | "deal.sample_created"
+  | "deal.sample_pipeline_started"
   | "doc.edited"
   | "doc.saved"
   | "doc.regenerated"

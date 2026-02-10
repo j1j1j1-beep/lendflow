@@ -2181,7 +2181,432 @@ export const resumeAfterTermReview = inngest.createFunction(
 );
 
 // ---------------------------------------------------------------------------
+// Sample deal pipeline
+// Skips OCR through Review Gate — extraction data is pre-loaded.
+// Runs: Analyze → Structure → Generate Docs → Generate Memo → Complete.
+// ---------------------------------------------------------------------------
+
+export const sampleDealPipeline = inngest.createFunction(
+  {
+    id: "sample-deal-pipeline",
+    name: "Sample Deal Pipeline",
+    retries: 2,
+  },
+  { event: "deal/sample-process" },
+  async ({ event, step }) => {
+    const { dealId } = event.data as { dealId: string; triggeredAt?: number };
+
+    // Look up orgId for audit logging
+    const dealForAudit = await step.run("fetch-deal-for-audit", async () => {
+      return prisma.deal.findUniqueOrThrow({ where: { id: dealId }, select: { orgId: true } });
+    });
+    const orgId = dealForAudit.orgId;
+
+    let lastStep = "INIT";
+
+    try {
+      // Audit: sample pipeline started
+      void logAudit({ orgId, dealId, action: "deal.sample_pipeline_started" });
+
+      // ---------------------------------------------------------------------
+      // Step 1: Analyze — run full analysis on pre-loaded extraction data
+      // ---------------------------------------------------------------------
+      lastStep = "ANALYZING";
+      const analysis = await step.run("analyze", async () => {
+        await prisma.deal.update({
+          where: { id: dealId },
+          data: { status: "ANALYZING", errorMessage: null, errorStep: null },
+        });
+
+        const deal = await prisma.deal.findUniqueOrThrow({
+          where: { id: dealId },
+        });
+
+        const latestExtractions = await prisma.extraction.findMany({
+          where: { dealId },
+          include: { document: true },
+        });
+
+        const analysisResult = runFullAnalysis({
+          extractions: latestExtractions.map((ext) => ({
+            docType: ext.document.docType ?? "OTHER",
+            data: ext.structuredData as Record<string, any>,
+          })),
+          proposedLoanAmount: deal.loanAmount ? Number(deal.loanAmount) : undefined,
+          proposedRate: deal.proposedRate ?? undefined,
+          proposedTerm: deal.proposedTerm ?? undefined,
+        });
+
+        // Create or update analysis record
+        const analysisData = {
+          totalGrossIncome: analysisResult.income.totalGrossIncome,
+          totalNetIncome: analysisResult.income.totalNetIncome,
+          incomeSources: analysisResult.income.sources as any,
+          incomeTrend: analysisResult.income.trend ?? null,
+          globalDscr: analysisResult.dscr.globalDscr ?? null,
+          propertyDscr: analysisResult.dscr.propertyDscr ?? null,
+          frontEndDti: analysisResult.dti.frontEndDti ?? null,
+          backEndDti: analysisResult.dti.backEndDti ?? null,
+          ltv: null as number | null,
+          currentRatio: analysisResult.liquidity.currentRatio ?? null,
+          quickRatio: analysisResult.liquidity.quickRatio ?? null,
+          debtToEquity: analysisResult.liquidity.debtToEquity ?? null,
+          avgDailyBalance: analysisResult.liquidity.averageDailyBalance ?? null,
+          minBalance: analysisResult.liquidity.minimumBalance ?? null,
+          monthsOfReserves: analysisResult.liquidity.monthsOfReserves ?? null,
+          largeDeposits: analysisResult.cashflow.largeDeposits as any ?? null,
+          avgMonthlyDeposits: analysisResult.cashflow.averageMonthlyDeposits ?? null,
+          depositVsIncome: analysisResult.cashflow.depositToIncomeRatio ?? null,
+          nsfCount: analysisResult.cashflow.nsfCount ?? null,
+          revenueByYear: analysisResult.business?.revenueByYear as any ?? null,
+          expenseRatio: analysisResult.business?.expenseRatio ?? null,
+          ownerComp: analysisResult.business?.ownerCompensation ?? null,
+          addBacks: analysisResult.business?.addBacks as any ?? null,
+          riskFlags: analysisResult.riskFlags as any,
+          riskScore: analysisResult.riskScore,
+          fullResults: analysisResult as any,
+        };
+        const analysisRecord = await prisma.analysis.upsert({
+          where: { dealId },
+          create: { dealId, ...analysisData },
+          update: analysisData,
+        });
+
+        return analysisRecord;
+      });
+
+      // ---------------------------------------------------------------------
+      // Step 2: Structure deal
+      // ---------------------------------------------------------------------
+      lastStep = "STRUCTURING";
+      const structuringResult = await step.run("structure-deal", async () => {
+        const deal = await prisma.deal.findUniqueOrThrow({
+          where: { id: dealId },
+        });
+
+        // Only structure if a loan program is selected
+        if (!deal.loanProgramId) {
+          return { skipped: true, status: null };
+        }
+
+        const { getLoanProgram } = await import("@/config/loan-programs");
+        const program = getLoanProgram(deal.loanProgramId);
+        if (!program) {
+          return { skipped: true, status: null };
+        }
+
+        await prisma.deal.update({
+          where: { id: dealId },
+          data: { status: "STRUCTURING" },
+        });
+
+        const { structureDeal } = await import("@/structuring/structure-deal");
+        const fullAnalysis = analysis.fullResults as any;
+
+        // Extract state from property address if available
+        const stateMatch = deal.propertyAddress?.match(/,\s*([A-Z]{2})\s+\d{5}/);
+        const stateAbbr = stateMatch ? stateMatch[1] : null;
+
+        const result = await withTimeout(
+          structureDeal({
+            analysis: fullAnalysis,
+            program,
+            borrowerName: deal.borrowerName,
+            loanPurpose: deal.loanPurpose,
+            propertyAddress: deal.propertyAddress,
+            requestedAmount: deal.loanAmount ? Number(deal.loanAmount) : 0,
+            requestedRate: deal.proposedRate ?? undefined,
+            requestedTermMonths: deal.proposedTerm ?? undefined,
+            stateAbbr,
+          }),
+          120_000,
+          "structure-deal-sample",
+        );
+
+        // Save DealTerms to database
+        const allCovenants = [
+          ...result.rulesEngine.covenants,
+          ...result.aiEnhancement.customCovenants.map((c) => ({
+            ...c,
+            source: "ai_recommendation" as const,
+          })),
+        ];
+
+        const allConditions = [
+          ...result.rulesEngine.conditions,
+          ...result.aiEnhancement.additionalConditions.map((c) => ({
+            ...c,
+            source: "ai_recommendation" as const,
+          })),
+        ];
+
+        await prisma.dealTerms.upsert({
+          where: { dealId },
+          create: {
+            dealId,
+            loanProgramId: deal.loanProgramId,
+            approvedAmount: result.rulesEngine.approvedAmount,
+            interestRate: result.rulesEngine.rate.totalRate,
+            termMonths: result.rulesEngine.termMonths,
+            amortizationMonths: result.rulesEngine.amortizationMonths,
+            ltv: result.rulesEngine.ltv,
+            monthlyPayment: result.rulesEngine.monthlyPayment,
+            baseRateType: result.rulesEngine.rate.baseRateType,
+            baseRateValue: result.rulesEngine.rate.baseRateValue,
+            spread: result.rulesEngine.rate.spread,
+            interestOnly: result.rulesEngine.interestOnly,
+            prepaymentPenalty: result.rulesEngine.prepaymentPenalty,
+            personalGuaranty: result.rulesEngine.personalGuaranty,
+            requiresAppraisal: result.rulesEngine.requiresAppraisal,
+            covenants: allCovenants as any,
+            conditions: allConditions as any,
+            specialTerms: result.aiEnhancement.specialTerms as any,
+            justification: result.aiEnhancement.justification,
+            complianceStatus: result.compliance.compliant ? "COMPLIANT" : "ISSUES_FOUND",
+            complianceIssues: result.compliance.issues as any,
+            complianceReview: {
+              deterministicChecks: result.compliance.deterministicChecks,
+              aiReviewIssues: result.compliance.aiReviewIssues,
+              reviewedAt: result.compliance.reviewedAt,
+            } as any,
+            fees: result.rulesEngine.fees as any,
+            status: result.status === "approved" ? "READY" : "NEEDS_REVIEW",
+          },
+          update: {
+            loanProgramId: deal.loanProgramId,
+            approvedAmount: result.rulesEngine.approvedAmount,
+            interestRate: result.rulesEngine.rate.totalRate,
+            termMonths: result.rulesEngine.termMonths,
+            amortizationMonths: result.rulesEngine.amortizationMonths,
+            ltv: result.rulesEngine.ltv,
+            monthlyPayment: result.rulesEngine.monthlyPayment,
+            baseRateType: result.rulesEngine.rate.baseRateType,
+            baseRateValue: result.rulesEngine.rate.baseRateValue,
+            spread: result.rulesEngine.rate.spread,
+            interestOnly: result.rulesEngine.interestOnly,
+            prepaymentPenalty: result.rulesEngine.prepaymentPenalty,
+            personalGuaranty: result.rulesEngine.personalGuaranty,
+            requiresAppraisal: result.rulesEngine.requiresAppraisal,
+            covenants: allCovenants as any,
+            conditions: allConditions as any,
+            specialTerms: result.aiEnhancement.specialTerms as any,
+            justification: result.aiEnhancement.justification,
+            complianceStatus: result.compliance.compliant ? "COMPLIANT" : "ISSUES_FOUND",
+            complianceIssues: result.compliance.issues as any,
+            complianceReview: {
+              deterministicChecks: result.compliance.deterministicChecks,
+              aiReviewIssues: result.compliance.aiReviewIssues,
+              reviewedAt: result.compliance.reviewedAt,
+            } as any,
+            fees: result.rulesEngine.fees as any,
+            status: result.status === "approved" ? "READY" : "NEEDS_REVIEW",
+          },
+        });
+
+        // Create Condition records (delete existing first for idempotency on retry)
+        await prisma.condition.deleteMany({ where: { dealId } });
+        for (const condition of allConditions) {
+          await prisma.condition.create({
+            data: {
+              dealId,
+              category: condition.category,
+              description: condition.description,
+              source: condition.source,
+              priority: condition.priority,
+            },
+          });
+        }
+
+        return { skipped: false, status: result.status };
+      });
+
+      // If structuring flagged for review, pause pipeline
+      if (structuringResult && !structuringResult.skipped && structuringResult.status === "needs_review") {
+        await step.run("flag-for-term-review-sample", async () => {
+          await prisma.deal.update({
+            where: { id: dealId },
+            data: { status: "NEEDS_TERM_REVIEW" },
+          });
+        });
+        // Pipeline pauses here — user reviews terms and triggers termsApprovalPipeline
+        return { success: true, dealId, paused: "NEEDS_TERM_REVIEW" };
+      }
+
+      // ---------------------------------------------------------------------
+      // Step 3: Generate loan documents — parallel per-doc steps
+      // ---------------------------------------------------------------------
+      lastStep = "GENERATING_DOCS";
+      const docGenSetup = await step.run("setup-doc-gen", async () => {
+        const built = await buildDocInput(dealId);
+        if (!built) return null;
+
+        const { filterRequiredDocs } = await import("@/documents/generate-all");
+        const filteredDocs = filterRequiredDocs(built.docInput, built.docsToGenerate);
+
+        await prisma.deal.update({
+          where: { id: dealId },
+          data: { status: "GENERATING_DOCS" },
+        });
+        await prisma.generatedDocument.deleteMany({ where: { dealId } });
+
+        return { docsToGenerate: filteredDocs, orgId: built.deal.orgId };
+      });
+
+      if (docGenSetup) {
+        await Promise.all(
+          docGenSetup.docsToGenerate.map((docType) =>
+            step.run(`gen-doc-${docType}-sample`, async () => {
+              await prisma.generatedDocument.deleteMany({ where: { dealId, docType } });
+              await generateAndSaveDocument(dealId, docType, docGenSetup.orgId);
+            })
+          )
+        );
+
+        // Audit: docs generated
+        void logAudit({ orgId, dealId, action: "deal.docs_generated", metadata: { docCount: docGenSetup.docsToGenerate.length } });
+      }
+
+      // ---------------------------------------------------------------------
+      // Step 4: Generate memo
+      // ---------------------------------------------------------------------
+      lastStep = "GENERATING_MEMO";
+      await step.run("generate-memo", async () => {
+        await prisma.deal.update({
+          where: { id: dealId },
+          data: { status: "GENERATING_MEMO" },
+        });
+
+        const deal = await prisma.deal.findUniqueOrThrow({
+          where: { id: dealId },
+          include: { org: true },
+        });
+
+        const fullAnalysis = await prisma.analysis.findUniqueOrThrow({
+          where: { dealId },
+        });
+
+        const dealDocs = await prisma.document.findMany({ where: { dealId } });
+        const verReport = await prisma.verificationReport.findUnique({ where: { dealId } });
+        const vrData = verReport as any;
+        const resolvedCount = await prisma.reviewItem.count({
+          where: { dealId, status: { in: ["CORRECTED", "CONFIRMED"] } },
+        });
+        const memoBuffer = await withTimeout(
+          generateCreditMemo({
+            borrowerName: deal.borrowerName,
+            loanAmount: deal.loanAmount ? Number(deal.loanAmount) : 0,
+            loanPurpose: deal.loanPurpose ?? "other",
+            loanType: deal.loanType ?? undefined,
+            proposedRate: deal.proposedRate ?? undefined,
+            proposedTerm: deal.proposedTerm ?? undefined,
+            propertyAddress: deal.propertyAddress ?? undefined,
+            analysis: fullAnalysis.fullResults as any,
+            documents: dealDocs.map((d) => ({
+              fileName: d.fileName,
+              docType: d.docType ?? "OTHER",
+              year: d.docYear ?? undefined,
+            })),
+            verificationSummary: {
+              mathChecksPassed: vrData?.mathPassed ?? 0,
+              mathChecksFailed: vrData?.mathFailed ?? 0,
+              crossDocPassed: vrData?.crossDocPassed ?? 0,
+              crossDocFailed: vrData?.crossDocFailed ?? 0,
+              textractAgreed: vrData?.textractAgreed ?? 0,
+              textractDisagreed: vrData?.textractDisagreed ?? 0,
+              reviewItemsResolved: resolvedCount,
+            },
+            generatedAt: new Date(),
+          }),
+          300_000,
+          "generate-memo-sample",
+        );
+
+        // Upload memo to S3 with proper versioning
+        const existingMemo = await prisma.creditMemo.findUnique({
+          where: { dealId },
+        });
+
+        const version = existingMemo ? existingMemo.version + 1 : 1;
+        const s3Key = `${deal.orgId}/${dealId}/credit-memo-v${version}.docx`;
+        await uploadToS3(s3Key, memoBuffer, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+
+        await prisma.creditMemo.upsert({
+          where: { dealId },
+          create: {
+            dealId,
+            s3Key,
+            version,
+          },
+          update: {
+            s3Key,
+            version,
+          },
+        });
+      });
+
+      // ---------------------------------------------------------------------
+      // Step 5: Complete
+      // ---------------------------------------------------------------------
+      lastStep = "COMPLETING";
+      await step.run("complete", async () => {
+        await prisma.deal.update({
+          where: { id: dealId },
+          data: { status: "COMPLETE" },
+        });
+
+        const deal = await prisma.deal.findUniqueOrThrow({
+          where: { id: dealId },
+          include: { user: true },
+        });
+
+        // Track usage
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const genDocs = await prisma.generatedDocument.count({ where: { dealId } });
+        await prisma.usageLog.upsert({
+          where: { orgId_month: { orgId: deal.orgId, month: currentMonth } },
+          create: { orgId: deal.orgId, month: currentMonth, dealsProcessed: 1, docsGenerated: genDocs },
+          update: { dealsProcessed: { increment: 1 }, docsGenerated: { increment: genDocs } },
+        });
+
+        // Best-effort email notification
+        try {
+          await sendAnalysisComplete({
+            to: deal.user.email,
+            borrowerName: deal.borrowerName,
+            dealId,
+          });
+        } catch (emailErr) {
+          console.error(`[sample-pipeline] Email notification failed for deal ${dealId}:`, emailErr);
+        }
+      });
+
+      // Audit: pipeline complete
+      void logAudit({ orgId, dealId, action: "deal.completed" });
+
+      return { success: true, dealId };
+    } catch (error) {
+      // Final error handler: mark deal as ERROR with last known pipeline stage
+      const message = error instanceof Error ? error.message : "Unknown pipeline error";
+
+      await prisma.deal.update({
+        where: { id: dealId },
+        data: {
+          status: "ERROR",
+          errorMessage: message,
+          errorStep: lastStep,
+        },
+      });
+
+      // Audit: pipeline error
+      void logAudit({ orgId, dealId, action: "deal.pipeline_error", metadata: { errorStep: lastStep, errorMessage: message } });
+
+      throw error;
+    }
+  }
+);
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 
-export const functions = [analysisPipeline, resumeAfterReview, resumeAfterTermReview];
+export const functions = [analysisPipeline, resumeAfterReview, resumeAfterTermReview, sampleDealPipeline];

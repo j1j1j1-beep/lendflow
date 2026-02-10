@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DealCard } from "@/components/DealCard";
@@ -230,37 +230,47 @@ export default function DashboardPage() {
           ))}
         </div>
       ) : filteredDeals.length === 0 ? (
+        filter === "all" && !searchInput ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 px-4">
+          <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <Landmark className="h-5 w-5 text-primary" />
+          </div>
+          <h3 className="text-lg font-semibold mb-1">Welcome to OpenShut</h3>
+          <p className="text-sm text-muted-foreground mb-6 text-center max-w-md">
+            Upload borrower documents to generate a complete loan package — credit analysis, deal structuring, and legal documents in minutes.
+          </p>
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard/deals/new">
+              <Button size="sm">
+                <Plus className="h-4 w-4" />
+                New Deal
+              </Button>
+            </Link>
+            <span className="text-xs text-muted-foreground">or</span>
+            <Link href="/dashboard/deals/new">
+              <Button size="sm" variant="outline">
+                Try Sample Deal
+              </Button>
+            </Link>
+          </div>
+        </div>
+        ) : (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 px-4 transition-colors duration-200 hover:border-foreground/20">
           <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4 animate-fade-up">
-            {searchInput ? (
-              <Search className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <Plus className="h-5 w-5 text-muted-foreground" />
-            )}
+            <Search className="h-5 w-5 text-muted-foreground" />
           </div>
           <h3 className="text-base font-medium mb-1">
             {searchInput
               ? `No deals matching "${searchInput.trim()}"`
-              : filter === "all"
-                ? "No deals yet"
-                : "No matching deals"}
+              : "No matching deals"}
           </h3>
           <p className="text-sm text-muted-foreground mb-5 text-center max-w-xs">
             {searchInput
               ? "Try a different search term or clear the filter."
-              : filter === "all"
-                ? "Upload your first borrower documents to get started."
-                : "Try a different filter."}
+              : "Try a different filter."}
           </p>
-          {!searchInput && filter === "all" && (
-            <Link href="/dashboard/deals/new">
-              <Button size="sm">
-                <Plus className="h-4 w-4" />
-                Create First Deal
-              </Button>
-            </Link>
-          )}
         </div>
+        )
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredDeals.map((deal) => (

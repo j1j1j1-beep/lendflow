@@ -1,6 +1,6 @@
 import { prisma } from "./db";
 
-const TRIAL_DEAL_LIMIT = 3;
+const TRIAL_DEAL_LIMIT = 1;
 
 export type PaywallResult =
   | { allowed: true }

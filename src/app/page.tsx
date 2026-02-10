@@ -55,12 +55,11 @@ export default async function Home() {
                     Sign In
                   </button>
                 </SignInButton>
-                <a
-                  href="mailto:demo@openshut.me?subject=Demo Request — Loan Origination Platform"
-                  className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
-                >
-                  Request Demo
-                </a>
+                <SignInButton mode="modal">
+                  <button className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md">
+                    Start Free Trial
+                  </button>
+                </SignInButton>
               </>
             )}
           </div>
@@ -95,26 +94,29 @@ export default async function Home() {
               className="mt-10 flex flex-wrap items-center gap-4 animate-fade-up"
               style={{ animationDelay: "150ms" }}
             >
-              <a
-                href="mailto:demo@openshut.me?subject=Demo Request — Loan Origination Platform"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]"
-              >
-                See It Live
-                <ArrowRight className="h-4 w-4" />
-              </a>
               {userId ? (
                 <a
                   href="/dashboard"
-                  className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]"
                 >
                   Go to Dashboard
+                  <ArrowRight className="h-4 w-4" />
                 </a>
               ) : (
-                <SignInButton mode="modal">
-                  <button className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]">
-                    Sign In
-                  </button>
-                </SignInButton>
+                <>
+                  <SignInButton mode="modal">
+                    <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
+                      Start Free Trial
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </SignInButton>
+                  <a
+                    href="mailto:demo@openshut.me?subject=Enterprise Inquiry — OpenShut"
+                    className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]"
+                  >
+                    Contact Sales
+                  </a>
+                </>
               )}
             </div>
           </div>
@@ -510,26 +512,29 @@ export default async function Home() {
                 See the full system on a live deal. 15 minutes. No slides.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                <a
-                  href="mailto:demo@openshut.me?subject=Demo Request — Loan Origination Platform"
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]"
-                >
-                  See It Live
-                  <ArrowRight className="h-4 w-4" />
-                </a>
                 {userId ? (
                   <a
                     href="/dashboard"
-                    className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]"
                   >
                     Go to Dashboard
+                    <ArrowRight className="h-4 w-4" />
                   </a>
                 ) : (
-                  <SignInButton mode="modal">
-                    <button className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]">
-                      Sign In
-                    </button>
-                  </SignInButton>
+                  <>
+                    <SignInButton mode="modal">
+                      <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
+                        Start Free Trial
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </SignInButton>
+                    <a
+                      href="mailto:demo@openshut.me?subject=Enterprise Inquiry — OpenShut"
+                      className="inline-flex h-12 items-center justify-center rounded-lg border border-input bg-background px-8 text-sm font-medium text-foreground shadow-xs transition-all duration-150 ease-out hover:bg-accent hover:shadow-sm hover:-translate-y-px active:scale-[0.98]"
+                    >
+                      Contact Sales
+                    </a>
+                  </>
                 )}
               </div>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">

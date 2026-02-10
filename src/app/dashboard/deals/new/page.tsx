@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,23 @@ export default function NewDealPage() {
   const [selectedOutputDocs, setSelectedOutputDocs] = useState<string[]>([]);
 
   const selectedProgram = loanProgramId ? getLoanProgram(loanProgramId) : null;
+
+  const handleSampleDeal = async () => {
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/deals/sample", { method: "POST" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to create sample deal");
+      }
+      const { deal } = await res.json();
+      toast.success("Sample deal created! Watch the pipeline process it.");
+      router.push(`/dashboard/deals/${deal.id}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (loanProgramId) {
@@ -154,6 +171,38 @@ export default function NewDealPage() {
           Enter borrower details and upload documents to begin credit analysis
         </p>
       </div>
+
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="flex items-center justify-between py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+              <Sparkles className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">New to OpenShut?</p>
+              <p className="text-xs text-muted-foreground">
+                Try a complete loan origination with our sample borrower — no documents needed
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleSampleDeal()}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              "Try Sample Deal"
+            )}
+          </Button>
+        </CardContent>
+      </Card>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>

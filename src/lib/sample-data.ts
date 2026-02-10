@@ -1,0 +1,593 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// OpenShut — Sample Extraction Data
+// Realistic CRE borrower data that mimics AWS Textract + AI extraction output.
+// Used by the /api/deals/sample endpoint to create a demo deal without OCR.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── Borrower Profile ────────────────────────────────────────────────────────
+
+export const SAMPLE_BORROWER = {
+  borrowerName: "Greenfield Commercial Properties LLC",
+  loanAmount: 1200000,
+  loanPurpose: "purchase",
+  loanProgramId: "dscr",
+  loanType: "commercial_real_estate",
+  propertyAddress: "456 Commerce Blvd, Austin, TX 78701",
+  proposedRate: 7.25, // percentage — will be divided by 100 in the API route
+  proposedTerm: 360,
+};
+
+// ─── Document Metadata ───────────────────────────────────────────────────────
+// Maps to Prisma DocType enum values and file names for Document records.
+
+export const SAMPLE_DOCUMENTS = [
+  { docType: "FORM_1040" as const, fileName: "2024_Federal_Tax_Return.pdf", year: 2024 },
+  { docType: "FORM_1040" as const, fileName: "2024_Schedule_E_Rental.pdf", year: 2024 },
+  { docType: "BANK_STATEMENT_CHECKING" as const, fileName: "Chase_Checking_Jul-Dec_2024.pdf" },
+  { docType: "PROFIT_AND_LOSS" as const, fileName: "2024_Annual_PnL.pdf" },
+];
+
+// ─── Extraction Data ─────────────────────────────────────────────────────────
+// Each entry matches the schemas in src/extraction/schemas/ and is consumed
+// by the analysis engine (src/analysis/).
+//
+// Internal consistency:
+// - 1040 wages ($142,000) = bank payroll deposits ($5,916.67/biweekly x 24 = ~$142,000)
+// - Schedule E totalRentalIncome ($70,000) = 1040 scheduleE.totalRentalIncome_line26
+// - P&L net income ($72,000) = borrower's business cash flow
+// - Bank statement deposits (~$28,000/mo) = wages + rental + business draws
+
+export const SAMPLE_EXTRACTIONS: Array<{
+  docType: string;
+  data: Record<string, unknown>;
+  year?: number;
+}> = [
+  // ─── 1. Form 1040 (2024) — Personal Federal Tax Return ───────────────────
+  {
+    docType: "FORM_1040",
+    year: 2024,
+    data: {
+      metadata: {
+        taxYear: 2024,
+        filingStatus: "Married Filing Jointly",
+        taxpayerName: "Robert J. Greenfield",
+        spouseName: "Sarah M. Greenfield",
+        ssn_last4: "4821",
+        address: "1220 Live Oak Dr, Austin, TX 78704",
+      },
+      income: {
+        wages_line1: 142000,
+        taxExemptInterest_line2a: 0,
+        taxableInterest_line2b: 1200,
+        qualifiedDividends_line3a: 2800,
+        ordinaryDividends_line3b: 3500,
+        iraDistributions_line4a: 0,
+        taxableIra_line4b: 0,
+        pensions_line5a: 0,
+        taxablePensions_line5b: 0,
+        socialSecurity_line6a: 0,
+        taxableSocialSecurity_line6b: 0,
+        capitalGain_line7: 0,
+        otherIncome_line8: 0,
+        totalIncome_line9: 248500,
+        adjustments_line10: 0,
+        agi_line11: 248500,
+        standardOrItemized_line12: 30000,
+        qbi_line13a: 0,
+        totalDeductions_line14: 30000,
+        taxableIncome_line15: 218500,
+      },
+      // Schedule C — self-employment income from property management consulting
+      scheduleC: [
+        {
+          businessName: "Greenfield Property Consulting",
+          principalCode: "531390",
+          grossReceipts_line1: 96000,
+          returnsAndAllowances_line2: 0,
+          cogs_line4: 0,
+          grossProfit_line5: 96000,
+          otherIncome_line6: 0,
+          grossIncome_line7: 96000,
+          totalExpenses_line28: 18000,
+          netProfit_line31: 78000,
+          expenses: {
+            advertising: 1200,
+            carAndTruck: 3600,
+            commissions: 0,
+            contractLabor: 2400,
+            depletion: 0,
+            depreciation_line13: 1800,
+            employeeBenefits: 0,
+            insurance: 2400,
+            interestMortgage: 0,
+            interestOther: 0,
+            legal: 1200,
+            officeExpense: 1800,
+            pensionPlans: 0,
+            rent: 0,
+            repairs: 0,
+            supplies: 600,
+            taxes: 1200,
+            travel: 800,
+            meals: 600,
+            utilities: 0,
+            wages: 0,
+            otherExpenses: 400,
+          },
+        },
+      ],
+      scheduleD: null,
+      // Schedule E — rental property income (matches standalone Schedule E extraction)
+      scheduleE: {
+        properties: [
+          {
+            address: "312 Elm Street, Austin, TX 78702",
+            propertyType: "Single Family",
+            fairRentalDays: 365,
+            personalUseDays: 0,
+            rentsReceived: 84000,
+            advertising: 600,
+            auto: 0,
+            cleaning: 1800,
+            commissions: 0,
+            insurance: 4200,
+            legal: 0,
+            management: 4200,
+            mortgageInterest: 14400,
+            otherInterest: 0,
+            repairs: 3600,
+            supplies: 600,
+            taxes: 7200,
+            utilities: 0,
+            depreciation: 5400,
+            other: 0,
+            totalExpenses: 42000,
+            netRentalIncome: 42000,
+          },
+          {
+            address: "789 Oak Ave, Round Rock, TX 78664",
+            propertyType: "Single Family",
+            fairRentalDays: 365,
+            personalUseDays: 0,
+            rentsReceived: 66000,
+            advertising: 400,
+            auto: 0,
+            cleaning: 1200,
+            commissions: 0,
+            insurance: 3600,
+            legal: 0,
+            management: 3300,
+            mortgageInterest: 12000,
+            otherInterest: 0,
+            repairs: 4800,
+            supplies: 400,
+            taxes: 6000,
+            utilities: 0,
+            depreciation: 4300,
+            other: 2000,
+            totalExpenses: 38000,
+            netRentalIncome: 28000,
+          },
+        ],
+        totalRentalIncome_line26: 70000,
+        partnershipSCorpIncome: [],
+      },
+      scheduleSE: {
+        netEarnings: 78000,
+        selfEmploymentTax: 11016,
+      },
+      w2Summary: [
+        {
+          employer: "Austin Regional Medical Center",
+          ein_last4: "7832",
+          wages_box1: 142000,
+          federalWithholding_box2: 28400,
+          socialSecurityWages_box3: 142000,
+          medicareWages_box5: 142000,
+        },
+      ],
+      deductions: {
+        type: "itemized" as const,
+        amount: 30000,
+        scheduleA: {
+          medicalDental: 0,
+          stateLocalTaxes: 10000,
+          mortgageInterest: 14000,
+          charitableContributions: 6000,
+          totalItemized: 30000,
+        },
+      },
+      tax: {
+        taxBeforeCredits_line16: 47200,
+        totalCredits: 0,
+        otherTaxes_line23: 11016,
+        totalTax_line24: 47200,
+        federalWithholding_line25a: 28400,
+        totalPayments_line33: 28400,
+        overpaid_line34: 0,
+        amountOwed_line37: 18800,
+      },
+      extractionNotes: [
+        "Sample data — not extracted from a real document.",
+      ],
+      // Legacy flat field names (consumed by income.ts extract1040Income)
+      line1: 142000,
+      wages: 142000,
+      wagesSalariesTips: 142000,
+      taxableInterest: 1200,
+      ordinaryDividends: 3500,
+      totalIncome: 248500,
+      adjustedGrossIncome: 248500,
+      taxableIncome: 218500,
+      totalTax: 47200,
+      // Line-keyed aliases for the spec
+      wagesLine1: 142000,
+      businessIncomeLine12: 78000,
+      totalIncomeLine9: 248500,
+      adjustedGrossIncomeLine11: 248500,
+      taxableIncomeLine15: 218500,
+      totalTaxLine24: 47200,
+    },
+  },
+
+  // ─── 2. Schedule E (2024) — Standalone Rental Income Detail ──────────────
+  // Stored as a second FORM_1040 document; docType in the extraction lets
+  // the income analyzer route it to extractScheduleEIncome().
+  {
+    docType: "SCHEDULE_E",
+    year: 2024,
+    data: {
+      properties: [
+        {
+          address: "312 Elm Street, Austin, TX 78702",
+          propertyType: "Single Family",
+          fairRentalDays: 365,
+          personalUseDays: 0,
+          rentsReceived: 84000,
+          grossRent: 84000,
+          advertising: 600,
+          cleaning: 1800,
+          insurance: 4200,
+          management: 4200,
+          mortgageInterest: 14400,
+          repairs: 3600,
+          supplies: 600,
+          taxes: 7200,
+          depreciation: 5400,
+          other: 0,
+          totalExpenses: 42000,
+          netRentalIncome: 42000,
+        },
+        {
+          address: "789 Oak Ave, Round Rock, TX 78664",
+          propertyType: "Single Family",
+          fairRentalDays: 365,
+          personalUseDays: 0,
+          rentsReceived: 66000,
+          grossRent: 66000,
+          advertising: 400,
+          cleaning: 1200,
+          insurance: 3600,
+          management: 3300,
+          mortgageInterest: 12000,
+          repairs: 4800,
+          supplies: 400,
+          taxes: 6000,
+          depreciation: 4300,
+          other: 2000,
+          totalExpenses: 38000,
+          netRentalIncome: 28000,
+        },
+      ],
+      // Aggregated totals
+      totalRentsReceived: 150000,
+      totalExpenses: 80000,
+      netRentalIncome: 70000,
+      totalDepreciation: 9700,
+      totalMortgageInterest: 26400,
+      extractionNotes: [
+        "Sample data — not extracted from a real document.",
+      ],
+    },
+  },
+
+  // ─── 3. Bank Statement — Chase Checking (Jul-Dec 2024, 6 months) ─────────
+  // Monthly summaries + regularPaymentsDetected. Matches bank-statement.schema.
+  //
+  // Consistency checks:
+  //   Payroll: $5,916.67 x 2/mo = $11,833/mo  (~$142,000/yr wages on 1040)
+  //   Rental:  $7,000 + $5,500 = $12,500/mo    (~$150,000/yr gross rents on Sched E)
+  //   Remaining ~$3,667/mo from business draws / other
+  {
+    docType: "BANK_STATEMENT",
+    data: {
+      metadata: {
+        bankName: "JPMorgan Chase",
+        accountHolder: "Robert J. Greenfield",
+        accountNumber_last4: "9274",
+        accountType: "checking",
+        statementPeriodStart: "2024-07-01",
+        statementPeriodEnd: "2024-12-31",
+        address: "1220 Live Oak Dr, Austin, TX 78704",
+      },
+      summary: {
+        beginningBalance: 42350.00,
+        totalDeposits: 168400.00,
+        totalWithdrawals: 156800.00,
+        totalFees: 0,
+        endingBalance: 53950.00,
+        averageDailyBalance: 48150.00,
+        daysInPeriod: 184,
+      },
+      // Monthly summaries (used by cashflow analyzer when no individual txns)
+      monthlySummaries: [
+        {
+          statementPeriod: "2024-07",
+          totalDeposits: 28400,
+          depositCount: 8,
+          totalWithdrawals: 26200,
+          withdrawalCount: 22,
+          endingBalance: 44550,
+          nsfCount: 0,
+          overdraftCount: 0,
+        },
+        {
+          statementPeriod: "2024-08",
+          totalDeposits: 27800,
+          depositCount: 7,
+          totalWithdrawals: 25900,
+          withdrawalCount: 20,
+          endingBalance: 46450,
+          nsfCount: 0,
+          overdraftCount: 0,
+        },
+        {
+          statementPeriod: "2024-09",
+          totalDeposits: 28100,
+          depositCount: 8,
+          totalWithdrawals: 26400,
+          withdrawalCount: 21,
+          endingBalance: 48150,
+          nsfCount: 0,
+          overdraftCount: 0,
+        },
+        {
+          statementPeriod: "2024-10",
+          totalDeposits: 28600,
+          depositCount: 8,
+          totalWithdrawals: 27100,
+          withdrawalCount: 23,
+          endingBalance: 49650,
+          nsfCount: 0,
+          overdraftCount: 0,
+        },
+        {
+          statementPeriod: "2024-11",
+          totalDeposits: 27900,
+          depositCount: 7,
+          totalWithdrawals: 25800,
+          withdrawalCount: 19,
+          endingBalance: 51750,
+          nsfCount: 0,
+          overdraftCount: 0,
+        },
+        {
+          statementPeriod: "2024-12",
+          totalDeposits: 27600,
+          depositCount: 7,
+          totalWithdrawals: 25400,
+          withdrawalCount: 20,
+          endingBalance: 53950,
+          nsfCount: 0,
+          overdraftCount: 0,
+        },
+      ],
+      // Representative transactions (12+ entries)
+      deposits: [
+        { date: "2024-07-05", description: "ADP PAYROLL - AUSTIN REGIONAL MED", amount: 5916.67, runningBalance: 48266.67, category: "ach_deposit" },
+        { date: "2024-07-19", description: "ADP PAYROLL - AUSTIN REGIONAL MED", amount: 5916.67, runningBalance: 50183.34, category: "ach_deposit" },
+        { date: "2024-07-01", description: "TENANT RENT DEP - 312 ELM ST", amount: 7000.00, runningBalance: 49350.00, category: "ach_deposit" },
+        { date: "2024-07-01", description: "TENANT RENT DEP - 789 OAK AVE", amount: 5500.00, runningBalance: 47850.00, category: "ach_deposit" },
+        { date: "2024-07-15", description: "GREENFIELD PROP CONSULTING - DRAW", amount: 4066.66, runningBalance: 52450.00, category: "ach_deposit" },
+        { date: "2024-08-02", description: "ADP PAYROLL - AUSTIN REGIONAL MED", amount: 5916.67, runningBalance: 46366.67, category: "ach_deposit" },
+        { date: "2024-08-16", description: "ADP PAYROLL - AUSTIN REGIONAL MED", amount: 5916.67, runningBalance: 48283.34, category: "ach_deposit" },
+        { date: "2024-08-01", description: "TENANT RENT DEP - 312 ELM ST", amount: 7000.00, runningBalance: 51450.00, category: "ach_deposit" },
+        { date: "2024-08-01", description: "TENANT RENT DEP - 789 OAK AVE", amount: 5500.00, runningBalance: 49950.00, category: "ach_deposit" },
+        { date: "2024-09-06", description: "ADP PAYROLL - AUSTIN REGIONAL MED", amount: 5916.67, runningBalance: 49066.67, category: "ach_deposit" },
+        { date: "2024-09-20", description: "ADP PAYROLL - AUSTIN REGIONAL MED", amount: 5916.67, runningBalance: 50983.34, category: "ach_deposit" },
+        { date: "2024-09-01", description: "TENANT RENT DEP - 312 ELM ST", amount: 7000.00, runningBalance: 55150.00, category: "ach_deposit" },
+        { date: "2024-10-04", description: "ADP PAYROLL - AUSTIN REGIONAL MED", amount: 5916.67, runningBalance: 51566.67, category: "ach_deposit" },
+        { date: "2024-10-18", description: "ADP PAYROLL - AUSTIN REGIONAL MED", amount: 5916.67, runningBalance: 53483.34, category: "ach_deposit" },
+      ],
+      withdrawals: [
+        { date: "2024-07-01", description: "WELLS FARGO MORTGAGE - 312 ELM", amount: 2450.00, runningBalance: 39900.00, category: "ach_debit" },
+        { date: "2024-07-05", description: "CHASE AUTO LOAN PMT", amount: 485.00, runningBalance: 47781.67, category: "ach_debit" },
+        { date: "2024-07-15", description: "AMEX CREDIT CARD MIN PMT", amount: 350.00, runningBalance: 52100.00, category: "ach_debit" },
+        { date: "2024-08-01", description: "WELLS FARGO MORTGAGE - 312 ELM", amount: 2450.00, runningBalance: 44000.00, category: "ach_debit" },
+        { date: "2024-08-05", description: "CHASE AUTO LOAN PMT", amount: 485.00, runningBalance: 45881.67, category: "ach_debit" },
+        { date: "2024-09-01", description: "WELLS FARGO MORTGAGE - 312 ELM", amount: 2450.00, runningBalance: 45700.00, category: "ach_debit" },
+      ],
+      flags: {
+        nsf_count: 0,
+        overdraft_count: 0,
+        overdraft_days: 0,
+        negative_ending_balance: false,
+        large_deposits: [],
+        large_withdrawals: [],
+        recurring_deposits: [
+          { description: "ADP PAYROLL - AUSTIN REGIONAL MED", frequency: "biweekly", amount: 5916.67 },
+          { description: "TENANT RENT DEP - 312 ELM ST", frequency: "monthly", amount: 7000.00 },
+          { description: "TENANT RENT DEP - 789 OAK AVE", frequency: "monthly", amount: 5500.00 },
+        ],
+        loan_payments: [
+          { description: "WELLS FARGO MORTGAGE - 312 ELM", amount: 2450.00, frequency: "monthly" },
+          { description: "CHASE AUTO LOAN PMT", amount: 485.00, frequency: "monthly" },
+          { description: "AMEX CREDIT CARD MIN PMT", amount: 350.00, frequency: "monthly" },
+        ],
+      },
+      // regularPaymentsDetected — consumed by DSCR analyzer
+      regularPaymentsDetected: [
+        {
+          description: "WELLS FARGO MORTGAGE - 312 ELM",
+          amount: 2450,
+          frequency: "monthly",
+          category: "mortgage",
+        },
+        {
+          description: "CHASE AUTO LOAN PMT",
+          amount: 485,
+          frequency: "monthly",
+          category: "loan",
+        },
+        {
+          description: "AMEX CREDIT CARD MIN PMT",
+          amount: 350,
+          frequency: "monthly",
+          category: "credit card",
+        },
+      ],
+      extractionNotes: [
+        "Sample data — not extracted from a real document.",
+        "6-month checking statement, Jul-Dec 2024.",
+      ],
+    },
+  },
+
+  // ─── 4. Profit & Loss Statement (2024 Annual) ────────────────────────────
+  // Matches pnl.schema.ts. Revenue = property management fees + rental income.
+  {
+    docType: "PROFIT_AND_LOSS",
+    year: 2024,
+    data: {
+      metadata: {
+        businessName: "Greenfield Commercial Properties LLC",
+        periodStart: "2024-01-01",
+        periodEnd: "2024-12-31",
+        periodType: "annual" as const,
+        preparedBy: "Martinez & Associates CPA",
+        basis: "accrual" as const,
+      },
+      revenue: {
+        grossRevenue: 320000,
+        salesReturnsAndAllowances: 0,
+        salesDiscounts: 0,
+        netRevenue: 320000,
+        revenueBreakdown: [
+          { category: "Property Management Fees", amount: 170000 },
+          { category: "Rental Income", amount: 150000 },
+        ],
+      },
+      costOfGoodsSold: {
+        beginningInventory: null,
+        purchases: null,
+        directLabor: null,
+        directMaterials: null,
+        manufacturingOverhead: null,
+        freightIn: null,
+        endingInventory: null,
+        totalCOGS: 0,
+        cogsBreakdown: [],
+      },
+      grossProfit: 320000,
+      grossProfitMargin: 100,
+      operatingExpenses: {
+        salariesAndWages: 95000,
+        officerCompensation: null,
+        payrollTaxes: null,
+        employeeBenefits: null,
+        rent: null,
+        utilities: 14000,
+        insurance: 18000,
+        officeExpenses: null,
+        advertising: null,
+        professionalFees: null,
+        legal: null,
+        accounting: null,
+        repairs: 32000,
+        maintenance: null,
+        depreciation: 24000,
+        amortization: null,
+        travel: null,
+        meals: null,
+        entertainment: null,
+        vehicleExpenses: null,
+        bankCharges: null,
+        interest: null,
+        taxesAndLicenses: 28000,
+        badDebtExpense: null,
+        charitableContributions: null,
+        education: null,
+        subscriptions: null,
+        telephone: null,
+        internet: null,
+        software: null,
+        contractLabor: null,
+        commissionsAndFees: null,
+        otherExpenses: 22000,
+        totalOperatingExpenses: 248000,
+        expenseBreakdown: [
+          { category: "Salaries & Wages", amount: 95000 },
+          { category: "Insurance", amount: 18000 },
+          { category: "Repairs & Maintenance", amount: 32000 },
+          { category: "Utilities", amount: 14000 },
+          { category: "Property Taxes", amount: 28000 },
+          { category: "Management Fees", amount: 15000 },
+          { category: "Depreciation", amount: 24000 },
+          { category: "Other Expenses", amount: 22000 },
+        ],
+      },
+      operatingIncome: 72000,
+      otherIncomeAndExpenses: {
+        interestIncome: 0,
+        interestExpense: 0,
+        gainOnSaleOfAssets: 0,
+        lossOnSaleOfAssets: 0,
+        otherIncome: 0,
+        otherExpenses: 0,
+        totalOtherNet: 0,
+      },
+      incomeBeforeTax: 72000,
+      incomeTaxExpense: 0,
+      netIncome: 72000,
+      netIncomeMargin: 22.5,
+      addBacks: {
+        depreciation: 24000,
+        amortization: 0,
+        interestExpense: 0,
+        ownerCompensation: 0,
+        oneTimeExpenses: 0,
+        nonRecurringItems: 0,
+        personalExpenses: 0,
+        totalAddBacks: 24000,
+        adjustedNetIncome: 96000,
+        addBackDetails: [
+          { description: "Depreciation (non-cash)", amount: 24000, reason: "Non-cash expense add-back per Fannie Mae B3-3.2-01" },
+        ],
+      },
+      ebitda: 96000,
+      priorPeriodComparison: {
+        hasPriorPeriod: false,
+        priorPeriodStart: null,
+        priorPeriodEnd: null,
+        priorGrossRevenue: null,
+        priorNetIncome: null,
+        revenueGrowthPercent: null,
+        netIncomeGrowthPercent: null,
+      },
+      // Legacy flat field names (consumed by business.ts)
+      totalRevenue: 320000,
+      totalOperatingExpenses: 248000,
+      salaries: 95000,
+      insurance: 18000,
+      repairsAndMaintenance: 32000,
+      utilities: 14000,
+      propertyTaxes: 28000,
+      managementFees: 15000,
+      depreciation: 24000,
+      otherExpenses: 22000,
+      extractionNotes: [
+        "Sample data — not extracted from a real document.",
+      ],
+    },
+  },
+];
