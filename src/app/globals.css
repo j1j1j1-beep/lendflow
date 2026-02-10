@@ -123,15 +123,12 @@
   body {
     @apply bg-background text-foreground;
   }
-  /* Safari scroll fix — prevents rubber-banding from breaking layout */
   html {
     height: -webkit-fill-available;
-    overflow: hidden;
   }
   body {
     min-height: 100dvh;
     min-height: -webkit-fill-available;
-    overflow: auto;
     -webkit-overflow-scrolling: touch;
   }
   /* Prevent iOS input zoom */

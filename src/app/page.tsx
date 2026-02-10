@@ -71,9 +71,9 @@ export default async function Home() {
               className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl animate-fade-up"
               style={{ animationDelay: "0ms" }}
             >
-              Your analysts spend weeks.
+              From borrower file to
               <br />
-              <span className="text-primary">This takes minutes.</span>
+              <span className="text-primary">ready-to-sign deal terms in minutes.</span>
             </h1>
             <p
               className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed animate-fade-up"
