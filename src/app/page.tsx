@@ -34,7 +34,7 @@ export default async function Home() {
         <div className="mx-auto max-w-6xl flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <FileText className="h-4 w-4" />
+              <Landmark className="h-4 w-4" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-foreground">
               Loan Origination Platform
@@ -72,7 +72,7 @@ export default async function Home() {
       ══════════════════════════════════════════════ */}
       <section className="relative w-full">
         <div className="mx-auto max-w-6xl px-6 pt-24 pb-20 sm:pt-32 sm:pb-28 lg:pt-40 lg:pb-32">
-          <div className="max-w-3xl">
+          <div className="max-w-4xl">
             <h1
               className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl animate-fade-up"
               style={{ animationDelay: "0ms" }}
@@ -82,7 +82,7 @@ export default async function Home() {
               <span className="text-primary">ready-to-sign deal terms in minutes.</span>
             </h1>
             <p
-              className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed animate-fade-up"
+              className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-4xl leading-relaxed animate-fade-up"
               style={{ animationDelay: "75ms" }}
             >
               Every figure across the borrower&apos;s tax returns, bank
