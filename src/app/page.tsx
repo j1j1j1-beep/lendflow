@@ -23,7 +23,7 @@ export default async function Home() {
   const { userId } = await auth();
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
+    <div className="dark flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
       {/* ── Gradient Orbs ── */}
       <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-primary/5 blur-3xl" />
       <div className="pointer-events-none absolute top-1/3 -left-40 h-[500px] w-[500px] rounded-full bg-primary/3 blur-3xl" />
@@ -37,7 +37,7 @@ export default async function Home() {
               <Landmark className="h-4 w-4" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-foreground">
-              Loan Origination Platform
+              OpenShut
             </span>
           </div>
           <div className="flex items-center gap-3">
