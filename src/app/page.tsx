@@ -12,6 +12,10 @@ import {
   Scale,
   ArrowRight,
   FileStack,
+  Clock,
+  DollarSign,
+  AlertTriangle,
+  Lock,
 } from "lucide-react";
 
 export default async function Home() {
@@ -65,17 +69,18 @@ export default async function Home() {
               className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl animate-fade-up"
               style={{ animationDelay: "0ms" }}
             >
-              Loan Origination.
+              Your analysts spend weeks.
               <br />
-              <span className="text-muted-foreground">Automated.</span>
+              <span className="text-primary">This takes minutes.</span>
             </h1>
             <p
               className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed animate-fade-up"
               style={{ animationDelay: "75ms" }}
             >
-              Upload borrower documents. Get triple-verified credit analysis,
-              complete loan packages, and compliance-checked documents — in
-              minutes, not days.
+              Upload borrower documents. The system reads every line,
+              cross-checks every number against the source, generates a
+              complete loan package with 26 legal documents — each one
+              cited to statute and compliance-verified before you ever see it.
             </p>
             <div
               className="mt-10 flex flex-wrap items-center gap-4 animate-fade-up"
@@ -85,7 +90,7 @@ export default async function Home() {
                 href="mailto:demo@lendflow.ai?subject=Demo Request — Loan Origination Platform"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]"
               >
-                Request Demo
+                See It Live
                 <ArrowRight className="h-4 w-4" />
               </a>
               <SignInButton mode="modal">
@@ -94,53 +99,56 @@ export default async function Home() {
                 </button>
               </SignInButton>
             </div>
-            <div
-              className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground animate-fade-up"
-              style={{ animationDelay: "225ms" }}
-            >
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                No credit card required
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                SOC 2 compliant infrastructure
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                Enterprise-grade security
-              </span>
-            </div>
           </div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════
-          STATS / SOCIAL PROOF
+          THE PROBLEM
       ══════════════════════════════════════════════ */}
       <section className="w-full border-y border-border/50 bg-muted/30">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+        <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+          <h2
+            className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl text-center mb-4 animate-fade-up"
+          >
+            You already know what&apos;s broken
+          </h2>
+          <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "50ms" }}>
+            Every lending team deals with the same bottlenecks. The question is whether you keep paying for them.
+          </p>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
             {[
-              { value: "26", label: "Document Templates", delay: "100ms" },
-              { value: "50", label: "State Compliance", suffix: "-State", delay: "150ms" },
-              { value: "10", label: "Loan Programs", delay: "200ms" },
-              { value: "3x", label: "Triple Verification", delay: "250ms" },
-            ].map((stat) => (
+              {
+                icon: Clock,
+                stat: "40+ hours",
+                label: "per deal in analyst time",
+                desc: "Manually keying numbers from tax returns, cross-referencing bank statements, catching your own typos. Your best people spend most of their time on data entry.",
+                delay: "100ms",
+              },
+              {
+                icon: DollarSign,
+                stat: "$15K+",
+                label: "in legal fees per deal",
+                desc: "Outside counsel drafts the same loan agreement for the hundredth time. You pay partner rates for work a template could handle — if the template understood regulations.",
+                delay: "175ms",
+              },
+              {
+                icon: AlertTriangle,
+                stat: "1 in 4",
+                label: "deals have data errors",
+                desc: "Manual data entry across documents creates discrepancies that slip through review. One wrong number in a debt-service calculation changes the entire credit decision.",
+                delay: "250ms",
+              },
+            ].map((problem) => (
               <div
-                key={stat.label}
-                className="text-center animate-fade-up"
-                style={{ animationDelay: stat.delay }}
+                key={problem.label}
+                className="rounded-xl border border-destructive/20 bg-destructive/5 p-7 animate-fade-up"
+                style={{ animationDelay: problem.delay }}
               >
-                <div className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl tabular-nums">
-                  {stat.value}
-                  {stat.suffix && (
-                    <span className="text-muted-foreground">{stat.suffix}</span>
-                  )}
-                </div>
-                <div className="mt-1.5 text-sm text-muted-foreground">
-                  {stat.label}
-                </div>
+                <problem.icon className="h-5 w-5 text-destructive mb-4" />
+                <div className="text-2xl font-bold text-foreground">{problem.stat}</div>
+                <div className="text-sm font-medium text-foreground mt-0.5">{problem.label}</div>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{problem.desc}</p>
               </div>
             ))}
           </div>
@@ -148,50 +156,42 @@ export default async function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          FEATURE GRID
+          WHAT CHANGES
       ══════════════════════════════════════════════ */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2
               className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
-              style={{ animationDelay: "0ms" }}
             >
-              Everything you need to close faster
+              What changes when the machine does the work
             </h2>
-            <p
-              className="mt-4 text-lg text-muted-foreground animate-fade-up"
-              style={{ animationDelay: "50ms" }}
-            >
-              From document intake to final loan package — one platform handles
-              the entire origination workflow.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {[
               {
-                icon: Zap,
-                title: "AI Document Extraction",
-                desc: "AWS Textract combined with large language models extracts every data point from tax returns, bank statements, rent rolls, and financial statements — with field-level confidence scores.",
+                icon: Brain,
+                title: "Reads documents like a senior analyst",
+                desc: "Tax returns, bank statements, rent rolls, K-1s, balance sheets — the system reads every line, extracts every field, and flags anything that doesn't add up. No manual data entry. No missed fields.",
                 delay: "100ms",
               },
               {
                 icon: ShieldCheck,
-                title: "Triple Verification",
-                desc: "Three independent verification layers: mathematical recalculation of every figure, cross-document consistency checks, and source-document comparison against Textract output.",
+                title: "Every number verified against the source",
+                desc: "Each extracted figure is mathematically recalculated, cross-referenced against other documents in the package, and compared to the raw OCR output. If line 31 of a 1040 doesn't match the sum of lines 1 through 25 — you'll know.",
                 delay: "150ms",
               },
               {
                 icon: FileStack,
-                title: "Auto Document Generation",
-                desc: "26 loan document templates generate complete packages — promissory notes, loan agreements, security instruments, guarantees, environmental indemnities, and more — all populated from verified deal terms.",
+                title: "26 legal documents, generated and cited to statute",
+                desc: "Promissory notes, loan agreements, security instruments, guaranties, environmental indemnities, UCC filings, closing disclosures — each one populated from verified deal terms with actual statutory citations. Not boilerplate. Not templates with blanks.",
                 delay: "200ms",
               },
               {
                 icon: Scale,
-                title: "Compliance Built-In",
-                desc: "State-by-state regulatory checks, program-specific compliance requirements, usury limits, and disclosure rules verified automatically. Every document gets a compliance score before it reaches your desk.",
+                title: "Compliance-checked before it hits your desk",
+                desc: "Every document runs through a separate AI legal review (independent from generation), deterministic regulatory checks against 50-state usury limits, program-specific rules (SBA, TRID, ATR/QM), and structural verification. Issues are flagged with the exact regulation and fix.",
                 delay: "250ms",
               },
             ].map((feature) => (
@@ -216,23 +216,16 @@ export default async function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          HOW IT WORKS
+          HOW IT ACTUALLY WORKS
       ══════════════════════════════════════════════ */}
       <section className="w-full border-t border-border/50 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2
               className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
-              style={{ animationDelay: "0ms" }}
             >
-              Three steps to a complete loan package
+              Upload to loan package in three steps
             </h2>
-            <p
-              className="mt-4 text-lg text-muted-foreground animate-fade-up"
-              style={{ animationDelay: "50ms" }}
-            >
-              What used to take days of analyst time now runs in minutes.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
@@ -240,22 +233,22 @@ export default async function Home() {
               {
                 step: "01",
                 icon: Upload,
-                title: "Upload Documents",
-                desc: "Drop in borrower financials — tax returns, bank statements, rent rolls, personal financial statements. Any format, any volume.",
+                title: "Drop in the borrower file",
+                desc: "Tax returns, bank statements, financials — any format, any volume. The system handles the rest.",
                 delay: "100ms",
               },
               {
                 step: "02",
-                icon: Brain,
-                title: "AI Extracts & Verifies",
-                desc: "Every data point is extracted, mathematically verified, cross-referenced across documents, and compared against source. Discrepancies are flagged automatically.",
+                icon: Zap,
+                title: "AI extracts, verifies, and structures",
+                desc: "Every data point extracted. Every number recalculated. Deal terms structured against your loan program. Discrepancies flagged for your review.",
                 delay: "175ms",
               },
               {
                 step: "03",
                 icon: Download,
-                title: "Download Loan Package",
-                desc: "A complete credit memo plus all loan documents — generated, compliance-checked, and ready for review. Download individually or as a single ZIP file.",
+                title: "Download the complete package",
+                desc: "Credit memo + all loan documents — generated, compliance-checked, and ready. Download individually, edit inline, or grab the entire package as a ZIP.",
                 delay: "250ms",
               },
             ].map((step) => (
@@ -283,34 +276,63 @@ export default async function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          BOTTOM CTA
+          TRUST / NUMBERS
       ══════════════════════════════════════════════ */}
       <section className="w-full">
+        <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+            {[
+              { value: "26", label: "Legal documents per deal", delay: "100ms" },
+              { value: "50", suffix: "-state", label: "Regulatory compliance", delay: "150ms" },
+              { value: "10", label: "Loan programs supported", delay: "200ms" },
+              { value: "5", suffix: "-layer", label: "Verification on every doc", delay: "250ms" },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="text-center animate-fade-up"
+                style={{ animationDelay: stat.delay }}
+              >
+                <div className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl tabular-nums">
+                  {stat.value}
+                  {stat.suffix && (
+                    <span className="text-muted-foreground">{stat.suffix}</span>
+                  )}
+                </div>
+                <div className="mt-1.5 text-sm text-muted-foreground">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          BOTTOM CTA
+      ══════════════════════════════════════════════ */}
+      <section className="w-full border-t border-border/50">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div
             className="relative rounded-2xl border bg-card p-12 sm:p-16 text-center overflow-hidden animate-fade-up"
-            style={{ animationDelay: "0ms" }}
           >
-            {/* CTA background orb */}
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
             </div>
 
             <div className="relative">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Ready to transform your
-                <br className="hidden sm:block" /> lending operations?
+                Stop paying for work
+                <br className="hidden sm:block" /> a machine does better.
               </h2>
               <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                See how automated origination can cut your deal processing time
-                from days to minutes. Schedule a live walkthrough with our team.
+                See the full system on a live deal. 15 minutes. No slides.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                 <a
                   href="mailto:demo@lendflow.ai?subject=Demo Request — Loan Origination Platform"
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]"
                 >
-                  Request Demo
+                  See It Live
                   <ArrowRight className="h-4 w-4" />
                 </a>
                 <SignInButton mode="modal">
@@ -318,6 +340,20 @@ export default async function Home() {
                     Sign In
                   </button>
                 </SignInButton>
+              </div>
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5 text-primary" />
+                  Bank-grade encryption
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                  SOC 2 compliant
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                  No data leaves your environment
+                </span>
               </div>
             </div>
           </div>
