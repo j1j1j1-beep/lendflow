@@ -44,23 +44,25 @@ export default async function Home() {
             {userId ? (
               <a
                 href="/dashboard"
-                className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
               >
                 Go to Dashboard
               </a>
             ) : (
-              <SignInButton mode="modal">
-                <button className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                  Sign In
-                </button>
-              </SignInButton>
+              <>
+                <SignInButton mode="modal">
+                  <button className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <a
+                  href="mailto:demo@lendflow.ai?subject=Demo Request — Loan Origination Platform"
+                  className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
+                >
+                  Request Demo
+                </a>
+              </>
             )}
-            <a
-              href="mailto:demo@lendflow.ai?subject=Demo Request — Loan Origination Platform"
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
-            >
-              Request Demo
-            </a>
           </div>
         </div>
       </nav>
