@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { SignInButton } from "@clerk/nextjs";
 import {
   FileText,
@@ -21,6 +22,8 @@ import {
 
 export default async function Home() {
   const { userId } = await auth();
+
+  if (userId) redirect("/dashboard");
 
   return (
     <div className="dark flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
