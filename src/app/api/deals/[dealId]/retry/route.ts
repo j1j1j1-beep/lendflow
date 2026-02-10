@@ -4,6 +4,8 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { inngest } from "@/inngest/client";
 import { deleteFromS3 } from "@/lib/s3";
 import { logAudit } from "@/lib/audit";
+import { withRateLimit } from "@/lib/with-rate-limit";
+import { heavyLimit } from "@/lib/rate-limit";
 
 // ---------------------------------------------------------------------------
 // POST /api/deals/[dealId]/retry - Retry a failed deal pipeline
@@ -13,6 +15,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ dealId: string }> }
 ) {
+  const limited = await withRateLimit(request, heavyLimit);
+  if (limited) return limited;
+
   try {
     const { user, org } = await requireAuth();
     const { dealId } = await params;

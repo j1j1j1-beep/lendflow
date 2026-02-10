@@ -4,6 +4,8 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { LOAN_PROGRAMS } from "@/config/loan-programs";
 import { DOC_TYPE_LABELS } from "@/documents/types";
 import { logAudit } from "@/lib/audit";
+import { withRateLimit } from "@/lib/with-rate-limit";
+import { writeLimit } from "@/lib/rate-limit";
 
 // Valid DealStatus values for filtering
 const VALID_STATUSES = new Set([
@@ -17,6 +19,9 @@ const VALID_STATUSES = new Set([
 // ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
+  const limited = await withRateLimit(request, writeLimit);
+  if (limited) return limited;
+
   try {
     const { user, org } = await requireAuth();
 

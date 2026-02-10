@@ -3,11 +3,16 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { uploadToS3 } from "@/lib/s3";
 import { logAudit } from "@/lib/audit";
+import { withRateLimit } from "@/lib/with-rate-limit";
+import { heavyLimit } from "@/lib/rate-limit";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ docId: string }> }
 ) {
+  const limited = await withRateLimit(request, heavyLimit);
+  if (limited) return limited;
+
   try {
     const { user, org } = await requireAuth();
     const { docId } = await params;

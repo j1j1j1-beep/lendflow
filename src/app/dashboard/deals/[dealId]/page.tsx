@@ -719,6 +719,7 @@ export default function DealDetailPage() {
   } | null>(null);
   const [retryError, setRetryError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [retryingDocs, setRetryingDocs] = useState(false);
 
   const fetchDeal = useCallback(async () => {
     try {
@@ -1397,6 +1398,45 @@ export default function DealDetailPage() {
                         <Badge variant={deal.generatedDocuments.every(d => d.status === "REVIEWED") ? "default" : "destructive"}>
                           {deal.generatedDocuments.every(d => d.status === "REVIEWED") ? "All Checks Passed" : "Review Required"}
                         </Badge>
+                        {deal.generatedDocuments.filter(d => d.status === "FAILED" || d.status === "FLAGGED").length > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
+                            disabled={retryingDocs}
+                            onClick={async () => {
+                              setRetryingDocs(true);
+                              try {
+                                const res = await fetch(`/api/deals/${dealId}/retry-docs`, { method: "POST" });
+                                if (!res.ok) {
+                                  const body = await res.json().catch(() => ({}));
+                                  throw new Error(body.error || "Retry failed");
+                                }
+                                const data = await res.json();
+                                toast.success(
+                                  `Retried ${data.retried} documents: ${data.succeeded} succeeded, ${data.failed} failed`
+                                );
+                                fetchDeal();
+                              } catch (err) {
+                                toast.error(err instanceof Error ? err.message : "Failed to retry documents");
+                              } finally {
+                                setRetryingDocs(false);
+                              }
+                            }}
+                          >
+                            {retryingDocs ? (
+                              <>
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                Retrying...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="h-3.5 w-3.5" />
+                                Retry {deal.generatedDocuments.filter(d => d.status === "FAILED" || d.status === "FLAGGED").length} Failed
+                              </>
+                            )}
+                          </Button>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"

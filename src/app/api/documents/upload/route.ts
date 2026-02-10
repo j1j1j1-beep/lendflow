@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { uploadToS3 } from "@/lib/s3";
+import { withRateLimit } from "@/lib/with-rate-limit";
+import { writeLimit } from "@/lib/rate-limit";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 
@@ -10,6 +12,9 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 // ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
+  const limited = await withRateLimit(request, writeLimit);
+  if (limited) return limited;
+
   try {
     const { org } = await requireAuth();
 

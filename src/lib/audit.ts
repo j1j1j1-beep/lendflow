@@ -16,6 +16,7 @@ export type AuditAction =
   | "doc.edited"
   | "doc.saved"
   | "doc.regenerated"
+  | "doc.batch_retry"
   | "doc.downloaded"
   | "doc.package_downloaded"
   | "member.invited"
