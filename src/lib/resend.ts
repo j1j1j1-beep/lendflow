@@ -10,7 +10,7 @@ export async function sendAnalysisComplete(params: {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   await resend.emails.send({
-    from: "LendFlow AI <notifications@lendflow.ai>",
+    from: "OpenShut AI <notifications@openshut.me>",
     to: params.to,
     subject: `Analysis complete: ${params.borrowerName}`,
     html: `
@@ -30,7 +30,7 @@ export async function sendReviewNeeded(params: {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   await resend.emails.send({
-    from: "LendFlow AI <notifications@lendflow.ai>",
+    from: "OpenShut AI <notifications@openshut.me>",
     to: params.to,
     subject: `Review needed: ${params.borrowerName}`,
     html: `

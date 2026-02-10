@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// LendFlow Analysis Engine — Debt-to-Income Ratio (DTI)
+// OpenShut Analysis Engine — Debt-to-Income Ratio (DTI)
 // 100% deterministic. Zero AI. Pure TypeScript math.
 // ─────────────────────────────────────────────────────────────────────────────
 

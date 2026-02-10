@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// LendFlow Analysis Engine — Risk Flag Detection
+// OpenShut Analysis Engine — Risk Flag Detection
 // 100% deterministic. Zero AI. Pure TypeScript math.
 // ─────────────────────────────────────────────────────────────────────────────
 

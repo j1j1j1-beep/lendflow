@@ -1,6 +1,6 @@
 import { Inngest } from "inngest";
 
 export const inngest = new Inngest({
-  id: "lendflow",
-  name: "LendFlow AI",
+  id: "openshut",
+  name: "OpenShut AI",
 });

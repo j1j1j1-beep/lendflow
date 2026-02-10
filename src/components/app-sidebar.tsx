@@ -62,7 +62,7 @@ export function AppSidebar() {
                   <FileText className="h-4 w-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold tracking-tight">LendFlow</span>
+                  <span className="font-semibold tracking-tight">OpenShut</span>
                   <span className="text-xs text-muted-foreground">
                     Credit Analysis
                   </span>

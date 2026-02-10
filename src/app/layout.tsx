@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LendFlow AI",
+  title: "OpenShut AI",
   description:
     "Triple-verified AI credit analysis for loan officers. Upload documents, get verified numbers, download credit memos.",
 };

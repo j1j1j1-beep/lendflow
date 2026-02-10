@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// LendFlow Analysis Engine — Business / Self-Employment Analysis
+// OpenShut Analysis Engine — Business / Self-Employment Analysis
 // 100% deterministic. Zero AI. Pure TypeScript math.
 // ─────────────────────────────────────────────────────────────────────────────
 

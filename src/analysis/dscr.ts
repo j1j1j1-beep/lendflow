@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// LendFlow Analysis Engine — Debt Service Coverage Ratio (DSCR)
+// OpenShut Analysis Engine — Debt Service Coverage Ratio (DSCR)
 // 100% deterministic. Zero AI. Pure TypeScript math.
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// LendFlow Analysis Engine — Master Orchestrator
+// OpenShut Analysis Engine — Master Orchestrator
 // 100% deterministic. Zero AI. Pure TypeScript math.
 //
 // Runs the full analysis pipeline on verified extraction data.

@@ -56,7 +56,7 @@ export default async function Home() {
                   </button>
                 </SignInButton>
                 <a
-                  href="mailto:demo@lendflow.ai?subject=Demo Request — Loan Origination Platform"
+                  href="mailto:demo@openshut.me?subject=Demo Request — Loan Origination Platform"
                   className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
                 >
                   Request Demo
@@ -96,7 +96,7 @@ export default async function Home() {
               style={{ animationDelay: "150ms" }}
             >
               <a
-                href="mailto:demo@lendflow.ai?subject=Demo Request — Loan Origination Platform"
+                href="mailto:demo@openshut.me?subject=Demo Request — Loan Origination Platform"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]"
               >
                 See It Live
@@ -511,7 +511,7 @@ export default async function Home() {
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                 <a
-                  href="mailto:demo@lendflow.ai?subject=Demo Request — Loan Origination Platform"
+                  href="mailto:demo@openshut.me?subject=Demo Request — Loan Origination Platform"
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]"
                 >
                   See It Live
@@ -557,10 +557,10 @@ export default async function Home() {
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>&copy; {new Date().getFullYear()} All rights reserved.</span>
             <a
-              href="mailto:demo@lendflow.ai"
+              href="mailto:demo@openshut.me"
               className="transition-colors hover:text-foreground"
             >
-              demo@lendflow.ai
+              demo@openshut.me
             </a>
           </div>
           <p className="mt-4 text-xs text-muted-foreground/60 max-w-3xl">

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// LendFlow Analysis Engine — Income Analysis
+// OpenShut Analysis Engine — Income Analysis
 // 100% deterministic. Zero AI. Pure TypeScript math.
 // ─────────────────────────────────────────────────────────────────────────────
 

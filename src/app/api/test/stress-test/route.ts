@@ -1189,13 +1189,13 @@ export async function POST(request: NextRequest) {
   try {
     const org = await prisma.organization.upsert({
       where: { clerkOrgId: "test_org_stress_test" },
-      create: { clerkOrgId: "test_org_stress_test", name: "LendFlow Test Organization" },
+      create: { clerkOrgId: "test_org_stress_test", name: "OpenShut Test Organization" },
       update: {},
     });
 
     const user = await prisma.user.upsert({
       where: { clerkId: "test_user_stress_test" },
-      create: { clerkId: "test_user_stress_test", email: "test@lendflow.test", name: "Stress Test Runner", orgId: org.id },
+      create: { clerkId: "test_user_stress_test", email: "test@openshut.me", name: "Stress Test Runner", orgId: org.id },
       update: {},
     });
 

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// LendFlow Analysis Engine — Cash Flow / Bank Deposit Analysis
+// OpenShut Analysis Engine — Cash Flow / Bank Deposit Analysis
 // 100% deterministic. Zero AI. Pure TypeScript math.
 // ─────────────────────────────────────────────────────────────────────────────
 
