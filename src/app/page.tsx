@@ -19,6 +19,8 @@ import {
   BookOpen,
   Landmark,
 } from "lucide-react";
+import { MarketingNav } from "@/components/marketing-nav";
+import { MarketingFooter } from "@/components/marketing-footer";
 
 export default async function Home() {
   const { userId } = await auth();
@@ -32,45 +34,10 @@ export default async function Home() {
       <div className="pointer-events-none absolute top-1/3 -left-40 h-[500px] w-[500px] rounded-full bg-primary/3 blur-3xl" />
       <div className="pointer-events-none absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-primary/4 blur-3xl" />
 
-      {/* ── Navigation ── */}
-      <nav className="w-full border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="mx-auto max-w-6xl flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Landmark className="h-4 w-4" />
-            </div>
-            <span className="text-lg font-semibold tracking-tight text-foreground">
-              OpenShut
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            {userId ? (
-              <a
-                href="/dashboard"
-                className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
-              >
-                Go to Dashboard
-              </a>
-            ) : (
-              <>
-                <SignInButton mode="modal">
-                  <button className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                    Sign In
-                  </button>
-                </SignInButton>
-                <SignInButton mode="modal">
-                  <button className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md">
-                    Try It Free
-                  </button>
-                </SignInButton>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      <MarketingNav />
 
       {/* ══════════════════════════════════════════════
-          HERO SECTION
+          1. HERO
       ══════════════════════════════════════════════ */}
       <section className="relative w-full">
         <div className="mx-auto max-w-6xl px-6 pt-24 pb-20 sm:pt-32 sm:pb-28 lg:pt-40 lg:pb-32">
@@ -97,75 +64,53 @@ export default async function Home() {
               className="mt-10 flex flex-wrap items-center gap-4 animate-fade-up"
               style={{ animationDelay: "150ms" }}
             >
-              {userId ? (
-                <a
-                  href="/dashboard"
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]"
-                >
-                  Go to Dashboard
+              <SignInButton mode="modal">
+                <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
+                  Try It Free
                   <ArrowRight className="h-4 w-4" />
-                </a>
-              ) : (
-                <>
-                  <SignInButton mode="modal">
-                    <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
-                      Try It Free
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                  </SignInButton>
-                </>
-              )}
+                </button>
+              </SignInButton>
             </div>
           </div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════
-          THE PROBLEM
+          2. LOAN PROGRAMS
       ══════════════════════════════════════════════ */}
       <section className="w-full border-y border-border/50 bg-muted/30">
-        <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-          <h2
-            className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl text-center mb-4 animate-fade-up"
-          >
-            You already know what&apos;s broken
-          </h2>
-          <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "50ms" }}>
-            Every lending team deals with the same bottlenecks. The question is whether you keep paying for them.
-          </p>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <h2
+              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
+            >
+              10 loan programs, each with its own regulatory framework
+            </h2>
+            <p className="mt-4 text-muted-foreground animate-fade-up" style={{ animationDelay: "50ms" }}>
+              Every program has program-specific compliance checks, document requirements, and regulatory references built in.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {[
-              {
-                icon: Clock,
-                stat: "Weeks",
-                label: "per deal in analyst time",
-                desc: "Manually keying numbers from tax returns, cross-referencing bank statements, catching your own typos. Your best people spend most of their time on data entry.",
-                delay: "100ms",
-              },
-              {
-                icon: DollarSign,
-                stat: "Tens of thousands",
-                label: "in legal fees per deal",
-                desc: "Outside counsel drafts the same loan agreement for the hundredth time. You pay partner rates for work that should take minutes, not weeks.",
-                delay: "175ms",
-              },
-              {
-                icon: AlertTriangle,
-                stat: "Error-prone",
-                label: "constant risk of data errors",
-                desc: "Manual data entry across documents creates discrepancies that slip through review. One wrong number in a debt-service calculation changes the entire credit decision.",
-                delay: "250ms",
-              },
-            ].map((problem) => (
+              { name: "SBA 7(a)", docs: "27 docs", delay: "50ms" },
+              { name: "SBA 504", docs: "28 docs", delay: "100ms" },
+              { name: "Commercial CRE", docs: "23 docs", delay: "150ms" },
+              { name: "DSCR", docs: "17 docs", delay: "200ms" },
+              { name: "Bank Statement", docs: "17 docs", delay: "250ms" },
+              { name: "Conventional Business", docs: "17 docs", delay: "300ms" },
+              { name: "Line of Credit", docs: "18 docs", delay: "350ms" },
+              { name: "Equipment Financing", docs: "16 docs", delay: "400ms" },
+              { name: "Bridge", docs: "20 docs", delay: "450ms" },
+              { name: "Crypto-Collateralized", docs: "16 docs", delay: "500ms" },
+            ].map((program) => (
               <div
-                key={problem.label}
-                className="rounded-xl border border-destructive/20 bg-destructive/5 p-7 animate-fade-up"
-                style={{ animationDelay: problem.delay }}
+                key={program.name}
+                className="rounded-lg border bg-card p-4 text-center animate-fade-up"
+                style={{ animationDelay: program.delay }}
               >
-                <problem.icon className="h-5 w-5 text-destructive mb-4" />
-                <div className="text-xl font-bold text-foreground">{problem.stat}</div>
-                <div className="text-sm font-medium text-foreground mt-0.5">{problem.label}</div>
-                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{problem.desc}</p>
+                <div className="text-sm font-semibold text-card-foreground">{program.name}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{program.docs}</div>
               </div>
             ))}
           </div>
@@ -173,7 +118,7 @@ export default async function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          WHAT CHANGES
+          3. HOW IT WORKS
       ══════════════════════════════════════════════ */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
@@ -181,7 +126,67 @@ export default async function Home() {
             <h2
               className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
             >
-              What changes when the machine does the work
+              Upload to loan package in three steps
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+            {[
+              {
+                step: "01",
+                icon: Upload,
+                title: "Drop in the borrower file",
+                desc: "Tax returns, bank statements, financials. Any format, any volume. Every upload encrypted and processed automatically.",
+                delay: "100ms",
+              },
+              {
+                step: "02",
+                icon: ShieldCheck,
+                title: "Two independent systems verify every number",
+                desc: "Each document is read by two separate systems, independently. Every total, subtotal, and line item is recalculated from the raw numbers. Income on a tax return is matched against deposits in the bank statements. If the two systems disagree on a single figure, it gets flagged for review. Nothing slips through the cracks.",
+                delay: "175ms",
+              },
+              {
+                step: "03",
+                icon: Download,
+                title: "Download the complete loan package",
+                desc: "Credit memo and up to 37 legal documents, each verified against federal and state lending regulations. Download individually, edit inline, or grab the entire package as a ZIP.",
+                delay: "250ms",
+              },
+            ].map((step) => (
+              <div
+                key={step.step}
+                className="relative text-center animate-fade-up"
+                style={{ animationDelay: step.delay }}
+              >
+                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                  <step.icon className="h-6 w-6" />
+                </div>
+                <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  Step {step.step}
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
+                  {step.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          4. WHAT OPENSHUT HANDLES
+      ══════════════════════════════════════════════ */}
+      <section className="w-full border-t border-border/50 bg-muted/30">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2
+              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
+            >
+              What OpenShut handles
             </h2>
           </div>
 
@@ -233,9 +238,9 @@ export default async function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          REGULATORY FRAMEWORK
+          5. REGULATORY FRAMEWORK
       ══════════════════════════════════════════════ */}
-      <section className="w-full border-t border-border/50 bg-muted/30">
+      <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-2xl mx-auto mb-6">
             <h2
@@ -355,69 +360,9 @@ export default async function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          HOW IT ACTUALLY WORKS
+          6. STATS
       ══════════════════════════════════════════════ */}
-      <section className="w-full">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2
-              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
-            >
-              Upload to loan package in three steps
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-            {[
-              {
-                step: "01",
-                icon: Upload,
-                title: "Drop in the borrower file",
-                desc: "Tax returns, bank statements, financials. Any format, any volume. Every upload encrypted and processed automatically.",
-                delay: "100ms",
-              },
-              {
-                step: "02",
-                icon: Zap,
-                title: "AI extracts, verifies, and structures",
-                desc: "Every data point extracted against IRS field specifications. Every number independently verified. Deal terms structured against your loan program. Discrepancies flagged for your review.",
-                delay: "175ms",
-              },
-              {
-                step: "03",
-                icon: Download,
-                title: "Download the complete loan package",
-                desc: "Credit memo and up to 37 legal documents, each verified against federal and state lending regulations. Download individually, edit inline, or grab the entire package as a ZIP.",
-                delay: "250ms",
-              },
-            ].map((step) => (
-              <div
-                key={step.step}
-                className="relative text-center animate-fade-up"
-                style={{ animationDelay: step.delay }}
-              >
-                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-                  <step.icon className="h-6 w-6" />
-                </div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  Step {step.step}
-                </div>
-                <h3 className="text-lg font-semibold text-foreground">
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
-                  {step.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          TRUST / NUMBERS
-      ══════════════════════════════════════════════ */}
-      <section className="w-full border-t border-border/50 bg-muted/30">
+      <section className="w-full border-y border-border/50 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {[
@@ -447,41 +392,51 @@ export default async function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          LOAN PROGRAMS
+          7. THE PROBLEM
       ══════════════════════════════════════════════ */}
       <section className="w-full">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <h2
-              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
-            >
-              10 loan programs, each with its own regulatory framework
-            </h2>
-            <p className="mt-4 text-muted-foreground animate-fade-up" style={{ animationDelay: "50ms" }}>
-              Every program has program-specific compliance checks, document requirements, and regulatory references built in.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+          <h2
+            className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl text-center mb-4 animate-fade-up"
+          >
+            You already know what&apos;s broken
+          </h2>
+          <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "50ms" }}>
+            Every lending team deals with the same bottlenecks. The question is whether you keep paying for them.
+          </p>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
             {[
-              { name: "SBA 7(a)", docs: "27 docs", delay: "50ms" },
-              { name: "SBA 504", docs: "28 docs", delay: "100ms" },
-              { name: "Commercial CRE", docs: "23 docs", delay: "150ms" },
-              { name: "DSCR", docs: "17 docs", delay: "200ms" },
-              { name: "Bank Statement", docs: "17 docs", delay: "250ms" },
-              { name: "Conventional Business", docs: "17 docs", delay: "300ms" },
-              { name: "Line of Credit", docs: "18 docs", delay: "350ms" },
-              { name: "Equipment Financing", docs: "16 docs", delay: "400ms" },
-              { name: "Bridge", docs: "20 docs", delay: "450ms" },
-              { name: "Crypto-Collateralized", docs: "16 docs", delay: "500ms" },
-            ].map((program) => (
+              {
+                icon: Clock,
+                stat: "Weeks",
+                label: "per deal in analyst time",
+                desc: "Manually keying numbers from tax returns, cross-referencing bank statements, catching your own typos. Your best people spend most of their time on data entry.",
+                delay: "100ms",
+              },
+              {
+                icon: DollarSign,
+                stat: "Tens of thousands",
+                label: "in legal fees per deal",
+                desc: "Outside counsel drafts the same loan agreement for the hundredth time. You pay partner rates for work that should take minutes, not weeks.",
+                delay: "175ms",
+              },
+              {
+                icon: AlertTriangle,
+                stat: "Error-prone",
+                label: "constant risk of data errors",
+                desc: "Manual data entry across documents creates discrepancies that slip through review. One wrong number in a debt-service calculation changes the entire credit decision.",
+                delay: "250ms",
+              },
+            ].map((problem) => (
               <div
-                key={program.name}
-                className="rounded-lg border bg-card p-4 text-center animate-fade-up"
-                style={{ animationDelay: program.delay }}
+                key={problem.label}
+                className="rounded-xl border border-destructive/20 bg-destructive/5 p-7 animate-fade-up"
+                style={{ animationDelay: problem.delay }}
               >
-                <div className="text-sm font-semibold text-card-foreground">{program.name}</div>
-                <div className="mt-1 text-xs text-muted-foreground">{program.docs}</div>
+                <problem.icon className="h-5 w-5 text-destructive mb-4" />
+                <div className="text-xl font-bold text-foreground">{problem.stat}</div>
+                <div className="text-sm font-medium text-foreground mt-0.5">{problem.label}</div>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{problem.desc}</p>
               </div>
             ))}
           </div>
@@ -489,7 +444,7 @@ export default async function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          BOTTOM CTA
+          8. BOTTOM CTA
       ══════════════════════════════════════════════ */}
       <section className="w-full border-t border-border/50">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
@@ -509,24 +464,12 @@ export default async function Home() {
                 One deal, fully processed. See what the platform does with real borrower data.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                {userId ? (
-                  <a
-                    href="/dashboard"
-                    className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]"
-                  >
-                    Go to Dashboard
+                <SignInButton mode="modal">
+                  <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
+                    Try It Free
                     <ArrowRight className="h-4 w-4" />
-                  </a>
-                ) : (
-                  <>
-                    <SignInButton mode="modal">
-                      <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
-                        Try It Free
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
-                    </SignInButton>
-                  </>
-                )}
+                  </button>
+                </SignInButton>
               </div>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
@@ -547,20 +490,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="w-full border-t border-border/50">
-        <div className="mx-auto max-w-6xl px-6 py-8">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>&copy; {new Date().getFullYear()} OpenShut. All rights reserved.</span>
-          </div>
-          <p className="mt-4 text-xs text-muted-foreground/60 max-w-3xl">
-            All documents generated by this platform are for informational purposes and should be
-            reviewed by qualified legal counsel prior to execution. This platform does not provide
-            legal advice. Regulatory compliance checks are based on publicly available federal and
-            state statutes and are not a substitute for independent legal review.
-          </p>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }
