@@ -143,6 +143,13 @@ const REQUIRED_KEYS: Record<string, string[]> = {
   // settlement_statement, compliance_certificate, amortization_schedule, closing_disclosure, loan_estimate: NO required keys (zero AI)
 };
 
+// Keys that the AI should return as string[] (not string)
+const ARRAY_KEYS = new Set([
+  "conditionsPrecedent", "representationsAndWarranties", "covenants",
+  "representations", "eventsOfDefault", "borrowerCovenants",
+  "waiverOfDefenses", "specialConditions",
+]);
+
 function validateProse(docType: string, prose: AiDocProse): void {
   const keys = REQUIRED_KEYS[docType];
   if (!keys) return;
@@ -151,7 +158,11 @@ function validateProse(docType: string, prose: AiDocProse): void {
   if (missing.length > 0) {
     // Fill missing keys with placeholder text so templates don't crash
     for (const key of missing) {
-      prose[key] = `[${key} — AI generation did not produce this section. Manual review required.]`;
+      if (ARRAY_KEYS.has(key)) {
+        prose[key] = [`[${key} — AI generation did not produce this section. Manual review required.]`];
+      } else {
+        prose[key] = `[${key} — AI generation did not produce this section. Manual review required.]`;
+      }
     }
     console.warn(`AI prose for ${docType} missing keys: ${missing.join(", ")}. Placeholders injected.`);
   }

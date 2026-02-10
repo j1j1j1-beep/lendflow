@@ -22,6 +22,7 @@ import {
   formatCurrency,
   formatDate,
   numberToWords,
+  ensureProseArray,
   COLORS,
 } from "../doc-helpers";
 
@@ -139,9 +140,7 @@ export function buildGuaranty(
     bulletPoint(
       "Any defense based on Lender's election of remedies, including any election to proceed against collateral or to exercise any right of setoff;",
     ),
-    ...(Array.isArray(prose.waiverOfDefenses)
-      ? prose.waiverOfDefenses.map((item) => bulletPoint(item))
-      : [bodyText(prose.waiverOfDefenses)]),
+    ...ensureProseArray(prose.waiverOfDefenses).map((item) => bulletPoint(item)),
     spacer(4),
 
     // ---- Subrogation Waiver ----

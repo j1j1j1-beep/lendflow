@@ -587,6 +587,89 @@ export function notaryBlock(stateAbbr: string | null): Paragraph[] {
 // Document wrapper — builds a complete Document with standard page setup
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Collateral type descriptions — human-readable labels for enum values
+// ---------------------------------------------------------------------------
+
+const COLLATERAL_DESCRIPTIONS: Record<string, string> = {
+  real_estate:
+    "All real property, including but not limited to land, buildings, fixtures, and improvements thereto",
+  commercial_real_estate:
+    "First Priority Deed of Trust/Mortgage on the commercial real property",
+  residential_1_4:
+    "First Priority Deed of Trust/Mortgage on the residential property (1-4 family)",
+  residential_condo:
+    "First Priority Deed of Trust/Mortgage on the residential condominium unit",
+  equipment:
+    "All equipment, machinery, tools, furniture, fixtures, and other tangible personal property",
+  heavy_equipment:
+    "All heavy equipment, machinery, and related attachments, together with all accessories and replacements",
+  inventory:
+    "All inventory, including raw materials, work-in-process, finished goods, and supplies",
+  accounts_receivable:
+    "All accounts, accounts receivable, chattel paper, instruments, and general intangibles",
+  blanket_lien:
+    "Blanket lien on all assets of the Borrower, including all present and after-acquired property",
+  vehicles:
+    "All motor vehicles, trailers, and other titled goods, together with all certificates of title",
+  intellectual_property:
+    "All intellectual property, including patents, trademarks, copyrights, trade secrets, and licenses",
+  securities:
+    "All investment property, securities, securities accounts, and financial assets",
+  digital_assets:
+    "All digital assets, cryptocurrency, tokens, and rights associated therewith, including private keys and wallet access",
+  cash_and_deposits:
+    "All deposit accounts, cash, and cash equivalents held at any financial institution",
+  general_intangibles:
+    "All general intangibles, including payment intangibles, software, and contract rights",
+};
+
+/**
+ * Convert a collateral type enum value to a human-readable description.
+ * Falls back to title-casing the raw value if not in the map.
+ */
+export function collateralLabel(type: string): string {
+  return COLLATERAL_DESCRIPTIONS[type] ?? type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// ---------------------------------------------------------------------------
+// Prose array safety — prevents character-by-character rendering
+// ---------------------------------------------------------------------------
+
+/**
+ * Safely convert an AI prose value that should be a string[] into an actual
+ * string[]. Handles all edge cases:
+ *   - Already a proper string[] → returned as-is
+ *   - A string (AI returned prose as single text) → wrapped in [string]
+ *   - An array of single characters (string was spread) → joined back
+ *   - null/undefined → placeholder array
+ */
+export function ensureProseArray(value: unknown): string[] {
+  if (!value) {
+    return ["[This section was not generated. Manual review required.]"];
+  }
+
+  if (typeof value === "string") {
+    return [value];
+  }
+
+  if (Array.isArray(value)) {
+    // Filter out non-strings and empty values
+    const strings = value.filter((v): v is string => typeof v === "string" && v.length > 0);
+    if (strings.length === 0) {
+      return ["[This section was not generated. Manual review required.]"];
+    }
+    // Detect character-by-character arrays: if average length ≤ 2, it's a spread string
+    const avgLen = strings.reduce((sum, s) => sum + s.length, 0) / strings.length;
+    if (avgLen <= 2) {
+      return [strings.join("")];
+    }
+    return strings;
+  }
+
+  return [String(value)];
+}
+
 export function buildLegalDocument(options: {
   title: string;
   headerLeft?: string;

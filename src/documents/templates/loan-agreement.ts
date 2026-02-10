@@ -27,6 +27,7 @@ import {
   formatPercent,
   formatDate,
   numberToWords,
+  ensureProseArray,
   COLORS,
 } from "../doc-helpers";
 
@@ -346,12 +347,8 @@ export function buildLoanAgreement(
       "Taxes: Borrower has filed all required tax returns and paid all taxes due and payable, except those being contested in good faith with adequate reserves.",
     ),
   );
-  if (Array.isArray(prose.representations)) {
-    for (const rep of prose.representations) {
-      children.push(numberedItem(rep));
-    }
-  } else {
-    children.push(numberedItem(String(prose.representations)));
+  for (const rep of ensureProseArray(prose.representations)) {
+    children.push(numberedItem(rep));
   }
 
   // -----------------------------------------------------------------------
@@ -523,12 +520,8 @@ export function buildLoanAgreement(
       "Material Adverse Change: Any event or condition occurs that constitutes a Material Adverse Effect.",
     ),
   );
-  if (Array.isArray(prose.eventsOfDefault)) {
-    for (const event of prose.eventsOfDefault) {
-      children.push(numberedItem(event));
-    }
-  } else {
-    children.push(numberedItem(String(prose.eventsOfDefault)));
+  for (const event of ensureProseArray(prose.eventsOfDefault)) {
+    children.push(numberedItem(event));
   }
 
   // -----------------------------------------------------------------------

@@ -24,6 +24,8 @@ import {
   formatPercent,
   formatDate,
   numberToWords,
+  collateralLabel,
+  ensureProseArray,
   COLORS,
 } from "../doc-helpers";
 
@@ -219,7 +221,7 @@ export function buildCommitmentLetter(
       ),
     );
     for (const collateral of input.collateralTypes) {
-      children.push(bulletPoint(collateral));
+      children.push(bulletPoint(collateralLabel(collateral)));
     }
   } else {
     children.push(
@@ -269,12 +271,8 @@ export function buildCommitmentLetter(
     ),
   );
 
-  if (Array.isArray(prose.conditionsPrecedent)) {
-    for (const condition of prose.conditionsPrecedent) {
-      children.push(bulletPoint(condition));
-    }
-  } else {
-    children.push(bulletPoint(String(prose.conditionsPrecedent)));
+  for (const condition of ensureProseArray(prose.conditionsPrecedent)) {
+    children.push(bulletPoint(condition));
   }
   children.push(spacer(8));
 

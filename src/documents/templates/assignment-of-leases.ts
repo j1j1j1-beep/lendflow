@@ -24,6 +24,7 @@ import {
   formatCurrency,
   formatDate,
   numberToWords,
+  ensureProseArray,
   COLORS,
 } from "../doc-helpers";
 
@@ -155,12 +156,8 @@ export function buildAssignmentOfLeases(
       "Assignor represents and warrants to Assignee as of the date hereof and at all times while any portion of the Loan remains outstanding:",
     ),
   );
-  if (Array.isArray(prose.representationsAndWarranties)) {
-    prose.representationsAndWarranties.forEach((item) => {
-      children.push(bulletPoint(item));
-    });
-  } else {
-    children.push(bodyText(prose.representationsAndWarranties as unknown as string));
+  for (const item of ensureProseArray(prose.representationsAndWarranties)) {
+    children.push(bulletPoint(item));
   }
   children.push(spacer(4));
 
@@ -173,12 +170,8 @@ export function buildAssignmentOfLeases(
       "Assignor covenants and agrees that, until all obligations under the Loan are fully satisfied:",
     ),
   );
-  if (Array.isArray(prose.covenants)) {
-    prose.covenants.forEach((item) => {
-      children.push(bulletPoint(item));
-    });
-  } else {
-    children.push(bodyText(prose.covenants as unknown as string));
+  for (const item of ensureProseArray(prose.covenants)) {
+    children.push(bulletPoint(item));
   }
   children.push(spacer(4));
 

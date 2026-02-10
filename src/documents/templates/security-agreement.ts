@@ -21,39 +21,10 @@ import {
   formatCurrency,
   formatDate,
   numberToWords,
+  collateralLabel,
+  ensureProseArray,
   COLORS,
 } from "../doc-helpers";
-
-// ---------------------------------------------------------------------------
-// Collateral type descriptions
-// ---------------------------------------------------------------------------
-
-const COLLATERAL_DESCRIPTIONS: Record<string, string> = {
-  real_estate:
-    "All real property, including but not limited to land, buildings, fixtures, and improvements thereto",
-  equipment:
-    "All equipment, machinery, tools, furniture, fixtures, and other tangible personal property",
-  inventory:
-    "All inventory, including raw materials, work-in-process, finished goods, and supplies",
-  accounts_receivable:
-    "All accounts, accounts receivable, chattel paper, instruments, and general intangibles",
-  vehicles:
-    "All motor vehicles, trailers, and other titled goods, together with all certificates of title",
-  intellectual_property:
-    "All intellectual property, including patents, trademarks, copyrights, trade secrets, and licenses",
-  securities:
-    "All investment property, securities, securities accounts, and financial assets",
-  digital_assets:
-    "All digital assets, cryptocurrency, tokens, and rights associated therewith, including private keys and wallet access",
-  cash_and_deposits:
-    "All deposit accounts, cash, and cash equivalents held at any financial institution",
-  general_intangibles:
-    "All general intangibles, including payment intangibles, software, and contract rights",
-};
-
-function collateralLabel(type: string): string {
-  return COLLATERAL_DESCRIPTIONS[type] ?? type;
-}
 
 // ---------------------------------------------------------------------------
 // Builder
@@ -168,9 +139,7 @@ export function buildSecurityAgreement(
     bulletPoint(
       "Transmitting Utility: Debtor is not a 'transmitting utility' as defined in UCC § 9-102(a)(81).",
     ),
-    ...(Array.isArray(prose.representationsAndWarranties)
-      ? prose.representationsAndWarranties.map((item) => bulletPoint(item))
-      : [bodyText(prose.representationsAndWarranties)]),
+    ...ensureProseArray(prose.representationsAndWarranties).map((item) => bulletPoint(item)),
     spacer(4),
 
     // ---- Covenants ----

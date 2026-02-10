@@ -27,6 +27,7 @@ import {
   formatDate,
   formatPercent,
   numberToWords,
+  ensureProseArray,
   COLORS,
 } from "../doc-helpers";
 
@@ -126,9 +127,7 @@ export function buildDeedOfTrust(
       "Trustor covenants and agrees with Beneficiary as follows:",
     ),
     spacer(2),
-    ...(Array.isArray(prose.borrowerCovenants)
-      ? prose.borrowerCovenants.map((item) => bulletPoint(item))
-      : [bodyText(prose.borrowerCovenants as unknown as string)]),
+    ...ensureProseArray(prose.borrowerCovenants).map((item) => bulletPoint(item)),
     spacer(2),
 
     // Standard covenants

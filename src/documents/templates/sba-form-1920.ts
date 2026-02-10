@@ -21,6 +21,7 @@ import {
   formatCurrency,
   formatPercent,
   formatDate,
+  collateralLabel,
   COLORS,
 } from "../doc-helpers";
 
@@ -174,11 +175,7 @@ export function buildSbaForm1920(input: DocumentInput): Document {
         label: "Collateral",
         value:
           input.collateralTypes.length > 0
-            ? input.collateralTypes
-                .map((ct) =>
-                  ct.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-                )
-                .join("; ")
+            ? input.collateralTypes.map(collateralLabel).join("; ")
             : "[COLLATERAL — TO BE COMPLETED]",
       },
       {
@@ -277,10 +274,7 @@ export function buildSbaForm1920(input: DocumentInput): Document {
   children.push(spacer(4));
 
   const collateralRows: string[][] = input.collateralTypes.map((ct) => {
-    const label = ct
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
-    return [label, "[APPRAISED VALUE — TO BE COMPLETED]", "[LIEN POSITION]"];
+    return [collateralLabel(ct), "[APPRAISED VALUE — TO BE COMPLETED]", "[LIEN POSITION]"];
   });
 
   if (collateralRows.length === 0) {

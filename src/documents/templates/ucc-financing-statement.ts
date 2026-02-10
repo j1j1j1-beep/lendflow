@@ -16,6 +16,7 @@ import {
   spacer,
   signatureBlock,
   keyTermsTable,
+  collateralLabel,
   COLORS,
 } from "../doc-helpers";
 
@@ -70,7 +71,7 @@ export function buildUccFinancingStatement(
   // Enumerate specific collateral types from deal
   if (input.collateralTypes && input.collateralTypes.length > 0) {
     for (const ct of input.collateralTypes) {
-      children.push(bulletPoint(ct));
+      children.push(bulletPoint(collateralLabel(ct)));
     }
   }
   children.push(spacer(2));

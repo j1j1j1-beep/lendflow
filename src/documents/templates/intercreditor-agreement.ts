@@ -23,6 +23,7 @@ import {
   formatCurrency,
   formatDate,
   numberToWords,
+  collateralLabel,
   COLORS,
 } from "../doc-helpers";
 
@@ -42,7 +43,7 @@ export function buildIntercreditorAgreement(
   const dateFormatted = formatDate(input.generatedAt);
   const maturityFormatted = formatDate(input.maturityDate);
   const collateralDescription =
-    input.propertyAddress ?? (input.collateralTypes.length > 0 ? input.collateralTypes.join(", ") : "See Schedule A");
+    input.propertyAddress ?? (input.collateralTypes.length > 0 ? input.collateralTypes.map(collateralLabel).join("; ") : "See Schedule A");
 
   const children: (Paragraph | Table)[] = [];
 

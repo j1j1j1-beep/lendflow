@@ -24,6 +24,7 @@ import {
   formatCurrencyDetailed,
   formatDate,
   formatPercent,
+  ensureProseArray,
   COLORS,
 } from "../doc-helpers";
 
@@ -201,9 +202,7 @@ export function buildSbaAuthorization(
       "In addition to the standard conditions above, the following special conditions apply to this authorization:",
     ),
     spacer(2),
-    ...(Array.isArray(prose.specialConditions)
-      ? prose.specialConditions.map((item) => bulletPoint(item))
-      : [bodyText(prose.specialConditions as unknown as string)]),
+    ...ensureProseArray(prose.specialConditions).map((item) => bulletPoint(item)),
     spacer(8),
 
     // ---- Governing Law ----

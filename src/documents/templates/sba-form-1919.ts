@@ -20,6 +20,7 @@ import {
   spacer,
   formatCurrency,
   formatDate,
+  collateralLabel,
   COLORS,
 } from "../doc-helpers";
 
@@ -139,9 +140,7 @@ export function buildSbaForm1919(input: DocumentInput): Document {
         label: "Collateral Offered",
         value:
           input.collateralTypes.length > 0
-            ? input.collateralTypes
-                .map((ct) => ct.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
-                .join("; ")
+            ? input.collateralTypes.map(collateralLabel).join("; ")
             : "[COLLATERAL DESCRIPTION — TO BE COMPLETED]",
       },
       {
