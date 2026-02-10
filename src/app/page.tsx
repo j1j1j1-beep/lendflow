@@ -123,22 +123,22 @@ export default async function Home() {
             {[
               {
                 icon: Clock,
-                stat: "40+ hours",
+                stat: "Weeks",
                 label: "per deal in analyst time",
                 desc: "Manually keying numbers from tax returns, cross-referencing bank statements, catching your own typos. Your best people spend most of their time on data entry.",
                 delay: "100ms",
               },
               {
                 icon: DollarSign,
-                stat: "$15K+",
+                stat: "Tens of thousands",
                 label: "in legal fees per deal",
                 desc: "Outside counsel drafts the same loan agreement for the hundredth time. You pay partner rates for work that should take minutes, not weeks.",
                 delay: "175ms",
               },
               {
                 icon: AlertTriangle,
-                stat: "1 in 4",
-                label: "deals have data errors",
+                stat: "Constant",
+                label: "risk of data errors",
                 desc: "Manual data entry across documents creates discrepancies that slip through review. One wrong number in a debt-service calculation changes the entire credit decision.",
                 delay: "250ms",
               },
@@ -182,13 +182,13 @@ export default async function Home() {
               {
                 icon: FileStack,
                 title: "37 legal documents, verified against federal and state law",
-                desc: "Promissory notes, loan agreements, deeds of trust, UCC filings, SBA forms, TRID disclosures, environmental indemnities. Every provision cites the governing statute: UCC Article 9, TILA/Reg Z, CERCLA §9601, SBA SOP 50 10. What outside counsel bills $15K per deal to prepare.",
+                desc: "Promissory notes, loan agreements, deeds of trust, UCC filings, SBA forms, TRID disclosures, environmental indemnities. Every provision cites the governing statute: UCC Article 9, TILA/Reg Z, CERCLA 9601, SBA SOP 50 10. What you currently pay outside counsel tens of thousands per deal to prepare.",
                 delay: "150ms",
               },
               {
                 icon: Scale,
                 title: "50-state regulatory compliance built in",
-                desc: "Independent legal review on every document. Regulatory checks against 50-state usury statutes, SBA size standards per 13 CFR §120, HPML thresholds, ATR/QM rules, OFAC, and BSA/AML. Every issue flagged with the exact regulation and the recommended fix.",
+                desc: "Independent legal review on every document. Regulatory checks against 50-state usury statutes, SBA size standards per 13 CFR 120, HPML thresholds, ATR/QM rules, OFAC, and BSA/AML. Every issue flagged with the exact regulation and the recommended fix.",
                 delay: "200ms",
               },
               {
@@ -254,8 +254,8 @@ export default async function Home() {
                 category: "SBA Programs",
                 items: [
                   "SBA SOP 50 10",
-                  "13 CFR §120 (Loan Programs)",
-                  "13 CFR §121 (Size Standards)",
+                  "13 CFR 120 (Loan Programs)",
+                  "13 CFR 121 (Size Standards)",
                   "SBA Guaranty Fee Tiers",
                   "SBA Use of Proceeds Rules",
                   "CDC/504 Debenture Requirements",
@@ -267,7 +267,7 @@ export default async function Home() {
                 category: "Commercial & Secured Lending",
                 items: [
                   "UCC Article 9 (Secured Transactions)",
-                  "CERCLA 42 USC §9601 (Environmental)",
+                  "CERCLA 42 USC 9601 (Environmental)",
                   "FIRREA (Appraisal Requirements)",
                   "Flood Disaster Protection Act",
                   "50-State Usury Statutes",
@@ -292,9 +292,9 @@ export default async function Home() {
                 icon: FileText,
                 category: "Document Standards",
                 items: [
-                  "UCC §9-108 Collateral Descriptions",
-                  "UCC §9-503 Debtor Name Requirements",
-                  "CERCLA §9607 Liability Standards",
+                  "UCC 9-108 Collateral Descriptions",
+                  "UCC 9-503 Debtor Name Requirements",
+                  "CERCLA 9607 Liability Standards",
                   "ASTM E1527-21 (Phase I ESA)",
                   "ABA Legal Opinion Standards",
                   "IRS Form Specifications",
