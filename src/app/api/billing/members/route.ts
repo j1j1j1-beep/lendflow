@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
+import { logAudit } from "@/lib/audit";
 
 // ---------------------------------------------------------------------------
 // GET /api/billing/members — list all members of the authed org
@@ -42,7 +43,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { org } = await requireAuth();
+    const { user, org } = await requireAuth();
 
     const body = await request.json();
     const { email, name } = body as { email?: string; name?: string };
@@ -91,6 +92,15 @@ export async function POST(request: NextRequest) {
         name: name || email.split("@")[0],
         orgId: org.id,
       },
+    });
+
+    void logAudit({
+      orgId: org.id,
+      userId: user.id,
+      userEmail: user.email,
+      action: "member.invited",
+      target: email.toLowerCase(),
+      metadata: { memberId: member.id, name: member.name },
     });
 
     return NextResponse.json({ member }, { status: 201 });
@@ -146,6 +156,15 @@ export async function DELETE(request: NextRequest) {
 
     await prisma.user.delete({
       where: { id: userId },
+    });
+
+    void logAudit({
+      orgId: org.id,
+      userId: user.id,
+      userEmail: user.email,
+      action: "member.removed",
+      target: targetUser.email,
+      metadata: { removedUserId: userId, removedUserName: targetUser.name },
     });
 
     return NextResponse.json({ success: true });

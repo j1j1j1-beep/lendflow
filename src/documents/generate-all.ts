@@ -222,6 +222,7 @@ const ZERO_AI_DOCS = new Set(["settlement_statement", "compliance_certificate", 
 export async function generateSingleDocument(
   docType: string,
   input: DocumentInput,
+  feedback?: string,
 ): Promise<DocumentGenerationResult> {
   const docTypeLabel = DOC_TYPE_LABELS[docType] ?? docType;
   const isZeroAI = ZERO_AI_DOCS.has(docType);
@@ -236,8 +237,8 @@ export async function generateSingleDocument(
   let complianceChecks: DocumentGenerationResult["complianceChecks"] = [];
 
   if (!isZeroAI) {
-    // Step 1: Generate AI prose
-    prose = await generateDocProse(docType, input);
+    // Step 1: Generate AI prose (with feedback from previous legal review if provided)
+    prose = await generateDocProse(docType, input, feedback);
 
     // Step 2: Compliance review — finds issues, fixes them, returns corrected prose
     const { review, complianceChecks: checks, correctedProse } = await reviewDocument(docType, input, prose);

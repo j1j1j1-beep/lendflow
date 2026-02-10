@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { getS3Buffer, uploadToS3 } from "@/lib/s3";
 import HTMLtoDOCX from "html-to-docx";
+import { logAudit } from "@/lib/audit";
 
 // ---------------------------------------------------------------------------
 // GET /api/generated-documents/[docId]/content — Proxy DOCX from S3
@@ -59,7 +60,7 @@ export async function POST(
   { params }: { params: Promise<{ docId: string }> }
 ) {
   try {
-    const { org } = await requireAuth();
+    const { user, org } = await requireAuth();
     const { docId } = await params;
 
     const body = await request.json();
@@ -94,6 +95,16 @@ export async function POST(
     await prisma.generatedDocument.update({
       where: { id: docId },
       data: { version: { increment: 1 } },
+    });
+
+    void logAudit({
+      orgId: org.id,
+      userId: user.id,
+      userEmail: user.email,
+      dealId: doc.dealId,
+      action: "doc.saved",
+      target: doc.docType,
+      metadata: { docId, version: doc.version + 1 },
     });
 
     return NextResponse.json({ success: true });

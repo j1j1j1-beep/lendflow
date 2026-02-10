@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { getS3Buffer } from "@/lib/s3";
 import JSZip from "jszip";
+import { logAudit } from "@/lib/audit";
 
 const DOC_TYPE_LABELS: Record<string, string> = {
   promissory_note: "Promissory Note",
@@ -42,7 +43,7 @@ export async function GET(
   { params }: { params: Promise<{ dealId: string }> }
 ) {
   try {
-    const { org } = await requireAuth();
+    const { user, org } = await requireAuth();
     const { dealId } = await params;
 
     const deal = await prisma.deal.findFirst({
@@ -88,6 +89,19 @@ export async function GET(
     await Promise.all(fetches);
 
     const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
+
+    void logAudit({
+      orgId: org.id,
+      userId: user.id,
+      userEmail: user.email,
+      dealId,
+      action: "doc.package_downloaded",
+      metadata: {
+        borrowerName: deal.borrowerName,
+        docCount: deal.generatedDocuments.length,
+        includedMemo: !!deal.creditMemo?.s3Key,
+      },
+    });
 
     return new NextResponse(new Uint8Array(zipBuffer), {
       status: 200,

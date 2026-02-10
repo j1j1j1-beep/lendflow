@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { inngest } from "@/inngest/client";
 import { deleteFromS3 } from "@/lib/s3";
+import { logAudit } from "@/lib/audit";
 
 // ---------------------------------------------------------------------------
 // POST /api/deals/[dealId]/retry - Retry a failed deal pipeline
@@ -13,7 +14,7 @@ export async function POST(
   { params }: { params: Promise<{ dealId: string }> }
 ) {
   try {
-    const { org } = await requireAuth();
+    const { user, org } = await requireAuth();
     const { dealId } = await params;
 
     const deal = await prisma.deal.findFirst({
@@ -87,6 +88,15 @@ export async function POST(
 
     // Re-trigger the pipeline
     await inngest.send({ name: "deal/analyze", data: { dealId } });
+
+    void logAudit({
+      orgId: org.id,
+      userId: user.id,
+      userEmail: user.email,
+      dealId,
+      action: "deal.retried",
+      metadata: { previousError: deal.errorMessage, previousErrorStep: deal.errorStep },
+    });
 
     return NextResponse.json({ success: true, dealId });
   } catch (error) {

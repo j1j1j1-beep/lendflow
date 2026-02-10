@@ -26,6 +26,13 @@ export async function GET() {
       }),
     ]);
 
+    // Calculate trial deals remaining (null if not on trial)
+    let trialDealsRemaining: number | null = null;
+    if (!subscription || subscription.plan === "trial" || subscription.status === "trialing") {
+      const dealCount = await prisma.deal.count({ where: { orgId: org.id } });
+      trialDealsRemaining = Math.max(0, 3 - dealCount);
+    }
+
     return NextResponse.json({
       subscription: subscription
         ? {
@@ -46,6 +53,7 @@ export async function GET() {
         count: memberCount,
         max: subscription?.maxSeats ?? 25,
       },
+      trialDealsRemaining,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {

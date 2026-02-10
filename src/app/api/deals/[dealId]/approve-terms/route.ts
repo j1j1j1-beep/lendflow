@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { inngest } from "@/inngest/client";
+import { logAudit } from "@/lib/audit";
 
 // ---------------------------------------------------------------------------
 // POST /api/deals/[dealId]/approve-terms - Approve deal terms and resume pipeline
@@ -12,7 +13,7 @@ export async function POST(
   { params }: { params: Promise<{ dealId: string }> }
 ) {
   try {
-    const { org } = await requireAuth();
+    const { user, org } = await requireAuth();
     const { dealId } = await params;
 
     const deal = await prisma.deal.findFirst({
@@ -34,6 +35,14 @@ export async function POST(
     await inngest.send({
       name: "deal/terms-approved",
       data: { dealId },
+    });
+
+    void logAudit({
+      orgId: org.id,
+      userId: user.id,
+      userEmail: user.email,
+      dealId,
+      action: "deal.terms_approved",
     });
 
     return NextResponse.json({ success: true });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { stripe, STRIPE_PRICES } from "@/lib/stripe";
+import { logAudit } from "@/lib/audit";
 
 // ---------------------------------------------------------------------------
 // POST /api/billing/checkout — create a Stripe checkout session
@@ -9,7 +10,7 @@ import { stripe, STRIPE_PRICES } from "@/lib/stripe";
 
 export async function POST(request: NextRequest) {
   try {
-    const { org } = await requireAuth();
+    const { user, org } = await requireAuth();
 
     const body = await request.json();
     const { type } = body as { type: "license" | "subscription" };
@@ -69,6 +70,15 @@ export async function POST(request: NextRequest) {
           line_items: [{ price: STRIPE_PRICES.monthly, quantity: 1 }],
           subscription_data: { metadata: { orgId: org.id } },
         });
+
+    void logAudit({
+      orgId: org.id,
+      userId: user.id,
+      userEmail: user.email,
+      action: "billing.checkout_started",
+      target: type,
+      metadata: { sessionId: session.id },
+    });
 
     return NextResponse.json({ url: session.url });
   } catch (error) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import type Stripe from "stripe";
+import { logAudit } from "@/lib/audit";
 
 export const runtime = "nodejs";
 
@@ -168,6 +169,12 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       currentPeriodEnd: new Date((subscription as unknown as { current_period_end: number }).current_period_end * 1000),
     },
   });
+
+  void logAudit({
+    orgId,
+    action: "billing.subscription_created",
+    metadata: { stripeSubscriptionId: subscription.id, stripeCustomerId: customerId },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -254,5 +261,11 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     data: {
       status: "past_due",
     },
+  });
+
+  void logAudit({
+    orgId: sub.orgId,
+    action: "billing.payment_failed",
+    metadata: { stripeSubscriptionId: subscriptionId, invoiceId: invoice.id },
   });
 }

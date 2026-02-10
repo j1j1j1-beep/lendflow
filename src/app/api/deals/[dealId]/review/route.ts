@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { inngest } from "@/inngest/client";
+import { logAudit } from "@/lib/audit";
 
 // ---------------------------------------------------------------------------
 // POST /api/deals/[dealId]/review - Resolve a review item
@@ -101,6 +102,16 @@ export async function POST(
         data: { dealId },
       });
     }
+
+    void logAudit({
+      orgId: org.id,
+      userId: user.id,
+      userEmail: user.email,
+      dealId,
+      action: "deal.review_submitted",
+      target: reviewItemId,
+      metadata: { action, fieldPath: reviewItem.fieldPath, allResolved },
+    });
 
     return NextResponse.json({
       reviewItem: updatedItem,

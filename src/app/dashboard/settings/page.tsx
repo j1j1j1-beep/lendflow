@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -12,6 +13,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Crown,
+  Activity,
+  Download,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -81,6 +84,65 @@ type MembersResponse = {
   members: Member[];
   maxSeats: number;
 };
+
+type AuditLog = {
+  id: string;
+  orgId: string;
+  userId: string | null;
+  userEmail: string | null;
+  dealId: string | null;
+  action: string;
+  target: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+};
+
+type AuditResponse = {
+  logs: AuditLog[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+// ─── Action Label Mapping ────────────────────────────────────────────────────
+
+const ACTION_LABELS: Record<string, string> = {
+  "deal.created": "Created deal",
+  "deal.analyzed": "Started analysis",
+  "deal.review_submitted": "Submitted review",
+  "deal.terms_approved": "Approved terms",
+  "deal.retried": "Retried analysis",
+  "deal.completed": "Completed deal",
+  "doc.edited": "Edited document",
+  "doc.saved": "Saved document",
+  "doc.downloaded": "Downloaded document",
+  "doc.package_downloaded": "Downloaded loan package",
+  "member.invited": "Invited team member",
+  "member.removed": "Removed team member",
+  "billing.checkout_started": "Started checkout",
+  "billing.subscription_created": "Subscription activated",
+  "billing.subscription_canceled": "Canceled subscription",
+  "billing.payment_failed": "Payment failed",
+  "settings.updated": "Updated settings",
+};
+
+// ─── Time Formatting ─────────────────────────────────────────────────────────
+
+function timeAgo(date: string): string {
+  const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(date).toLocaleDateString();
+}
+
+function formatAction(action: string): string {
+  return ACTION_LABELS[action] ?? action.replace(/[._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 // ─── Plan Badge ──────────────────────────────────────────────────────────────
 
@@ -264,6 +326,10 @@ export default function SettingsPage() {
           <TabsTrigger value="usage" className="gap-1.5">
             <BarChart3 className="h-3.5 w-3.5" />
             Usage
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="gap-1.5">
+            <Activity className="h-3.5 w-3.5" />
+            Activity
           </TabsTrigger>
         </TabsList>
 
@@ -705,6 +771,11 @@ export default function SettingsPage() {
             </Card>
           )}
         </TabsContent>
+
+        {/* ─── ACTIVITY TAB ──────────────────────────────────────────────────────── */}
+        <TabsContent value="activity">
+          <ActivityLog />
+        </TabsContent>
       </Tabs>
     </div>
   );
@@ -769,5 +840,218 @@ function UsageHistory() {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+// ─── Activity Log Component ─────────────────────────────────────────────────
+
+function ActivityLog() {
+  const searchParams = useSearchParams();
+  const dealIdFilter = searchParams.get("dealId");
+
+  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const limit = 20;
+
+  const fetchLogs = useCallback(
+    async (pageNum: number, append: boolean) => {
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+      try {
+        const params = new URLSearchParams({
+          page: String(pageNum),
+          limit: String(limit),
+        });
+        if (dealIdFilter) {
+          params.set("dealId", dealIdFilter);
+        }
+        const res = await fetch(`/api/audit?${params.toString()}`);
+        if (!res.ok) throw new Error("Failed to load activity logs");
+        const data: AuditResponse = await res.json();
+        setLogs((prev) => (append ? [...prev, ...data.logs] : data.logs));
+        setTotal(data.total);
+        setPage(data.page);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to load activity");
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [dealIdFilter]
+  );
+
+  useEffect(() => {
+    fetchLogs(1, false);
+  }, [fetchLogs]);
+
+  const hasMore = logs.length < total;
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-16" />
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {dealIdFilter && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Filtered to deal: <span className="font-mono text-xs">{dealIdFilter}</span>
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const url = new URL(window.location.href);
+                  url.searchParams.delete("dealId");
+                  window.history.replaceState({}, "", url.toString());
+                  window.location.reload();
+                }}
+              >
+                Clear filter
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                Activity Log
+              </CardTitle>
+              <CardDescription className="mt-1.5">
+                Recent actions across your organization.
+              </CardDescription>
+            </div>
+            {logs.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    if (dealIdFilter) params.set("dealId", dealIdFilter);
+                    params.set("format", "csv");
+                    window.open(`/api/audit/export?${params.toString()}`, "_blank");
+                  }}
+                >
+                  <Download className="h-3.5 w-3.5 mr-1.5" />
+                  CSV
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    if (dealIdFilter) params.set("dealId", dealIdFilter);
+                    params.set("format", "json");
+                    window.open(`/api/audit/export?${params.toString()}`, "_blank");
+                  }}
+                >
+                  <Download className="h-3.5 w-3.5 mr-1.5" />
+                  JSON
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {logs.length > 0 ? (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Time</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Details</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {logs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                        <span title={new Date(log.createdAt).toLocaleString()}>
+                          {timeAgo(log.createdAt)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {log.userEmail ?? (
+                          <span className="text-muted-foreground italic">System</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs font-normal">
+                          {formatAction(log.action)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground max-w-[260px] truncate">
+                        {log.target && (
+                          <span className="font-medium text-foreground">{log.target}</span>
+                        )}
+                        {log.target && log.metadata && Object.keys(log.metadata).length > 0 && (
+                          <span> &mdash; </span>
+                        )}
+                        {log.metadata && Object.keys(log.metadata).length > 0 && (
+                          <span className="text-xs">
+                            {Object.entries(log.metadata)
+                              .map(([k, v]) => `${k}: ${v}`)
+                              .join(", ")}
+                          </span>
+                        )}
+                        {!log.target && (!log.metadata || Object.keys(log.metadata).length === 0) && (
+                          <span className="italic">--</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {hasMore && (
+                <div className="flex justify-center pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={loadingMore}
+                    onClick={() => fetchLogs(page + 1, true)}
+                  >
+                    {loadingMore ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                        Loading...
+                      </>
+                    ) : (
+                      `Load More (${logs.length} of ${total})`
+                    )}
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No activity recorded yet.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

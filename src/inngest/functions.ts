@@ -206,10 +206,34 @@ export const analysisPipeline = inngest.createFunction(
     id: "analysis-pipeline",
     name: "Document Analysis Pipeline",
     retries: 2,
+    idempotency: "event.data.dealId",
   },
   { event: "deal/analyze" },
   async ({ event, step }) => {
     const { dealId } = event.data as { dealId: string };
+
+    // Guard: skip if deal is already in a processing state
+    const currentDeal = await step.run("check-idempotent", async () => {
+      const deal = await prisma.deal.findUnique({ where: { id: dealId } });
+      if (!deal) return { skip: true };
+
+      const processingStatuses = [
+        "PROCESSING_OCR", "CLASSIFYING", "EXTRACTING", "VERIFYING",
+        "RESOLVING", "ANALYZING", "GENERATING_MEMO", "STRUCTURING", "GENERATING_DOCS",
+      ];
+
+      if (processingStatuses.includes(deal.status)) {
+        console.log(`[idempotency] Deal ${dealId} already in ${deal.status}, skipping duplicate`);
+        return { skip: true };
+      }
+
+      return { skip: false };
+    });
+
+    if (currentDeal.skip) {
+      return { success: false, dealId, error: "Deal already being processed" };
+    }
+
     let lastStep = "INIT";
 
     try {
@@ -1321,6 +1345,15 @@ export const analysisPipeline = inngest.createFunction(
           include: { user: true },
         });
 
+        // Track usage
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const genDocs = await prisma.generatedDocument.count({ where: { dealId } });
+        await prisma.usageLog.upsert({
+          where: { orgId_month: { orgId: deal.orgId, month: currentMonth } },
+          create: { orgId: deal.orgId, month: currentMonth, dealsProcessed: 1, docsGenerated: genDocs },
+          update: { dealsProcessed: { increment: 1 }, docsGenerated: { increment: genDocs } },
+        });
+
         await sendAnalysisComplete({
           to: deal.user.email,
           borrowerName: deal.borrowerName,
@@ -1356,10 +1389,26 @@ export const resumeAfterReview = inngest.createFunction(
     id: "resume-after-review",
     name: "Resume Analysis After Review",
     retries: 2,
+    idempotency: "event.data.dealId",
   },
   { event: "deal/review-complete" },
   async ({ event, step }) => {
     const { dealId } = event.data as { dealId: string };
+
+    // Guard: only resume if deal is actually in review state
+    const currentDeal = await step.run("check-resume-state", async () => {
+      const deal = await prisma.deal.findUnique({ where: { id: dealId } });
+      if (!deal) return { skip: true };
+      if (deal.status !== "NEEDS_REVIEW") {
+        console.log(`[idempotency] Deal ${dealId} not in expected state (${deal.status}), skipping`);
+        return { skip: true };
+      }
+      return { skip: false };
+    });
+
+    if (currentDeal.skip) {
+      return { success: false, dealId, error: "Deal not in expected state for resume" };
+    }
 
     try {
       // Get all extractions with resolved review items applied
@@ -1843,6 +1892,15 @@ export const resumeAfterReview = inngest.createFunction(
           include: { user: true },
         });
 
+        // Track usage
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const genDocs = await prisma.generatedDocument.count({ where: { dealId } });
+        await prisma.usageLog.upsert({
+          where: { orgId_month: { orgId: deal.orgId, month: currentMonth } },
+          create: { orgId: deal.orgId, month: currentMonth, dealsProcessed: 1, docsGenerated: genDocs },
+          update: { dealsProcessed: { increment: 1 }, docsGenerated: { increment: genDocs } },
+        });
+
         await sendAnalysisComplete({
           to: deal.user.email,
           borrowerName: deal.borrowerName,
@@ -1904,10 +1962,26 @@ export const resumeAfterTermReview = inngest.createFunction(
     id: "resume-after-term-review",
     name: "Resume Pipeline After Term Review",
     retries: 2,
+    idempotency: "event.data.dealId",
   },
   { event: "deal/terms-approved" },
   async ({ event, step }) => {
     const { dealId } = event.data as { dealId: string };
+
+    // Guard: only resume if deal is actually in term review state
+    const currentDeal = await step.run("check-resume-state", async () => {
+      const deal = await prisma.deal.findUnique({ where: { id: dealId } });
+      if (!deal) return { skip: true };
+      if (deal.status !== "NEEDS_TERM_REVIEW") {
+        console.log(`[idempotency] Deal ${dealId} not in expected state (${deal.status}), skipping`);
+        return { skip: true };
+      }
+      return { skip: false };
+    });
+
+    if (currentDeal.skip) {
+      return { success: false, dealId, error: "Deal not in expected state for resume" };
+    }
 
     try {
       // Mark deal terms as approved
@@ -2021,6 +2095,15 @@ export const resumeAfterTermReview = inngest.createFunction(
         const deal = await prisma.deal.findUniqueOrThrow({
           where: { id: dealId },
           include: { user: true },
+        });
+
+        // Track usage
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const genDocs = await prisma.generatedDocument.count({ where: { dealId } });
+        await prisma.usageLog.upsert({
+          where: { orgId_month: { orgId: deal.orgId, month: currentMonth } },
+          create: { orgId: deal.orgId, month: currentMonth, dealsProcessed: 1, docsGenerated: genDocs },
+          update: { dealsProcessed: { increment: 1 }, docsGenerated: { increment: genDocs } },
         });
 
         await sendAnalysisComplete({

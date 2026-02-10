@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
+// import { checkPaywall } from "@/lib/paywall"; // TODO: Enable after launch
 import { inngest } from "@/inngest/client";
+import { logAudit } from "@/lib/audit";
 
 // ---------------------------------------------------------------------------
 // POST /api/analyze - Trigger analysis pipeline for a deal
@@ -9,7 +11,13 @@ import { inngest } from "@/inngest/client";
 
 export async function POST(request: NextRequest) {
   try {
-    const { org } = await requireAuth();
+    const { user, org } = await requireAuth();
+
+    // TODO: Enable paywall after launch
+    // const paywall = await checkPaywall(org.id);
+    // if (!paywall.allowed) {
+    //   return NextResponse.json({ error: paywall.reason }, { status: 402 });
+    // }
 
     const body = await request.json();
     const { dealId } = body;
@@ -75,6 +83,15 @@ export async function POST(request: NextRequest) {
     await inngest.send({
       name: "deal/analyze",
       data: { dealId },
+    });
+
+    void logAudit({
+      orgId: org.id,
+      userId: user.id,
+      userEmail: user.email,
+      dealId,
+      action: "deal.analyzed",
+      metadata: { borrowerName: deal.borrowerName, previousStatus: deal.status },
     });
 
     return NextResponse.json({ success: true, dealId });

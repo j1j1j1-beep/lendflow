@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { stripe } from "@/lib/stripe";
+import { logAudit } from "@/lib/audit";
 
 // ---------------------------------------------------------------------------
 // POST /api/billing/cancel — cancel subscription at period end
@@ -9,7 +10,7 @@ import { stripe } from "@/lib/stripe";
 
 export async function POST() {
   try {
-    const { org } = await requireAuth();
+    const { user, org } = await requireAuth();
 
     const sub = await prisma.subscription.findUnique({
       where: { orgId: org.id },
@@ -45,6 +46,14 @@ export async function POST() {
     await prisma.subscription.update({
       where: { orgId: org.id },
       data: { cancelAtPeriodEnd: true },
+    });
+
+    void logAudit({
+      orgId: org.id,
+      userId: user.id,
+      userEmail: user.email,
+      action: "billing.subscription_canceled",
+      metadata: { stripeSubscriptionId: sub.stripeSubscriptionId },
     });
 
     return NextResponse.json({ success: true, cancelAtPeriodEnd: true });

@@ -54,6 +54,24 @@ model UsageLog {
   @@unique([orgId, month])
 }
 
+// ─── Audit Trail ─────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  orgId     String
+  userId    String?
+  userEmail String?
+  dealId    String?
+  action    String   // "deal.created", "deal.analyzed", "doc.edited", "doc.saved", "terms.approved", "member.invited", "member.removed", "billing.checkout", "billing.canceled", etc.
+  target    String?  // What was acted on — e.g. docType, member email, etc.
+  metadata  Json?    // Extra context — old/new values, status changes, etc.
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([orgId, createdAt])
+  @@index([dealId, createdAt])
+}
+
 model User {
   id        String       @id @default(cuid())
   clerkId   String       @unique
