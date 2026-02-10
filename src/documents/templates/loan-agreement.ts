@@ -346,8 +346,12 @@ export function buildLoanAgreement(
       "Taxes: Borrower has filed all required tax returns and paid all taxes due and payable, except those being contested in good faith with adequate reserves.",
     ),
   );
-  for (const rep of prose.representations) {
-    children.push(numberedItem(rep));
+  if (Array.isArray(prose.representations)) {
+    for (const rep of prose.representations) {
+      children.push(numberedItem(rep));
+    }
+  } else {
+    children.push(numberedItem(String(prose.representations)));
   }
 
   // -----------------------------------------------------------------------
@@ -519,8 +523,12 @@ export function buildLoanAgreement(
       "Material Adverse Change: Any event or condition occurs that constitutes a Material Adverse Effect.",
     ),
   );
-  for (const event of prose.eventsOfDefault) {
-    children.push(numberedItem(event));
+  if (Array.isArray(prose.eventsOfDefault)) {
+    for (const event of prose.eventsOfDefault) {
+      children.push(numberedItem(event));
+    }
+  } else {
+    children.push(numberedItem(String(prose.eventsOfDefault)));
   }
 
   // -----------------------------------------------------------------------

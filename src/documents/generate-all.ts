@@ -41,6 +41,21 @@ import { buildBorrowingBaseAgreement } from "./templates/borrowing-base-agreemen
 import { buildDigitalAssetPledge } from "./templates/digital-asset-pledge";
 import { buildCustodyAgreement } from "./templates/custody-agreement";
 
+// SBA regulatory form builders (zero AI)
+import { buildSbaForm1919 } from "./templates/sba-form-1919";
+import { buildSbaForm1920 } from "./templates/sba-form-1920";
+import { buildSbaForm159 } from "./templates/sba-form-159";
+import { buildSbaForm148 } from "./templates/sba-form-148";
+import { buildSbaForm1050 } from "./templates/sba-form-1050";
+
+// Compliance / regulatory form builders (zero AI)
+import { buildIrs4506c } from "./templates/irs-4506c";
+import { buildIrsW9 } from "./templates/irs-w9";
+import { buildFloodDetermination } from "./templates/flood-determination";
+import { buildPrivacyNotice } from "./templates/privacy-notice";
+import { buildPatriotActNotice } from "./templates/patriot-act-notice";
+import { buildDisbursementAuthorization } from "./templates/disbursement-authorization";
+
 import type {
   PromissoryNoteProse, LoanAgreementProse, SecurityAgreementProse, GuarantyProse,
   CommitmentLetterProse, EnvironmentalIndemnityProse, AssignmentOfLeasesProse,
@@ -207,6 +222,33 @@ function buildDocFromTemplate(
       return buildDigitalAssetPledge(input, prose as unknown as DigitalAssetPledgeProse);
     case "custody_agreement":
       return buildCustodyAgreement(input, prose as unknown as CustodyAgreementProse);
+
+    // SBA regulatory forms (zero AI — no prose needed)
+    case "sba_form_1919":
+      return buildSbaForm1919(input);
+    case "sba_form_1920":
+      return buildSbaForm1920(input);
+    case "sba_form_159":
+      return buildSbaForm159(input);
+    case "sba_form_148":
+      return buildSbaForm148(input);
+    case "sba_form_1050":
+      return buildSbaForm1050(input);
+
+    // Compliance / regulatory forms (zero AI — no prose needed)
+    case "irs_4506c":
+      return buildIrs4506c(input);
+    case "irs_w9":
+      return buildIrsW9(input);
+    case "flood_determination":
+      return buildFloodDetermination(input);
+    case "privacy_notice":
+      return buildPrivacyNotice(input);
+    case "patriot_act_notice":
+      return buildPatriotActNotice(input);
+    case "disbursement_authorization":
+      return buildDisbursementAuthorization(input);
+
     default:
       return null;
   }
@@ -217,7 +259,13 @@ function buildDocFromTemplate(
 // ---------------------------------------------------------------------------
 
 // Doc types that are 100% deterministic — no AI prose, no review needed
-const ZERO_AI_DOCS = new Set(["settlement_statement", "compliance_certificate", "amortization_schedule", "closing_disclosure", "loan_estimate"]);
+const ZERO_AI_DOCS = new Set([
+  "settlement_statement", "compliance_certificate", "amortization_schedule",
+  "closing_disclosure", "loan_estimate",
+  "sba_form_1919", "sba_form_1920", "sba_form_159", "sba_form_148", "sba_form_1050",
+  "irs_4506c", "irs_w9", "flood_determination",
+  "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+]);
 
 export async function generateSingleDocument(
   docType: string,
@@ -325,16 +373,25 @@ export function filterRequiredDocs(
 ): string[] {
   const hasRealProperty = !!input.propertyAddress || input.collateralTypes.some((t) => {
     const lower = t.toLowerCase();
-    return lower.includes("real_estate") || lower.includes("real estate") || lower === "real property";
+    return lower.includes("real_estate") || lower.includes("real estate") || lower === "real property"
+      || lower.includes("residential") || lower.includes("commercial_real_estate");
   });
 
   return requiredDocTypes.filter((docType) => {
     if (docType === "guaranty" && !input.terms.personalGuaranty) return false;
+    if (docType === "deed_of_trust" && !hasRealProperty) return false;
     if ((docType === "environmental_indemnity" || docType === "assignment_of_leases") && !hasRealProperty) return false;
     if (docType === "subordination_agreement" && !input.subordinateCreditorName) return false;
     if (docType === "intercreditor_agreement" && !input.secondLienLenderName) return false;
     if ((docType === "sba_authorization" || docType === "cdc_debenture") && !input.programId.startsWith("sba_")) return false;
     if (docType === "cdc_debenture" && input.programId !== "sba_504") return false;
+    // SBA regulatory forms — only for SBA programs
+    const sbaForms = ["sba_form_1919", "sba_form_1920", "sba_form_159", "sba_form_148", "sba_form_1050"];
+    if (sbaForms.includes(docType) && !input.programId.startsWith("sba_")) return false;
+    if (docType === "sba_form_1920" && input.programId !== "sba_7a") return false; // 1920 is 7(a) only
+    if (docType === "sba_form_1050" && input.programId !== "sba_7a") return false; // 1050 is 7(a) only
+    // Flood determination — only for real property
+    if (docType === "flood_determination" && !hasRealProperty) return false;
     if (docType === "borrowing_base_agreement" && input.programId !== "line_of_credit") return false;
     if ((docType === "digital_asset_pledge" || docType === "custody_agreement") && input.programId !== "crypto_collateral") return false;
     if ((docType === "snda" || docType === "estoppel_certificate") && !hasRealProperty) return false;

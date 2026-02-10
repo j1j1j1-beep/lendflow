@@ -129,7 +129,16 @@ const SBA_7A: LoanProgram = {
     { name: "Hazard Insurance", description: "Maintain adequate hazard insurance on collateral.", frequency: "annual" },
   ],
 
-  requiredOutputDocs: ["promissory_note", "loan_agreement", "guaranty", "sba_authorization", "security_agreement", "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter"],
+  requiredOutputDocs: [
+    "promissory_note", "loan_agreement", "guaranty", "sba_authorization", "security_agreement",
+    "deed_of_trust", "environmental_indemnity", "assignment_of_leases", "ucc_financing_statement",
+    "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate",
+    "compliance_certificate", "amortization_schedule", "opinion_letter",
+    // SBA regulatory forms
+    "sba_form_1919", "sba_form_1920", "sba_form_159", "sba_form_148", "sba_form_1050",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
   complianceChecks: ["sba_size_standard", "sba_credit_elsewhere", "sba_use_of_proceeds", "ofac_screening", "usury_check", "flood_zone"],
 
   standardFees: [
@@ -195,7 +204,16 @@ const SBA_504: LoanProgram = {
     { name: "Hazard Insurance", description: "Maintain adequate hazard insurance.", frequency: "annual" },
   ],
 
-  requiredOutputDocs: ["promissory_note", "loan_agreement", "guaranty", "sba_authorization", "security_agreement", "cdc_debenture", "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter"],
+  requiredOutputDocs: [
+    "promissory_note", "loan_agreement", "guaranty", "sba_authorization", "security_agreement",
+    "cdc_debenture", "deed_of_trust", "environmental_indemnity", "assignment_of_leases", "ucc_financing_statement",
+    "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate",
+    "compliance_certificate", "amortization_schedule", "opinion_letter",
+    // SBA regulatory forms (1920 and 1050 will be filtered out — they're 7(a) only)
+    "sba_form_1919", "sba_form_1920", "sba_form_159", "sba_form_148", "sba_form_1050",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
   complianceChecks: ["sba_size_standard", "sba_504_eligibility", "job_creation", "ofac_screening", "usury_check", "flood_zone"],
 
   standardFees: [
@@ -259,7 +277,14 @@ const COMMERCIAL_CRE: LoanProgram = {
     { name: "Environmental Compliance", description: "Maintain compliance with all environmental regulations.", frequency: "annual" },
   ],
 
-  requiredOutputDocs: ["promissory_note", "loan_agreement", "guaranty", "security_agreement", "assignment_of_leases", "commitment_letter", "corporate_resolution", "environmental_indemnity", "snda", "estoppel_certificate", "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter"],
+  requiredOutputDocs: [
+    "promissory_note", "loan_agreement", "guaranty", "security_agreement", "deed_of_trust",
+    "assignment_of_leases", "ucc_financing_statement", "commitment_letter", "corporate_resolution",
+    "environmental_indemnity", "snda", "estoppel_certificate", "settlement_statement",
+    "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
   complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "environmental_phase1"],
 
   standardFees: [
@@ -318,7 +343,13 @@ const DSCR_LOAN: LoanProgram = {
     { name: "Annual Rent Roll", description: "Provide updated rent roll.", frequency: "annual" },
   ],
 
-  requiredOutputDocs: ["promissory_note", "deed_of_trust", "closing_disclosure", "loan_estimate", "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter"],
+  requiredOutputDocs: [
+    "promissory_note", "deed_of_trust", "closing_disclosure", "loan_estimate",
+    "commitment_letter", "corporate_resolution", "settlement_statement",
+    "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
   complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "hpml_check", "atr_check"],
 
   standardFees: [
@@ -375,7 +406,13 @@ const BANK_STATEMENT: LoanProgram = {
     { name: "Property Insurance", description: "Maintain hazard insurance.", frequency: "annual" },
   ],
 
-  requiredOutputDocs: ["promissory_note", "deed_of_trust", "closing_disclosure", "loan_estimate", "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter"],
+  requiredOutputDocs: [
+    "promissory_note", "deed_of_trust", "closing_disclosure", "loan_estimate",
+    "commitment_letter", "corporate_resolution", "settlement_statement",
+    "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
   complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "atr_check", "hpml_check"],
 
   standardFees: [
@@ -436,8 +473,14 @@ const CONVENTIONAL_BUSINESS: LoanProgram = {
     { name: "Minimum Working Capital", description: "Maintain positive working capital.", frequency: "quarterly" },
   ],
 
-  requiredOutputDocs: ["promissory_note", "loan_agreement", "guaranty", "security_agreement", "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter"],
-  complianceChecks: ["ofac_screening", "usury_check", "flood_zone"], // maxLtv implies real estate collateral possible
+  requiredOutputDocs: [
+    "promissory_note", "loan_agreement", "guaranty", "security_agreement", "ucc_financing_statement",
+    "commitment_letter", "corporate_resolution", "settlement_statement",
+    "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
+  complianceChecks: ["ofac_screening", "usury_check", "flood_zone"],
 
   standardFees: [
     { name: "Origination Fee", type: "percent", value: 0.01, description: "1% of loan amount" },
@@ -493,7 +536,13 @@ const LINE_OF_CREDIT: LoanProgram = {
     { name: "Minimum Current Ratio", description: "Maintain minimum current ratio of 1.2:1.", threshold: 1.2, frequency: "quarterly" },
   ],
 
-  requiredOutputDocs: ["promissory_note", "loan_agreement", "guaranty", "security_agreement", "borrowing_base_agreement", "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter"],
+  requiredOutputDocs: [
+    "promissory_note", "loan_agreement", "guaranty", "security_agreement", "ucc_financing_statement",
+    "borrowing_base_agreement", "commitment_letter", "corporate_resolution", "settlement_statement",
+    "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
   complianceChecks: ["ofac_screening", "usury_check"],
 
   standardFees: [
@@ -549,7 +598,13 @@ const EQUIPMENT_FINANCING: LoanProgram = {
     { name: "Equipment Maintenance", description: "Maintain equipment in good working condition.", frequency: "annual" },
   ],
 
-  requiredOutputDocs: ["promissory_note", "security_agreement", "ucc_financing_statement", "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter"],
+  requiredOutputDocs: [
+    "promissory_note", "guaranty", "security_agreement", "ucc_financing_statement",
+    "commitment_letter", "corporate_resolution", "settlement_statement",
+    "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
   complianceChecks: ["ofac_screening", "usury_check", "ucc_lien_search"],
 
   standardFees: [
@@ -605,7 +660,13 @@ const BRIDGE_LOAN: LoanProgram = {
     { name: "Property Insurance", description: "Maintain builder's risk or hazard insurance.", frequency: "annual" },
   ],
 
-  requiredOutputDocs: ["promissory_note", "loan_agreement", "guaranty", "deed_of_trust", "security_agreement", "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter"],
+  requiredOutputDocs: [
+    "promissory_note", "loan_agreement", "guaranty", "deed_of_trust", "security_agreement",
+    "environmental_indemnity", "assignment_of_leases", "commitment_letter", "corporate_resolution",
+    "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
   complianceChecks: ["ofac_screening", "usury_check", "flood_zone"],
 
   standardFees: [
@@ -663,7 +724,13 @@ const CRYPTO_COLLATERALIZED: LoanProgram = {
     { name: "Wallet Verification", description: "Collateral must remain in custodial wallet.", frequency: "monthly" },
   ],
 
-  requiredOutputDocs: ["promissory_note", "loan_agreement", "digital_asset_pledge", "custody_agreement", "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter"],
+  requiredOutputDocs: [
+    "promissory_note", "loan_agreement", "digital_asset_pledge", "custody_agreement",
+    "commitment_letter", "corporate_resolution", "settlement_statement",
+    "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
   complianceChecks: ["ofac_screening", "usury_check", "bsa_aml", "source_of_funds"],
 
   standardFees: [

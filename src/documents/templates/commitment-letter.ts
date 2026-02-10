@@ -269,8 +269,12 @@ export function buildCommitmentLetter(
     ),
   );
 
-  for (const condition of prose.conditionsPrecedent) {
-    children.push(bulletPoint(condition));
+  if (Array.isArray(prose.conditionsPrecedent)) {
+    for (const condition of prose.conditionsPrecedent) {
+      children.push(bulletPoint(condition));
+    }
+  } else {
+    children.push(bulletPoint(String(prose.conditionsPrecedent)));
   }
   children.push(spacer(8));
 
