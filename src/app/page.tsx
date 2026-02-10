@@ -87,7 +87,7 @@ export default async function Home() {
             >
               Every figure across the borrower&apos;s tax returns, bank
               statements, and financials independently verified and
-              cross-referenced. 37 legal documents cited to the governing
+              cross-referenced. Up to 37 legal documents cited to the governing
               federal or state statute. Your complete loan package, verified
               against federal and state lending regulations, ready in minutes.
             </p>
@@ -187,7 +187,7 @@ export default async function Home() {
               },
               {
                 icon: FileStack,
-                title: "37 legal documents, verified against federal and state law",
+                title: "Up to 37 legal documents, verified against federal and state law",
                 desc: "Promissory notes, loan agreements, deeds of trust, UCC filings, SBA forms, TRID disclosures, environmental indemnities. Every provision cites the governing statute: UCC Article 9, TILA/Reg Z, CERCLA 9601, SBA SOP 50 10. What you currently pay outside counsel tens of thousands per deal to prepare.",
                 delay: "150ms",
               },
@@ -379,7 +379,7 @@ export default async function Home() {
                 step: "03",
                 icon: Download,
                 title: "Download the complete loan package",
-                desc: "Credit memo and 37 legal documents, each verified against federal and state lending regulations. Download individually, edit inline, or grab the entire package as a ZIP.",
+                desc: "Credit memo and up to 37 legal documents, each verified against federal and state lending regulations. Download individually, edit inline, or grab the entire package as a ZIP.",
                 delay: "250ms",
               },
             ].map((step) => (
@@ -413,7 +413,7 @@ export default async function Home() {
         <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {[
-              { value: "37", label: "Legal documents per deal", delay: "100ms" },
+              { value: "37", label: "Legal documents per deal (up to)", delay: "100ms" },
               { value: "50", suffix: "-state", label: "Regulatory compliance", delay: "150ms" },
               { value: "10", label: "Loan programs supported", delay: "200ms" },
               { value: "20", suffix: "+", label: "Federal and state regulations", delay: "250ms" },
