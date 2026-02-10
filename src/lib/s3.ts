@@ -30,6 +30,7 @@ export async function uploadToS3(
       Key: key,
       Body: buffer,
       ContentType: contentType,
+      ServerSideEncryption: "AES256",
     })
   );
 }

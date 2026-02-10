@@ -16,6 +16,8 @@ import {
   DollarSign,
   AlertTriangle,
   Lock,
+  BookOpen,
+  Landmark,
 } from "lucide-react";
 
 export default async function Home() {
@@ -77,10 +79,11 @@ export default async function Home() {
               className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed animate-fade-up"
               style={{ animationDelay: "75ms" }}
             >
-              Upload borrower documents. The system reads every line,
-              cross-checks every number against the source, generates a
-              complete loan package with 26 legal documents — each one
-              cited to statute and compliance-verified before you ever see it.
+              Every figure across the borrower&apos;s tax returns, bank
+              statements, and financials independently verified and
+              cross-referenced. 37 legal documents cited to the governing
+              federal or state statute. Your complete loan package, verified
+              against federal and state lending regulations, ready in minutes.
             </p>
             <div
               className="mt-10 flex flex-wrap items-center gap-4 animate-fade-up"
@@ -129,7 +132,7 @@ export default async function Home() {
                 icon: DollarSign,
                 stat: "$15K+",
                 label: "in legal fees per deal",
-                desc: "Outside counsel drafts the same loan agreement for the hundredth time. You pay partner rates for work a template could handle — if the template understood regulations.",
+                desc: "Outside counsel drafts the same loan agreement for the hundredth time. You pay partner rates for work that should take minutes, not weeks.",
                 delay: "175ms",
               },
               {
@@ -171,27 +174,27 @@ export default async function Home() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {[
               {
-                icon: Brain,
-                title: "Reads documents like a senior analyst",
-                desc: "Tax returns, bank statements, rent rolls, K-1s, balance sheets — the system reads every line, extracts every field, and flags anything that doesn't add up. No manual data entry. No missed fields.",
+                icon: ShieldCheck,
+                title: "Every number independently verified",
+                desc: "Every figure is mathematically recalculated and cross-referenced against every other document in the borrower file. If the income on the tax return doesn\u2019t match the deposits in the bank statements, it gets flagged. If line 31 of a 1040 doesn\u2019t match the sum of lines 1 through 25 \u2014 you\u2019ll know.",
                 delay: "100ms",
               },
               {
-                icon: ShieldCheck,
-                title: "Every number verified against the source",
-                desc: "Each extracted figure is mathematically recalculated, cross-referenced against other documents in the package, and compared to the raw OCR output. If line 31 of a 1040 doesn't match the sum of lines 1 through 25 — you'll know.",
+                icon: FileStack,
+                title: "37 legal documents, verified against federal and state law",
+                desc: "Promissory notes, loan agreements, deeds of trust, UCC filings, SBA forms, TRID disclosures, environmental indemnities. Every provision cites the governing statute: UCC Article 9, TILA/Reg Z, CERCLA §9601, SBA SOP 50 10. What outside counsel bills $15K per deal to prepare.",
                 delay: "150ms",
               },
               {
-                icon: FileStack,
-                title: "26 legal documents, generated and cited to statute",
-                desc: "Promissory notes, loan agreements, security instruments, guaranties, environmental indemnities, UCC filings, closing disclosures — each one populated from verified deal terms with actual statutory citations. Not boilerplate. Not templates with blanks.",
+                icon: Scale,
+                title: "50-state regulatory compliance built in",
+                desc: "Independent legal review on every document. Regulatory checks against 50-state usury statutes, SBA size standards per 13 CFR §120, HPML thresholds, ATR/QM rules, OFAC, and BSA/AML. Every issue flagged with the exact regulation and the recommended fix.",
                 delay: "200ms",
               },
               {
-                icon: Scale,
-                title: "Compliance-checked before it hits your desk",
-                desc: "Every document runs through a separate AI legal review (independent from generation), deterministic regulatory checks against 50-state usury limits, program-specific rules (SBA, TRID, ATR/QM), and structural verification. Issues are flagged with the exact regulation and fix.",
+                icon: Brain,
+                title: "Full credit evaluation and deal structuring",
+                desc: "DSCR, DTI, cash flow analysis, liquidity, income verification, and risk flags. Deal terms structured automatically: rate, LTV, fees, covenants, and conditions. No guesswork. No spreadsheets.",
                 delay: "250ms",
               },
             ].map((feature) => (
@@ -216,9 +219,131 @@ export default async function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          HOW IT ACTUALLY WORKS
+          REGULATORY FRAMEWORK
       ══════════════════════════════════════════════ */}
       <section className="w-full border-t border-border/50 bg-muted/30">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <div className="text-center max-w-2xl mx-auto mb-6">
+            <h2
+              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
+            >
+              Built on the regulations that govern your deals
+            </h2>
+            <p className="mt-4 text-muted-foreground animate-fade-up" style={{ animationDelay: "50ms" }}>
+              Every document is verified against the actual federal and state statutes that apply to your loan program. Not summaries. Not interpretations. The law itself.
+            </p>
+          </div>
+
+          <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: Landmark,
+                category: "Federal Lending",
+                items: [
+                  "TILA / Regulation Z",
+                  "RESPA / Regulation X",
+                  "ECOA / Regulation B",
+                  "Dodd-Frank ATR/QM Rule",
+                  "TRID Integrated Disclosures",
+                  "HMDA / Regulation C",
+                ],
+                delay: "100ms",
+              },
+              {
+                icon: BookOpen,
+                category: "SBA Programs",
+                items: [
+                  "SBA SOP 50 10",
+                  "13 CFR §120 (Loan Programs)",
+                  "13 CFR §121 (Size Standards)",
+                  "SBA Guaranty Fee Tiers",
+                  "SBA Use of Proceeds Rules",
+                  "CDC/504 Debenture Requirements",
+                ],
+                delay: "150ms",
+              },
+              {
+                icon: Scale,
+                category: "Commercial & Secured Lending",
+                items: [
+                  "UCC Article 9 (Secured Transactions)",
+                  "CERCLA 42 USC §9601 (Environmental)",
+                  "FIRREA (Appraisal Requirements)",
+                  "Flood Disaster Protection Act",
+                  "50-State Usury Statutes",
+                  "State Licensing Requirements",
+                ],
+                delay: "200ms",
+              },
+              {
+                icon: ShieldCheck,
+                category: "Compliance & Anti-Fraud",
+                items: [
+                  "BSA / Anti-Money Laundering",
+                  "OFAC Sanctions Screening",
+                  "USA PATRIOT Act (CIP)",
+                  "GLBA Privacy Requirements",
+                  "FinCEN CDD Rule",
+                  "HPML Thresholds (Dodd-Frank)",
+                ],
+                delay: "250ms",
+              },
+              {
+                icon: FileText,
+                category: "Document Standards",
+                items: [
+                  "UCC §9-108 Collateral Descriptions",
+                  "UCC §9-503 Debtor Name Requirements",
+                  "CERCLA §9607 Liability Standards",
+                  "ASTM E1527-21 (Phase I ESA)",
+                  "ABA Legal Opinion Standards",
+                  "IRS Form Specifications",
+                ],
+                delay: "300ms",
+              },
+              {
+                icon: Lock,
+                category: "Security & Data",
+                items: [
+                  "AES-256 encryption on every upload",
+                  "TLS encryption in transit",
+                  "Full audit trail on all actions",
+                  "Borrower financials never stored in plaintext",
+                  "Presigned URLs for document access",
+                  "Org-level tenant isolation",
+                ],
+                delay: "350ms",
+              },
+            ].map((group) => (
+              <div
+                key={group.category}
+                className="rounded-xl border bg-card p-7 animate-fade-up"
+                style={{ animationDelay: group.delay }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <group.icon className="h-5 w-5 text-primary" />
+                  <h3 className="text-sm font-semibold text-card-foreground">
+                    {group.category}
+                  </h3>
+                </div>
+                <ul className="space-y-2">
+                  {group.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          HOW IT ACTUALLY WORKS
+      ══════════════════════════════════════════════ */}
+      <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2
@@ -234,21 +359,21 @@ export default async function Home() {
                 step: "01",
                 icon: Upload,
                 title: "Drop in the borrower file",
-                desc: "Tax returns, bank statements, financials — any format, any volume. The system handles the rest.",
+                desc: "Tax returns, bank statements, financials. Any format, any volume. Every upload encrypted and processed automatically.",
                 delay: "100ms",
               },
               {
                 step: "02",
                 icon: Zap,
                 title: "AI extracts, verifies, and structures",
-                desc: "Every data point extracted. Every number recalculated. Deal terms structured against your loan program. Discrepancies flagged for your review.",
+                desc: "Every data point extracted against IRS field specifications. Every number independently verified. Deal terms structured against your loan program. Discrepancies flagged for your review.",
                 delay: "175ms",
               },
               {
                 step: "03",
                 icon: Download,
-                title: "Download the complete package",
-                desc: "Credit memo + all loan documents — generated, compliance-checked, and ready. Download individually, edit inline, or grab the entire package as a ZIP.",
+                title: "Download the complete loan package",
+                desc: "Credit memo and 37 legal documents, each verified against federal and state lending regulations. Download individually, edit inline, or grab the entire package as a ZIP.",
                 delay: "250ms",
               },
             ].map((step) => (
@@ -278,14 +403,14 @@ export default async function Home() {
       {/* ══════════════════════════════════════════════
           TRUST / NUMBERS
       ══════════════════════════════════════════════ */}
-      <section className="w-full">
+      <section className="w-full border-t border-border/50 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {[
-              { value: "26", label: "Legal documents per deal", delay: "100ms" },
+              { value: "37", label: "Legal documents per deal", delay: "100ms" },
               { value: "50", suffix: "-state", label: "Regulatory compliance", delay: "150ms" },
               { value: "10", label: "Loan programs supported", delay: "200ms" },
-              { value: "5", suffix: "-layer", label: "Verification on every doc", delay: "250ms" },
+              { value: "20", suffix: "+", label: "Federal and state regulations", delay: "250ms" },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -301,6 +426,48 @@ export default async function Home() {
                 <div className="mt-1.5 text-sm text-muted-foreground">
                   {stat.label}
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          LOAN PROGRAMS
+      ══════════════════════════════════════════════ */}
+      <section className="w-full">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <h2
+              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
+            >
+              10 loan programs, each with its own regulatory framework
+            </h2>
+            <p className="mt-4 text-muted-foreground animate-fade-up" style={{ animationDelay: "50ms" }}>
+              Every program has program-specific compliance checks, document requirements, and regulatory references built in.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            {[
+              { name: "SBA 7(a)", docs: "27 docs", delay: "50ms" },
+              { name: "SBA 504", docs: "28 docs", delay: "100ms" },
+              { name: "Commercial CRE", docs: "23 docs", delay: "150ms" },
+              { name: "DSCR", docs: "17 docs", delay: "200ms" },
+              { name: "Bank Statement", docs: "17 docs", delay: "250ms" },
+              { name: "Conventional Business", docs: "17 docs", delay: "300ms" },
+              { name: "Line of Credit", docs: "18 docs", delay: "350ms" },
+              { name: "Equipment Financing", docs: "16 docs", delay: "400ms" },
+              { name: "Bridge", docs: "20 docs", delay: "450ms" },
+              { name: "Crypto-Collateralized", docs: "16 docs", delay: "500ms" },
+            ].map((program) => (
+              <div
+                key={program.name}
+                className="rounded-lg border bg-card p-4 text-center animate-fade-up"
+                style={{ animationDelay: program.delay }}
+              >
+                <div className="text-sm font-semibold text-card-foreground">{program.name}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{program.docs}</div>
               </div>
             ))}
           </div>
@@ -344,15 +511,15 @@ export default async function Home() {
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Lock className="h-3.5 w-3.5 text-primary" />
-                  Bank-grade encryption
+                  Every upload encrypted
                 </span>
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                  SOC 2 compliant
+                  Full audit trail
                 </span>
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                  No data leaves your environment
+                  Verified against federal and state regulations
                 </span>
               </div>
             </div>
@@ -362,14 +529,22 @@ export default async function Home() {
 
       {/* ── Footer ── */}
       <footer className="w-full border-t border-border/50">
-        <div className="mx-auto max-w-6xl px-6 py-8 flex items-center justify-between text-sm text-muted-foreground">
-          <span>&copy; {new Date().getFullYear()} All rights reserved.</span>
-          <a
-            href="mailto:demo@lendflow.ai"
-            className="transition-colors hover:text-foreground"
-          >
-            demo@lendflow.ai
-          </a>
+        <div className="mx-auto max-w-6xl px-6 py-8">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>&copy; {new Date().getFullYear()} All rights reserved.</span>
+            <a
+              href="mailto:demo@lendflow.ai"
+              className="transition-colors hover:text-foreground"
+            >
+              demo@lendflow.ai
+            </a>
+          </div>
+          <p className="mt-4 text-xs text-muted-foreground/60 max-w-3xl">
+            All documents generated by this platform are for informational purposes and should be
+            reviewed by qualified legal counsel prior to execution. This platform does not provide
+            legal advice. Regulatory compliance checks are based on publicly available federal and
+            state statutes and are not a substitute for independent legal review.
+          </p>
         </div>
       </footer>
     </div>
