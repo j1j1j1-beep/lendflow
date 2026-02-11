@@ -54,12 +54,12 @@ export default async function Home() {
               className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-4xl leading-relaxed animate-fade-up"
               style={{ animationDelay: "75ms" }}
             >
-              Two independent systems read every document separately, then
-              every number is mathematically checked from scratch. If anything
-              doesn&apos;t add up, it gets flagged. No hallucinations, no
-              guessing, no trusting a single source. Up to 37 legal documents,
-              each cited to the governing federal or state statute. Your
-              complete loan package, ready in minutes.
+              Every figure across the borrower&apos;s tax returns, bank
+              statements, and financials independently verified and
+              cross-referenced. Up to 37 legal documents cited to the governing
+              federal or state statute. Your complete loan package, verified
+              against federal and state lending regulations, ready in minutes.
+              Every output is mathematically verified. Zero hallucinations, guaranteed.
             </p>
             <div
               className="mt-10 flex flex-wrap items-center gap-4 animate-fade-up"
