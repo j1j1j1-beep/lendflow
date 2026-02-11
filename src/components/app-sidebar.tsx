@@ -9,8 +9,8 @@ import {
   FilePlus,
   Moon,
   Sun,
-  FileText,
   Settings,
+  Landmark,
 } from "lucide-react";
 import {
   Sidebar,
@@ -59,7 +59,7 @@ export function AppSidebar() {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard" className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm shadow-primary/20 transition-shadow duration-200 group-hover:shadow-md group-hover:shadow-primary/25">
-                  <FileText className="h-4 w-4" />
+                  <Landmark className="h-4 w-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold tracking-tight">OpenShut</span>

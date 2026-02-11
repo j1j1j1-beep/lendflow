@@ -41,19 +41,19 @@ const STAGES = [
     details: [
       {
         icon: Upload,
-        text: "Drop in tax returns, bank statements, P&Ls, rent rolls, balance sheets — any format, any volume.",
+        text: "Drop in tax returns, bank statements, P&Ls, rent rolls, balance sheets, any format, any volume.",
       },
       {
         icon: FileSearch,
-        text: "AI auto-classifies every file: Form 1040, Schedule C, Schedule E, K-1, W-2, bank statement (checking/savings), P&L, balance sheet, rent roll, 1120, 1120S, 1065.",
+        text: "Every file is automatically classified: Form 1040, Schedule C, Schedule E, K-1, W-2, bank statement (checking/savings), P&L, balance sheet, rent roll, 1120, 1120S, 1065.",
       },
       {
         icon: Lock,
-        text: "Every file encrypted with AES-256 at rest, TLS in transit. Stored in AWS S3 with presigned URL access only.",
+        text: "End-to-end encryption at rest and in transit. Secure access with expiring links.",
       },
       {
         icon: Settings2,
-        text: "AWS Textract Lending adapter processes each document against IRS field specifications — not generic OCR, but field-level extraction purpose-built for financial documents.",
+        text: "Each document is processed through a specialized financial document engine built for IRS field specifications, not generic text recognition.",
       },
     ],
   },
@@ -70,7 +70,7 @@ const STAGES = [
     details: [
       {
         icon: Search,
-        text: "Every data point extracted from every document — line by line, field by field. Nothing inferred, everything sourced.",
+        text: "Every data point extracted from every document, line by line, field by field. Nothing inferred, everything sourced.",
       },
       {
         icon: Calculator,
@@ -82,7 +82,7 @@ const STAGES = [
       },
       {
         icon: Binary,
-        text: "Textract-vs-AI comparison: two independent extraction methods compared field by field. If they disagree, both values are presented with the percentage difference.",
+        text: "Dual-extraction comparison: two independent extraction methods compared field by field. If they disagree, both values are presented with the percentage difference.",
       },
       {
         icon: ClipboardList,
@@ -99,11 +99,11 @@ const STAGES = [
     borderColor: "border-violet-400/20",
     dotColor: "bg-violet-400",
     summary:
-      "AI analyzes all verified extractions. DSCR, DTI, cash flow, liquidity — every metric calculated and every risk identified.",
+      "All verified extractions are analyzed together. DSCR, DTI, cash flow, liquidity, every metric calculated and every risk identified.",
     details: [
       {
         icon: Activity,
-        text: "AI analyzes all verified extractions together — not document by document, but as a complete financial picture of the borrower.",
+        text: "The platform analyzes all verified extractions together, not document by document, but as a complete financial picture of the borrower.",
       },
       {
         icon: Calculator,
@@ -119,7 +119,7 @@ const STAGES = [
       },
       {
         icon: FileText,
-        text: "Result: a comprehensive Credit Memo with deal recommendations, supporting data, risk assessment, and the full analytical rationale — ready for committee review.",
+        text: "Result: a comprehensive Credit Memo with deal recommendations, supporting data, risk assessment, and the full analytical rationale, ready for committee review.",
       },
     ],
   },
@@ -132,11 +132,11 @@ const STAGES = [
     borderColor: "border-amber-400/20",
     dotColor: "bg-amber-400",
     summary:
-      "A deterministic rules engine — not AI — calculates every deal term. Rate, LTV, fees, covenants, all checked against 50-state usury limits.",
+      "A deterministic rules engine calculates every deal term. Rate, LTV, fees, covenants, all checked against 50-state usury limits.",
     details: [
       {
         icon: Binary,
-        text: "A rules engine (not AI) calculates all deal terms. Every number is deterministic — the same inputs always produce the same outputs. No hallucination risk.",
+        text: "A rules engine calculates all deal terms. Every number is deterministic. The same inputs always produce the same outputs, every time.",
       },
       {
         icon: Layers,
@@ -173,11 +173,11 @@ const STAGES = [
       },
       {
         icon: Brain,
-        text: "AI-generated documents (loan agreement, promissory note, guaranty) are written with program-specific legal references — not boilerplate, but provisions tied to the actual regulations governing the deal.",
+        text: "Prose documents (loan agreement, promissory note, guaranty) are generated with program-specific legal references, not boilerplate, but provisions tied to the actual regulations governing the deal.",
       },
       {
         icon: Binary,
-        text: "Deterministic documents (UCC filing, closing disclosure, amortization schedule) are built from pure template + data. No AI involved — just verified numbers placed in the correct fields.",
+        text: "Deterministic documents (UCC filing, closing disclosure, amortization schedule) are built from pure template + data. Pure calculation. Verified numbers placed in the correct fields.",
       },
       {
         icon: Scale,
@@ -185,11 +185,11 @@ const STAGES = [
       },
       {
         icon: RefreshCcw,
-        text: "Deficiencies flagged with the specific regulation and recommended fix. AI revises and resubmits for review — up to 3 cycles — until all compliance checks pass.",
+        text: "Deficiencies flagged with the specific regulation and recommended fix. The system revises and resubmits for review, up to 3 cycles, until all compliance checks pass.",
       },
       {
         icon: CheckCircle2,
-        text: "Result: a complete loan package — credit memo plus up to 37 legal documents — ready for download individually, inline editing, or as a single ZIP archive.",
+        text: "Result: a complete loan package, credit memo plus up to 37 legal documents, ready for download individually, inline editing, or as a single ZIP archive.",
       },
     ],
   },
@@ -202,19 +202,19 @@ const BEHIND_SCENES = [
   {
     icon: BookOpen,
     title: "IRS Field Specifications",
-    desc: "Every extraction maps to the exact IRS field definition. Line 31 of Form 1040 isn't just a number — it's verified against the IRS specification for Adjusted Gross Income. Schedule E Line 26 is verified as the sum of Lines 3 through 20 minus Lines 5 through 19. No guessing.",
+    desc: "Every extraction maps to the exact IRS field definition. Line 31 of Form 1040 isn't just a number, it's verified against the IRS specification for Adjusted Gross Income. Schedule E Line 26 is verified as the sum of Lines 3 through 20 minus Lines 5 through 19. No guessing.",
     delay: "100ms",
   },
   {
     icon: Binary,
     title: "Deterministic Verification",
-    desc: "No AI in the verification loop. Every math check is a deterministic calculation. 2 + 2 = 4, not \"approximately 4.\" Every cross-document comparison uses exact field values. The verification layer never hallucinates because it never uses a language model.",
+    desc: "Every math check is a deterministic calculation. 2 + 2 = 4, not \"approximately 4.\" Every cross-document comparison uses exact field values. The verification layer is mathematically verified and produces the same result every time for the same input.",
     delay: "175ms",
   },
   {
     icon: RefreshCcw,
     title: "Three-Layer Review",
-    desc: "AI writes prose. Compliance review checks every provision against the governing statute. Deterministic verification confirms every required provision is present and every number is correct. If any layer fails, the cycle repeats — up to three times — until the document passes.",
+    desc: "The platform generates prose. Compliance review checks every provision against the governing statute. Deterministic verification confirms every required provision is present and every number is correct. If any layer fails, the cycle repeats, up to three times, until the document passes.",
     delay: "250ms",
   },
   {
@@ -226,13 +226,13 @@ const BEHIND_SCENES = [
   {
     icon: Layers,
     title: "Dual Extraction Pipeline",
-    desc: "AWS Textract Lending and AI extract every field independently. The results are compared field by field. Agreement increases confidence. Disagreement triggers manual review with both values displayed. You never rely on a single extraction source.",
+    desc: "Two independent systems extract every field independently. The results are compared field by field. Agreement increases confidence. Disagreement triggers manual review with both values displayed. You never rely on a single extraction source.",
     delay: "400ms",
   },
   {
     icon: ShieldCheck,
     title: "Rules Engine Owns the Numbers",
-    desc: "AI never sets a rate, LTV, fee, or covenant. The deterministic rules engine owns every number in the deal terms. AI writes the narrative around the numbers, but the numbers themselves come from code that produces the same output every time for the same input.",
+    desc: "Rates, LTV, fees, and covenants are never interpreted. The deterministic rules engine owns every number in the deal terms. The platform generates the narrative around the numbers, but the numbers themselves come from pure calculation that produces the same output every time for the same input.",
     delay: "475ms",
   },
 ];
@@ -252,7 +252,7 @@ const STATS = [
   {
     value: "3",
     suffix: "-layer",
-    label: "Verification (math, cross-doc, Textract)",
+    label: "Verification (math, cross-doc, dual-extraction)",
     delay: "325ms",
   },
 ];
@@ -301,7 +301,7 @@ export default function HowItWorksPage() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          THE FIVE STAGES — VERTICAL TIMELINE
+          THE FIVE STAGES - VERTICAL TIMELINE
       ══════════════════════════════════════════════ */}
       <section className="w-full border-t border-border/50">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
@@ -323,7 +323,7 @@ export default function HowItWorksPage() {
 
           {/* Timeline */}
           <div className="relative">
-            {/* Vertical line — hidden on mobile, visible on md+ */}
+            {/* Vertical line - hidden on mobile, visible on md+ */}
             <div className="hidden md:block absolute left-8 top-0 bottom-0 w-px bg-border" />
 
             <div className="space-y-16 md:space-y-20">
@@ -333,7 +333,7 @@ export default function HowItWorksPage() {
                   className="relative animate-fade-up"
                   style={{ animationDelay: `${idx * 75}ms` }}
                 >
-                  {/* Timeline dot — hidden on mobile */}
+                  {/* Timeline dot - hidden on mobile */}
                   <div
                     className={`hidden md:flex absolute left-8 -translate-x-1/2 top-1 h-4 w-4 rounded-full ${stage.dotColor} ring-4 ring-background z-10`}
                   />

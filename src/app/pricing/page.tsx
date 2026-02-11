@@ -17,7 +17,6 @@ import {
   ChevronDown,
   Sparkles,
   Building2,
-  Crown,
 } from "lucide-react";
 
 /* ────────────────────────────────────────────────
@@ -29,7 +28,7 @@ const TIERS = [
     name: "Try It Free",
     price: "$0",
     period: "",
-    description: "One deal. Full pipeline. No credit card.",
+    description: "One deal. Full pipeline. No credit card. See exactly what the platform does before you commit.",
     highlight: false,
     features: [
       "1 deal, fully processed",
@@ -37,54 +36,38 @@ const TIERS = [
       "Full credit analysis and deal structuring",
       "All 10 loan programs",
       "50-state compliance checks",
-      "Sample deal with pre-loaded data OR upload your own",
+      "Sample deal with pre-loaded data or upload your own",
       "No credit card required",
     ],
-    cta: "Get Started",
+    cta: "Try It Free",
     icon: Sparkles,
     delay: "100ms",
   },
   {
-    name: "Professional",
-    price: "$3,000 \u2013 $5,000",
-    period: "/month",
+    name: "Full License",
+    price: "$50,000",
+    period: " initiation",
+    priceSecondary: "$5,000 - $10,000",
+    periodSecondary: "/month",
     description:
-      "Unlimited deals. Full team access. Everything you need to run a lending operation.",
+      "Unlimited deals for up to 25 people. Replaces what most firms spend tens of thousands per deal on outside counsel and analyst hours. Pays for itself in a handful of deals.",
     highlight: true,
-    badge: "Recommended",
+    badge: "Full Platform",
     features: [
-      "Everything in Free, plus:",
       "Unlimited deals",
       "Up to 25 seats per organization",
-      "Full audit trail",
-      "Priority document processing",
-      "Inline document editing",
+      "All 10 loan programs with full compliance",
+      "Up to 37 legal documents per deal",
+      "Full audit trail on every action",
+      "Inline document editing and review",
       "Download complete loan packages (ZIP)",
       "Team management and seat controls",
-    ],
-    cta: "Start Subscription",
-    icon: Crown,
-    delay: "175ms",
-  },
-  {
-    name: "Enterprise",
-    price: "$50,000",
-    period: " one-time license",
-    description:
-      "For organizations that want to own the platform outright. One payment, no recurring.",
-    highlight: false,
-    features: [
-      "Everything in Professional, plus:",
       "Dedicated onboarding",
-      "Volume pricing on monthly subscription",
-      "Custom loan program configuration",
-      "Priority support",
-      "Organization-wide deployment",
       "Paid via bank transfer (ACH) or wire",
     ],
-    cta: "Contact Us",
+    cta: "Get Started",
     icon: Building2,
-    delay: "250ms",
+    delay: "175ms",
   },
 ];
 
@@ -109,14 +92,14 @@ const INCLUDED_FEATURES = [
   },
   {
     icon: Brain,
-    title: "AI credit analysis",
+    title: "Full credit analysis",
     desc: "DSCR, DTI, cash flow, liquidity, and risk flags. Full credit evaluation with recommendations.",
     delay: "250ms",
   },
   {
     icon: Zap,
     title: "Deterministic deal structuring",
-    desc: "Rate, LTV, fees, covenants, and conditions set by rules engine. No AI hallucination on numbers.",
+    desc: "Rate, LTV, fees, covenants, and conditions set by rules engine. Every number deterministically calculated.",
     delay: "300ms",
   },
   {
@@ -140,7 +123,7 @@ const INCLUDED_FEATURES = [
   {
     icon: Lock,
     title: "Encrypted document storage",
-    desc: "AES-256 at rest, TLS in transit. Presigned URLs for access. Organization-level tenant isolation.",
+    desc: "End-to-end encryption at rest and in transit. Secure document access with expiring links. Organization-level data isolation.",
     delay: "500ms",
   },
   {
@@ -154,12 +137,12 @@ const INCLUDED_FEATURES = [
 const FAQ = [
   {
     q: "What counts as a deal?",
-    a: "One borrower, one loan. Upload as many documents as needed for that borrower \u2014 tax returns, bank statements, financials. All document extraction, verification, analysis, structuring, and generation for that deal is included.",
+    a: "One borrower, one loan. Upload as many documents as needed for that borrower, including tax returns, bank statements, and financials. All document extraction, verification, analysis, structuring, and generation for that deal is included.",
     delay: "100ms",
   },
   {
     q: "What happens after my free deal?",
-    a: "You\u2019ll need an active subscription to create additional deals. Your first deal and all its generated documents remain accessible.",
+    a: "You'll need a full license to create additional deals. Your first deal and all its generated documents remain accessible.",
     delay: "150ms",
   },
   {
@@ -179,12 +162,12 @@ const FAQ = [
   },
   {
     q: "Is my data secure?",
-    a: "Every document is encrypted with AES-256 at rest and TLS in transit. Documents are stored in AWS S3 with presigned URLs for access. Full audit trail on every action. Organization-level tenant isolation.",
+    a: "Every document is encrypted end-to-end, at rest and in transit. Secure access through expiring links. Full audit trail on every action. Organization-level data isolation. No borrower data is shared or used for training.",
     delay: "350ms",
   },
   {
-    q: "Do I need a contract for the enterprise license?",
-    a: "No. The enterprise license is a one-time payment via bank transfer or wire. No contracts, no negotiations.",
+    q: "How does payment work?",
+    a: "The $50,000 initiation fee is a one-time payment via bank transfer (ACH) or wire. Monthly fees are billed automatically after that. No contracts, no negotiations.",
     delay: "400ms",
   },
 ];
@@ -219,7 +202,7 @@ export default function PricingPage() {
             className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl mx-auto leading-relaxed animate-fade-up"
             style={{ animationDelay: "75ms" }}
           >
-            One deal free. Then choose the plan that fits your volume.
+            One deal free. Then the full platform, no limits.
           </p>
         </div>
       </section>
@@ -229,13 +212,13 @@ export default function PricingPage() {
       ══════════════════════════════════════════════ */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 pb-24 sm:pb-32">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 max-w-4xl mx-auto lg:items-start">
             {TIERS.map((tier) => (
               <div
                 key={tier.name}
                 className={`relative rounded-2xl border p-8 sm:p-10 animate-fade-up transition-all duration-200 ${
                   tier.highlight
-                    ? "border-primary/50 bg-card shadow-lg shadow-primary/5 ring-1 ring-primary/20 lg:scale-105 lg:-my-4"
+                    ? "border-primary/50 bg-card shadow-lg shadow-primary/5 ring-1 ring-primary/20"
                     : "border-border/50 bg-card"
                 }`}
                 style={{ animationDelay: tier.delay }}
@@ -274,6 +257,16 @@ export default function PricingPage() {
                     <span className="text-base text-muted-foreground">
                       {tier.period}
                     </span>
+                  )}
+                  {tier.priceSecondary && (
+                    <div className="mt-1">
+                      <span className="text-xl font-semibold text-foreground">
+                        {tier.priceSecondary}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {tier.periodSecondary}
+                      </span>
+                    </div>
                   )}
                 </div>
 
@@ -332,7 +325,7 @@ export default function PricingPage() {
               className="mt-4 text-muted-foreground animate-fade-up"
               style={{ animationDelay: "50ms" }}
             >
-              Every deal gets the full pipeline regardless of plan. Free or paid,
+              Every deal gets the full pipeline. Free trial or licensed,
               the output is the same.
             </p>
           </div>

@@ -54,11 +54,12 @@ export default async function Home() {
               className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-4xl leading-relaxed animate-fade-up"
               style={{ animationDelay: "75ms" }}
             >
-              Every figure across the borrower&apos;s tax returns, bank
-              statements, and financials independently verified and
-              cross-referenced. Up to 37 legal documents cited to the governing
-              federal or state statute. Your complete loan package, verified
-              against federal and state lending regulations, ready in minutes.
+              Two independent systems read every document separately, then
+              every number is mathematically checked from scratch. If anything
+              doesn&apos;t add up, it gets flagged. No hallucinations, no
+              guessing, no trusting a single source. Up to 37 legal documents,
+              each cited to the governing federal or state statute. Your
+              complete loan package, ready in minutes.
             </p>
             <div
               className="mt-10 flex flex-wrap items-center gap-4 animate-fade-up"
@@ -324,12 +325,12 @@ export default async function Home() {
                 icon: Lock,
                 category: "Security & Data",
                 items: [
-                  "AES-256 encryption on every upload",
-                  "TLS encryption in transit",
+                  "End-to-end encryption at rest and in transit",
                   "Full audit trail on all actions",
-                  "Borrower financials never stored in plaintext",
-                  "Presigned URLs for document access",
-                  "Org-level tenant isolation",
+                  "Role-based access controls",
+                  "Organization-level data isolation",
+                  "Secure document access with expiring links",
+                  "No borrower data shared or used for training",
                 ],
                 delay: "350ms",
               },
@@ -366,7 +367,7 @@ export default async function Home() {
         <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {[
-              { value: "37", label: "Legal documents per deal (up to)", delay: "100ms" },
+              { value: "Up to 37", label: "Legal documents per deal", delay: "100ms" },
               { value: "50", suffix: "-state", label: "Regulatory compliance", delay: "150ms" },
               { value: "10", label: "Loan programs supported", delay: "200ms" },
               { value: "20", suffix: "+", label: "Federal and state regulations", delay: "250ms" },

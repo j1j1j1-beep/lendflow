@@ -55,7 +55,7 @@ export default function FeaturesPage() {
               Replace weeks of manual data entry, spreadsheet analysis, and
               outside counsel with a single platform that extracts, verifies,
               analyzes, structures, and generates your complete loan
-              package&mdash;every number recalculated, every document cited to
+              package, every number recalculated, every document cited to
               the governing statute.
             </p>
             <div
@@ -96,10 +96,10 @@ export default function FeaturesPage() {
               className="mt-4 text-muted-foreground leading-relaxed animate-fade-up"
               style={{ animationDelay: "100ms" }}
             >
-              Borrower files arrive as PDFs, scans, and images. OpenShut uses
-              AWS Textract combined with AI extraction to pull structured data
-              from every page, then independently verifies every figure against
-              IRS field-level specifications.
+              Borrower files arrive as PDFs, scans, and images. OpenShut
+              processes every page through a specialized financial document
+              engine to pull structured data, then independently verifies
+              every figure against IRS field-level specifications.
             </p>
           </div>
 
@@ -114,14 +114,14 @@ export default function FeaturesPage() {
               },
               {
                 icon: FileSearch,
-                title: "AWS Textract + AI extraction",
-                desc: "Dual-layer extraction pipeline. AWS Textract handles OCR and table detection. AI layer extracts semantic fields, resolves ambiguity, and maps data to IRS form specifications. Both layers run independently, then results are compared.",
+                title: "Dual-layer extraction engine",
+                desc: "Dual-layer extraction pipeline. The first pass handles document parsing and table detection. A second independent system extracts semantic fields, resolves ambiguity, and maps data to IRS form specifications. Both layers run independently, then results are compared.",
                 delay: "150ms",
               },
               {
                 icon: Layers,
                 title: "Auto-classification",
-                desc: "Documents are automatically classified by type: Form 1040, Schedule C, Schedule E, K-1, bank statement, P&L, balance sheet. No manual sorting. The system identifies the document type and routes it to the appropriate extraction pipeline.",
+                desc: "Documents are automatically classified by type: Form 1040, Schedule C, Schedule E, K-1, bank statement, P&L, balance sheet. No manual sorting. Each document is identified and routed to the appropriate extraction pipeline.",
                 delay: "200ms",
               },
             ].map((item) => (
@@ -217,7 +217,7 @@ export default function FeaturesPage() {
                 Every sum, subtotal, and total in the borrower file is
                 independently recalculated from its component line items. The
                 system does not trust the printed totals on a tax return or
-                financial statement&mdash;it recomputes them.
+                financial statement. It recomputes them.
               </p>
               <ul className="space-y-3">
                 {[
@@ -249,8 +249,8 @@ export default function FeaturesPage() {
                 </h3>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                Numbers don&apos;t just have to add up internally&mdash;they
-                have to match across documents. The system cross-references
+                Numbers don&apos;t just have to add up internally. They
+                have to match across documents. The platform cross-references
                 every income figure, every deposit, every revenue line across
                 the entire borrower file.
               </p>
@@ -274,7 +274,7 @@ export default function FeaturesPage() {
             </div>
           </div>
 
-          {/* Textract vs AI comparison */}
+          {/* Dual-engine comparison */}
           <div
             className="mt-10 rounded-xl border bg-card p-8 animate-fade-up"
             style={{ animationDelay: "400ms" }}
@@ -282,17 +282,17 @@ export default function FeaturesPage() {
             <div className="flex items-center gap-3 mb-5">
               <Zap className="h-5 w-5 text-primary" />
               <h3 className="text-base font-semibold text-card-foreground">
-                Textract vs. AI comparison layer
+                Dual-engine comparison layer
               </h3>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
-              Both extraction engines&mdash;AWS Textract and AI&mdash;run
-              independently on every document. The system then compares their
-              outputs field by field. Agreements are accepted. Disagreements
-              are flagged with both values, the confidence level of each, and
-              the recommended resolution. This dual-path architecture catches
-              OCR misreads, AI hallucinations, and ambiguous formatting that
-              either system alone would miss.
+              Both extraction engines run independently on every document.
+              The platform then compares their outputs field by field.
+              Agreements are accepted. Disagreements are flagged with both
+              values, the confidence level of each, and the recommended
+              resolution. This dual-path architecture catches misreads,
+              ambiguous formatting, and extraction errors that either system
+              alone would miss.
             </p>
           </div>
         </div>
@@ -323,8 +323,9 @@ export default function FeaturesPage() {
             >
               Once every data point is extracted and verified, the platform
               runs a full credit analysis and structures deal terms
-              automatically. The rules engine owns every number&mdash;rates, LTV,
-              fees, and covenants are set by program-specific rules, not by AI.
+              automatically. The rules engine owns every number. Rates, LTV,
+              fees, and covenants are set by program-specific rules, not by
+              interpretation.
             </p>
           </div>
 
@@ -399,18 +400,18 @@ export default function FeaturesPage() {
                   Rules engine owns all numbers
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-3xl">
-                  AI writes prose&mdash;credit analysis narrative, risk
-                  commentary, deal recommendations. It never sets rates, LTV
-                  caps, fees, or covenants. Every numerical deal term is
-                  determined by a deterministic rules engine configured per
-                  loan program. Interest rates are set by program-specific
-                  rate tables and borrower risk tier. LTV is capped by
-                  collateral type and program rules. Fees follow published
-                  schedules (SBA guaranty fee tiers, for example). Covenants
-                  and conditions are assigned based on deal size, property
-                  type, and risk factors. This architecture means deal terms
-                  are auditable, consistent, and explainable&mdash;not subject
-                  to AI variance.
+                  The platform generates prose, including credit analysis
+                  narrative, risk commentary, and deal recommendations. It
+                  never sets rates, LTV caps, fees, or covenants. Every
+                  numerical deal term is determined by a deterministic rules
+                  engine configured per loan program. Interest rates are set
+                  by program-specific rate tables and borrower risk tier. LTV
+                  is capped by collateral type and program rules. Fees follow
+                  published schedules (SBA guaranty fee tiers, for example).
+                  Covenants and conditions are assigned based on deal size,
+                  property type, and risk factors. This architecture means
+                  deal terms are auditable, consistent, and explainable,
+                  never subject to variance.
                 </p>
               </div>
             </div>
@@ -441,12 +442,13 @@ export default function FeaturesPage() {
               className="mt-4 text-muted-foreground leading-relaxed animate-fade-up"
               style={{ animationDelay: "100ms" }}
             >
-              Every loan program generates the documents it requires&mdash;no
-              more, no less. Each document is either AI-generated (prose
+              Every loan program generates the documents it requires, no
+              more, no less. Each document is either platform-generated (prose
               sections like recitals and covenants) or deterministic (pure
-              calculation, zero AI) and independently verified against
-              applicable regulations. View inline, edit in the browser,
-              download individually, or grab the entire package as a ZIP.
+              calculation, no interpretation) and independently verified
+              against applicable regulations. View inline, edit in the
+              browser, download individually, or grab the entire package as
+              a ZIP.
             </p>
           </div>
 
@@ -484,7 +486,7 @@ export default function FeaturesPage() {
                   "Borrower Certification",
                   "Hazard Insurance Disclosure",
                 ],
-                desc: "TILA/Regulation Z integrated disclosures. APR and finance charge calculations are deterministic (zero AI, pure math). Timing requirements and tolerance thresholds enforced per TRID rules.",
+                desc: "TILA/Regulation Z integrated disclosures. APR and finance charge calculations are deterministic, pure math. Timing requirements and tolerance thresholds enforced per TRID rules.",
                 delay: "200ms",
               },
               {
@@ -591,7 +593,7 @@ export default function FeaturesPage() {
             </div>
           </div>
 
-          {/* AI vs deterministic */}
+          {/* Platform-generated vs deterministic */}
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2">
             <div
               className="rounded-xl border bg-card p-8 animate-fade-up"
@@ -600,16 +602,16 @@ export default function FeaturesPage() {
               <div className="flex items-center gap-3 mb-5">
                 <Brain className="h-5 w-5 text-primary" />
                 <h3 className="text-base font-semibold text-card-foreground">
-                  AI-generated documents
+                  Platform-generated documents
                 </h3>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                Prose-heavy sections&mdash;recitals, representations, covenant
-                narratives, credit analysis memos&mdash;are generated by AI
-                using verified deal data. After generation, every document
-                passes through an independent compliance review that checks
-                every provision against applicable statutes and flags
-                deficiencies with recommended fixes.
+                Prose-heavy sections, including recitals, representations,
+                covenant narratives, and credit analysis memos, are generated
+                by the platform using verified deal data. After generation,
+                every document passes through an independent compliance review
+                that checks every provision against applicable statutes and
+                flags deficiencies with recommended fixes.
               </p>
               <div className="text-xs text-muted-foreground/80 bg-muted/30 rounded-lg p-3">
                 Examples: Loan Agreement recitals, Credit Memo narrative,
@@ -624,15 +626,15 @@ export default function FeaturesPage() {
               <div className="flex items-center gap-3 mb-5">
                 <Calculator className="h-5 w-5 text-primary" />
                 <h3 className="text-base font-semibold text-card-foreground">
-                  Deterministic documents (zero AI)
+                  Deterministic documents (pure calculation)
                 </h3>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                 Financial calculations, payment schedules, disclosure
-                figures, and regulatory thresholds skip AI entirely. They are
-                built from templates using verified data and deterministic
-                calculation. Every APR, finance charge, payment amount, and
-                fee is computed directly. Then verified independently.
+                figures, and regulatory thresholds are built from templates
+                using verified data and deterministic calculation. Every APR,
+                finance charge, payment amount, and fee is computed directly.
+                Then verified independently.
               </p>
               <div className="text-xs text-muted-foreground/80 bg-muted/30 rounded-lg p-3">
                 Examples: Closing Disclosure APR, Loan Estimate figures,
@@ -745,7 +747,7 @@ export default function FeaturesPage() {
                 {
                   step: "1",
                   title: "Generate",
-                  desc: "AI writes prose. Rules engine sets numbers. Template builds the document structure. Every field populated from verified deal data.",
+                  desc: "The platform generates prose. Rules engine sets numbers. Template builds the document structure. Every field populated from verified deal data.",
                 },
                 {
                   step: "2",
@@ -878,7 +880,7 @@ export default function FeaturesPage() {
                   "AES-256 encryption on every upload",
                   "TLS encryption in transit",
                   "Full audit trail on all actions",
-                  "Presigned URLs for document access",
+                  "Secure document access with expiring links",
                   "Org-level tenant isolation",
                   "Borrower data never stored in plaintext",
                 ],
