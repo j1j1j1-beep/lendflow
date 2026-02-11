@@ -1,7 +1,5 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // OpenShut Analysis Engine — Business / Self-Employment Analysis
 // 100% deterministic. Zero AI. Pure TypeScript math.
-// ─────────────────────────────────────────────────────────────────────────────
 
 export interface BusinessAnalysis {
   revenueByYear: Record<number, number>;
@@ -22,9 +20,7 @@ export interface BusinessAnalysis {
   notes: string[];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 function num(val: unknown): number {
   if (typeof val === "number" && Number.isFinite(val)) return val;
@@ -56,9 +52,7 @@ function normalizeDocType(docType: string): string {
   return docType.toLowerCase().replace(/[\s\-_]/g, "");
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Per-document extraction
-// ─────────────────────────────────────────────────────────────────────────────
 
 interface BusinessYearData {
   year: number;
@@ -216,9 +210,7 @@ function extractProfitAndLoss(data: any, year: number): BusinessYearData {
   };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Main business analysis
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function analyzeBusiness(
   extractions: Array<{ docType: string; data: any; year?: number }>
@@ -234,7 +226,7 @@ export function analyzeBusiness(
     return null;
   }
 
-  // ── Extract data from each document ────────────────────────────────────────
+  // Extract data from each document
   const yearDataEntries: BusinessYearData[] = [];
 
   for (const doc of businessDocs) {
@@ -254,7 +246,7 @@ export function analyzeBusiness(
     yearDataEntries.push(entry);
   }
 
-  // ── Aggregate by year (sum if multiple business entities per year) ─────────
+  // Aggregate by year (sum if multiple business entities per year)
   const byYear: Record<number, BusinessYearData[]> = {};
   for (const entry of yearDataEntries) {
     if (!byYear[entry.year]) {
@@ -267,7 +259,7 @@ export function analyzeBusiness(
     .map(Number)
     .sort((a, b) => a - b);
 
-  // ── Revenue by year ────────────────────────────────────────────────────────
+  // Revenue by year
   const revenueByYear: Record<number, number> = {};
   const adjustedNetByYear: Record<number, number> = {};
 
@@ -286,7 +278,7 @@ export function analyzeBusiness(
     adjustedNetByYear[yr] = yearNet + yearAddBacks;
   }
 
-  // ── Revenue trend ──────────────────────────────────────────────────────────
+  // Revenue trend
   let revenueTrend: "increasing" | "stable" | "declining" = "stable";
   let revenueTrendPercent = 0;
 
@@ -311,7 +303,7 @@ export function analyzeBusiness(
 
   revenueTrendPercent = Math.round(revenueTrendPercent * 10000) / 10000;
 
-  // ── Aggregate add-backs (most recent year, or all if single year) ──────────
+  // Aggregate add-backs (most recent year, or all if single year)
   const latestYear = years[years.length - 1];
   const latestEntries = byYear[latestYear];
 
@@ -325,14 +317,14 @@ export function analyzeBusiness(
   const latestNetIncome = latestEntries.reduce((s, e) => s + e.netIncome, 0);
   const adjustedNetIncome = latestNetIncome + totalAddBacks;
 
-  // ── Expense ratio ──────────────────────────────────────────────────────────
+  // Expense ratio
   const latestRevenue = revenueByYear[latestYear] || 0;
   const latestExpenses = latestEntries.reduce((s, e) => s + e.totalExpenses, 0);
   const expenseRatio = latestRevenue > 0
     ? Math.round((latestExpenses / latestRevenue) * 10000) / 10000
     : 0;
 
-  // ── Notes ──────────────────────────────────────────────────────────────────
+  // Notes
   const notes: string[] = [];
 
   notes.push(

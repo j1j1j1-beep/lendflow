@@ -2,9 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 
-// ---------------------------------------------------------------------------
 // GET /api/billing — current subscription status for the authed org
-// ---------------------------------------------------------------------------
 
 export async function GET() {
   try {

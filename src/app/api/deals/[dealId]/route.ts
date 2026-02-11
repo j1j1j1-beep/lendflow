@@ -3,9 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { getPresignedDownloadUrl, deleteFromS3 } from "@/lib/s3";
 
-// ---------------------------------------------------------------------------
 // GET /api/deals/[dealId] - Get full deal with all related data
-// ---------------------------------------------------------------------------
 
 export async function GET(
   request: NextRequest,
@@ -110,9 +108,7 @@ export async function GET(
   }
 }
 
-// ---------------------------------------------------------------------------
 // DELETE /api/deals/[dealId] - Permanently delete a deal and all related data
-// ---------------------------------------------------------------------------
 
 export async function DELETE(
   request: NextRequest,

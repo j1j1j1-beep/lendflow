@@ -1,9 +1,7 @@
-// =============================================================================
 // intercreditor-agreement.ts
 // Generates a DOCX Intercreditor Agreement from deterministic deal terms + AI prose.
 // Governs the relationship between multiple lenders on the same deal — the most
 // complex document in a loan package.
-// =============================================================================
 
 import {
   Document,
@@ -29,9 +27,7 @@ import {
 
 import type { DocumentInput, IntercreditorProse } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildIntercreditorAgreement(
   input: DocumentInput,
@@ -47,14 +43,10 @@ export function buildIntercreditorAgreement(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("Intercreditor Agreement"));
 
-  // -----------------------------------------------------------------------
   // 2. Parties — First Lien Lender, Second Lien Lender, Borrower
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Parties"));
   children.push(
     bodyText(
@@ -83,9 +75,7 @@ export function buildIntercreditorAgreement(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 3. Recitals
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Recitals"));
   children.push(
     bodyTextRuns([
@@ -123,9 +113,7 @@ export function buildIntercreditorAgreement(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // 4. Key Terms Table
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Key Terms"));
   children.push(
     keyTermsTable([
@@ -142,9 +130,7 @@ export function buildIntercreditorAgreement(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 5. Article I — Definitions and Interpretation (AI prose)
-  // -----------------------------------------------------------------------
   children.push(new Paragraph({ children: [new PageBreak()] }));
   children.push(articleHeading("I", "Definitions and Interpretation"));
   children.push(
@@ -158,9 +144,7 @@ export function buildIntercreditorAgreement(
   );
   children.push(bodyText(prose.definitionsAndInterpretation));
 
-  // -----------------------------------------------------------------------
   // 6. Article II — Lien Priority (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("II", "Lien Priority"));
   children.push(
     bodyText(
@@ -179,9 +163,7 @@ export function buildIntercreditorAgreement(
   );
   children.push(bodyText(prose.lienPriority));
 
-  // -----------------------------------------------------------------------
   // 7. Article III — Payment Waterfall (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("III", "Payment Waterfall"));
   children.push(
     bodyText(
@@ -200,9 +182,7 @@ export function buildIntercreditorAgreement(
   );
   children.push(bodyText(prose.paymentWaterfall));
 
-  // -----------------------------------------------------------------------
   // 8. Article IV — Standstill and Cure (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("IV", "Standstill and Cure Rights"));
   children.push(
     bodyText(
@@ -221,9 +201,7 @@ export function buildIntercreditorAgreement(
   );
   children.push(bodyText(prose.standstillAndCure));
 
-  // -----------------------------------------------------------------------
   // 9. Article V — Enforcement Rights (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("V", "Enforcement Rights"));
   children.push(
     bodyText(
@@ -236,9 +214,7 @@ export function buildIntercreditorAgreement(
   );
   children.push(bodyText(prose.enforcementRights));
 
-  // -----------------------------------------------------------------------
   // 10. Article VI — Purchase Option (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("VI", "Purchase Option"));
   children.push(
     bodyText(
@@ -251,9 +227,7 @@ export function buildIntercreditorAgreement(
   );
   children.push(bodyText(prose.purchaseOption));
 
-  // -----------------------------------------------------------------------
   // 11. Article VII — Release and Amendment (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("VII", "Release and Amendment"));
   children.push(
     bodyText(
@@ -266,9 +240,7 @@ export function buildIntercreditorAgreement(
   );
   children.push(bodyText(prose.releaseAndAmendment));
 
-  // -----------------------------------------------------------------------
   // 12. Article VIII — Bankruptcy Provisions (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("VIII", "Bankruptcy Provisions"));
   children.push(
     bodyText(
@@ -287,9 +259,7 @@ export function buildIntercreditorAgreement(
   );
   children.push(bodyText(prose.bankruptcyProvisions));
 
-  // -----------------------------------------------------------------------
   // Article IX — Insurance and Condemnation Proceeds
-  // -----------------------------------------------------------------------
   children.push(articleHeading("IX", "Insurance and Condemnation Proceeds"));
   children.push(
     bodyText(
@@ -297,9 +267,7 @@ export function buildIntercreditorAgreement(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // Article X — Notices
-  // -----------------------------------------------------------------------
   children.push(articleHeading("X", "Notices"));
   children.push(
     bodyText(
@@ -307,9 +275,7 @@ export function buildIntercreditorAgreement(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // Article XI — Representations and Warranties
-  // -----------------------------------------------------------------------
   children.push(articleHeading("XI", "Representations and Warranties"));
   children.push(
     bodyText(
@@ -317,9 +283,7 @@ export function buildIntercreditorAgreement(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // Article XII — Term and Termination
-  // -----------------------------------------------------------------------
   children.push(articleHeading("XII", "Term and Termination"));
   children.push(
     bodyText(
@@ -327,15 +291,11 @@ export function buildIntercreditorAgreement(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // Article XIII — Governing Law (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("XIII", "Governing Law"));
   children.push(bodyText(prose.governingLaw));
 
-  // -----------------------------------------------------------------------
   // Standard clauses
-  // -----------------------------------------------------------------------
   children.push(articleHeading("XIV", "Additional Standard Provisions"));
   children.push(
     bodyText(
@@ -367,9 +327,7 @@ export function buildIntercreditorAgreement(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // 14. Signature blocks
-  // -----------------------------------------------------------------------
   children.push(new Paragraph({ children: [new PageBreak()] }));
   children.push(sectionHeading("IN WITNESS WHEREOF"));
   children.push(
@@ -407,9 +365,7 @@ export function buildIntercreditorAgreement(
     ...signatureBlock(input.borrowerName, "Authorized Signatory"),
   );
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Intercreditor Agreement",
     headerRight: `Intercreditor Agreement — ${input.borrowerName}`,

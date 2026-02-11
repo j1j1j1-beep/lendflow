@@ -1,9 +1,7 @@
-// =============================================================================
 // sba-form-1919.ts
 // Generates a DOCX SBA Form 1919 — Borrower Information Form.
 // ZERO AI — pure deterministic data mapping from DocumentInput.
 // Fields not available in DocumentInput use placeholder text for manual entry.
-// =============================================================================
 
 import {
   Document,
@@ -26,9 +24,7 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function entityTypeLabel(et: DocumentInput["entityType"]): string {
   switch (et) {
@@ -45,17 +41,13 @@ function entityTypeLabel(et: DocumentInput["entityType"]): string {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildSbaForm1919(input: DocumentInput): Document {
   const { terms } = input;
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // Title
-  // -------------------------------------------------------------------------
   children.push(documentTitle("SBA Form 1919"));
   children.push(spacer(2));
   children.push(
@@ -73,9 +65,7 @@ export function buildSbaForm1919(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Section A: Applicant/Borrower Information
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Section A: Applicant/Borrower Information"));
   children.push(spacer(4));
 
@@ -118,9 +108,7 @@ export function buildSbaForm1919(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Section B: About the Loan Request
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Section B: About the Loan Request"));
   children.push(spacer(4));
 
@@ -151,9 +139,7 @@ export function buildSbaForm1919(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Section C: Indebtedness
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Section C: Indebtedness"));
   children.push(spacer(4));
   children.push(
@@ -185,9 +171,7 @@ export function buildSbaForm1919(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Section D: Management Information
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Section D: Management Information"));
   children.push(spacer(4));
   children.push(
@@ -238,9 +222,7 @@ export function buildSbaForm1919(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Section E: Certifications and Declarations
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Section E: Certifications and Declarations"));
   children.push(spacer(4));
   children.push(
@@ -312,9 +294,7 @@ export function buildSbaForm1919(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Certification Statement
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Certification"));
   children.push(spacer(4));
   children.push(
@@ -331,9 +311,7 @@ export function buildSbaForm1919(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Signature Block
-  // -------------------------------------------------------------------------
   children.push(
     bodyText("APPLICANT/BORROWER:", { bold: true, color: COLORS.primary }),
   );
@@ -366,9 +344,7 @@ export function buildSbaForm1919(input: DocumentInput): Document {
   children.push(bodyText("Title: ____________________________"));
   children.push(bodyText("Date: ____________________________"));
 
-  // -------------------------------------------------------------------------
   // Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "SBA Form 1919 — Borrower Information Form",
     headerRight: `SBA Form 1919 — ${input.borrowerName}`,

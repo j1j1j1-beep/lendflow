@@ -1,7 +1,5 @@
-// =============================================================================
 // promissory-note.ts
 // Generates a DOCX Promissory Note from deterministic deal terms + AI prose.
-// =============================================================================
 
 import {
   Document,
@@ -26,9 +24,7 @@ import {
 
 import type { DocumentInput, PromissoryNoteProse } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildPromissoryNote(
   input: DocumentInput,
@@ -51,14 +47,10 @@ export function buildPromissoryNote(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("Promissory Note"));
 
-  // -----------------------------------------------------------------------
   // 2. Header info — key terms table
-  // -----------------------------------------------------------------------
   children.push(
     keyTermsTable([
       { label: "Date", value: dateFormatted },
@@ -70,9 +62,7 @@ export function buildPromissoryNote(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 3. Promise to Pay
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("1. Promise to Pay"));
   children.push(
     bodyTextRuns([
@@ -86,9 +76,7 @@ export function buildPromissoryNote(
     ]),
   );
 
-  // -----------------------------------------------------------------------
   // 4. Interest Rate
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("2. Interest Rate"));
   if (terms.baseRateType.toLowerCase().includes("fixed")) {
     children.push(
@@ -110,9 +98,7 @@ export function buildPromissoryNote(
     );
   }
 
-  // -----------------------------------------------------------------------
   // 5. Payment Terms
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("3. Payment Terms"));
 
   if (terms.interestOnly) {
@@ -154,9 +140,7 @@ export function buildPromissoryNote(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // 6. Application of Payments
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("4. Application of Payments"));
   children.push(
     bodyText(
@@ -164,9 +148,7 @@ export function buildPromissoryNote(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // 7. Prepayment
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("5. Prepayment"));
   if (terms.prepaymentPenalty) {
     children.push(
@@ -182,9 +164,7 @@ export function buildPromissoryNote(
     );
   }
 
-  // -----------------------------------------------------------------------
   // 8. Late Charges (deterministic — rules engine owns these numbers)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("6. Late Charges"));
   children.push(
     bodyText(
@@ -192,9 +172,7 @@ export function buildPromissoryNote(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // 9. Default (deterministic baseline + AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("7. Default"));
   children.push(
     bodyText(
@@ -237,9 +215,7 @@ export function buildPromissoryNote(
   );
   children.push(bodyText(prose.defaultProvisions));
 
-  // -----------------------------------------------------------------------
   // 10. Acceleration (deterministic baseline + AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("8. Acceleration"));
   children.push(
     bodyText(
@@ -252,9 +228,7 @@ export function buildPromissoryNote(
   );
   children.push(bodyText(prose.accelerationClause));
 
-  // -----------------------------------------------------------------------
   // 11. Waivers (deterministic baseline + AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("9. Waivers"));
   children.push(
     bodyText(
@@ -267,15 +241,11 @@ export function buildPromissoryNote(
   );
   children.push(bodyText(prose.waiverProvisions));
 
-  // -----------------------------------------------------------------------
   // 12. Governing Law (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("10. Governing Law"));
   children.push(bodyText(prose.governingLawClause));
 
-  // -----------------------------------------------------------------------
   // 13. Miscellaneous (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("11. Miscellaneous"));
   children.push(bodyText(prose.miscellaneousProvisions));
 
@@ -303,9 +273,15 @@ export function buildPromissoryNote(
     ),
   );
 
-  // -----------------------------------------------------------------------
-  // 14. Signature blocks
-  // -----------------------------------------------------------------------
+  // Usury Savings Clause
+  children.push(sectionHeading("15. Usury Savings Clause"));
+  children.push(
+    bodyText(
+      "Notwithstanding any provision of this Note to the contrary, in no event shall the interest rate charged hereunder exceed the maximum rate permitted by applicable law (the \"Maximum Lawful Rate\"). If the rate of interest payable under this Note would otherwise exceed the Maximum Lawful Rate, the rate shall be automatically reduced to the Maximum Lawful Rate. Any interest collected in excess of the Maximum Lawful Rate shall be applied first to reduce the outstanding principal balance, and any remaining excess shall be refunded to the Borrower. In determining whether the interest paid or payable exceeds the Maximum Lawful Rate, Borrower and Lender shall, to the maximum extent permitted by applicable law: (a) characterize any non-principal payment as an expense, fee, or premium rather than as interest; (b) exclude voluntary prepayments and the effects thereof; and (c) spread the total amount of interest throughout the entire contemplated term of the Note so that the interest rate is uniform throughout the entire term.",
+    ),
+  );
+
+  // 15. Signature blocks
   children.push(sectionHeading("IN WITNESS WHEREOF"));
   children.push(
     bodyText(
@@ -326,9 +302,7 @@ export function buildPromissoryNote(
   );
   children.push(...signatureBlock(input.lenderName, "Authorized Signatory"));
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Promissory Note",
     headerRight: `Promissory Note — ${input.borrowerName}`,

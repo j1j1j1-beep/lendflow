@@ -1,9 +1,7 @@
-// =============================================================================
 // generate-doc.ts
 // AI prose generation for loan documents. Claude writes ONLY prose sections —
 // all numbers are injected into the prompt as context so Claude writes around
 // them but never invents numbers.
-// =============================================================================
 
 import type {
   DocumentInput,
@@ -19,9 +17,7 @@ import {
 import { claudeJson } from "@/lib/claude";
 import { getLegalReferences } from "./legal-references";
 
-// ---------------------------------------------------------------------------
 // Shared deal context builder — injects ALL numbers into prompt
-// ---------------------------------------------------------------------------
 
 function buildDealContext(input: DocumentInput): string {
   const ratePercent = (input.terms.interestRate * 100).toFixed(3);
@@ -94,9 +90,7 @@ SPECIAL TERMS:
 ${specialTermsBlock}`;
 }
 
-// ---------------------------------------------------------------------------
 // System prompt (shared for all doc types)
-// ---------------------------------------------------------------------------
 
 const SYSTEM_PROMPT = `You are a senior commercial lending attorney with 20+ years of experience at a top-tier law firm. You draft enforceable, production-ready loan document prose for institutional lenders. Your documents must withstand judicial scrutiny and regulatory examination.
 
@@ -119,11 +113,12 @@ ABSOLUTE RULES — VIOLATION OF ANY RULE MAKES THE DOCUMENT UNENFORCEABLE:
    - Reviewed by opposing counsel before execution
    - Examined by bank regulators during an audit
    - Tested in litigation if the borrower defaults
-7. OUTPUT: Respond ONLY with valid JSON matching the requested schema. No commentary, disclaimers, or template language.`;
+7. OUTPUT: Respond ONLY with valid JSON matching the requested schema. No commentary, disclaimers, or template language.
 
-// ---------------------------------------------------------------------------
+AI-GENERATED CONTENT DISCLAIMER AND FAIR LENDING COMPLIANCE:
+This AI-generated content is for document drafting assistance only and does not constitute legal advice. The output must not be used as the sole basis for credit decisions. All credit decisions must comply with the Equal Credit Opportunity Act (ECOA, 15 U.S.C. Section 1691 et seq.), the Fair Housing Act (42 U.S.C. Section 3601 et seq.), and all applicable federal and state fair lending laws and regulations. This platform does not make, recommend, or influence credit approval or denial decisions. The generated documents must be reviewed by qualified legal counsel before execution. Do not include any language in the generated prose that could be construed as a credit decision, credit recommendation, or assessment of borrower creditworthiness.`;
+
 // Per-doc-type prompt builders
-// ---------------------------------------------------------------------------
 
 function buildPromissoryNotePrompt(input: DocumentInput): string {
   const refs = getLegalReferences("promissory_note", input.programId);
@@ -182,15 +177,26 @@ function buildGuarantyPrompt(input: DocumentInput): string {
   const refs = getLegalReferences("guaranty", input.programId);
   return `${buildDealContext(input)}
 ${refs ? `\n${refs}\n` : ""}
-Generate the prose sections for a GUARANTY AGREEMENT. This is a ${input.terms.personalGuaranty ? "full personal" : "limited"} guaranty. The deterministic sections (parties, guaranteed amount) are handled by the template. You provide the legal clauses. This must be a guaranty of PAYMENT (not collection). The guarantor is directly liable — the lender need not first pursue the borrower.
+Generate the prose sections for a GUARANTY AGREEMENT. This is a ${input.terms.personalGuaranty ? "full personal" : "limited"} guaranty. The deterministic sections (parties, guaranteed amount) are handled by the template. You provide SUPPLEMENTARY legal clauses ONLY.
+
+The template ALREADY includes all of the following — do NOT repeat, expand, or rephrase any of them:
+- Section 3.1: "absolute, unconditional, and continuing guaranty of payment and not merely a guaranty of collection" (guarantor directly liable — lender need not first pursue borrower)
+- Full enumerated list of guaranteed obligations (principal, interest, fees, late charges, collection costs, attorney fees)
+- "This Guaranty covers all amounts owing without limitation"
+- Waivers (a) through (g) covering specific suretyship defenses: (a) notice of acceptance, (b) presentment/demand/protest, (c) notice of default or non-payment, (d) any right to require lender to proceed against borrower first, (e) marshaling of assets, (f) any defense based on modifications to loan terms, (g) any other suretyship defense under applicable law
+- Subrogation waiver (no subrogation until all obligations paid in full)
+- Subordination of guarantor's claims against borrower to lender's claims
+- Spousal consent section
+
+You provide ONLY supplementary legal clauses NOT covered above (e.g., reinstatement after avoided payments, joint and several liability if multiple guarantors, financial reporting obligations, net worth maintenance covenants, death/incapacity provisions, notice addresses, integration clause). If a field has no additional content needed, return a brief statement that the template provisions are sufficient.
 
 Return JSON matching this exact schema:
 {
-  "guarantyScope": "string — scope of guaranty (unconditional, continuing, absolute), what obligations are guaranteed, guaranty amount",
-  "waiverOfDefenses": ["array of strings — each is a specific defense the guarantor waives (suretyship defenses, marshaling, notice of default, notice of acceptance, etc.)"],
-  "subrogationWaiver": "string — waiver of subrogation rights until all obligations are paid in full",
-  "subordination": "string — subordination of any claims guarantor has against borrower to the lender's claims",
-  "miscellaneous": "string — amendments, successors, counterparts, entire agreement",
+  "guarantyScope": "string — SUPPLEMENTARY scope provisions only (e.g., reinstatement of guaranty if any payment is avoided/recovered in bankruptcy, continuing nature surviving renewals/extensions). Do NOT restate that this is unconditional/absolute/continuing or re-list guaranteed amounts — the template already covers that",
+  "waiverOfDefenses": ["array of strings — each is a SUPPLEMENTARY defense waiver NOT already in the template's (a)-(g) list (e.g., waiver of anti-deficiency statutes, waiver of right to trial by jury, waiver of statute of limitations defenses, waiver of Regulation Z rescission rights if applicable)"],
+  "subrogationWaiver": "string — SUPPLEMENTARY subrogation provisions only (e.g., if subrogation rights vest after full payment, any limitations or conditions). Do NOT restate the basic subrogation waiver — template already includes it",
+  "subordination": "string — SUPPLEMENTARY subordination provisions only (e.g., turnover obligations if guarantor receives payment in violation, treatment in bankruptcy). Do NOT restate the basic subordination — template already includes it",
+  "miscellaneous": "string — amendments, successors, counterparts, entire agreement, notices, integration",
   "governingLaw": "string — governing law, jurisdiction, venue, jury trial waiver"
 }`;
 }
@@ -215,15 +221,25 @@ function buildEnvironmentalIndemnityPrompt(input: DocumentInput): string {
   const refs = getLegalReferences("environmental_indemnity", input.programId);
   return `${buildDealContext(input)}
 ${refs ? `\n${refs}\n` : ""}
-Generate the prose sections for an ENVIRONMENTAL INDEMNITY AGREEMENT. The deterministic sections (parties, key terms table, recitals) are handled by the template. You provide the legal clauses.
+Generate the prose sections for an ENVIRONMENTAL INDEMNITY AGREEMENT. The deterministic sections (parties, key terms table, recitals) are handled by the template. You provide SUPPLEMENTARY legal clauses ONLY.
+
+The template ALREADY includes all of the following — do NOT repeat, expand, or rephrase any of them:
+- Hazardous Substances definition referencing CERCLA (42 U.S.C. Section 9601(14)), including petroleum products, asbestos, PCBs, mold, and radioactive materials
+- Environmental Laws definition (CERCLA, RCRA, CWA, CAA, TSCA, and all applicable federal, state, and local environmental statutes and regulations)
+- Indemnification scope covering all losses, costs, damages, liabilities, claims, fines, penalties, and expenses (including attorney fees and remediation costs)
+- Statement that indemnity obligations are unsecured obligations of the indemnitor
+- Survival clause (obligations survive loan repayment, foreclosure, and deed-in-lieu)
+- Subrogation waiver
+
+You provide ONLY supplementary provisions NOT covered above (e.g., deal-specific environmental representations about the actual property, property-specific covenants, remediation procedures and obligations, additional survival/successor terms, lender inspection rights, environmental insurance requirements). If a field has no additional content needed, return a brief statement that the template provisions are sufficient.
 
 Return JSON matching this exact schema:
 {
-  "indemnificationScope": "string — comprehensive indemnification scope covering all environmental liabilities, claims, losses, damages, costs, and expenses including remediation costs, fines, penalties, and legal fees arising from hazardous substances on or about the property. You must include a comprehensive definition of Hazardous Substances (referencing CERCLA 42 U.S.C. § 9601, RCRA, Clean Water Act, petroleum products, asbestos, PCBs, mold) and Environmental Laws (all federal, state, and local laws relating to pollution, environmental protection, or hazardous substances)",
-  "representationsAndWarranties": ["array of strings — each is an environmental representation (no known contamination, compliance with environmental laws, no underground storage tanks, no hazardous substances, no pending environmental actions, Phase I/II results disclosed)"],
-  "covenants": ["array of strings — each is an ongoing environmental covenant (comply with environmental laws, no hazardous substances, notify lender of environmental issues, permit lender inspections, maintain environmental insurance if required)"],
-  "remediationObligations": "string — obligations upon discovery of contamination including prompt notice, investigation, remediation plan, completion of cleanup, cooperation with authorities",
-  "survivalClause": "string — survival of indemnity obligations beyond loan repayment and foreclosure, binding on successors and assigns",
+  "indemnificationScope": "string — SUPPLEMENTARY indemnification provisions only (e.g., deal-specific carve-outs, contribution rights, indemnification procedures including notice/defense/settlement mechanics). Do NOT restate the definitions of Hazardous Substances or Environmental Laws, and do NOT restate the indemnification scope — the template already covers all of that",
+  "representationsAndWarranties": ["array of strings — each is a deal-specific environmental representation about the ACTUAL property (e.g., Phase I/II results disclosed, no known contamination, no underground storage tanks, no pending environmental actions, compliance history). These should be specific to this deal, not generic definitions"],
+  "covenants": ["array of strings — each is an ongoing environmental covenant (comply with environmental laws, no new hazardous substances, notify lender of environmental issues, permit lender inspections, maintain environmental insurance if required, deliver copies of environmental reports)"],
+  "remediationObligations": "string — obligations upon discovery of contamination including prompt notice, investigation, remediation plan, completion of cleanup to applicable standards, cooperation with governmental authorities, and lender approval of remediation plans",
+  "survivalClause": "string — SUPPLEMENTARY survival provisions only (e.g., binding on successors and assigns, survival independent of other loan documents, no release upon transfer of property). Do NOT restate the basic survival or subrogation waiver — template already includes those",
   "governingLaw": "string — governing law, jurisdiction, venue, jury trial waiver"
 }`;
 }
@@ -339,11 +355,22 @@ function buildEstoppelPrompt(input: DocumentInput): string {
   const refs = getLegalReferences("estoppel_certificate", input.programId);
   return `${buildDealContext(input)}
 ${refs ? `\n${refs}\n` : ""}
-Generate the prose sections for a TENANT ESTOPPEL CERTIFICATE. The deterministic sections (parties, key terms table, standard certifications) are handled by the template. You provide additional deal-specific certifications.
+Generate the prose sections for a TENANT ESTOPPEL CERTIFICATE. The template ALREADY includes these 9 standard certifications — do NOT repeat, expand, or rephrase any of them:
+1. Lease in full force and effect
+2. No defaults by landlord or tenant
+3. No claims/defenses/offsets against landlord
+4. Rent paid through date, none prepaid
+5. Security deposit amount
+6. No purchase option or ROFR
+7. No assignments or subleases
+8. Improvements complete
+9. No notice of sale/transfer/assignment
+
+You provide ONLY additional deal-specific certifications that are NOT covered above (e.g., CAM charges, percentage rent, tenant improvement allowances, renewal options, parking rights, signage rights). If there are no additional deal-specific items needed, return a brief statement that no additional certifications are required.
 
 Return JSON matching this exact schema:
 {
-  "additionalCertifications": "string — any additional deal-specific tenant certifications beyond the standard items (e.g., certifications about CAM charges, percentage rent, tenant improvement allowances, renewal options)"
+  "additionalCertifications": "string — deal-specific tenant certifications NOT already in the template's standard 9 items"
 }`;
 }
 
@@ -351,11 +378,23 @@ function buildBorrowersCertificatePrompt(input: DocumentInput): string {
   const refs = getLegalReferences("borrowers_certificate", input.programId);
   return `${buildDealContext(input)}
 ${refs ? `\n${refs}\n` : ""}
-Generate the prose sections for a BORROWER'S CERTIFICATE. The deterministic sections (parties, key terms table, standard 10 certifications) are handled by the template. You provide additional deal-specific certifications.
+Generate the prose sections for a BORROWER'S CERTIFICATE. The template ALREADY includes these 10 standard certifications — do NOT repeat, expand, or rephrase any of them:
+1. Reps and warranties remain true
+2. No event of default
+3. Conditions precedent satisfied
+4. Financial statements true and correct
+5. No material adverse change
+6. Entity good standing / legal capacity
+7. Authorized execution
+8. Loan proceeds for stated purpose
+9. Insurance in effect
+10. Governmental approvals obtained
+
+You provide ONLY additional deal-specific certifications NOT covered above (e.g., environmental compliance, specific collateral conditions, program-specific requirements). If there are no additional items needed, return a brief statement that no additional certifications are required.
 
 Return JSON matching this exact schema:
 {
-  "additionalCertifications": "string — additional deal-specific borrower certifications beyond the standard 10 items, tailored to this specific loan program and collateral type",
+  "additionalCertifications": "string — deal-specific borrower certifications NOT already in the template's standard 10 items",
   "governingLaw": "string — governing law, jurisdiction"
 }`;
 }
@@ -364,11 +403,21 @@ function buildOpinionLetterPrompt(input: DocumentInput): string {
   const refs = getLegalReferences("opinion_letter", input.programId);
   return `${buildDealContext(input)}
 ${refs ? `\n${refs}\n` : ""}
-Generate the prose sections for a LEGAL OPINION LETTER. The deterministic sections (parties, key terms table, standard 6 opinions) are handled by the template. You provide additional deal-specific opinions. Follow ABA Legal Opinion Accord standards. Enforceability opinion must include the standard bankruptcy/insolvency/equitable principles carve-out per TriBar standards.
+Generate the prose sections for a LEGAL OPINION LETTER. The deterministic sections (parties, key terms table) are handled by the template. You provide additional deal-specific opinions. Follow ABA Legal Opinion Accord standards.
+
+The template ALREADY includes these 6 standard opinions — do NOT repeat, expand, or rephrase any of them:
+1. Entity organization and good standing (or individual capacity for natural persons)
+2. Authority to execute and perform the loan documents
+3. Non-violation of laws, organizational documents, or material agreements
+4. Enforceability of loan documents (with standard bankruptcy/insolvency/equitable principles carve-out per TriBar standards)
+5. No pending litigation that would materially affect the transaction
+6. Compliance with applicable laws
+
+You provide ONLY additional deal-specific opinions NOT covered above (e.g., UCC perfection opinions, real property lien opinions, usury compliance for the specific state, regulatory opinions for specialized borrowers, tax opinions, environmental compliance opinions, ERISA opinions if applicable). If there are no additional deal-specific opinions needed, return a brief statement that no additional opinions are required.
 
 Return JSON matching this exact schema:
 {
-  "additionalOpinions": "string — additional deal-specific legal opinions beyond the standard 6, tailored to this loan program, collateral type, and state law requirements",
+  "additionalOpinions": "string — deal-specific legal opinions NOT already in the template's standard 6 opinions, tailored to this loan program, collateral type, and state law requirements",
   "governingLaw": "string — governing law"
 }`;
 }
@@ -426,11 +475,33 @@ function buildBorrowingBasePrompt(input: DocumentInput): string {
   const refs = getLegalReferences("borrowing_base_agreement", input.programId);
   return `${buildDealContext(input)}
 ${refs ? `\n${refs}\n` : ""}
-Generate the prose sections for a BORROWING BASE AGREEMENT for a revolving line of credit. The deterministic sections (parties, key terms, definitions, borrowing base formula table, ineligible accounts list, ineligible inventory list, borrowing base certificate form, events of default) are handled by the template. You provide the deal-specific criteria and requirements.
+Generate the prose sections for a BORROWING BASE AGREEMENT for a revolving line of credit. The deterministic sections (parties, key terms, definitions, borrowing base formula table, ineligible accounts list, ineligible inventory list, borrowing base certificate form, events of default) are handled by the template. You provide SUPPLEMENTARY deal-specific criteria and requirements ONLY.
+
+The template ALREADY includes these standard ineligibility categories — do NOT repeat, expand, or rephrase any of them:
+
+Ineligible Accounts Receivable (already in template):
+- Past due more than 90 days from invoice date
+- Foreign accounts (obligor located outside the United States)
+- Intercompany accounts
+- Government accounts (without valid assignment of claims under the Assignment of Claims Act)
+- Accounts of bankrupt or insolvent debtors
+- Contra accounts (mutual debts/credits between borrower and account debtor)
+- Bonded/retainage accounts
+
+Ineligible Inventory (already in template):
+- Work-in-process (WIP)
+- Consigned inventory
+- In-transit inventory for more than 30 days
+- Obsolete or slow-moving inventory
+- Inventory held on memorandum
+- Inventory located outside the United States
+- Inventory subject to third-party liens
+
+You provide ONLY additional deal-specific or industry-specific criteria NOT covered above. If a field has no additional content needed, return a brief statement that the template provisions are sufficient.
 
 Return JSON matching this exact schema:
 {
-  "eligibilityCriteria": "string — additional eligibility criteria for accounts receivable and inventory beyond the standard ineligibility categories already in the template. Include industry-specific criteria, concentration limits (no single debtor >25% of eligible accounts), dilution triggers, and any deal-specific eligibility requirements",
+  "eligibilityCriteria": "string — SUPPLEMENTARY eligibility criteria NOT already in the template's standard ineligibility lists above. Include industry-specific criteria, concentration limits (no single debtor >25% of eligible accounts), dilution triggers, cross-aging provisions, and any deal-specific eligibility requirements",
   "advanceRates": "string — detailed advance rate provisions including how rates may be adjusted by lender, seasonal adjustments if applicable, advance rate step-downs for specific collateral categories, and the process for lender to modify advance rates upon deterioration of collateral quality",
   "reportingRequirements": "string — comprehensive reporting obligations including monthly borrowing base certificates, accounts receivable aging reports, inventory reports, accounts payable aging, financial statements (monthly/quarterly/annual), field examination requirements (frequency, scope, who bears cost), and consequences of late or inaccurate reporting",
   "reserveProvisions": "string — reserve provisions including dilution reserves (based on historical dilution rate), concentration reserves, seasonal reserves if applicable, availability reserves for rent/taxes/insurance, and lender's right to establish additional reserves in its commercially reasonable discretion",
@@ -474,9 +545,7 @@ Return JSON matching this exact schema:
 }`;
 }
 
-// ---------------------------------------------------------------------------
 // Generic fallback for unsupported doc types
-// ---------------------------------------------------------------------------
 
 function buildGenericProse(docType: string, input: DocumentInput): AiDocProse {
   const state = input.stateAbbr ? `the State of ${input.stateAbbr}` : "the applicable state";
@@ -486,9 +555,7 @@ function buildGenericProse(docType: string, input: DocumentInput): AiDocProse {
   };
 }
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 export async function generateDocProse(
   docType: string,
@@ -531,6 +598,14 @@ export async function generateDocProse(
     const maxTokens = complexTypes.has(docType) ? 6000 : 4000;
 
     let userPrompt = promptBuilder(input);
+
+    // DSCR business-purpose exemption guidance: DSCR loans on investment properties
+    // are typically exempt from TRID/Reg Z consumer protections.
+    if (input.programId === "dscr" && ["loan_agreement", "closing_disclosure"].includes(docType)) {
+      userPrompt += `\n\nDSCR BUSINESS-PURPOSE EXEMPTION GUIDANCE:
+DSCR (Debt Service Coverage Ratio) loans on investment properties are typically classified as business-purpose loans exempt from the Truth in Lending Act (TILA) / Real Estate Settlement Procedures Act (RESPA) Integrated Disclosure (TRID) requirements and Regulation Z consumer protections under 12 CFR 1026.3(a)(1), which excludes credit extended primarily for a business, commercial, or agricultural purpose.
+IMPORTANT: If a DSCR loan is secured by the borrower's primary residence (owner-occupied), TRID and Regulation Z consumer protections MAY apply regardless of the stated business purpose. Do NOT include TRID-specific disclosures (Loan Estimate, Closing Disclosure timing requirements, 3-day review periods, tolerance thresholds) for investment-property DSCR loans unless the property is owner-occupied. For non-owner-occupied investment properties, use standard commercial loan documentation without consumer disclosure requirements.`;
+    }
 
     // If feedback from legal review is provided, append it so AI corrects its output
     if (feedback) {

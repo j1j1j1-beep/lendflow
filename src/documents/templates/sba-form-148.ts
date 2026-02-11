@@ -1,10 +1,8 @@
-// =============================================================================
 // sba-form-148.ts
 // Generates a DOCX SBA Form 148 — Unconditional Guarantee.
 // ZERO AI — pure deterministic data mapping from DocumentInput.
 // This is the SBA-specific guarantee form, distinct from the general guaranty
 // agreement template. References SBA SOP 50 10 and 13 CFR 120.
-// =============================================================================
 
 import {
   Document,
@@ -25,18 +23,14 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildSbaForm148(input: DocumentInput): Document {
   const { terms } = input;
   const guarantor = input.guarantorName ?? input.borrowerName;
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // Title
-  // -------------------------------------------------------------------------
   children.push(documentTitle("SBA Form 148"));
   children.push(spacer(2));
   children.push(
@@ -54,9 +48,7 @@ export function buildSbaForm148(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Party Identification
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Party Identification"));
   children.push(spacer(4));
 
@@ -78,9 +70,7 @@ export function buildSbaForm148(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Guarantee
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Unconditional Guarantee"));
   children.push(spacer(4));
 
@@ -99,9 +89,7 @@ export function buildSbaForm148(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Guarantee Provisions
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Guarantee Provisions"));
   children.push(spacer(4));
 
@@ -193,9 +181,7 @@ export function buildSbaForm148(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // SBA Reference
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("SBA Regulatory Reference"));
   children.push(spacer(4));
 
@@ -214,9 +200,7 @@ export function buildSbaForm148(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Governing Law
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Governing Law"));
   children.push(spacer(4));
 
@@ -227,9 +211,7 @@ export function buildSbaForm148(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Signature Block
-  // -------------------------------------------------------------------------
   children.push(
     bodyText("GUARANTOR:", { bold: true, color: COLORS.primary }),
   );
@@ -268,9 +250,7 @@ export function buildSbaForm148(input: DocumentInput): Document {
   children.push(bodyText("City, State, ZIP: ____________________________"));
   children.push(bodyText("SSN/TIN: ____________________________"));
 
-  // -------------------------------------------------------------------------
   // Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "SBA Form 148 — Unconditional Guarantee",
     headerRight: `SBA Form 148 — ${guarantor}`,

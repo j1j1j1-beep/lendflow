@@ -1,4 +1,3 @@
-// =============================================================================
 // review-gate.ts
 // Collects all failed verification checks and determines whether extracted
 // data can proceed to analysis or needs human review.
@@ -7,15 +6,12 @@
 // TOLERANCE PHILOSOPHY: Small discrepancies from OCR rounding, AI extraction,
 // or minor formatting differences should NOT block the pipeline. Only
 // genuinely material discrepancies warrant human review.
-// =============================================================================
 
 import type { MathCheck } from "./math-checks";
 import type { CrossDocCheck } from "./cross-document";
 import type { TextractComparison } from "./textract-vs-structured";
 
-// ---------------------------------------------------------------------------
 // Tolerance thresholds — discrepancies below these are auto-passed
-// ---------------------------------------------------------------------------
 
 // Math checks: if the difference is under $50 AND under 2% of expected, auto-pass
 const MATH_TOLERANCE_ABSOLUTE = 50;
@@ -29,9 +25,7 @@ const CROSS_DOC_TOLERANCE_PERCENT = 0.05;
 const TEXTRACT_TOLERANCE_ABSOLUTE = 25;
 const TEXTRACT_TOLERANCE_PERCENT = 0.03;
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 export interface ReviewGateResult {
   canProceed: boolean;
@@ -58,9 +52,7 @@ export interface ReviewItemInput {
   documentId?: string;
 }
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function fmt(n: number): string {
   return n.toLocaleString("en-US", {
@@ -79,9 +71,7 @@ function percentDiff(a: number, b: number): number {
   return Math.abs(a - b) / max;
 }
 
-// ---------------------------------------------------------------------------
 // Review item builders
-// ---------------------------------------------------------------------------
 
 function mathCheckToReviewItem(check: MathCheck, documentId?: string): ReviewItemInput {
   return {
@@ -131,9 +121,7 @@ function textractToReviewItem(comparison: TextractComparison, documentId?: strin
   };
 }
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 export function evaluateReviewGate(params: {
   mathChecks: MathCheck[];
@@ -146,7 +134,7 @@ export function evaluateReviewGate(params: {
   const reviewItems: ReviewItemInput[] = [];
   let autoPassedCount = 0;
 
-  // ---- Math checks ----
+  // Math checks
   let mathChecksPassed = 0;
   let mathChecksFailed = 0;
 
@@ -167,7 +155,7 @@ export function evaluateReviewGate(params: {
     }
   }
 
-  // ---- Cross-doc checks ----
+  // Cross-doc checks
   let crossDocPassed = 0;
   let crossDocFailed = 0;
   let crossDocWarnings = 0;
@@ -196,7 +184,7 @@ export function evaluateReviewGate(params: {
     }
   }
 
-  // ---- Textract comparisons ----
+  // Textract comparisons
   let textractAgreed = 0;
   let textractDisagreed = 0;
 
@@ -219,7 +207,7 @@ export function evaluateReviewGate(params: {
     // it's informational, not a blocking mismatch.
   }
 
-  // ---- Gate decision ----
+  // Gate decision
   const canProceed = reviewItems.length === 0;
 
   return {

@@ -1,9 +1,9 @@
-// ─── Deterministic IRS Line Number → Schema Field Mapping ───────────────────
+// Deterministic IRS Line Number → Schema Field Mapping
 // NO AI. Pure code. Maps known IRS form line numbers/labels to structured fields.
 // This is the ground truth for tax form extraction — Textract reads the characters,
 // this code maps them to the right place.
 
-// ─── 1040 Individual Income Tax Return ──────────────────────────────────────
+// 1040 Individual Income Tax Return
 
 export const IRS_1040_MAP: Record<string, string> = {
   // Income
@@ -46,7 +46,7 @@ export const IRS_1040_MAP: Record<string, string> = {
   "occupation": "metadata.taxpayerName",
 };
 
-// ─── Schedule C (Profit or Loss from Business) ─────────────────────────────
+// Schedule C (Profit or Loss from Business)
 
 export const IRS_SCHEDULE_C_MAP: Record<string, string> = {
   "1": "scheduleC.grossReceipts_line1",
@@ -97,7 +97,7 @@ export const IRS_SCHEDULE_C_MAP: Record<string, string> = {
   "g": "scheduleC.materialParticipation",
 };
 
-// ─── Schedule E (Supplemental Income — Rental) ─────────────────────────────
+// Schedule E (Supplemental Income — Rental)
 
 export const IRS_SCHEDULE_E_MAP: Record<string, string> = {
   // Per-property fields: these get suffixed with _propN in extraction
@@ -148,7 +148,7 @@ export const IRS_SCHEDULE_E_MAP: Record<string, string> = {
   "2_personalUseDays": "scheduleE.personalUseDays",
 };
 
-// ─── Form 1120 (C-Corp) ────────────────────────────────────────────────────
+// Form 1120 (C-Corp)
 
 export const IRS_1120_MAP: Record<string, string> = {
   // Income
@@ -208,7 +208,7 @@ export const IRS_1120_MAP: Record<string, string> = {
   "schedule_l_total_liab_equity_eoy": "scheduleL.endOfYear.liabilitiesAndEquity.totalLiabilitiesAndEquity",
 };
 
-// ─── Form 1120S (S-Corp) ───────────────────────────────────────────────────
+// Form 1120S (S-Corp)
 
 export const IRS_1120S_MAP: Record<string, string> = {
   // Income
@@ -282,7 +282,7 @@ export const IRS_1120S_MAP: Record<string, string> = {
   "officer_comp_amount": "officerCompensation.compensationAmount",
 };
 
-// ─── Form 1065 (Partnership) ───────────────────────────────────────────────
+// Form 1065 (Partnership)
 
 export const IRS_1065_MAP: Record<string, string> = {
   // Income
@@ -349,7 +349,7 @@ export const IRS_1065_MAP: Record<string, string> = {
   "schedule_l_partners_capital_eoy": "scheduleL.endOfYear.liabilitiesAndCapital.partnersCapitalAccounts",
 };
 
-// ─── Schedule K-1 ──────────────────────────────────────────────────────────
+// Schedule K-1
 
 export const IRS_K1_MAP: Record<string, string> = {
   // Partner/Shareholder info
@@ -410,7 +410,7 @@ export const IRS_K1_MAP: Record<string, string> = {
   "capital_method": "capitalAccount.method",
 };
 
-// ─── Lookup Functions ──────────────────────────────────────────────────────
+// Lookup Functions
 
 export type FormType = "1040" | "1120" | "1120S" | "1065" | "K1" | "SCHEDULE_C" | "SCHEDULE_E";
 

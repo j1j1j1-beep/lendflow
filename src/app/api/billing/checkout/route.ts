@@ -4,9 +4,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { stripe, STRIPE_PRICES } from "@/lib/stripe";
 import { logAudit } from "@/lib/audit";
 
-// ---------------------------------------------------------------------------
 // POST /api/billing/checkout — create a Stripe checkout session
-// ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
   try {

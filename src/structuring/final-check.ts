@@ -1,9 +1,7 @@
-// =============================================================================
 // final-check.ts
 // Deterministic final verification of the complete deal terms. Runs AFTER the
 // rules engine, AI enhancement, and compliance review. Catches any internal
 // inconsistencies before terms are saved.
-// =============================================================================
 
 import type { RulesEngineOutput } from "./rules-engine";
 import type { AiEnhancement } from "./ai-structuring";
@@ -11,9 +9,7 @@ import type { ComplianceResult } from "./compliance-review";
 import type { LoanProgram } from "@/config/loan-programs";
 import { calculateMonthlyPayment } from "./rules-engine";
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 export interface FinalCheckIssue {
   field: string;
@@ -28,16 +24,12 @@ export interface FinalCheckResult {
   issues: FinalCheckIssue[];
 }
 
-// ---------------------------------------------------------------------------
 // Tolerances
-// ---------------------------------------------------------------------------
 
 const PAYMENT_TOLERANCE = 1; // $1 for rounding
 const RATE_TOLERANCE = 0.0001; // 0.01% for rounding
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 export function runFinalCheck(params: {
   rulesOutput: RulesEngineOutput;

@@ -1,4 +1,4 @@
-// ─── Bank Statement Extraction Prompt ─────────────────────────────────────────
+// Bank Statement Extraction Prompt
 // This is the PRIMARY extraction method for bank statements. Textract extracts
 // raw text and tables, then Claude structures the data into our schema.
 // Bank statements have no standardized line numbering like IRS forms,

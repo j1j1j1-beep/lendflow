@@ -1,4 +1,4 @@
-// ─── Textract Lending API Field Mapper ────────────────────────────────────────
+// Textract Lending API Field Mapper
 // Maps Textract Lending's standardized field names (the `Type` field on each
 // LendingField) to our Zod schema dot-paths. Textract Lending returns
 // well-structured fields for IRS tax forms (1040, W-2), so we can map them
@@ -8,7 +8,7 @@
 // LendingDocuments with LendingFields), so they still require Claude for
 // structuring.
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// Types
 
 export interface LendingFieldInput {
   type: string;       // Textract Lending field name (e.g. "WAGES_TIPS_OTHER_COMP")
@@ -23,13 +23,13 @@ export interface LendingMappingResult {
   totalFields: number;
 }
 
-// ─── Supported Page Types ────────────────────────────────────────────────────
+// Supported Page Types
 // Only IRS forms with LendingFields are supported. Bank statements arrive as
 // ExpenseDocuments and need Claude extraction.
 
 export const LENDING_SUPPORTED_TYPES = new Set(["1040", "W-2", "W2"]);
 
-// ─── Form 1040 Mapping ──────────────────────────────────────────────────────
+// Form 1040 Mapping
 // Textract Lending field Type -> our 1040.schema.ts dot-path
 
 const FORM_1040_LENDING_MAP: Record<string, string> = {
@@ -76,7 +76,7 @@ const FORM_1040_LENDING_MAP: Record<string, string> = {
   "ADDRESS": "metadata.address",
 };
 
-// ─── W-2 Mapping ─────────────────────────────────────────────────────────────
+// W-2 Mapping
 // Textract Lending field Type -> our w2.schema.ts dot-path
 
 const W2_LENDING_MAP: Record<string, string> = {
@@ -110,7 +110,7 @@ const W2_LENDING_MAP: Record<string, string> = {
   "LOCAL_INCOME_TAX": "localTaxInfo.localIncomeTax_box19",
 };
 
-// ─── Lookup table: page type -> field map ────────────────────────────────────
+// Lookup table: page type -> field map
 
 const LENDING_MAPS: Record<string, Record<string, string>> = {
   "1040": FORM_1040_LENDING_MAP,
@@ -118,7 +118,7 @@ const LENDING_MAPS: Record<string, Record<string, string>> = {
   "W2": W2_LENDING_MAP,
 };
 
-// ─── String-valued field detection ───────────────────────────────────────────
+// String-valued field detection
 // Schema paths whose leaf values should remain as strings (not parsed as
 // dollar amounts). We match on the final segment of the dot-path.
 
@@ -142,7 +142,7 @@ function isStringField(schemaPath: string): boolean {
   return STRING_FIELD_SUFFIXES.has(leaf);
 }
 
-// ─── Dollar Parsing ──────────────────────────────────────────────────────────
+// Dollar Parsing
 
 /**
  * Parse a dollar/numeric string into a number.
@@ -182,7 +182,7 @@ function parseDollar(value: string): number | null {
   return negative ? -num : num;
 }
 
-// ─── Nested Object Builder ───────────────────────────────────────────────────
+// Nested Object Builder
 
 /**
  * Set a value at a dot-separated path in a nested object.
@@ -213,7 +213,7 @@ function setNestedValue(
   current[parts[parts.length - 1]] = value;
 }
 
-// ─── Main Mapping Function ───────────────────────────────────────────────────
+// Main Mapping Function
 
 /**
  * Map Textract Lending fields to our Zod schema shape for a given page type.

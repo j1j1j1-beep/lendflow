@@ -1,9 +1,7 @@
-// =============================================================================
 // custody-agreement.ts
 // Builds a three-party Digital Asset Custody Agreement for crypto-collateralized
 // loans. Governs the custodian holding digital asset collateral.
 // All financial numbers come from DocumentInput; AI writes prose.
-// =============================================================================
 
 import type { DocumentInput, CustodyAgreementProse } from "../types";
 import {
@@ -25,9 +23,7 @@ import {
   COLORS,
 } from "../doc-helpers";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildCustodyAgreement(
   input: DocumentInput,
@@ -38,7 +34,7 @@ export function buildCustodyAgreement(
   const loanAmountWords = numberToWords(input.terms.approvedAmount);
 
   const children = [
-    // ---- Title ----
+    // Title
     documentTitle("Digital Asset Custody Agreement"),
     spacer(4),
 
@@ -47,14 +43,14 @@ export function buildCustodyAgreement(
     ),
     spacer(4),
 
-    // ---- Parties ----
+    // Parties
     articleHeading("I", "Parties"),
     partyBlock("Depositor", input.borrowerName, "the \"Depositor\""),
     partyBlock("Secured Party", input.lenderName, "the \"Secured Party\""),
     partyBlock("Custodian", "[APPROVED CUSTODIAN NAME]", "the \"Custodian\""),
     spacer(4),
 
-    // ---- Key Terms ----
+    // Key Terms
     articleHeading("II", "Key Terms"),
     keyTermsTable([
       { label: "Assets in Custody", value: "All digital assets pledged as collateral under the Digital Asset Pledge and Security Agreement" },
@@ -65,7 +61,7 @@ export function buildCustodyAgreement(
     ]),
     spacer(4),
 
-    // ---- Custodian Responsibilities ----
+    // Custodian Responsibilities
     articleHeading("III", "Custodian Responsibilities"),
     bodyText(
       "Custodian shall be responsible for the safekeeping and administration of all Digital Assets deposited in the Custody Account. Custodian shall:",
@@ -89,7 +85,7 @@ export function buildCustodyAgreement(
     ),
     sectionSubheading("3.5", "Legal Compliance"),
     bodyText(
-      "Comply with all applicable federal, state, and local laws and regulations regarding digital asset custody, including but not limited to applicable anti-money laundering (AML) laws, know-your-customer (KYC) requirements, and sanctions compliance.",
+      "Comply with all applicable federal, state, and local laws and regulations regarding digital asset custody, including but not limited to applicable anti-money laundering (AML) laws, know-your-customer (KYC) requirements, and sanctions compliance. Custodian shall comply with SEC Staff Accounting Bulletin No. 122 (SAB 122, which rescinded and replaced SAB 121 in January 2025) regarding the accounting treatment of digital assets held in custody, and shall maintain appropriate on-balance-sheet or off-balance-sheet treatment as required by SAB 122 guidance.",
     ),
     sectionSubheading("3.6", "SOC 2 Certification"),
     bodyText(
@@ -97,7 +93,7 @@ export function buildCustodyAgreement(
     ),
     spacer(4),
 
-    // ---- Access Control ----
+    // Access Control
     articleHeading("IV", "Access Control"),
     bodyText(
       "Access to the Custody Account and the Digital Assets held therein shall be governed by the following provisions:",
@@ -121,32 +117,32 @@ export function buildCustodyAgreement(
     ),
     spacer(4),
 
-    // ---- Custody Terms (AI prose) ----
+    // Custody Terms (AI prose)
     articleHeading("V", "Additional Custody Terms"),
     bodyText(prose.custodyTerms),
     spacer(4),
 
-    // ---- Access Control (AI prose) ----
+    // Access Control (AI prose)
     articleHeading("VI", "Additional Access Control Provisions"),
     bodyText(prose.accessControl),
     spacer(4),
 
-    // ---- Insurance Requirements (AI prose) ----
+    // Insurance Requirements (AI prose)
     articleHeading("VII", "Insurance Requirements"),
     bodyText(prose.insuranceRequirements),
     spacer(4),
 
-    // ---- Transfer Provisions (AI prose) ----
+    // Transfer Provisions (AI prose)
     articleHeading("VIII", "Transfer Provisions"),
     bodyText(prose.transferProvisions),
     spacer(4),
 
-    // ---- Termination Provisions (AI prose) ----
+    // Termination Provisions (AI prose)
     articleHeading("IX", "Termination"),
     bodyText(prose.terminationProvisions),
     spacer(4),
 
-    // ---- Indemnification ----
+    // Indemnification
     articleHeading("X", "Indemnification"),
     bodyText(
       "Each party (an \"Indemnifying Party\") shall indemnify, defend, and hold harmless the other parties and their respective officers, directors, employees, agents, successors, and assigns (collectively, the \"Indemnified Parties\") from and against any and all losses, damages, liabilities, costs, and expenses (including reasonable attorneys' fees) arising out of or resulting from:",
@@ -156,8 +152,33 @@ export function buildCustodyAgreement(
     bulletPoint("Any third-party claim arising from the Indemnifying Party's failure to comply with applicable law."),
     spacer(4),
 
-    // ---- Limitation of Liability ----
-    articleHeading("XI", "Limitation of Liability"),
+    // Regulatory Environment
+    articleHeading("XI", "Regulatory Environment"),
+    bodyText(
+      "The parties acknowledge that, as of 2025, the OCC, FDIC, and Federal Reserve have withdrawn their previously issued restrictive guidance on digital asset activities (OCC Interpretive Letters 1170, 1172, 1174 rescission; FDIC FIL-16-2022 withdrawal; Federal Reserve SR 22-6 withdrawal). Additionally, SEC Staff Accounting Bulletin No. 121 (SAB 121) was rescinded in January 2025 and replaced by SAB 122, which revised the accounting framework for custodied digital assets. Custodian shall monitor and comply with all applicable regulatory developments affecting digital asset custody services.",
+    ),
+    spacer(2),
+    bodyText(
+      "The following regulatory actions specifically authorize and govern digital asset custody activities by supervised financial institutions:",
+    ),
+    spacer(2),
+    bulletPoint(
+      "OCC Interpretive Letters 1183 and 1184 (2025): These letters superseded the restrictive OCC Interpretive Letters 1170, 1172, and 1174 issued during 2021-2022. IL 1183 and IL 1184 confirm that national banks and federal savings associations may provide digital asset custody services, hold stablecoin reserves, and participate in distributed ledger networks under existing authority, subject to safety and soundness standards and appropriate risk management frameworks.",
+    ),
+    bulletPoint(
+      "FDIC FIL-7-2025: This Financial Institution Letter replaced FIL-16-2022 and eliminated the requirement that FDIC-supervised insured depository institutions obtain prior FDIC approval before engaging in crypto-related activities, including digital asset custody. Insured institutions may now engage in permissible digital asset custody activities under existing supervisory processes without prior non-objection from the FDIC, provided they maintain appropriate risk management and internal controls.",
+    ),
+    bulletPoint(
+      "Joint Interagency Guidance on Digital Asset Custody (2025): The OCC, FDIC, and Federal Reserve jointly issued guidance establishing a unified supervisory framework for digital asset custody services provided by banking organizations. This guidance addresses key risk areas including operational risk, cybersecurity, third-party custody arrangements, private key management, and insurance requirements, and confirms that properly managed digital asset custody is a permissible banking activity.",
+    ),
+    spacer(2),
+    bodyText(
+      "Custodian represents that it has reviewed the foregoing regulatory guidance and that its custody operations comply with the requirements set forth therein. Custodian shall promptly notify the Depositor and Secured Party of any material change in the regulatory framework applicable to its digital asset custody operations.",
+    ),
+    spacer(4),
+
+    // Limitation of Liability
+    articleHeading("XII", "Limitation of Liability"),
     bodyText(
       "Custodian shall not be liable for any loss of or damage to Digital Assets resulting from events beyond Custodian's reasonable control, including but not limited to:",
     ),
@@ -171,8 +192,8 @@ export function buildCustodyAgreement(
     ),
     spacer(4),
 
-    // ---- Governing Law (AI prose) ----
-    articleHeading("XII", "Governing Law"),
+    // Governing Law (AI prose)
+    articleHeading("XIII", "Governing Law"),
     bodyText(prose.governingLaw),
     spacer(4),
 
@@ -198,7 +219,7 @@ export function buildCustodyAgreement(
     ]),
     spacer(8),
 
-    // ---- Signatures (three parties) ----
+    // Signatures (three parties)
     bodyTextRuns([
       {
         text: "IN WITNESS WHEREOF, the parties have executed this Digital Asset Custody Agreement as of the date first written above.",

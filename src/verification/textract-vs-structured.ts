@@ -1,14 +1,10 @@
-// =============================================================================
 // textract-vs-structured.ts
 // Compares every numerical field in Claude's structured extraction output
 // against Textract's raw key-value pairs. ZERO AI. Pure deterministic matching.
-// =============================================================================
 
 const ABSOLUTE_TOLERANCE = 1; // $1 for rounding differences
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 export interface TextractComparison {
   fieldPath: string;
@@ -27,9 +23,7 @@ export interface TextractKeyValuePair {
   page: number;
 }
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Flatten a nested object into dot-separated paths with their values.
@@ -108,11 +102,9 @@ function parseNumericValue(raw: string): number | null {
   return result;
 }
 
-// ---------------------------------------------------------------------------
 // IRS Field Mapping
 // Maps structured field paths to known IRS form line labels as they appear
 // in Textract output.
-// ---------------------------------------------------------------------------
 
 const IRS_FIELD_MAP: Record<string, string[]> = {
   // 1040
@@ -160,9 +152,7 @@ const IRS_FIELD_MAP: Record<string, string[]> = {
   "ordinaryBusinessIncome_line23": ["23", "Ordinary business income", "Line 23"],
 };
 
-// ---------------------------------------------------------------------------
 // Fuzzy matching for non-standard documents
-// ---------------------------------------------------------------------------
 
 /**
  * Normalized key for comparison: lowercase, stripped of punctuation/spaces.
@@ -253,9 +243,7 @@ export function fuzzyMatchKey(textractKey: string, fieldPath: string): boolean {
   return false;
 }
 
-// ---------------------------------------------------------------------------
 // Main comparison function
-// ---------------------------------------------------------------------------
 
 export function compareTextractVsStructured(
   docType: string,

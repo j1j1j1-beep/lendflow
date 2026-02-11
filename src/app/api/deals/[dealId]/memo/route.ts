@@ -3,9 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { getS3Buffer } from "@/lib/s3";
 
-// ---------------------------------------------------------------------------
 // GET /api/deals/[dealId]/memo - Download the credit memo DOCX
-// ---------------------------------------------------------------------------
 
 export async function GET(
   request: NextRequest,

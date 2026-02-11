@@ -1,11 +1,9 @@
-// =============================================================================
 // estoppel-certificate.ts
 // Builds a Tenant Estoppel Certificate for CRE loan transactions.
 // Signed by the tenant to certify the status of their lease and confirm that
 // the landlord/borrower is not in default. Lender relies on this certificate
 // when underwriting loans secured by multi-tenant commercial properties.
 // All financial numbers from DocumentInput; AI writes prose.
-// =============================================================================
 
 import type { DocumentInput, EstoppelProse } from "../types";
 import {
@@ -25,9 +23,7 @@ import {
   COLORS,
 } from "../doc-helpers";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildEstoppelCertificate(
   input: DocumentInput,
@@ -38,15 +34,11 @@ export function buildEstoppelCertificate(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("Tenant Estoppel Certificate"));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 2. Addressee
-  // -----------------------------------------------------------------------
   children.push(
     bodyTextRuns([
       { text: "TO: ", bold: true },
@@ -63,9 +55,7 @@ export function buildEstoppelCertificate(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 3. Date
-  // -----------------------------------------------------------------------
   children.push(
     bodyTextRuns([
       { text: "Date: ", bold: true },
@@ -74,9 +64,7 @@ export function buildEstoppelCertificate(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 4. Opening
-  // -----------------------------------------------------------------------
   children.push(
     bodyText(
       "The undersigned tenant (the \"Tenant\") of the above-referenced property hereby certifies to the Lender as follows, understanding that the Lender is relying on these certifications in connection with a loan secured by the Property:",
@@ -84,9 +72,7 @@ export function buildEstoppelCertificate(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 5. Tenant Information Table
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Tenant Information"));
   children.push(
     keyTermsTable([
@@ -101,9 +87,7 @@ export function buildEstoppelCertificate(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 6. Certifications (deterministic numbered items)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Certifications"));
   children.push(
     bodyText(
@@ -158,16 +142,12 @@ export function buildEstoppelCertificate(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 7. Additional Certifications (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Additional Certifications"));
   children.push(bodyText(prose.additionalCertifications));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 8. Reliance
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Reliance"));
   children.push(
     bodyText(
@@ -176,9 +156,7 @@ export function buildEstoppelCertificate(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 9. Binding Effect
-  // -----------------------------------------------------------------------
   children.push(
     bodyText(
       "This Certificate shall be binding upon the undersigned and its successors and assigns.",
@@ -186,9 +164,7 @@ export function buildEstoppelCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 10. Governing Law and Counterparts
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Governing Law"));
   children.push(
     bodyText(
@@ -203,9 +179,7 @@ export function buildEstoppelCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 11. Signature (Tenant only)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("IN WITNESS WHEREOF"));
   children.push(
     bodyText(
@@ -226,9 +200,7 @@ export function buildEstoppelCertificate(
     bodyText("Title: ____________________________"),
   );
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Tenant Estoppel Certificate",
     headerRight: `Estoppel Certificate \u2014 ${input.borrowerName}`,

@@ -1,7 +1,5 @@
-// =============================================================================
 // loan-agreement.ts
 // Generates a DOCX Loan Agreement from deterministic deal terms + AI prose.
-// =============================================================================
 
 import {
   Document,
@@ -37,9 +35,7 @@ import type {
   ConditionItem,
 } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function conditionsByCategory(
   conditions: ConditionItem[],
@@ -59,9 +55,7 @@ function categoryLabel(cat: ConditionItem["category"]): string {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildLoanAgreement(
   input: DocumentInput,
@@ -84,9 +78,7 @@ export function buildLoanAgreement(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("Loan Agreement"));
   children.push(spacer(4));
   children.push(
@@ -94,9 +86,7 @@ export function buildLoanAgreement(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 2. Parties
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Parties"));
   children.push(
     bodyText(
@@ -109,9 +99,7 @@ export function buildLoanAgreement(
   children.push(partyBlock("LENDER", input.lenderName, "the \"Lender\""));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 3. Recitals (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Recitals"));
   children.push(bodyText(prose.recitals));
   children.push(spacer(4));
@@ -122,9 +110,7 @@ export function buildLoanAgreement(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // 4. Article I — Definitions
-  // -----------------------------------------------------------------------
   children.push(new Paragraph({ children: [new PageBreak()] }));
   children.push(articleHeading("I", "Definitions"));
   children.push(
@@ -189,13 +175,11 @@ export function buildLoanAgreement(
   children.push(
     bodyTextRuns([
       { text: '"Material Adverse Effect" ', bold: true },
-      { text: "means a material adverse change in the business, operations, properties, assets, or financial condition of Borrower." },
+      { text: "means a material adverse change in the business, operations, properties, assets, financial condition, prospects, or ability to perform obligations under any Loan Document, of Borrower." },
     ]),
   );
 
-  // -----------------------------------------------------------------------
   // 5. Article II — The Loan
-  // -----------------------------------------------------------------------
   children.push(articleHeading("II", "The Loan"));
 
   children.push(sectionSubheading("2.1", "Commitment"));
@@ -226,9 +210,7 @@ export function buildLoanAgreement(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // 6. Article III — Interest and Payments
-  // -----------------------------------------------------------------------
   children.push(articleHeading("III", "Interest and Payments"));
 
   children.push(sectionSubheading("3.1", "Interest Rate"));
@@ -308,10 +290,10 @@ export function buildLoanAgreement(
     );
   }
 
-  // -----------------------------------------------------------------------
   // 7. Article IV — Representations and Warranties (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("IV", "Representations and Warranties"));
+  const isIndividual = !input.entityType || input.entityType === "sole_proprietor";
+
   children.push(
     bodyText(
       "Borrower represents and warrants to Lender as of the date hereof and as of each date on which any amount is outstanding under this Agreement:",
@@ -319,7 +301,9 @@ export function buildLoanAgreement(
   );
   children.push(
     numberedItem(
-      `Organization and Good Standing: Borrower is duly organized, validly existing, and in good standing under the laws of ${input.stateAbbr ?? "its state of organization"}.`,
+      isIndividual
+        ? "Legal Capacity: Borrower has full legal capacity to execute, deliver, and perform this Agreement and all related Loan Documents."
+        : `Organization and Good Standing: Borrower is duly organized, validly existing, and in good standing under the laws of ${input.stateAbbr ?? "its state of organization"}.`,
     ),
   );
   children.push(
@@ -347,13 +331,26 @@ export function buildLoanAgreement(
       "Taxes: Borrower has filed all required tax returns and paid all taxes due and payable, except those being contested in good faith with adequate reserves.",
     ),
   );
+
+  // BSA/AML Compliance Representation
+  children.push(
+    numberedItem(
+      "BSA/AML Compliance: Borrower represents and warrants that it has established and maintains an anti-money laundering compliance program in accordance with the Bank Secrecy Act (31 U.S.C. Section 5311 et seq.), the USA PATRIOT Act (Title III of Pub. L. 107-56), and applicable regulations of the Financial Crimes Enforcement Network (FinCEN) set forth in 31 CFR Chapter X. Borrower shall file all required Currency Transaction Reports (CTRs) for transactions exceeding $10,000 and Suspicious Activity Reports (SARs) as required by 31 CFR 1020.320. For loans originated under SBA programs, Borrower further represents compliance with the anti-money laundering requirements set forth in SBA Standard Operating Procedure 50 10 8. Borrower shall promptly notify Lender of any material changes to its AML compliance program or any investigation or inquiry by any governmental authority related thereto.",
+    ),
+  );
+
+  // OFAC/Sanctions Representation
+  children.push(
+    numberedItem(
+      "OFAC/Sanctions Compliance: Borrower represents and warrants that neither Borrower, nor any of its principals, owners, affiliates, or any person or entity holding a beneficial interest in Borrower, is a Specially Designated National (SDN) or a blocked person on the Consolidated Sanctions List maintained by the Office of Foreign Assets Control (OFAC) of the U.S. Department of the Treasury, or is otherwise the target of any sanctions program administered by OFAC. Borrower shall not, directly or indirectly, use the Loan proceeds, or lend, contribute, or otherwise make available such proceeds to any person or entity, in any manner that would result in a violation of any applicable sanctions program administered by OFAC, including but not limited to those authorized under Executive Order 13224 and regulations set forth in 31 CFR Part 500 et seq. Borrower shall promptly notify Lender if Borrower becomes aware of any change in circumstances that could cause this representation to become inaccurate.",
+    ),
+  );
+
   for (const rep of ensureProseArray(prose.representations)) {
     children.push(numberedItem(rep));
   }
 
-  // -----------------------------------------------------------------------
   // 8. Article V — Covenants
-  // -----------------------------------------------------------------------
   children.push(articleHeading("V", "Covenants"));
   children.push(
     bodyText(
@@ -428,15 +425,15 @@ export function buildLoanAgreement(
       "Borrower shall not merge, consolidate, or sell all or substantially all of its assets, and shall not permit any change in the ownership or control of Borrower, without the prior written consent of Lender.",
     ),
   );
-  children.push(
-    bulletPoint(
-      "Borrower shall not make any distributions, dividends, or payments to its owners or equity holders without the prior written consent of Lender, except for tax distributions in an amount not exceeding the Borrower's actual tax liability attributable to the Borrower's income.",
-    ),
-  );
+  if (!isIndividual) {
+    children.push(
+      bulletPoint(
+        "Borrower shall not make any distributions, dividends, or payments to its owners or equity holders without the prior written consent of Lender, except for tax distributions in an amount not exceeding the Borrower's actual tax liability attributable to the Borrower's income.",
+      ),
+    );
+  }
 
-  // -----------------------------------------------------------------------
   // 9. Article VI — Conditions Precedent
-  // -----------------------------------------------------------------------
   children.push(articleHeading("VI", "Conditions Precedent"));
   children.push(
     bodyText(
@@ -476,9 +473,7 @@ export function buildLoanAgreement(
     children.push(bodyText("Standard closing conditions apply as determined by Lender."));
   }
 
-  // -----------------------------------------------------------------------
   // 10. Article VII — Events of Default (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("VII", "Events of Default"));
   children.push(
     bodyText(
@@ -524,15 +519,11 @@ export function buildLoanAgreement(
     children.push(numberedItem(event));
   }
 
-  // -----------------------------------------------------------------------
   // 11. Article VIII — Remedies (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("VIII", "Remedies"));
   children.push(bodyText(prose.remediesOnDefault));
 
-  // -----------------------------------------------------------------------
   // 12. Article IX — Fees
-  // -----------------------------------------------------------------------
   children.push(articleHeading("IX", "Fees and Expenses"));
 
   if (terms.fees.length > 0) {
@@ -572,9 +563,7 @@ export function buildLoanAgreement(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // 13. Article X — Miscellaneous (AI prose)
-  // -----------------------------------------------------------------------
   children.push(articleHeading("X", "Miscellaneous"));
 
   children.push(sectionSubheading("10.1", "Waiver and Amendment"));
@@ -628,9 +617,7 @@ export function buildLoanAgreement(
     }
   }
 
-  // -----------------------------------------------------------------------
   // 14. Signature blocks
-  // -----------------------------------------------------------------------
   children.push(new Paragraph({ children: [new PageBreak()] }));
   children.push(sectionHeading("IN WITNESS WHEREOF"));
   children.push(
@@ -651,9 +638,7 @@ export function buildLoanAgreement(
   );
   children.push(...signatureBlock(input.lenderName, "Authorized Signatory"));
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Loan Agreement",
     headerRight: `Loan Agreement — ${input.borrowerName}`,

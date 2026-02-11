@@ -1,9 +1,7 @@
-// =============================================================================
 // legal-review.ts
 // AI-powered legal review of generated document prose. A SEPARATE Claude call
 // (independent from generation) reviews the complete document for legal
 // accuracy, regulatory compliance, and internal consistency.
-// =============================================================================
 
 import type {
   DocumentInput,
@@ -19,9 +17,7 @@ import {
 } from "@/documents/doc-helpers";
 import { getLegalChecklist } from "./legal-knowledge";
 
-// ---------------------------------------------------------------------------
 // System prompt
-// ---------------------------------------------------------------------------
 
 const REVIEW_SYSTEM_PROMPT = `You are a senior bank regulatory compliance officer and legal reviewer with 25+ years of experience examining loan documents for institutional lenders. You have deep expertise in UCC Article 9, federal lending regulations (TILA/Reg Z, ECOA/Reg B, RESPA), state usury laws, SBA lending requirements, CERCLA/RCRA environmental law, bankruptcy code provisions, and ABA legal opinion standards.
 
@@ -59,7 +55,7 @@ SPECIFIC LEGAL ISSUES YOU MUST CHECK AND FIX:
 6. STATE-SPECIFIC REQUIREMENTS:
    - Governing law must name the specific state with conflict-of-laws exclusion
    - Must comply with state-specific notice/cure periods for default and acceleration
-   - Community property states (AZ, CA, ID, LA, NV, NM, TX, WA, WI) may require spousal consent
+   - Community property states (AZ, CA, ID, LA, NV, NM, TX, WA, WI; opt-in: AK, FL, KY, SD, TN) may require spousal consent
 
 RULES FOR YOUR CORRECTIONS:
 - NEVER change any dollar amount, interest rate, fee amount, date, term length, LTV, or any other number. These come from the rules engine and are the absolute source of truth. If a number is wrong, flag it but do NOT change it.
@@ -93,9 +89,7 @@ Respond ONLY with valid JSON matching this schema:
   ]
 }`;
 
-// ---------------------------------------------------------------------------
 // User prompt builder
-// ---------------------------------------------------------------------------
 
 function buildReviewPrompt(
   docType: string,
@@ -195,9 +189,7 @@ ${proseSections}
 Review this document for legal accuracy, regulatory compliance, and internal consistency. Only flag genuine issues — do not invent problems if the document is well-drafted.`;
 }
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 /** Extract regulatory framework name from a provision description */
 function extractRegulation(provision: string): string {

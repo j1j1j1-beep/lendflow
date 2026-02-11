@@ -1,4 +1,3 @@
-// =============================================================================
 // compliance-checks.ts
 // Program-level compliance checks — deterministic regulatory validation that
 // runs against deal terms and loan program rules. These are the actual
@@ -6,14 +5,11 @@
 //
 // Each check returns a ComplianceCheckResult with real statute citations.
 // Rules engine owns the numbers; this module only validates them.
-// =============================================================================
 
 import type { DocumentInput } from "./types";
 import { LOAN_PROGRAMS } from "@/config/loan-programs";
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 export type ComplianceCheckResult = {
   name: string;
@@ -23,16 +19,14 @@ export type ComplianceCheckResult = {
   severity: "critical" | "warning" | "info";
 };
 
-// ---------------------------------------------------------------------------
 // State usury limits — ALL 50 states + DC
 // Rates are the general/default maximum interest rate for commercial loans.
 // Many states exempt commercial loans above certain principal thresholds or
 // when parties are sophisticated entities. See commercialExemptAbove.
-// ---------------------------------------------------------------------------
 
 const STATE_USURY_LIMITS: Record<
   string,
-  { rate: number; statute: string; commercialExemptAbove?: number }
+  { rate: number; statute: string; commercialExemptAbove?: number; commercialCeiling?: number; criminalUsuryCap?: number; criminalUsuryExemptionThreshold?: number }
 > = {
   AL: { rate: 0.08, statute: "Ala. Code §8-8-5 (contractual max)", commercialExemptAbove: 2000 },
   AK: { rate: 0.105, statute: "Alaska Stat. §45.45.010", commercialExemptAbove: 25000 },
@@ -43,7 +37,7 @@ const STATE_USURY_LIMITS: Record<
   CT: { rate: 0.12, statute: "Conn. Gen. Stat. §37-4" },
   DE: { rate: 0.105, statute: "Del. Code tit. 6, §2301 (5% over Fed discount rate)", commercialExemptAbove: 100000 },
   DC: { rate: 0.24, statute: "D.C. Code §28-3301" },
-  FL: { rate: 0.18, statute: "Fla. Stat. §687.02", commercialExemptAbove: 500000 },
+  FL: { rate: 0.18, statute: "Fla. Stat. §687.02 (>$500K: 25% cap per §687.071; 25% criminal usury threshold)", commercialExemptAbove: 500000, commercialCeiling: 0.25 },
   GA: { rate: 999, statute: "Ga. Code §7-4-2 (no usury cap for loans >$3K by written agreement)", commercialExemptAbove: 3000 },
   HI: { rate: 0.12, statute: "Haw. Rev. Stat. §478-4 (12% max; non-consumer transactions exempt)", commercialExemptAbove: 750000 },
   ID: { rate: 0.12, statute: "Idaho Code §28-22-104" },
@@ -64,20 +58,20 @@ const STATE_USURY_LIMITS: Record<
   NE: { rate: 0.16, statute: "Neb. Rev. Stat. §45-101.03" },
   NV: { rate: 999, statute: "Nev. Rev. Stat. §99.050 (no usury limit for written commercial contracts)" },
   NH: { rate: 999, statute: "N.H. Rev. Stat. §336:1 (no usury cap for agreed-upon rates; 10% default)" },
-  NJ: { rate: 0.06, statute: "N.J. Stat. §31:1-1", commercialExemptAbove: 50000 },
+  NJ: { rate: 0.16, statute: "N.J. Stat. §31:1-1 (6% for oral agreements only; 16% for written — all commercial loans are written)", commercialExemptAbove: 50000 },
   NM: { rate: 0.15, statute: "N.M. Stat. §56-8-3" },
-  NY: { rate: 0.16, statute: "N.Y. Gen. Oblig. Law §5-501; Banking Law §14-a", commercialExemptAbove: 250000 },
+  NY: { rate: 0.16, statute: "N.Y. Gen. Oblig. Law §5-501; Banking Law §14-a; Penal Law §190.40", commercialExemptAbove: 250000, criminalUsuryCap: 0.25, criminalUsuryExemptionThreshold: 2500000 },
   NC: { rate: 0.08, statute: "N.C. Gen. Stat. §24-1.1", commercialExemptAbove: 25000 },
   ND: { rate: 0.06, statute: "N.D. Cent. Code §47-14-09", commercialExemptAbove: 35000 },
   OH: { rate: 0.08, statute: "Ohio Rev. Code §1343.01", commercialExemptAbove: 100000 },
   OK: { rate: 999, statute: "Okla. Stat. tit. 15, §266 (freedom of contract; 6% default when no rate agreed)" },
   OR: { rate: 0.12, statute: "Or. Rev. Stat. §82.010", commercialExemptAbove: 50000 },
-  PA: { rate: 0.06, statute: "41 Pa. Stat. §201", commercialExemptAbove: 50000 },
+  PA: { rate: 0.06, statute: "41 Pa. Stat. §201", commercialExemptAbove: 10000 },
   RI: { rate: 0.21, statute: "R.I. Gen. Laws §6-26-2" },
   SC: { rate: 0.0875, statute: "S.C. Code §34-31-20", commercialExemptAbove: 50000 },
   SD: { rate: 999, statute: "S.D. Codified Laws §54-3-4 (no usury limit for written contracts)" },
   TN: { rate: 0.24, statute: "Tenn. Code §47-14-103 (max 24% or 4% above avg prime rate)", commercialExemptAbove: 250000 },
-  TX: { rate: 0.18, statute: "Tex. Fin. Code §303.009 (commercial >$500K exempt per Ch. 306)", commercialExemptAbove: 500000 },
+  TX: { rate: 0.18, statute: "Tex. Fin. Code §303.009 (28% commercial ceiling per Ch. 303; real-property-secured >$3M per Ch. 306)", commercialExemptAbove: 3000000, commercialCeiling: 0.28 },
   UT: { rate: 999, statute: "Utah Code §15-1-1 (no usury cap for agreed-upon rates; 10% default)" },
   VT: { rate: 0.12, statute: "Vt. Stat. tit. 9, §41a" },
   VA: { rate: 0.12, statute: "Va. Code §6.2-303 (business loans >$5K exempt)", commercialExemptAbove: 5000 },
@@ -87,9 +81,7 @@ const STATE_USURY_LIMITS: Record<
   WY: { rate: 0.07, statute: "Wyo. Stat. §40-14-306", commercialExemptAbove: 25000 },
 };
 
-// ---------------------------------------------------------------------------
 // Individual check implementations
-// ---------------------------------------------------------------------------
 
 function checkUsury(input: DocumentInput): ComplianceCheckResult {
   const state = input.stateAbbr?.toUpperCase() ?? null;
@@ -112,14 +104,59 @@ function checkUsury(input: DocumentInput): ComplianceCheckResult {
 
   // Check if commercial exemption applies
   if (limit.commercialExemptAbove && principal >= limit.commercialExemptAbove) {
+    // Some states raise the cap instead of removing it (e.g. FL: 25% for >$500K, TX: 28% commercial ceiling)
+    if (limit.commercialCeiling) {
+      const ceilingPassed = rate <= limit.commercialCeiling;
+      return {
+        name: "Usury Compliance",
+        passed: ceilingPassed,
+        regulation: limit.statute,
+        description: ceilingPassed
+          ? `Commercial loan of $${principal.toLocaleString()} exceeds ${state} exemption threshold ` +
+            `of $${limit.commercialExemptAbove.toLocaleString()} — subject to elevated commercial ceiling of ` +
+            `${(limit.commercialCeiling * 100).toFixed(1)}% per ${limit.statute}. ` +
+            `Rate of ${(rate * 100).toFixed(3)}% is within the commercial ceiling.`
+          : `Commercial loan of $${principal.toLocaleString()} exceeds ${state} exemption threshold ` +
+            `of $${limit.commercialExemptAbove.toLocaleString()}, but rate of ${(rate * 100).toFixed(3)}% ` +
+            `EXCEEDS the ${state} commercial ceiling of ${(limit.commercialCeiling * 100).toFixed(1)}% per ${limit.statute}. ` +
+            `Usury violation — may result in forfeiture of interest and/or statutory penalties.`,
+        severity: ceilingPassed ? "info" : "critical",
+      };
+    }
+
+    // Even when civil usury is exempt, criminal usury cap may still apply (e.g. NY 25% for $250K-$2.5M)
+    if (limit.criminalUsuryCap != null) {
+      const fullyExempt = limit.criminalUsuryExemptionThreshold != null
+        && principal >= limit.criminalUsuryExemptionThreshold;
+      if (!fullyExempt && rate > limit.criminalUsuryCap) {
+        return {
+          name: "Usury Compliance",
+          passed: false,
+          regulation: limit.statute,
+          description:
+            `Commercial loan of $${principal.toLocaleString()} exceeds ${state} civil exemption threshold ` +
+            `of $${limit.commercialExemptAbove.toLocaleString()}, but rate of ${(rate * 100).toFixed(3)}% ` +
+            `EXCEEDS the ${state} criminal usury cap of ${(limit.criminalUsuryCap * 100).toFixed(1)}% per ${limit.statute}. ` +
+            `Criminal usury applies to loans under $${(limit.criminalUsuryExemptionThreshold ?? 0).toLocaleString()}.`,
+          severity: "critical",
+        };
+      }
+    }
+
     return {
       name: "Usury Compliance",
       passed: true,
       regulation: limit.statute,
       description:
         `Commercial loan of $${principal.toLocaleString()} exceeds ${state} exemption threshold ` +
-        `of $${limit.commercialExemptAbove.toLocaleString()} — exempt from general usury cap per ${limit.statute}.`,
-      severity: "info",
+        `of $${limit.commercialExemptAbove.toLocaleString()} — exempt from general usury cap per ${limit.statute}.` +
+        (limit.criminalUsuryCap != null
+          ? ` Note: ${state} criminal usury cap of ${(limit.criminalUsuryCap * 100).toFixed(1)}% still applies` +
+            (limit.criminalUsuryExemptionThreshold != null
+              ? ` for loans under $${limit.criminalUsuryExemptionThreshold.toLocaleString()}.`
+              : `.`)
+          : ``),
+      severity: limit.criminalUsuryCap != null ? "warning" : "info",
     };
   }
 
@@ -146,7 +183,7 @@ function checkSbaSizeStandard(input: DocumentInput): ComplianceCheckResult {
     return {
       name: "SBA Size Standard — 7(a) Loan Limit",
       passed,
-      regulation: "13 CFR §120.151; SBA SOP 50 10 7",
+      regulation: "13 CFR §120.151; SBA SOP 50 10 8",
       description: passed
         ? `Loan amount of $${amount.toLocaleString()} is within the SBA 7(a) maximum of $${maxAmount.toLocaleString()} per 13 CFR §120.151.`
         : `Loan amount of $${amount.toLocaleString()} EXCEEDS the SBA 7(a) maximum of $${maxAmount.toLocaleString()} per 13 CFR §120.151.`,
@@ -161,7 +198,7 @@ function checkSbaSizeStandard(input: DocumentInput): ComplianceCheckResult {
     return {
       name: "SBA Size Standard — 504 Loan Limit",
       passed,
-      regulation: "13 CFR §120.931; SBA SOP 50 10 7",
+      regulation: "13 CFR §120.931; SBA SOP 50 10 8",
       description: passed
         ? `Loan amount of $${amount.toLocaleString()} is within the SBA 504 maximum of $${maxAmount.toLocaleString()} (manufacturing/energy cap) per 13 CFR §120.931.`
         : `Loan amount of $${amount.toLocaleString()} EXCEEDS the SBA 504 maximum of $${maxAmount.toLocaleString()} per 13 CFR §120.931.`,
@@ -185,11 +222,11 @@ function checkSbaCreditElsewhere(_input: DocumentInput): ComplianceCheckResult {
   return {
     name: "SBA Credit Elsewhere Test",
     passed: true,
-    regulation: "13 CFR §120.101; SBA SOP 50 10 7 Subpart B, Ch. 2",
+    regulation: "13 CFR §120.101; SBA SOP 50 10 8 Subpart B, Ch. 2",
     description:
       "The lender must certify that the borrower cannot obtain credit on reasonable terms " +
       "from non-Federal sources without SBA assistance per 13 CFR §120.101. " +
-      "This is a lender certification — ensure SBA Form 1919 or equivalent documentation is completed.",
+      "This is a lender certification — ensure SBA Form 1919 (revised April 2025 per Executive Order 14168) or equivalent documentation is completed.",
     severity: "warning",
   };
 }
@@ -200,7 +237,7 @@ function checkSbaUseOfProceeds(_input: DocumentInput): ComplianceCheckResult {
   return {
     name: "SBA Use of Proceeds",
     passed: true,
-    regulation: "13 CFR §120.120; SBA SOP 50 10 7 Subpart B, Ch. 2",
+    regulation: "13 CFR §120.120; SBA SOP 50 10 8 Subpart B, Ch. 2",
     description:
       "Loan proceeds must be used for eligible business purposes per 13 CFR §120.120. " +
       "Prohibited uses include: floor plan financing, speculation, lending activities, " +
@@ -228,7 +265,7 @@ function checkSba504Eligibility(input: DocumentInput): ComplianceCheckResult {
 
   // Net worth and average income tests (qualitative — cannot fully verify from deal data)
   checks.push(
-    "Borrower must have tangible net worth not exceeding $15M and average net income not exceeding $5M " +
+    "Borrower must have tangible net worth not exceeding $20M and average net income not exceeding $6.5M " +
     "for the two years preceding the application per 13 CFR §121.301(c). Verify from financial statements.",
   );
 
@@ -247,8 +284,8 @@ function checkJobCreation(_input: DocumentInput): ComplianceCheckResult {
     passed: true,
     regulation: "13 CFR §120.861-120.862",
     description:
-      "SBA 504 loans must create or retain one job per $95,000 of CDC debenture funding " +
-      "(or $150,000 for small manufacturers and energy public policy projects) per 13 CFR §120.861. " +
+      "SBA 504 loans must create or retain one job per $90,000 of CDC debenture funding " +
+      "(or $140,000 for small manufacturers and energy public policy projects) per 13 CFR §120.861. " +
       "Job creation goals must be documented and reported annually. " +
       "Verify projected job creation meets the required ratio.",
     severity: "warning",
@@ -292,10 +329,11 @@ function checkHpml(input: DocumentInput): ComplianceCheckResult {
   // threshold that would likely trigger HPML.
   const rate = input.terms.interestRate;
 
-  // Conservative estimate: current APOR for 30-year is roughly 6-7%.
-  // HPML triggers at APOR + 1.5% = ~8.5% for first liens.
-  // We flag as warning if rate > 8.5% since exact APOR lookup is needed.
-  const conservativeHpmlThreshold = 0.085;
+  // HPML triggers at APOR + 1.5% for first liens, APOR + 3.5% for subordinate liens.
+  // Current APOR ~6.1% (as of 2025) → first-lien threshold ~7.6%.
+  // TODO: Replace with dynamic APOR lookup from FFIEC/CFPB weekly table for production use.
+  // Using 7.6% as conservative threshold — should be recalculated as APOR + 1.5% for first-lien.
+  const conservativeHpmlThreshold = 0.076;
   const isLikelyHpml = rate > conservativeHpmlThreshold;
 
   return {
@@ -499,6 +537,111 @@ function checkSourceOfFunds(_input: DocumentInput): ComplianceCheckResult {
   };
 }
 
+function checkGeniusActCompliance(input: DocumentInput): ComplianceCheckResult {
+  // GENIUS Act (Guiding and Establishing National Innovation for U.S. Stablecoins)
+  // Signed into law July 18, 2025. Requires stablecoin issuers to maintain 1:1 reserves,
+  // register with federal/state regulators, and comply with AML/sanctions requirements.
+  // Loans collateralized by stablecoins or crypto must verify issuer compliance.
+  const hasCryptoCollateral = input.collateralTypes.some((t) => {
+    const lower = t.toLowerCase();
+    return (
+      lower.includes("crypto") ||
+      lower.includes("stablecoin") ||
+      lower.includes("digital_asset") ||
+      lower.includes("digital asset") ||
+      lower.includes("bitcoin") ||
+      lower.includes("ethereum") ||
+      lower.includes("token")
+    );
+  });
+
+  if (!hasCryptoCollateral) {
+    return {
+      name: "GENIUS Act — Stablecoin/Crypto Collateral Compliance",
+      passed: true,
+      regulation: "GENIUS Act (P.L. 119-XX, signed July 18, 2025); 12 USC §5401 et seq.",
+      description:
+        "No crypto or stablecoin collateral identified. GENIUS Act compliance check is not applicable to this transaction.",
+      severity: "info",
+    };
+  }
+
+  // Crypto/stablecoin collateral detected — flag for GENIUS Act review
+  return {
+    name: "GENIUS Act — Stablecoin/Crypto Collateral Compliance",
+    passed: false,
+    regulation: "GENIUS Act (P.L. 119-XX, signed July 18, 2025); 12 USC §5401 et seq.",
+    description:
+      "This loan involves crypto/stablecoin collateral subject to the GENIUS Act (signed July 18, 2025). " +
+      "Required verification: (1) If stablecoin collateral, confirm the issuer is a licensed payment stablecoin issuer " +
+      "under the GENIUS Act with 1:1 reserve backing (U.S. Treasuries, insured deposits, or approved reserve assets), " +
+      "(2) Verify the issuer is registered with a federal prudential regulator or approved state regulator, " +
+      "(3) Confirm monthly reserve attestation reports are current and publicly available, " +
+      "(4) Non-compliant stablecoins (foreign-issued without U.S. registration, algorithmic stablecoins without " +
+      "qualifying reserves) may not be accepted as collateral without enhanced risk assessment, " +
+      "(5) Document the specific stablecoin/token, issuer, and compliance status in the loan file. " +
+      "Manual review required — this check cannot be fully automated.",
+    severity: "critical",
+  };
+}
+
+// States requiring TILA-like commercial financing disclosures
+const COMMERCIAL_DISCLOSURE_STATES: Record<string, string> = {
+  CA: "SB 1235 (Cal. Fin. Code §22800 et seq.)",
+  NY: "S5470-B (N.Y. Fin. Serv. Law §801 et seq.)",
+  VA: "HB 1027/SB 784 (Va. Code §6.2-2227 et seq.)",
+  UT: "SB 183 (Utah Code §7-27-101 et seq.)",
+  FL: "HB 751 (Fla. Stat. §559.9601 et seq.)",
+  GA: "SB 90 (Ga. Code §7-8-1 et seq.)",
+  CT: "SB 1032",
+  KS: "SB 345",
+  MO: "HB 990",
+  TX: "HB 4182",
+  LA: "SB 89",
+};
+
+function checkCommercialFinancingDisclosure(input: DocumentInput): ComplianceCheckResult {
+  const state = input.stateAbbr?.toUpperCase() ?? null;
+
+  if (!state) {
+    return {
+      name: "Commercial Financing Disclosure",
+      passed: true,
+      regulation: "State commercial financing disclosure laws",
+      description:
+        "No state specified on deal. Cannot determine if commercial financing disclosure is required. " +
+        "Eleven states (CA, NY, VA, UT, FL, GA, CT, KS, MO, TX, LA) require TILA-like disclosures for commercial financing. " +
+        "Manual review recommended.",
+      severity: "warning",
+    };
+  }
+
+  const statute = COMMERCIAL_DISCLOSURE_STATES[state];
+  if (!statute) {
+    return {
+      name: "Commercial Financing Disclosure",
+      passed: true,
+      regulation: "State commercial financing disclosure laws",
+      description:
+        `${state} does not currently require TILA-like commercial financing disclosures. ` +
+        `No additional commercial financing disclosure obligations for this transaction.`,
+      severity: "info",
+    };
+  }
+
+  return {
+    name: "Commercial Financing Disclosure",
+    passed: false,
+    regulation: statute,
+    description:
+      `${state} requires TILA-like disclosures for commercial financing transactions per ${statute}. ` +
+      `Required disclosures typically include: total cost of financing, APR or estimated APR, total repayment amount, ` +
+      `payment schedule, and prepayment policies. Ensure all required commercial financing disclosures are provided ` +
+      `to the borrower prior to consummation. Failure to provide may result in state enforcement actions.`,
+    severity: "critical",
+  };
+}
+
 function checkUccLienSearch(_input: DocumentInput): ComplianceCheckResult {
   return {
     name: "UCC Lien Search",
@@ -515,9 +658,7 @@ function checkUccLienSearch(_input: DocumentInput): ComplianceCheckResult {
   };
 }
 
-// ---------------------------------------------------------------------------
 // Check dispatcher — maps complianceChecks label strings to implementations
-// ---------------------------------------------------------------------------
 
 const CHECK_REGISTRY: Record<string, (input: DocumentInput) => ComplianceCheckResult> = {
   usury_check: checkUsury,
@@ -534,11 +675,11 @@ const CHECK_REGISTRY: Record<string, (input: DocumentInput) => ComplianceCheckRe
   bsa_aml: checkBsaAml,
   source_of_funds: checkSourceOfFunds,
   ucc_lien_search: checkUccLienSearch,
+  genius_act: checkGeniusActCompliance,
+  commercial_financing_disclosure: checkCommercialFinancingDisclosure,
 };
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 /**
  * Run all compliance checks defined on the loan program for this deal.

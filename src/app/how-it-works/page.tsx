@@ -165,11 +165,11 @@ const STAGES = [
     borderColor: "border-rose-400/20",
     dotColor: "bg-rose-400",
     summary:
-      "Up to 37 legal documents generated, independently reviewed against applicable regulations, and revised until every compliance check passes.",
+      "Up to 28 legal documents generated, independently reviewed against applicable regulations, and revised until every compliance check passes.",
     details: [
       {
         icon: FileText,
-        text: "Up to 37 legal documents generated per deal: loan agreement, promissory note, deed of trust/mortgage, guaranty, UCC financing statement, closing disclosure, environmental indemnity, SBA forms, and more.",
+        text: "Up to 28 legal documents generated per deal: loan agreement, promissory note, deed of trust/mortgage, guaranty, UCC financing statement, closing disclosure, environmental indemnity, SBA forms, and more.",
       },
       {
         icon: Brain,
@@ -189,7 +189,7 @@ const STAGES = [
       },
       {
         icon: CheckCircle2,
-        text: "Result: a complete loan package, credit memo plus up to 37 legal documents, ready for download individually, inline editing, or as a single ZIP archive.",
+        text: "Result: a complete loan package, credit memo plus up to 28 legal documents, ready for download individually, inline editing, or as a single ZIP archive.",
       },
     ],
   },
@@ -202,7 +202,7 @@ const BEHIND_SCENES = [
   {
     icon: BookOpen,
     title: "IRS Field Specifications",
-    desc: "Every extraction maps to the exact IRS field definition. Line 31 of Form 1040 isn't just a number, it's verified against the IRS specification for Adjusted Gross Income. Schedule E Line 26 is verified as the sum of Lines 3 through 20 minus Lines 5 through 19. No guessing.",
+    desc: "Every extraction maps to the exact IRS field definition. Line 11 of Form 1040 isn't just a number, it's verified against the IRS specification for Adjusted Gross Income. Schedule C Line 31 is verified as gross profit minus total expenses. No guessing.",
     delay: "100ms",
   },
   {
@@ -214,7 +214,7 @@ const BEHIND_SCENES = [
   {
     icon: RefreshCcw,
     title: "Three-Layer Review",
-    desc: "The platform generates prose. Compliance review checks every provision against the governing statute. Deterministic verification confirms every required provision is present and every number is correct. If any layer fails, the cycle repeats, up to three times, until the document passes.",
+    desc: "The platform writes the document. Compliance review checks every provision against the governing statute. Deterministic verification confirms every required provision is present and every number is correct. If any layer fails, the cycle repeats, up to three times, until the document passes.",
     delay: "250ms",
   },
   {
@@ -232,7 +232,7 @@ const BEHIND_SCENES = [
   {
     icon: ShieldCheck,
     title: "Rules Engine Owns the Numbers",
-    desc: "Rates, LTV, fees, and covenants are never interpreted. The deterministic rules engine owns every number in the deal terms. The platform generates the narrative around the numbers, but the numbers themselves come from pure calculation that produces the same output every time for the same input.",
+    desc: "Rates, LTV, fees, and covenants are never interpreted. The deterministic rules engine owns every number in the deal terms. The platform writes the narrative around the numbers, but the numbers themselves come from pure calculation that produces the same output every time for the same input.",
     delay: "475ms",
   },
 ];
@@ -241,7 +241,7 @@ const BEHIND_SCENES = [
    STATS
    ──────────────────────────────────────────── */
 const STATS = [
-  { value: "37", label: "Legal documents per deal (up to)", delay: "100ms" },
+  { value: "Up to 28", label: "Legal documents per deal", delay: "100ms" },
   {
     value: "50",
     suffix: "-state",
@@ -287,7 +287,7 @@ export default function HowItWorksPage() {
               style={{ animationDelay: "50ms" }}
             >
               From uploaded file to{" "}
-              <span className="text-primary">signed loan package</span>
+              <span className="text-primary">ready-to-sign loan package</span>
             </h1>
             <p
               className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-3xl leading-relaxed animate-fade-up"

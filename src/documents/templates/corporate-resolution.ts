@@ -1,8 +1,6 @@
-// =============================================================================
 // corporate-resolution.ts
 // Generates a DOCX Corporate Borrowing Resolution from deterministic deal
 // terms + AI prose. Required for all entity borrowers (LLC, Corp, Partnership).
-// =============================================================================
 
 import {
   Document,
@@ -23,9 +21,7 @@ import {
 
 import type { DocumentInput, CorporateResolutionProse } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildCorporateResolution(
   input: DocumentInput,
@@ -36,11 +32,86 @@ export function buildCorporateResolution(
   const maturityFormatted = formatDate(input.maturityDate);
   const dateFormatted = formatDate(input.generatedAt);
 
+  const isIndividual = !input.entityType || input.entityType === "sole_proprietor";
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
+  // Individual guard — if called for a sole proprietor / individual,
+  // produce an "Individual Authorization" instead of a corporate resolution.
+  if (isIndividual) {
+    const entityLabel = "Individual Authorization";
+    children.push(documentTitle(entityLabel));
+    children.push(
+      bodyTextRuns([
+        { text: "Borrower: ", bold: true },
+        { text: input.borrowerName, bold: true, underline: true },
+      ]),
+    );
+    children.push(
+      bodyTextRuns([
+        { text: "Date: ", bold: true },
+        { text: dateFormatted },
+      ]),
+    );
+    children.push(spacer(8));
+
+    children.push(sectionHeading("Recitals"));
+    children.push(bodyText(prose.resolutionRecitals));
+
+    children.push(sectionHeading("Key Terms"));
+    children.push(
+      keyTermsTable([
+        { label: "Borrower", value: input.borrowerName },
+        { label: "Loan Amount", value: principalFormatted },
+        { label: "Lender", value: input.lenderName },
+        { label: "Loan Program", value: input.programName },
+        { label: "Maturity Date", value: maturityFormatted },
+      ]),
+    );
+    children.push(spacer(8));
+
+    children.push(sectionHeading("1. Authorization to Borrow"));
+    children.push(bodyText(prose.authorizationClause));
+
+    children.push(sectionHeading("2. Authorized Signers"));
+    children.push(bodyText(prose.authorizedSigners));
+
+    children.push(sectionHeading("3. Ratification of Prior Actions"));
+    children.push(bodyText(prose.ratificationClause));
+
+    children.push(sectionHeading("4. Governing Law"));
+    children.push(bodyText(prose.governingLaw));
+
+    children.push(sectionHeading("5. Additional Provisions"));
+    children.push(
+      bodyText(
+        "Counterparts: This Authorization may be executed in counterparts, each of which shall be deemed an original. Signatures delivered by electronic means shall be deemed original signatures for all purposes.",
+      ),
+    );
+    children.push(spacer(4));
+
+    children.push(sectionHeading("IN WITNESS WHEREOF"));
+    children.push(
+      bodyText(
+        "The undersigned Borrower has executed this Individual Authorization as of the date first written above.",
+      ),
+    );
+    children.push(
+      bodyText("BORROWER:", { bold: true, color: COLORS.primary }),
+    );
+    children.push(
+      ...signatureBlock(input.borrowerName, "Borrower"),
+    );
+
+    return buildLegalDocument({
+      title: entityLabel,
+      headerRight: `${entityLabel} — ${input.borrowerName}`,
+      children,
+    });
+  }
+
+  // Entity path (LLC, Corporation, Partnership)
+
   // 1. Title
-  // -----------------------------------------------------------------------
   // Adapt title to entity type
   const entityLabel = (() => {
     switch (input.entityType) {
@@ -52,9 +123,7 @@ export function buildCorporateResolution(
   })();
   children.push(documentTitle(entityLabel));
 
-  // -----------------------------------------------------------------------
   // 2. Header — Entity name, date, meeting type
-  // -----------------------------------------------------------------------
   children.push(
     bodyTextRuns([
       { text: "Entity: ", bold: true },
@@ -80,15 +149,11 @@ export function buildCorporateResolution(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 3. Recitals (AI)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Recitals"));
   children.push(bodyText(prose.resolutionRecitals));
 
-  // -----------------------------------------------------------------------
   // 4. Key Terms Table
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Key Terms"));
   children.push(
     keyTermsTable([
@@ -101,33 +166,23 @@ export function buildCorporateResolution(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 5. Authorization (AI)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("1. Authorization to Borrow"));
   children.push(bodyText(prose.authorizationClause));
 
-  // -----------------------------------------------------------------------
   // 6. Authorized Signers (AI)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("2. Authorized Signers"));
   children.push(bodyText(prose.authorizedSigners));
 
-  // -----------------------------------------------------------------------
   // 7. Ratification (AI)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("3. Ratification of Prior Actions"));
   children.push(bodyText(prose.ratificationClause));
 
-  // -----------------------------------------------------------------------
   // 8. Certificate of Secretary / Manager (AI)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("4. Certificate of Secretary / Manager"));
   children.push(bodyText(prose.certificateOfSecretary));
 
-  // -----------------------------------------------------------------------
   // Incumbency Certificate
-  // -----------------------------------------------------------------------
   const certifierTitle = input.entityType === "llc" ? "Manager" : input.entityType === "partnership" ? "General Partner" : "Secretary";
   children.push(sectionHeading("5. Incumbency Certificate"));
   children.push(
@@ -143,9 +198,7 @@ export function buildCorporateResolution(
   children.push(bodyText("Signature: _____________________________"));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Organizational Documents
-  // -----------------------------------------------------------------------
   const orgDocLabel = input.entityType === "llc"
     ? "Articles of Organization and Operating Agreement"
     : input.entityType === "partnership"
@@ -159,9 +212,7 @@ export function buildCorporateResolution(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Quorum Certification
-  // -----------------------------------------------------------------------
   const quorumBody = input.entityType === "llc"
     ? "members holding a majority of the membership interests"
     : input.entityType === "partnership"
@@ -175,15 +226,11 @@ export function buildCorporateResolution(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 9. Governing Law (AI)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("8. Governing Law"));
   children.push(bodyText(prose.governingLaw));
 
-  // -----------------------------------------------------------------------
   // Standard Provisions
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("9. Additional Provisions"));
   children.push(
     bodyText(
@@ -198,9 +245,7 @@ export function buildCorporateResolution(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 10. Signature blocks
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("IN WITNESS WHEREOF"));
   children.push(
     bodyText(
@@ -230,9 +275,7 @@ export function buildCorporateResolution(
   );
   children.push(...signatureBlock(input.borrowerName, attestTitle));
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: entityLabel,
     headerRight: `${entityLabel} — ${input.borrowerName}`,

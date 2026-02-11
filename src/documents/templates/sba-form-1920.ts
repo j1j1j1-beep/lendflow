@@ -1,9 +1,14 @@
-// =============================================================================
 // sba-form-1920.ts
+// DEPRECATED: SBA Form 1920 was retired by the SBA effective August 1, 2023.
+// Lenders should use SBA Form 1919 (Borrower Information Form) and the
+// updated SBA Authorization/Approval process instead.
+// This template is retained for historical reference only and should NOT be
+// included in new loan document packages.
+//
+// Original description:
 // Generates a DOCX SBA Form 1920 — Lender's Application for Guaranty.
 // ZERO AI — pure deterministic data mapping from DocumentInput.
 // Fields not available in DocumentInput use placeholder text for manual entry.
-// =============================================================================
 
 import {
   Document,
@@ -27,9 +32,7 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Determine primary use-of-proceeds category from program context and
@@ -90,17 +93,13 @@ function buildUseOfProceedsRows(input: DocumentInput): string[][] {
   ]);
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildSbaForm1920(input: DocumentInput): Document {
   const { terms } = input;
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // Title
-  // -------------------------------------------------------------------------
   children.push(documentTitle("SBA Form 1920"));
   children.push(spacer(2));
   children.push(
@@ -118,9 +117,7 @@ export function buildSbaForm1920(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Part A: Lender Information
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Part A: Lender Information"));
   children.push(spacer(4));
 
@@ -138,9 +135,7 @@ export function buildSbaForm1920(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Part B: Loan Terms
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Part B: Loan Terms"));
   children.push(spacer(4));
 
@@ -194,9 +189,7 @@ export function buildSbaForm1920(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Part C: Use of Proceeds
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Part C: Use of Proceeds"));
   children.push(spacer(4));
   children.push(
@@ -221,9 +214,7 @@ export function buildSbaForm1920(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Part D: Credit Analysis Summary
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Part D: Credit Analysis Summary"));
   children.push(spacer(4));
 
@@ -267,9 +258,7 @@ export function buildSbaForm1920(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Part E: Collateral Summary
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Part E: Collateral Summary"));
   children.push(spacer(4));
 
@@ -305,9 +294,7 @@ export function buildSbaForm1920(input: DocumentInput): Document {
   }
   children.push(spacer(4));
 
-  // -------------------------------------------------------------------------
   // Part F: Lender's Certification
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Part F: Lender's Certification"));
   children.push(spacer(4));
 
@@ -355,9 +342,7 @@ export function buildSbaForm1920(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Signature Block
-  // -------------------------------------------------------------------------
   children.push(
     bodyText("AUTHORIZED LENDER OFFICER:", {
       bold: true,
@@ -379,9 +364,7 @@ export function buildSbaForm1920(input: DocumentInput): Document {
   children.push(spacer(4));
   children.push(bodyText("SBA Lender ID: ____________________________"));
 
-  // -------------------------------------------------------------------------
   // Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "SBA Form 1920 — Lender's Application for Guaranty",
     headerRight: `SBA Form 1920 — ${input.borrowerName}`,

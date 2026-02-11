@@ -1,15 +1,11 @@
-// =============================================================================
 // Loan Program Configuration System
 // Each program defines the entire context chain: required docs, structuring
 // rules, covenants, fees, compliance checks, and output documents.
 // Rules engine owns all numbers. AI never sets rates/LTV/fees.
-// =============================================================================
 
 import type { DocType } from "@/generated/prisma/client";
 
-// -----------------------------------------------------------------------------
 // Types
-// -----------------------------------------------------------------------------
 
 export interface LoanProgram {
   id: string;
@@ -70,9 +66,7 @@ export interface LoanProgram {
   }>;
 }
 
-// -----------------------------------------------------------------------------
 // Loan Programs
-// -----------------------------------------------------------------------------
 
 const SBA_7A: LoanProgram = {
   id: "sba_7a",
@@ -98,9 +92,11 @@ const SBA_7A: LoanProgram = {
     minDscr: 1.15,
     maxDti: 0.50,
     baseRate: "prime",
-    // SBA rate caps vary by loan size:
-    // ≤$50K: Prime+6.5%, $50K-$250K: Prime+6.0%, >$250K: Prime+2.75% variable / +3.0% fixed
-    spreadRange: [0.0, 0.0275], // Prime + 0% to Prime + 2.75% (for loans >$250K)
+    // SBA 7(a) rate caps by loan size (4 tiers per SBA SOP 50 10 8):
+    // ≤$50K: Prime+6.5%, $50K-$250K: Prime+6.0%, $250K-$350K: Prime+4.5%, >$350K: Prime+3.0%
+    // As of March 1, 2026, SBA also allows SOFR, 5yr Treasury, and 10yr Treasury as
+    // alternative base rates in addition to Prime (see SBA Policy Notice 2025-xxx).
+    spreadRange: [0.0, 0.03], // Prime + 0% to Prime + 3.0% (for loans >$350K)
     maxTerm: 300, // 25 years for real estate
     maxAmortization: 300,
     maxLoanAmount: 5_000_000,
@@ -122,6 +118,9 @@ const SBA_7A: LoanProgram = {
     "Flood Disaster Protection Act",
     "BSA/AML",
     "13 CFR 120",
+    // Effective March 1, 2026: SBA 7(a) allows SOFR, 5yr Treasury, and 10yr Treasury
+    // as alternative base rates in addition to WSJ Prime.
+    "SBA Alternative Base Rate Policy (SOFR, 5yr/10yr Treasury)",
   ],
   stateSpecificRules: true,
 
@@ -139,7 +138,9 @@ const SBA_7A: LoanProgram = {
     "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate",
     "compliance_certificate", "amortization_schedule", "opinion_letter",
     // SBA regulatory forms
-    "sba_form_1919", "sba_form_1920", "sba_form_159", "sba_form_148", "sba_form_1050",
+    // NOTE: SBA Form 1920 was retired August 2023 — removed from required docs.
+    // NOTE: SBA Form 1919 was revised April 2025 per Executive Order 14168.
+    "sba_form_1919", "sba_form_159", "sba_form_148", "sba_form_1050",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
@@ -176,7 +177,9 @@ const SBA_504: LoanProgram = {
   ],
 
   structuringRules: {
-    maxLtv: 0.90, // 50% bank first lien + 40% CDC second lien + 10% borrower equity
+    // 504 structure: 50% bank first lien + 40% CDC second lien + borrower equity injection.
+    // Equity injection: 10% standard, 15% for new businesses (<2 years), 20% for special-use properties.
+    maxLtv: 0.90,
     minDscr: 1.15,
     maxDti: 0.50,
     baseRate: "treasury", // CDC debenture rate (below-market fixed)
@@ -216,8 +219,9 @@ const SBA_504: LoanProgram = {
     "cdc_debenture", "deed_of_trust", "environmental_indemnity", "assignment_of_leases", "ucc_financing_statement",
     "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate",
     "compliance_certificate", "amortization_schedule", "opinion_letter",
-    // SBA regulatory forms (1920 and 1050 will be filtered out — they're 7(a) only)
-    "sba_form_1919", "sba_form_1920", "sba_form_159", "sba_form_148", "sba_form_1050",
+    // SBA regulatory forms (1050 is 7(a) only; Form 1920 retired August 2023 — removed)
+    // NOTE: SBA Form 1919 was revised April 2025 per Executive Order 14168.
+    "sba_form_1919", "sba_form_159", "sba_form_148", "sba_form_1050",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
@@ -334,7 +338,10 @@ const DSCR_LOAN: LoanProgram = {
     maxAmortization: 360,
     maxLoanAmount: 3_000_000,
     minLoanAmount: 75_000,
-    prepaymentPenalty: true,
+    // Dodd-Frank Section 1414 prohibits prepayment penalties on non-QM residential mortgages.
+    // DSCR loans on investment properties are business-purpose and may be exempt, but we
+    // default to false for safety. Override only for confirmed investment-property-only deals.
+    prepaymentPenalty: false,
     requiresAppraisal: true,
     requiresPersonalGuaranty: false,
     collateralTypes: ["residential_1_4"],
@@ -343,6 +350,9 @@ const DSCR_LOAN: LoanProgram = {
 
   applicableRegulations: [
     "TILA/Reg Z",
+    // NOTE: DSCR loans on investment properties are likely TRID-exempt as business-purpose
+    // under Reg Z 1026.3(a)(1). Review on a per-loan basis — if the borrower occupies the
+    // property or uses it as a primary residence, TRID applies.
     "RESPA/Reg X",
     "ECOA/Reg B",
     "HMDA/Reg C",
@@ -401,7 +411,9 @@ const BANK_STATEMENT: LoanProgram = {
     maxAmortization: 360,
     maxLoanAmount: 3_000_000,
     minLoanAmount: 100_000,
-    prepaymentPenalty: true,
+    // Dodd-Frank Section 1414 prohibits prepayment penalties on non-QM residential mortgages.
+    // Bank statement loans may serve primary residences, so default to false.
+    prepaymentPenalty: false,
     requiresAppraisal: true,
     requiresPersonalGuaranty: false,
     collateralTypes: ["residential_1_4", "residential_condo"],
@@ -746,6 +758,10 @@ const CRYPTO_COLLATERALIZED: LoanProgram = {
     "FinCEN requirements",
     "SEC digital asset guidance",
     "State digital asset lending laws",
+    // GENIUS Act (Guiding and Establishing National Innovation for U.S. Stablecoins)
+    // Signed into law July 18, 2025. Establishes federal framework for stablecoin issuers
+    // and affects digital asset lending collateral requirements for stablecoin-backed loans.
+    "GENIUS Act (stablecoin regulatory framework)",
   ],
   stateSpecificRules: true,
 
@@ -762,7 +778,7 @@ const CRYPTO_COLLATERALIZED: LoanProgram = {
     // Universal compliance forms
     "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
-  complianceChecks: ["ofac_screening", "usury_check", "bsa_aml", "source_of_funds"],
+  complianceChecks: ["ofac_screening", "usury_check", "bsa_aml", "source_of_funds", "genius_act"],
 
   lateFeePercent: 0.05,
   lateFeeGraceDays: 10,
@@ -773,9 +789,7 @@ const CRYPTO_COLLATERALIZED: LoanProgram = {
   ],
 };
 
-// -----------------------------------------------------------------------------
 // Registry
-// -----------------------------------------------------------------------------
 
 export const LOAN_PROGRAMS: Record<string, LoanProgram> = {
   sba_7a: SBA_7A,

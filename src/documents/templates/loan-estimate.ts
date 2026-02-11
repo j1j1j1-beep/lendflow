@@ -1,9 +1,12 @@
-// =============================================================================
 // loan-estimate.ts
 // Generates a DOCX TRID-compliant Loan Estimate — pure math, zero AI prose.
 // All numbers derived from DocumentInput (rules engine output).
 // Must be provided within 3 business days of application (Reg Z / TRID).
-// =============================================================================
+//
+// IMPORTANT: This custom DOCX output does NOT constitute the exact CFPB model form
+// H-24 (Loan Estimate) and therefore does NOT provide safe harbor protection
+// under TILA-RESPA Integrated Disclosure (TRID) rules. The lender must verify their
+// own form compliance with 12 CFR 1026.37 and Appendix H-24 before use in production.
 
 import {
   Document,
@@ -30,9 +33,7 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function daysBetween(a: Date, b: Date): number {
   const utcA = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
@@ -45,15 +46,29 @@ function perDiem(principal: number, rate: number): number {
 }
 
 /**
- * APR approximation using the N-ratio method.
+ * APR calculation using the actuarial method per Reg Z Appendix J.
+ * Uses Newton-Raphson iteration to solve for the periodic rate r in:
+ *   loanAmount = monthlyPayment * [(1 - (1+r)^-n) / r]
+ * This is REQUIRED by Regulation Z; the N-ratio approximation can diverge
+ * 20-40bps on 30-year loans, exceeding the 1/8% (12.5bps) tolerance.
  */
-function approximateAPR(
-  amountFinanced: number,
-  financeCharge: number,
-  numPayments: number,
+function calculateAPR_actuarial(
+  loanAmount: number,
+  totalFinanceCharge: number,
+  monthlyPayment: number,
+  termMonths: number,
 ): number {
-  if (amountFinanced <= 0 || numPayments <= 0) return 0;
-  return (2 * numPayments * financeCharge) / (amountFinanced * (numPayments + 1));
+  if (loanAmount <= 0 || termMonths <= 0 || monthlyPayment <= 0) return 0;
+  // Newton-Raphson to find monthly rate
+  let r = monthlyPayment / loanAmount; // initial guess
+  for (let i = 0; i < 100; i++) {
+    const pv = monthlyPayment * (1 - Math.pow(1 + r, -termMonths)) / r;
+    const dpv = monthlyPayment * ((-termMonths * Math.pow(1 + r, -termMonths - 1) * r - (1 - Math.pow(1 + r, -termMonths))) / (r * r));
+    const newR = r - (pv - loanAmount) / dpv;
+    if (Math.abs(newR - r) < 1e-10) break;
+    r = newR;
+  }
+  return r * 12 * 100; // annualize and convert to percentage
 }
 
 /** Categorize fees into origination, services not shopped, services shopped */
@@ -92,9 +107,7 @@ function categorizeFees(fees: DocumentInput["terms"]["fees"]): {
   return { origination, notShopped, shopped };
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildLoanEstimate(input: DocumentInput): Document {
   const { terms } = input;
@@ -118,13 +131,11 @@ export function buildLoanEstimate(input: DocumentInput): Document {
     balloonAmount = terms.approvedAmount;
   }
 
-  // =========================================================================
   // PAGE 1: Loan Terms + Projected Payments + Costs at Closing
-  // =========================================================================
   children.push(documentTitle("Loan Estimate"));
   children.push(spacer(4));
 
-  // -- Header info --
+  // Header info
   children.push(
     createTable(
       ["Item", "Detail"],
@@ -142,7 +153,7 @@ export function buildLoanEstimate(input: DocumentInput): Document {
   );
   children.push(spacer(6));
 
-  // -- Loan Terms Table --
+  // Loan Terms Table
   children.push(sectionHeading("Loan Terms"));
 
   const productType = terms.baseRateType.toLowerCase().includes("fixed")
@@ -184,7 +195,7 @@ export function buildLoanEstimate(input: DocumentInput): Document {
   );
   children.push(spacer(6));
 
-  // -- Projected Payments --
+  // Projected Payments
   children.push(sectionHeading("Projected Payments"));
 
   const estimatedEscrow = 0;
@@ -212,7 +223,7 @@ export function buildLoanEstimate(input: DocumentInput): Document {
   );
   children.push(spacer(6));
 
-  // -- Costs at Closing --
+  // Costs at Closing
   children.push(sectionHeading("Costs at Closing"));
 
   let totalFees = 0;
@@ -248,12 +259,10 @@ export function buildLoanEstimate(input: DocumentInput): Document {
     ),
   );
 
-  // -- Page break --
+  // Page break
   children.push(new Paragraph({ children: [new PageBreak()] }));
 
-  // =========================================================================
   // PAGE 2: Closing Cost Details
-  // =========================================================================
   children.push(sectionHeading("Estimated Closing Cost Details"));
 
   const categorized = categorizeFees(terms.fees);
@@ -365,12 +374,10 @@ export function buildLoanEstimate(input: DocumentInput): Document {
     ]),
   );
 
-  // -- Page break --
+  // Page break
   children.push(new Paragraph({ children: [new PageBreak()] }));
 
-  // =========================================================================
   // PAGE 3: Comparisons + Other Considerations
-  // =========================================================================
   children.push(sectionHeading("Comparisons"));
 
   // In 5 Years calculations
@@ -395,7 +402,8 @@ export function buildLoanEstimate(input: DocumentInput): Document {
   const totalPrepaidFinanceCharges = prepaidInterest;
   const financeCharge = totalOfPayments - terms.approvedAmount + totalPrepaidFinanceCharges;
   const amountFinanced = terms.approvedAmount - totalPrepaidFinanceCharges;
-  const apr = approximateAPR(amountFinanced, financeCharge, terms.termMonths);
+  // APR (Reg Z Appendix J actuarial method — Newton-Raphson iteration)
+  const apr = calculateAPR_actuarial(amountFinanced, financeCharge, terms.monthlyPayment, terms.termMonths);
   const totalInterest = totalOfPayments - terms.approvedAmount;
   const tip = terms.approvedAmount > 0 ? (totalInterest / terms.approvedAmount) * 100 : 0;
 
@@ -405,7 +413,7 @@ export function buildLoanEstimate(input: DocumentInput): Document {
       [
         ["In 5 Years — Total You Will Have Paid", formatCurrencyDetailed(totalPayments5Years)],
         ["In 5 Years — Principal You Will Have Paid Off", formatCurrencyDetailed(principalPaid5Years)],
-        ["Annual Percentage Rate (APR)", `${(apr * 100).toFixed(3)}%`],
+        ["Annual Percentage Rate (APR)", `${apr.toFixed(3)}%`],
         ["Total Interest Percentage (TIP)", `${tip.toFixed(3)}%`],
       ],
       { columnWidths: [55, 45], alternateRows: true },
@@ -420,7 +428,7 @@ export function buildLoanEstimate(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -- Other Considerations --
+  // Other Considerations
   children.push(sectionHeading("Other Considerations"));
 
   children.push(bodyText("Appraisal", { bold: true }));
@@ -465,7 +473,7 @@ export function buildLoanEstimate(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -- Confirm Receipt --
+  // Confirm Receipt
   children.push(sectionHeading("Confirm Receipt"));
   children.push(
     bodyText(
@@ -498,9 +506,7 @@ export function buildLoanEstimate(input: DocumentInput): Document {
     ...signatureBlock("____________________________", "Co-Applicant"),
   );
 
-  // -------------------------------------------------------------------------
   // Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "Loan Estimate",
     headerRight: `Loan Estimate — ${input.borrowerName}`,

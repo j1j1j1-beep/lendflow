@@ -1,8 +1,6 @@
-// =============================================================================
 // cross-document.ts
 // Cross-document verification: compares data ACROSS different documents
 // in the same deal. ZERO AI. Pure deterministic comparisons.
-// =============================================================================
 
 const ABSOLUTE_TOLERANCE = 1; // $1
 const PERCENT_TOLERANCE = 0.02; // 2%
@@ -10,9 +8,7 @@ const WARNING_THRESHOLD = 0.05; // 5% — warn but don't fail
 const CROSS_DOC_FAIL_THRESHOLD = 0.20; // 20% for loose comparisons
 const CROSS_DOC_HARD_FAIL_THRESHOLD = 0.50; // 50% for bank-vs-income
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 export interface CrossDocCheck {
   description: string;
@@ -33,9 +29,7 @@ export interface ExtractionInput {
   year?: number;
 }
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function get(obj: any, path: string): number {
   const parts = path.split(".");
@@ -121,9 +115,7 @@ function findFirst(extractions: ExtractionInput[], ...types: string[]): Extracti
   return results.length > 0 ? results[0] : null;
 }
 
-// ---------------------------------------------------------------------------
 // Cross-document check implementations
-// ---------------------------------------------------------------------------
 
 function checkW2vs1040(extractions: ExtractionInput[]): CrossDocCheck[] {
   const checks: CrossDocCheck[] = [];
@@ -491,9 +483,7 @@ function getStatementLabel(extraction: ExtractionInput): string {
   return "unknown period";
 }
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 export function runCrossDocChecks(
   extractions: Array<{ docType: string; data: any; year?: number }>

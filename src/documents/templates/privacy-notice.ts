@@ -1,8 +1,6 @@
-// =============================================================================
 // privacy-notice.ts
 // Generates a DOCX Gramm-Leach-Bliley Act Privacy Notice.
 // ZERO AI — pure deterministic data mapping from DocumentInput.
-// =============================================================================
 
 import {
   Document,
@@ -22,16 +20,12 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildPrivacyNotice(input: DocumentInput): Document {
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // 1. Title
-  // -------------------------------------------------------------------------
   children.push(
     documentTitle(
       "Privacy Notice \u2014 Gramm-Leach-Bliley Act Disclosure",
@@ -39,9 +33,7 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
   );
   children.push(spacer(4));
 
-  // -------------------------------------------------------------------------
   // 2. FACTS header
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("FACTS"));
 
   children.push(
@@ -53,9 +45,7 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 3. WHY? section
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Why?"));
 
   children.push(
@@ -65,9 +55,7 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 4. WHAT? section
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("What?"));
 
   children.push(
@@ -93,9 +81,7 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 5. HOW? section
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("How?"));
 
   children.push(
@@ -105,9 +91,18 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 6. Sharing Table — Standard GLBA Categories
-  // -------------------------------------------------------------------------
+  //
+  // WARNING: [Yes/No] fields below require lender-specific answers before distribution.
+  // These MUST be populated with actual lender practices before this document is used.
+  // Rows 3-6 of this table contain placeholder [Yes/No] values for:
+  //   - Joint marketing with other financial companies
+  //   - Affiliates' everyday business purposes (transactions & experiences)
+  //   - Affiliates' everyday business purposes (creditworthiness)
+  //   - Nonaffiliates marketing
+  // Each lender must determine its own sharing practices and replace [Yes/No]
+  // with "Yes" or "No" based on actual business operations.
+  //
   children.push(sectionHeading("Reasons We Can Share Your Personal Information"));
 
   children.push(
@@ -125,24 +120,28 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
           "No",
         ],
         [
+          // WARNING: [Yes/No] placeholder — must be replaced with lender-specific answer
           "For joint marketing with other financial companies",
-          "[Yes/No]",
-          "[Yes/No]",
+          "[Yes/No]", // REQUIRES LENDER INPUT
+          "[Yes/No]", // REQUIRES LENDER INPUT
         ],
         [
+          // WARNING: [Yes/No] placeholder — must be replaced with lender-specific answer
           "For our affiliates\u2019 everyday business purposes \u2014 information about your transactions and experiences",
-          "[Yes/No]",
-          "[Yes/No]",
+          "[Yes/No]", // REQUIRES LENDER INPUT
+          "[Yes/No]", // REQUIRES LENDER INPUT
         ],
         [
+          // WARNING: [Yes/No] placeholder — must be replaced with lender-specific answer
           "For our affiliates\u2019 everyday business purposes \u2014 information about your creditworthiness",
-          "[Yes/No]",
-          "[Yes/No]",
+          "[Yes/No]", // REQUIRES LENDER INPUT
+          "[Yes/No]", // REQUIRES LENDER INPUT
         ],
         [
+          // WARNING: [Yes/No] placeholder — must be replaced with lender-specific answer
           "For nonaffiliates to market to you",
-          "[Yes/No]",
-          "[Yes/No]",
+          "[Yes/No]", // REQUIRES LENDER INPUT
+          "[Yes/No]", // REQUIRES LENDER INPUT
         ],
       ],
       { columnWidths: [50, 25, 25], alternateRows: true },
@@ -150,9 +149,7 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 7. To Limit Our Sharing
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("To Limit Our Sharing"));
 
   children.push(
@@ -170,9 +167,7 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 8. Who We Are
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Who We Are"));
 
   children.push(
@@ -185,9 +180,7 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 9. What We Do
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("What We Do"));
 
   children.push(
@@ -252,9 +245,7 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 10. Definitions
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Definitions"));
 
   children.push(
@@ -270,9 +261,7 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 11. Effective Date & Regulatory Reference
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Effective Date"));
 
   children.push(
@@ -289,9 +278,7 @@ export function buildPrivacyNotice(input: DocumentInput): Document {
     ),
   );
 
-  // -------------------------------------------------------------------------
   // 12. Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "Privacy Notice",
     headerRight: `Privacy Notice \u2014 ${input.lenderName}`,

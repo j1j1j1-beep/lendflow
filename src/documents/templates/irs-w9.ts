@@ -1,8 +1,6 @@
-// =============================================================================
 // irs-w9.ts
 // Generates a DOCX IRS Form W-9 — Request for Taxpayer Identification Number
 // and Certification. ZERO AI — pure deterministic data mapping.
-// =============================================================================
 
 import {
   Document,
@@ -23,9 +21,7 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Map entityType to W-9 federal tax classification language.
@@ -47,16 +43,12 @@ function getFederalTaxClassification(
   }
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildIrsW9(input: DocumentInput): Document {
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // 1. Title
-  // -------------------------------------------------------------------------
   children.push(
     documentTitle(
       "IRS Form W-9 \u2014 Request for Taxpayer Identification Number and Certification",
@@ -64,9 +56,7 @@ export function buildIrsW9(input: DocumentInput): Document {
   );
   children.push(spacer(4));
 
-  // -------------------------------------------------------------------------
   // 2. Purpose
-  // -------------------------------------------------------------------------
   children.push(
     bodyText(
       "Per IRS Form W-9 (Rev. March 2024). Give Form W-9 to the requester. Do not send to the IRS.",
@@ -75,9 +65,7 @@ export function buildIrsW9(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 3. Lines 1-2 — Name and Business Name
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Name and Entity Information"));
 
   const address =
@@ -95,9 +83,7 @@ export function buildIrsW9(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 4. Line 3 — Federal Tax Classification
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Federal Tax Classification"));
 
   const taxClassification = getFederalTaxClassification(input.entityType);
@@ -127,9 +113,7 @@ export function buildIrsW9(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 5. Line 4 — Exemptions
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Exemptions"));
 
   children.push(
@@ -144,9 +128,7 @@ export function buildIrsW9(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 6. Lines 5-6 — Address
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Address"));
 
   children.push(
@@ -162,9 +144,7 @@ export function buildIrsW9(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 7. Part I — Taxpayer Identification Number (TIN)
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Part I \u2014 Taxpayer Identification Number (TIN)"));
 
   children.push(
@@ -186,9 +166,7 @@ export function buildIrsW9(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 8. Part II — Certification
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Part II \u2014 Certification"));
 
   children.push(
@@ -235,9 +213,7 @@ export function buildIrsW9(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 9. Signature
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Signature"));
 
   children.push(
@@ -259,9 +235,7 @@ export function buildIrsW9(input: DocumentInput): Document {
 
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 10. Requester Information
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Requester Information"));
 
   children.push(
@@ -272,9 +246,7 @@ export function buildIrsW9(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 11. Reference
-  // -------------------------------------------------------------------------
   children.push(
     bodyText(
       "Per IRS Form W-9 (Rev. March 2024). This document is prepared for use in connection with the loan transaction and should not be sent to the IRS.",
@@ -282,9 +254,7 @@ export function buildIrsW9(input: DocumentInput): Document {
     ),
   );
 
-  // -------------------------------------------------------------------------
   // 12. Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "IRS Form W-9",
     headerRight: `IRS Form W-9 \u2014 ${input.borrowerName}`,

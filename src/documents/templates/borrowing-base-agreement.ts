@@ -1,8 +1,6 @@
-// =============================================================================
 // borrowing-base-agreement.ts
 // Builds a Borrowing Base Agreement for revolving lines of credit.
 // All financial numbers come from DocumentInput; AI writes prose.
-// =============================================================================
 
 import type { DocumentInput, BorrowingBaseProse } from "../types";
 import {
@@ -26,9 +24,7 @@ import {
   COLORS,
 } from "../doc-helpers";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildBorrowingBaseAgreement(
   input: DocumentInput,
@@ -41,7 +37,7 @@ export function buildBorrowingBaseAgreement(
   const interestRate = `${(input.terms.interestRate * 100).toFixed(3)}%`;
 
   const children = [
-    // ---- Title ----
+    // Title
     documentTitle("Borrowing Base Agreement"),
     spacer(4),
 
@@ -50,13 +46,13 @@ export function buildBorrowingBaseAgreement(
     ),
     spacer(4),
 
-    // ---- Parties ----
+    // Parties
     articleHeading("I", "Parties"),
     partyBlock("Borrower", input.borrowerName, "the \"Borrower\""),
     partyBlock("Lender", input.lenderName, "the \"Lender\""),
     spacer(4),
 
-    // ---- Key Terms ----
+    // Key Terms
     articleHeading("II", "Key Terms"),
     keyTermsTable([
       { label: "Revolving Commitment Amount", value: `${loanAmount} (${loanAmountWords} dollars)` },
@@ -67,7 +63,7 @@ export function buildBorrowingBaseAgreement(
     ]),
     spacer(4),
 
-    // ---- Definitions ----
+    // Definitions
     articleHeading("III", "Definitions"),
     bodyText(
       "As used in this Agreement, the following terms shall have the meanings set forth below:",
@@ -99,7 +95,7 @@ export function buildBorrowingBaseAgreement(
     ]),
     spacer(4),
 
-    // ---- Borrowing Base Formula ----
+    // Borrowing Base Formula
     articleHeading("IV", "Borrowing Base Calculation"),
     bodyText(
       "The Borrowing Base shall be calculated as follows:",
@@ -122,7 +118,7 @@ export function buildBorrowingBaseAgreement(
     ),
     spacer(4),
 
-    // ---- Ineligible Accounts ----
+    // Ineligible Accounts
     articleHeading("V", "Ineligible Accounts"),
     bodyText(
       "The following accounts receivable shall be excluded from Eligible Accounts and shall not be included in the calculation of the Borrowing Base:",
@@ -137,7 +133,7 @@ export function buildBorrowingBaseAgreement(
     bulletPoint("Accounts where the account debtor is insolvent or the subject of any bankruptcy proceeding;"),
     spacer(4),
 
-    // ---- Ineligible Inventory ----
+    // Ineligible Inventory
     articleHeading("VI", "Ineligible Inventory"),
     bodyText(
       "The following inventory shall be excluded from Eligible Inventory and shall not be included in the calculation of the Borrowing Base:",
@@ -151,27 +147,27 @@ export function buildBorrowingBaseAgreement(
     bulletPoint("Packaging, supplies, and similar materials not held for sale in the ordinary course of business;"),
     spacer(4),
 
-    // ---- Eligibility Criteria (AI prose) ----
+    // Eligibility Criteria (AI prose)
     articleHeading("VII", "Additional Eligibility Criteria"),
     bodyText(prose.eligibilityCriteria),
     spacer(4),
 
-    // ---- Advance Rates (AI prose) ----
+    // Advance Rates (AI prose)
     articleHeading("VIII", "Advance Rate Provisions"),
     bodyText(prose.advanceRates),
     spacer(4),
 
-    // ---- Reporting Requirements (AI prose) ----
+    // Reporting Requirements (AI prose)
     articleHeading("IX", "Reporting Requirements"),
     bodyText(prose.reportingRequirements),
     spacer(4),
 
-    // ---- Reserve Provisions (AI prose) ----
+    // Reserve Provisions (AI prose)
     articleHeading("X", "Reserves"),
     bodyText(prose.reserveProvisions),
     spacer(4),
 
-    // ---- Borrowing Base Certificate ----
+    // Borrowing Base Certificate
     articleHeading("XI", "Borrowing Base Certificate"),
     bodyText(
       "Borrower shall deliver to Lender a Borrowing Base Certificate in the form attached hereto as Exhibit A, or in such other form as Lender may reasonably require, certified by an authorized officer of Borrower. Each Borrowing Base Certificate shall be delivered:",
@@ -185,7 +181,7 @@ export function buildBorrowingBaseAgreement(
     ),
     spacer(4),
 
-    // ---- Events of Default ----
+    // Events of Default
     articleHeading("XII", "Events of Default"),
     bodyText(
       "In addition to any Events of Default set forth in the Loan Agreement, the following shall constitute Events of Default under this Agreement:",
@@ -196,7 +192,7 @@ export function buildBorrowingBaseAgreement(
     bulletPoint("Borrower materially breaches any eligibility criteria, reporting obligation, or covenant under this Agreement;"),
     spacer(4),
 
-    // ---- Governing Law (AI prose) ----
+    // Governing Law (AI prose)
     articleHeading("XIII", "Governing Law"),
     bodyText(prose.governingLaw),
     spacer(4),
@@ -218,7 +214,7 @@ export function buildBorrowingBaseAgreement(
     ]),
     spacer(8),
 
-    // ---- Signatures ----
+    // Signatures
     bodyTextRuns([
       {
         text: "IN WITNESS WHEREOF, the parties have executed this Borrowing Base Agreement as of the date first written above.",

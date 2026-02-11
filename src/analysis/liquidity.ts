@@ -1,7 +1,5 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // OpenShut Analysis Engine — Reserves & Liquidity Analysis
 // 100% deterministic. Zero AI. Pure TypeScript math.
-// ─────────────────────────────────────────────────────────────────────────────
 
 export interface LiquidityAnalysis {
   totalLiquidAssets: number;
@@ -15,9 +13,7 @@ export interface LiquidityAnalysis {
   notes: string[];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 function num(val: unknown): number {
   if (typeof val === "number" && Number.isFinite(val)) return val;
@@ -66,9 +62,7 @@ function getMinBalance(statement: any): number {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Main liquidity analysis
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function analyzeLiquidity(params: {
   bankStatementData?: Array<any>;
@@ -78,7 +72,7 @@ export function analyzeLiquidity(params: {
   const { bankStatementData, balanceSheetData, monthlyDebtService } = params;
   const notes: string[] = [];
 
-  // ── Bank statement analysis ────────────────────────────────────────────────
+  // Bank statement analysis
   let totalEndingBalances = 0;
   let totalAverageBalance = 0;
   let globalMinBalance = Infinity;
@@ -146,7 +140,7 @@ export function analyzeLiquidity(params: {
 
   const minimumBalance = Math.round(globalMinBalance * 100) / 100;
 
-  // ── Balance sheet analysis ─────────────────────────────────────────────────
+  // Balance sheet analysis
   let bsCash = 0;
   let currentAssets = 0;
   let currentLiabilities = 0;
@@ -216,7 +210,7 @@ export function analyzeLiquidity(params: {
     }
   }
 
-  // ── Total liquid assets ────────────────────────────────────────────────────
+  // Total liquid assets
   // Use the greater of bank ending balances or balance sheet cash (to avoid double-counting)
   const totalLiquidAssets = Math.max(totalEndingBalances, bsCash);
 
@@ -227,7 +221,7 @@ export function analyzeLiquidity(params: {
     );
   }
 
-  // ── Months of reserves ─────────────────────────────────────────────────────
+  // Months of reserves
   let monthsOfReserves = 0;
   if (monthlyDebtService > 0) {
     monthsOfReserves = Math.round((totalLiquidAssets / monthlyDebtService) * 100) / 100;
@@ -237,7 +231,7 @@ export function analyzeLiquidity(params: {
     notes.push("No monthly debt service provided. Months of reserves not bounded.");
   }
 
-  // ── Rating ─────────────────────────────────────────────────────────────────
+  // Rating
   let rating: LiquidityAnalysis["rating"];
 
   if (monthsOfReserves >= 12) {
@@ -252,7 +246,7 @@ export function analyzeLiquidity(params: {
     notes.push("Less than 3 months of reserves. Significant liquidity risk.");
   }
 
-  // ── Additional warnings ────────────────────────────────────────────────────
+  // Additional warnings
   if (minimumBalance < 0) {
     notes.push(`Account went negative (min balance: $${minimumBalance.toLocaleString()}). Possible overdraft.`);
   }

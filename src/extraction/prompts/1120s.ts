@@ -1,4 +1,4 @@
-// ─── IRS Form 1120-S (S-Corporation) Extraction Prompt ────────────────────────
+// IRS Form 1120-S (S-Corporation) Extraction Prompt
 // FALLBACK prompt for when deterministic line mapping (irs-field-map.ts) fails.
 // Used for edge cases: unusual formatting, Schedule K in non-standard layout,
 // fields Textract can't identify via key-value pairs, or low-confidence results.

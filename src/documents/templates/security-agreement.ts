@@ -1,8 +1,6 @@
-// =============================================================================
 // security-agreement.ts
 // Builds a Security Agreement docx granting lender a security interest in
 // collateral. All financial numbers come from DocumentInput; AI writes prose.
-// =============================================================================
 
 import type { DocumentInput, SecurityAgreementProse } from "../types";
 import {
@@ -26,9 +24,7 @@ import {
   COLORS,
 } from "../doc-helpers";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildSecurityAgreement(
   input: DocumentInput,
@@ -39,7 +35,7 @@ export function buildSecurityAgreement(
   const loanAmountWords = numberToWords(input.terms.approvedAmount);
 
   const children = [
-    // ---- Title ----
+    // Title
     documentTitle("Security Agreement"),
     spacer(4),
 
@@ -48,13 +44,13 @@ export function buildSecurityAgreement(
     ),
     spacer(4),
 
-    // ---- Parties ----
+    // Parties
     articleHeading("I", "Parties"),
     partyBlock("Debtor", input.borrowerName, "the \"Debtor\""),
     partyBlock("Secured Party", input.lenderName, "the \"Secured Party\""),
     spacer(4),
 
-    // ---- Grant of Security Interest ----
+    // Grant of Security Interest
     articleHeading("II", "Grant of Security Interest"),
     bodyText(
       `Debtor hereby grants to Secured Party a continuing security interest in and to all of the Collateral described herein, whether now owned or hereafter acquired, wherever located, together with all accessions, additions, replacements, and substitutions thereto, and all proceeds and products thereof (collectively, the "Collateral"), to secure the prompt and complete payment, performance, and observance of all Obligations (as defined herein).`,
@@ -66,7 +62,7 @@ export function buildSecurityAgreement(
     spacer(2),
     spacer(4),
 
-    // ---- Collateral Description ----
+    // Collateral Description
     articleHeading("III", "Collateral Description"),
     bodyText(prose.collateralDescription),
     spacer(2),
@@ -88,7 +84,7 @@ export function buildSecurityAgreement(
     ),
     spacer(4),
 
-    // ---- Obligations Secured ----
+    // Obligations Secured
     articleHeading("IV", "Obligations Secured"),
     bodyText(
       `This Agreement secures the payment and performance of all obligations of Debtor to Secured Party (the "Obligations"), including without limitation:`,
@@ -116,17 +112,33 @@ export function buildSecurityAgreement(
     ]),
     spacer(4),
 
-    // ---- Representations and Warranties ----
+    // Representations and Warranties
     articleHeading("V", "Representations and Warranties"),
     bodyText(
       "Debtor represents and warrants to Secured Party as of the date hereof and at all times hereafter until the Obligations are paid in full:",
     ),
-    bulletPoint(
-      `Organization and Location: Debtor's chief executive office and principal place of business is located at ${input.debtorAddress ?? input.propertyAddress ?? "[address on file]"} in ${input.debtorStateOfOrganization ?? input.stateAbbr ?? "[STATE]"}.`,
-    ),
-    bulletPoint(
-      `Legal Name: Debtor's exact legal name as shown on its organizational documents is "${input.borrowerName}." Debtor has not used any other legal name, trade name, or fictitious business name in the past five (5) years except as disclosed to Secured Party in writing.`,
-    ),
+    ...(() => {
+      const isIndividual = !input.entityType || input.entityType === "sole_proprietor";
+      if (isIndividual) {
+        return [
+          bulletPoint(
+            `Residence: Debtor's principal residence is located at ${input.debtorAddress ?? input.propertyAddress ?? "[address on file]"} in ${input.debtorStateOfOrganization ?? input.stateAbbr ?? "[STATE]"}.`,
+          ),
+          bulletPoint(
+            `Legal Name: Debtor's exact legal name as shown on government-issued identification is "${input.borrowerName}." Debtor has not used any other legal name, trade name, or fictitious business name in the past five (5) years except as disclosed to Secured Party in writing.`,
+          ),
+        ];
+      } else {
+        return [
+          bulletPoint(
+            `Organization and Location: Debtor's chief executive office and principal place of business is located at ${input.debtorAddress ?? input.propertyAddress ?? "[address on file]"} in ${input.debtorStateOfOrganization ?? input.stateAbbr ?? "[STATE]"}.`,
+          ),
+          bulletPoint(
+            `Legal Name: Debtor's exact legal name as shown on its organizational documents is "${input.borrowerName}." Debtor has not used any other legal name, trade name, or fictitious business name in the past five (5) years except as disclosed to Secured Party in writing.`,
+          ),
+        ];
+      }
+    })(),
     bulletPoint(
       "No Prior Liens: Except as disclosed in writing to Secured Party, there are no security interests, liens, or encumbrances on any of the Collateral.",
     ),
@@ -142,7 +154,7 @@ export function buildSecurityAgreement(
     ...ensureProseArray(prose.representationsAndWarranties).map((item) => bulletPoint(item)),
     spacer(4),
 
-    // ---- Covenants ----
+    // Covenants
     articleHeading("VI", "Covenants"),
     bodyText(
       "Debtor covenants and agrees that, until all Obligations are fully satisfied:",
@@ -169,7 +181,7 @@ export function buildSecurityAgreement(
     ),
     spacer(4),
 
-    // ---- Perfection ----
+    // Perfection
     articleHeading("VII", "Perfection"),
     bodyText(
       "Secured Party shall perfect its security interest in the Collateral by one or more of the following methods, as applicable:",
@@ -190,11 +202,26 @@ export function buildSecurityAgreement(
       "Debtor shall execute all documents and take all actions necessary to perfect and maintain the perfection of Secured Party's security interest, including executing financing statements and amendments thereto.",
     ),
     spacer(2),
+
+    // UCC Section 9-509 — Financing Statement Authorization
+    sectionSubheading("7.1", "Financing Statement Authorization (UCC \u00A7 9-509)"),
+    bodyText(
+      "Borrower hereby authorizes Secured Party to file financing statements (UCC-1) and continuation statements (UCC-3) describing the Collateral, without Borrower's signature, pursuant to UCC Section 9-509. This authorization shall not be revoked until all Obligations are indefeasibly paid in full and this Agreement is terminated.",
+    ),
+    spacer(2),
+
+    // UCC Article 12 — Controllable Electronic Records
+    sectionSubheading("7.2", "Controllable Electronic Records (UCC Article 12)"),
+    bodyText(
+      "To the extent any Collateral constitutes a 'controllable electronic record' under UCC Article 12, Borrower shall ensure that Secured Party has 'control' of such record as defined in UCC Section 12-105. Perfection of Secured Party's security interest in controllable electronic records shall be achieved through control pursuant to UCC Section 12-104. UCC Article 12 (Controllable Electronic Records), adopted by 33+ states as of 2026, governs the rights of parties in controllable electronic records, and this provision shall be interpreted in accordance therewith.",
+    ),
+    spacer(2),
+
     bodyText("Additional Perfection Provisions:", { bold: true }),
     bodyText(prose.perfectionLanguage),
     spacer(4),
 
-    // ---- Events of Default ----
+    // Events of Default
     articleHeading("VIII", "Events of Default"),
     bodyText(
       "An Event of Default under this Agreement shall include, without limitation, any Event of Default as defined in the Loan Agreement of even date herewith between Debtor and Secured Party, as well as:",
@@ -222,7 +249,7 @@ export function buildSecurityAgreement(
     ),
     spacer(4),
 
-    // ---- Remedies ----
+    // Remedies
     articleHeading("IX", "Remedies"),
     bodyText(
       "Upon the occurrence and during the continuance of an Event of Default, Secured Party shall have all rights and remedies available under the Uniform Commercial Code and applicable law, including without limitation:",
@@ -247,7 +274,7 @@ export function buildSecurityAgreement(
     bodyText(prose.remediesOnDefault),
     spacer(4),
 
-    // ---- Disposition of Collateral ----
+    // Disposition of Collateral
     articleHeading("X", "Disposition of Collateral"),
     bodyText(
       "Any proceeds of the disposition of Collateral shall be applied in the following order: (a) first, to the reasonable costs and expenses of retaking, holding, preparing for sale, selling, and the like, including reasonable attorneys' fees and legal expenses incurred by Secured Party; (b) second, to the satisfaction of the Obligations in such order as Secured Party shall determine; and (c) third, any surplus to Debtor or as otherwise required by law. Debtor shall remain liable for any deficiency remaining after application of all proceeds.",
@@ -257,7 +284,7 @@ export function buildSecurityAgreement(
     bodyText(prose.dispositionOfCollateral),
     spacer(4),
 
-    // ---- Governing Law ----
+    // Governing Law
     articleHeading("XI", "Governing Law"),
     bodyText(prose.governingLaw),
     spacer(4),
@@ -280,7 +307,7 @@ export function buildSecurityAgreement(
     ]),
     spacer(8),
 
-    // ---- Signatures ----
+    // Signatures
     bodyTextRuns([
       {
         text: "IN WITNESS WHEREOF, the parties have executed this Security Agreement as of the date first written above.",

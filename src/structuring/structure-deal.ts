@@ -1,4 +1,3 @@
-// =============================================================================
 // structure-deal.ts
 // Orchestrator — runs all 4 layers of deal structuring in sequence:
 //   1. Rules Engine (deterministic)
@@ -7,7 +6,6 @@
 //   4. Final Check (deterministic)
 //
 // Returns the complete structured deal ready for database storage.
-// =============================================================================
 
 import type { FullAnalysis } from "@/analysis/analyze";
 import type { LoanProgram } from "@/config/loan-programs";
@@ -16,9 +14,7 @@ import { runAiStructuring, type AiEnhancement } from "./ai-structuring";
 import { runComplianceReview, type ComplianceResult } from "./compliance-review";
 import { runFinalCheck, type FinalCheckResult } from "./final-check";
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 export interface StructureDealInput {
   analysis: FullAnalysis;
@@ -43,14 +39,10 @@ export interface StructureDealOutput {
   declineReasons: string[];
 }
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 export async function structureDeal(input: StructureDealInput): Promise<StructureDealOutput> {
-  // -------------------------------------------------------------------------
   // Layer 1: Rules Engine (deterministic)
-  // -------------------------------------------------------------------------
   const rulesInput: RulesEngineInput = {
     analysis: input.analysis,
     program: input.program,
@@ -64,9 +56,7 @@ export async function structureDeal(input: StructureDealInput): Promise<Structur
 
   const rulesEngine = runRulesEngine(rulesInput);
 
-  // -------------------------------------------------------------------------
   // Layer 2: AI Enhancement (Claude — prose only)
-  // -------------------------------------------------------------------------
   const aiEnhancement = await runAiStructuring({
     rulesOutput: rulesEngine,
     analysis: input.analysis,
@@ -77,9 +67,7 @@ export async function structureDeal(input: StructureDealInput): Promise<Structur
     stateAbbr: input.stateAbbr,
   });
 
-  // -------------------------------------------------------------------------
   // Layer 3: Compliance Review (deterministic + Claude)
-  // -------------------------------------------------------------------------
   const isCommercial = input.program.category === "commercial" || input.program.category === "specialty";
 
   const compliance = await runComplianceReview({
@@ -92,9 +80,7 @@ export async function structureDeal(input: StructureDealInput): Promise<Structur
     isCommercial,
   });
 
-  // -------------------------------------------------------------------------
   // Layer 4: Deterministic Final Check
-  // -------------------------------------------------------------------------
   const finalCheck = runFinalCheck({
     rulesOutput: rulesEngine,
     aiEnhancement,
@@ -102,9 +88,7 @@ export async function structureDeal(input: StructureDealInput): Promise<Structur
     program: input.program,
   });
 
-  // -------------------------------------------------------------------------
   // Determine status
-  // -------------------------------------------------------------------------
   const declineReasons: string[] = [];
 
   // Not eligible per rules engine

@@ -34,9 +34,7 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   opinion_letter: "Legal Opinion Letter",
 };
 
-// ---------------------------------------------------------------------------
 // GET /api/deals/[dealId]/download-all — Zip all generated docs into one file
-// ---------------------------------------------------------------------------
 
 export async function GET(
   request: NextRequest,

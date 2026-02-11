@@ -1,8 +1,6 @@
-// =============================================================================
 // settlement-statement.ts
 // Generates a DOCX Settlement Statement — pure math, zero AI prose.
 // All numbers derived from DocumentInput (rules engine output).
-// =============================================================================
 
 import {
   Document,
@@ -26,9 +24,7 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function daysBetween(a: Date, b: Date): number {
   const utcA = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
@@ -36,23 +32,17 @@ function daysBetween(a: Date, b: Date): number {
   return Math.ceil((utcB - utcA) / (1000 * 60 * 60 * 24));
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildSettlementStatement(input: DocumentInput): Document {
   const { terms } = input;
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // 1. Title
-  // -------------------------------------------------------------------------
   children.push(documentTitle("Settlement Statement"));
   children.push(spacer(4));
 
-  // -------------------------------------------------------------------------
   // 2. Header text
-  // -------------------------------------------------------------------------
   children.push(
     bodyText(
       "This Settlement Statement sets forth all charges, adjustments, and disbursements in connection with the loan described herein.",
@@ -60,9 +50,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   );
   children.push(spacer(4));
 
-  // -------------------------------------------------------------------------
   // 3. Key Terms Table
-  // -------------------------------------------------------------------------
   children.push(
     keyTermsTable([
       { label: "Effective Date", value: formatDate(input.generatedAt) },
@@ -81,9 +69,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 4. Loan Summary
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Loan Summary"));
   children.push(
     createTable(
@@ -103,9 +89,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 5. Borrower Charges
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Borrower Charges"));
 
   const chargeRows: string[][] = [];
@@ -160,9 +144,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 6. Borrower Credits
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Borrower Credits"));
 
   const totalCredits = terms.approvedAmount;
@@ -179,9 +161,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 7. Net Disbursement
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Net Disbursement"));
 
   const netDisbursement = totalCredits - totalCharges;
@@ -211,9 +191,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 8. Certification
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Certification"));
   children.push(
     bodyText(
@@ -222,9 +200,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   );
   children.push(spacer(4));
 
-  // -------------------------------------------------------------------------
   // 9. Standard clause
-  // -------------------------------------------------------------------------
   children.push(
     bodyText(
       "This Settlement Statement is for informational purposes and does not modify the terms of the Loan Agreement, Promissory Note, or any other Loan Document.",
@@ -233,9 +209,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 10. Important Notes
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Important Notes"));
   children.push(
     bodyText(
@@ -244,9 +218,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   );
   children.push(spacer(4));
 
-  // -------------------------------------------------------------------------
   // 11. RESPA/TILA Disclaimer
-  // -------------------------------------------------------------------------
   children.push(
     bodyText(
       "This Settlement Statement is prepared for commercial loan transactions only and is not intended to serve as a substitute for any disclosure required under RESPA, TILA, or Regulation Z.",
@@ -255,9 +227,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 12. Signature blocks
-  // -------------------------------------------------------------------------
   children.push(
     bodyText("BORROWER:", { bold: true, color: COLORS.primary }),
   );
@@ -283,9 +253,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
     ...signatureBlock("____________________________", "Settlement Agent"),
   );
 
-  // -------------------------------------------------------------------------
   // 13. Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "Settlement Statement",
     headerRight: `Settlement Statement — ${input.borrowerName}`,

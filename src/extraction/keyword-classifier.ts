@@ -1,4 +1,4 @@
-// ─── Deterministic Document Classifier ──────────────────────────────────────────
+// Deterministic Document Classifier
 // Runs on Textract OCR output BEFORE any AI call. Classifies financial documents
 // by matching keywords in the raw text and key-value pair keys.
 //
@@ -10,7 +10,7 @@
 // Returns null docType if no confident match — caller falls back to Grok AI.
 // No AI, no external dependencies — pure deterministic string matching.
 
-// ─── Valid Document Types ────────────────────────────────────────────────────────
+// Valid Document Types
 
 export type DocumentType =
   | "FORM_1040"
@@ -38,7 +38,7 @@ export interface KeyValuePair {
   page: number;
 }
 
-// ─── Main Classifier ─────────────────────────────────────────────────────────────
+// Main Classifier
 
 /**
  * Classify a document by matching keywords in OCR text and Textract KV pairs.
@@ -58,7 +58,7 @@ export function classifyByKeywords(
   const text = rawText.toLowerCase();
   const keys = keyValuePairs.map((kv) => kv.key.toLowerCase());
 
-  // ── TIER 1: Keyword matching on raw text ───────────────────────────────────
+  // TIER 1: Keyword matching on raw text
   // These are literal words/phrases that appear on the document.
   // Check more specific patterns first to avoid false matches.
   const tier1Result = matchTier1Keywords(text);
@@ -66,7 +66,7 @@ export function classifyByKeywords(
     return { docType: tier1Result, confidence: "high", method: "keyword" };
   }
 
-  // ── TIER 2: KV key matching ────────────────────────────────────────────────
+  // TIER 2: KV key matching
   // Textract extracts form field names as keys. Financial documents have
   // distinctive field names that identify the form type.
   const tier2Result = matchTier2KVKeys(keys);
@@ -74,7 +74,7 @@ export function classifyByKeywords(
     return { docType: tier2Result, confidence: "medium", method: "kv_key" };
   }
 
-  // ── TIER 3: Contextual text analysis ───────────────────────────────────────
+  // TIER 3: Contextual text analysis
   // For bank statements, P&Ls, and balance sheets that may not have
   // explicit form titles — look for combinations of terms.
   const tier3Result = matchTier3Context(text);
@@ -86,7 +86,7 @@ export function classifyByKeywords(
   return { docType: null, confidence: "none", method: "none" };
 }
 
-// ─── TIER 1: Keyword Matching ────────────────────────────────────────────────────
+// TIER 1: Keyword Matching
 // Literal phrases that appear on official IRS forms and financial documents.
 // Order matters: more specific patterns are checked first (e.g., 1120-S before 1120).
 
@@ -171,7 +171,7 @@ function matchTier1Keywords(text: string): DocumentType | null {
   return null;
 }
 
-// ─── TIER 2: KV Key Matching ─────────────────────────────────────────────────────
+// TIER 2: KV Key Matching
 // Textract extracts key-value pairs from forms. The KEY names themselves
 // are distinctive enough to identify the document type.
 
@@ -242,7 +242,7 @@ function matchTier2KVKeys(keys: string[]): DocumentType | null {
   return null;
 }
 
-// ─── TIER 3: Contextual Text Analysis ────────────────────────────────────────────
+// TIER 3: Contextual Text Analysis
 // For documents without explicit titles — detect by combinations of terms
 // commonly found together in specific document types.
 

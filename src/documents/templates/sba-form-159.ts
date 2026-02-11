@@ -1,9 +1,7 @@
-// =============================================================================
 // sba-form-159.ts
 // Generates a DOCX SBA Form 159 — Fee Disclosure and Compensation Agreement.
 // ZERO AI — pure deterministic data mapping from DocumentInput.
 // Fields not available in DocumentInput use placeholder text for manual entry.
-// =============================================================================
 
 import {
   Document,
@@ -26,17 +24,13 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildSbaForm159(input: DocumentInput): Document {
   const { terms } = input;
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // Title
-  // -------------------------------------------------------------------------
   children.push(documentTitle("SBA Form 159"));
   children.push(spacer(2));
   children.push(
@@ -54,9 +48,7 @@ export function buildSbaForm159(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Loan Identification
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Loan Identification"));
   children.push(spacer(4));
 
@@ -75,9 +67,7 @@ export function buildSbaForm159(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Agent/Packager Information
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Agent/Packager Information"));
   children.push(spacer(4));
   children.push(
@@ -106,9 +96,7 @@ export function buildSbaForm159(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Fee Schedule
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Fee Schedule"));
   children.push(spacer(4));
   children.push(
@@ -167,9 +155,7 @@ export function buildSbaForm159(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Additional Fee Disclosures
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Additional Fee Disclosures"));
   children.push(spacer(4));
 
@@ -191,9 +177,7 @@ export function buildSbaForm159(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Certification
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Certification"));
   children.push(spacer(4));
 
@@ -236,9 +220,7 @@ export function buildSbaForm159(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Signature Blocks
-  // -------------------------------------------------------------------------
   children.push(
     bodyText("AGENT/PACKAGER:", { bold: true, color: COLORS.primary }),
   );
@@ -284,9 +266,7 @@ export function buildSbaForm159(input: DocumentInput): Document {
   children.push(bodyText("Title: ____________________________"));
   children.push(bodyText("Date: ____________________________"));
 
-  // -------------------------------------------------------------------------
   // Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "SBA Form 159 — Fee Disclosure and Compensation Agreement",
     headerRight: `SBA Form 159 — ${input.borrowerName}`,

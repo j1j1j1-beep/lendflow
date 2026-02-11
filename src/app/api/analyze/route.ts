@@ -5,9 +5,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { inngest } from "@/inngest/client";
 import { logAudit } from "@/lib/audit";
 
-// ---------------------------------------------------------------------------
 // POST /api/analyze - Trigger analysis pipeline for a deal
-// ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,4 +1,4 @@
-// ─── IRS Form 1040 Extraction Prompt ──────────────────────────────────────────
+// IRS Form 1040 Extraction Prompt
 // FALLBACK prompt for when deterministic line mapping (irs-field-map.ts) fails.
 // Used for edge cases: unusual formatting, schedules in non-standard order,
 // fields Textract can't identify via key-value pairs, or low-confidence results.

@@ -13,11 +13,9 @@ import {
 } from "@/lib/sample-data";
 import { Prisma } from "@/generated/prisma/client";
 
-// ---------------------------------------------------------------------------
 // POST /api/deals/sample — Create a pre-populated sample deal
 // Skips OCR/extraction. Inserts verified documents + extractions, then
 // triggers the analysis pipeline via Inngest.
-// ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
   const limited = await withRateLimit(request, writeLimit);
@@ -26,13 +24,13 @@ export async function POST(request: NextRequest) {
   try {
     const { user, org } = await requireAuth();
 
-    // ── Paywall check ──────────────────────────────────────────────────────
+    // Paywall check
     const paywall = await checkPaywall(org.id);
     if (!paywall.allowed) {
       return NextResponse.json({ error: paywall.reason }, { status: 403 });
     }
 
-    // ── Prevent duplicate sample deals ─────────────────────────────────────
+    // Prevent duplicate sample deals
     const existingSample = await prisma.deal.findFirst({
       where: {
         orgId: org.id,
@@ -50,7 +48,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Create Deal ────────────────────────────────────────────────────────
+    // Create Deal
     // Convert percentage rate to decimal for storage (7.25 -> 0.0725),
     // matching the pattern in POST /api/deals.
     const rateDecimal = SAMPLE_BORROWER.proposedRate / 100;
@@ -70,7 +68,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // ── Create Document + Extraction records ───────────────────────────────
+    // Create Document + Extraction records
     for (const doc of SAMPLE_DOCUMENTS) {
       const s3Key = `${org.id}/${deal.id}/sample/${doc.fileName}`;
 
@@ -121,7 +119,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Create Verification Report (all checks passed) ─────────────────────
+    // Create Verification Report (all checks passed)
     await prisma.verificationReport.create({
       data: {
         dealId: deal.id,
@@ -159,13 +157,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // ── Update deal status to ANALYZING ────────────────────────────────────
+    // Update deal status to ANALYZING
     await prisma.deal.update({
       where: { id: deal.id },
       data: { status: "ANALYZING" },
     });
 
-    // ── Trigger Inngest pipeline ───────────────────────────────────────────
+    // Trigger Inngest pipeline
     await inngest.send({
       name: "deal/sample-process",
       data: {
@@ -174,7 +172,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // ── Audit log ──────────────────────────────────────────────────────────
+    // Audit log
     void logAudit({
       orgId: org.id,
       userId: user.id,

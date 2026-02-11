@@ -1,8 +1,6 @@
-// =============================================================================
 // doc-helpers.ts
 // Shared docx building blocks for loan document generation.
 // Extracted from memo/generate.ts pattern + legal-document-specific additions.
-// =============================================================================
 
 import {
   Document,
@@ -57,9 +55,7 @@ export {
   TabStopPosition,
 };
 
-// ---------------------------------------------------------------------------
 // Colors — consistent with credit memo
-// ---------------------------------------------------------------------------
 
 export const COLORS = {
   primary: "1B3A5C",
@@ -75,9 +71,7 @@ export const COLORS = {
   lightBorder: "E2E8F0",
 };
 
-// ---------------------------------------------------------------------------
 // Border presets
-// ---------------------------------------------------------------------------
 
 export const NO_BORDERS = {
   top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
@@ -93,9 +87,7 @@ export const THIN_BORDERS = {
   right: { style: BorderStyle.SINGLE, size: 1, color: COLORS.borderGray },
 };
 
-// ---------------------------------------------------------------------------
 // Formatting helpers
-// ---------------------------------------------------------------------------
 
 export function formatCurrency(amount: number): string {
   if (isNaN(amount)) return "[Amount TBD]";
@@ -191,9 +183,7 @@ export function computeFirstPaymentDate(closingDate: Date): Date {
   return d;
 }
 
-// ---------------------------------------------------------------------------
 // Reusable docx element builders
-// ---------------------------------------------------------------------------
 
 export function spacer(points = 6): Paragraph {
   return new Paragraph({ spacing: { before: points * 20, after: points * 20 } });
@@ -266,15 +256,16 @@ export function sectionSubheading(number: string, title: string): Paragraph {
 }
 
 export function bodyText(
-  text: string,
+  text: string | undefined | null,
   options?: { bold?: boolean; italic?: boolean; color?: string; indent?: number },
 ): Paragraph {
+  const safeText = text ?? "[This section was not generated. Manual review required.]";
   return new Paragraph({
     spacing: { after: 100 },
     indent: options?.indent ? { left: convertInchesToTwip(options.indent) } : undefined,
     children: [
       new TextRun({
-        text,
+        text: safeText,
         size: 20,
         font: "Calibri",
         bold: options?.bold,
@@ -437,9 +428,7 @@ export function createTable(
   });
 }
 
-// ---------------------------------------------------------------------------
 // Legal document specific helpers
-// ---------------------------------------------------------------------------
 
 /** Title block for a legal document (centered, bold, document name). */
 export function documentTitle(title: string): Paragraph {
@@ -583,13 +572,9 @@ export function notaryBlock(stateAbbr: string | null): Paragraph[] {
   ];
 }
 
-// ---------------------------------------------------------------------------
 // Document wrapper — builds a complete Document with standard page setup
-// ---------------------------------------------------------------------------
 
-// ---------------------------------------------------------------------------
 // Collateral type descriptions — human-readable labels for enum values
-// ---------------------------------------------------------------------------
 
 const COLLATERAL_DESCRIPTIONS: Record<string, string> = {
   real_estate:
@@ -632,9 +617,7 @@ export function collateralLabel(type: string): string {
   return COLLATERAL_DESCRIPTIONS[type] ?? type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-// ---------------------------------------------------------------------------
 // Prose array safety — prevents character-by-character rendering
-// ---------------------------------------------------------------------------
 
 /**
  * Safely convert an AI prose value that should be a string[] into an actual

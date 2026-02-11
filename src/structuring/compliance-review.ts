@@ -1,18 +1,14 @@
-// =============================================================================
 // compliance-review.ts
 // AI-powered compliance review layer. A SEPARATE Claude call reviews the
 // complete proposed terms against federal/state regulations. If not compliant,
 // flags for human review — never auto-fixes.
-// =============================================================================
 
 import type { LoanProgram } from "@/config/loan-programs";
 import type { RulesEngineOutput } from "./rules-engine";
 import type { AiEnhancement } from "./ai-structuring";
 import { checkUsury, getDisclosureRequirements } from "@/config/state-rules";
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 export interface ComplianceIssue {
   severity: "critical" | "warning" | "info";
@@ -39,9 +35,7 @@ export interface ComplianceReviewInput {
   isCommercial: boolean;
 }
 
-// ---------------------------------------------------------------------------
 // Deterministic compliance checks (Layer 3a — no AI)
-// ---------------------------------------------------------------------------
 
 function runDeterministicChecks(input: ComplianceReviewInput): ComplianceIssue[] {
   const issues: ComplianceIssue[] = [];
@@ -78,7 +72,7 @@ function runDeterministicChecks(input: ComplianceReviewInput): ComplianceIssue[]
       });
     }
 
-    // SBA rate caps by size
+    // SBA 7(a) rate caps by loan size (4 tiers per SBA SOP 50 10 8)
     const totalRate = rulesOutput.rate.totalRate;
     const prime = rulesOutput.rate.baseRateValue;
     if (loanAmount <= 50000 && totalRate > prime + 0.065) {
@@ -95,12 +89,19 @@ function runDeterministicChecks(input: ComplianceReviewInput): ComplianceIssue[]
         description: `Rate ${(totalRate * 100).toFixed(2)}% exceeds SBA cap of Prime + 6.0% = ${((prime + 0.06) * 100).toFixed(2)}%`,
         recommendation: "Reduce rate to within SBA maximum spread",
       });
-    } else if (loanAmount > 250000 && totalRate > prime + 0.0275) {
+    } else if (loanAmount <= 350000 && totalRate > prime + 0.045) {
       issues.push({
         severity: "critical",
-        regulation: "SBA 7(a) Rate Cap — >$250K",
-        description: `Rate ${(totalRate * 100).toFixed(2)}% exceeds SBA cap of Prime + 2.75% (variable) = ${((prime + 0.0275) * 100).toFixed(2)}%`,
-        recommendation: "Reduce rate to within SBA maximum spread for variable-rate loans over $250K",
+        regulation: "SBA 7(a) Rate Cap — $250K-$350K",
+        description: `Rate ${(totalRate * 100).toFixed(2)}% exceeds SBA cap of Prime + 4.5% = ${((prime + 0.045) * 100).toFixed(2)}%`,
+        recommendation: "Reduce rate to within SBA maximum spread",
+      });
+    } else if (loanAmount > 350000 && totalRate > prime + 0.03) {
+      issues.push({
+        severity: "critical",
+        regulation: "SBA 7(a) Rate Cap — >$350K",
+        description: `Rate ${(totalRate * 100).toFixed(2)}% exceeds SBA cap of Prime + 3.0% = ${((prime + 0.03) * 100).toFixed(2)}%`,
+        recommendation: "Reduce rate to within SBA maximum spread for loans over $350K",
       });
     }
   }
@@ -148,7 +149,20 @@ function runDeterministicChecks(input: ComplianceReviewInput): ComplianceIssue[]
 
   // 5. Prepayment penalty compliance
   if (rulesOutput.prepaymentPenalty) {
-    if (program.applicableRegulations.some(r => r.includes("Dodd-Frank") || r.includes("ATR"))) {
+    // Non-QM residential mortgages: Dodd-Frank Section 1414 (15 U.S.C. §1639c(c))
+    // PROHIBITS prepayment penalties on non-QM residential mortgages. This is a
+    // legal violation, not merely a best-practice warning.
+    const isNonQmResidential = program.category === "residential" &&
+      (program.id === "dscr" || program.id === "bank_statement");
+
+    if (isNonQmResidential) {
+      issues.push({
+        severity: "critical",
+        regulation: "Dodd-Frank Section 1414 (15 U.S.C. §1639c(c)) — Non-QM prepayment penalty prohibition",
+        description: "Prepayment penalties are PROHIBITED on non-QM residential mortgages under Dodd-Frank Section 1414. This loan is a non-QM residential mortgage — any prepayment penalty renders the loan non-compliant.",
+        recommendation: "Remove the prepayment penalty from this non-QM residential mortgage or reclassify as a business-purpose loan exempt from Dodd-Frank residential mortgage requirements",
+      });
+    } else if (program.applicableRegulations.some(r => r.includes("Dodd-Frank") || r.includes("ATR"))) {
       issues.push({
         severity: "warning",
         regulation: "Dodd-Frank — Prepayment penalty restrictions",
@@ -169,9 +183,7 @@ function runDeterministicChecks(input: ComplianceReviewInput): ComplianceIssue[]
   return issues;
 }
 
-// ---------------------------------------------------------------------------
 // AI compliance review (Layer 3b)
-// ---------------------------------------------------------------------------
 
 function buildCompliancePrompt(input: ComplianceReviewInput): string {
   const { rulesOutput, aiEnhancement, program, borrowerName, stateAbbr } = input;
@@ -237,9 +249,7 @@ async function runAiComplianceReview(input: ComplianceReviewInput): Promise<Comp
   }
 }
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 export async function runComplianceReview(input: ComplianceReviewInput): Promise<ComplianceResult> {
   // Layer 3a: Deterministic checks (always run)

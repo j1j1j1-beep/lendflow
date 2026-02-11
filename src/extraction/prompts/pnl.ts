@@ -1,4 +1,4 @@
-// ─── Profit and Loss Statement Extraction Prompt ──────────────────────────────
+// Profit and Loss Statement Extraction Prompt
 // This is the PRIMARY extraction method for P&L / Income Statements.
 // Textract extracts raw text and tables, then Claude structures the data.
 // P&Ls have no standardized format — every business/accountant uses a different

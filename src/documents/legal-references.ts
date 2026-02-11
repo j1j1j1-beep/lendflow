@@ -1,8 +1,6 @@
-// =============================================================================
 // legal-references.ts
 // Actual statutory text excerpts organized by document type. These get injected
 // into AI prose generation prompts so the AI writes FROM the actual law.
-// =============================================================================
 
 const SECURITY_AGREEMENT_REFS = `APPLICABLE LEGAL STANDARDS — Reference these when drafting:
 
@@ -38,7 +36,7 @@ Guaranty of Payment vs. Guaranty of Collection:
 A guaranty of PAYMENT means the creditor may proceed directly against the guarantor upon the borrower's default without first pursuing the borrower or exhausting any remedies against the borrower or collateral. A guaranty of COLLECTION requires the creditor to first exhaust all remedies against the borrower before proceeding against the guarantor.
 
 Community Property States:
-Arizona, California, Idaho, Louisiana, Nevada, New Mexico, Texas, Washington, and Wisconsin are community property states. In these jurisdictions, spousal consent may be required for a guaranty to be enforceable against community property assets. The guaranty should include a spousal consent form or waiver where applicable.
+Arizona, California, Idaho, Louisiana, Nevada, New Mexico, Texas, Washington, and Wisconsin are community property states. Additionally, Alaska, Florida, Kentucky, South Dakota, and Tennessee allow opt-in community property trusts. In these jurisdictions, spousal consent may be required for a guaranty to be enforceable against community property assets. The guaranty should include a spousal consent form or waiver where applicable.
 
 Restatement (Third) of Suretyship and Guaranty — Suretyship Defenses:
 A secondary obligor (guarantor) may be discharged by: (1) modification of the underlying obligation without the guarantor's consent, (2) impairment of collateral by the creditor, and (3) extension of the time for payment of the underlying obligation. A well-drafted guaranty should include express waivers of these defenses.`;
@@ -49,7 +47,7 @@ Regulation Z (12 C.F.R. Section 1026.3(a)(1)) — Commercial Purpose Exemption:
 An extension of credit primarily for a business, commercial, or agricultural purpose is exempt from the Truth in Lending Act (TILA) disclosure requirements under Regulation Z.
 
 Equal Credit Opportunity Act (15 U.S.C. Section 1691) — ECOA:
-It is unlawful for any creditor to discriminate against any applicant with respect to any aspect of a credit transaction on the basis of race, color, religion, national origin, sex, marital status, age, receipt of public assistance, or the good faith exercise of any right under the Consumer Credit Protection Act.
+It is unlawful for any creditor to discriminate against any applicant with respect to any aspect of a credit transaction on the basis of race, color, religion, national origin, sex, marital status, age, receipt of public assistance, or the good faith exercise of any right under the Consumer Credit Protection Act. When AI or automated models are used in credit decisions, lenders must still provide specific and accurate adverse action reasons per 12 CFR 1002.9 — generic "model-based" explanations are insufficient.
 
 Cross-Default Standard Language Principles:
 A cross-default clause provides that a default under any other obligation of the borrower to the lender (or to third parties, if broadly drafted) constitutes an event of default under the loan agreement. This clause should specify the threshold amount and any cure periods applicable to cross-defaults.`;
@@ -66,7 +64,10 @@ CERCLA Section 9601(20)(E) — Secured Creditor Exemption (42 U.S.C. §9601(20)(
 "The term 'owner or operator' does not include a person that is a lender that, without participating in the management of a vessel or facility, holds indicia of ownership primarily to protect the security interest of the person in the vessel or facility." A lender does NOT participate in management solely by reason of: holding a security interest; including environmental compliance covenants in loan documents; monitoring or enforcing credit terms; conducting inspections; requiring response actions; providing financial advice to prevent default; restructuring credit terms; exercising remedies for breach; or conducting response actions under §9607(d)(1).
 
 RCRA Section 6903(5) — Definition of "Hazardous Waste":
-"Hazardous waste" means a solid waste, or combination of solid wastes, which because of its quantity, concentration, or physical, chemical, or infectious characteristics may: (A) cause or significantly contribute to an increase in mortality or an increase in serious irreversible or incapacitating reversible illness, or (B) pose a substantial present or potential hazard to human health or the environment when improperly treated, stored, transported, or disposed of, or otherwise managed.`;
+"Hazardous waste" means a solid waste, or combination of solid wastes, which because of its quantity, concentration, or physical, chemical, or infectious characteristics may: (A) cause or significantly contribute to an increase in mortality or an increase in serious irreversible or incapacitating reversible illness, or (B) pose a substantial present or potential hazard to human health or the environment when improperly treated, stored, transported, or disposed of, or otherwise managed.
+
+PFAS/PFOA/PFOS — CERCLA Hazardous Substance Designation (effective September 2025):
+Per final EPA rule under CERCLA Section 102, PFAS (per- and polyfluoroalkyl substances), including PFOA (perfluorooctanoic acid) and PFOS (perfluorooctane sulfonic acid), are designated as CERCLA hazardous substances effective September 2025. This designation triggers reporting requirements under CERCLA Section 103 and potential liability for contaminated sites under Section 107. Environmental indemnity agreements for properties with known or suspected PFAS contamination should specifically address PFAS remediation obligations and liability allocation.`;
 
 const UCC_FINANCING_STATEMENT_REFS = `APPLICABLE LEGAL STANDARDS — Reference these when drafting:
 
@@ -173,23 +174,17 @@ Borrower's certificates are contractual instruments, not governed by specific st
 Reliance Language:
 The certificate must clearly state that the lender is relying on the accuracy and completeness of the certifications in making the loan. Any material misrepresentation or omission may constitute an event of default under the loan agreement.`;
 
-// =============================================================================
 // Program-Specific Statutory References
 // Appended to base doc-type references when a program is specified
-// =============================================================================
 
-const SBA_PROGRAM_REFS = `SBA SOP 50 10 7 — SBA Standard Operating Procedures:
+const SBA_PROGRAM_REFS = `SBA SOP 50 10 8 — SBA Standard Operating Procedures (effective June 1, 2025):
 
-Interest Rate Maximums (Maturity < 7 years):
-- Loans ≤$25,000: Base rate + 4.25%
-- Loans $25,001-$50,000: Base rate + 3.25%
-- Loans >$50,000: Base rate + 2.25%
-
-Interest Rate Maximums (Maturity ≥ 7 years):
-- Loans ≤$25,000: Base rate + 4.75%
-- Loans $25,001-$50,000: Base rate + 3.75%
-- Loans >$50,000: Base rate + 2.75%
-Base rate is Prime Rate (Wall Street Journal) or optional peg rate. Spreads are the same for variable and fixed rates; the tier is based on loan maturity, not rate type.
+Interest Rate Maximums — 7(a) Loans (all maturities):
+- Loans $0-$50,000: Prime + 6.5%
+- Loans $50,001-$250,000: Prime + 6.0%
+- Loans $250,001-$350,000: Prime + 4.5%
+- Loans >$350,000: Prime + 3.0%
+Base rate is Prime Rate (Wall Street Journal). Under SOP 50 10 8, the 7(a) Small Loan maximum has been reduced to $350,000. Rate tiers apply to both variable and fixed rate loans.
 
 SBA Guaranty Fee Schedule:
 - Loans ≤$150,000: 2.0% of guaranteed portion
@@ -198,20 +193,23 @@ SBA Guaranty Fee Schedule:
 - Loans >$1,000,000: 3.75% of guaranteed portion
 Fee is based on the SBA-guaranteed portion (typically 75-85% of loan amount).
 
-Prepayment Penalty (SBA SOP 50 10 7, Chapter 5):
-Required for loans with maturity of 15 years or more. Penalty applies only during first 3 years:
+FY2026 Manufacturing Guaranty Fee Waiver:
+For FY2026, the SBA waives guaranty fees for small manufacturers (NAICS codes 31-33). This waiver applies to 7(a) loans made to eligible small manufacturing businesses during the fiscal year. Lenders should verify the borrower's NAICS code to confirm eligibility for the fee waiver.
+
+Prepayment Penalty (SBA SOP 50 10 8, Chapter 5):
+Required for loans with maturity of 15 years or more AND where 25% or more of the outstanding balance is prepaid in any 12-month period. Penalty applies only during first 3 years:
 - Year 1: 5% of prepaid amount
 - Year 2: 3% of prepaid amount
 - Year 3: 1% of prepaid amount
-No prepayment penalty after year 3 or for loans with maturity <15 years.
+No prepayment penalty after year 3 or for loans with maturity <15 years. Partial prepayments below the 25% threshold in a 12-month period do not trigger the penalty.
 
-13 CFR 120.101 — Credit Elsewhere Test:
-The Applicant must demonstrate it cannot obtain credit from other sources on reasonable terms.
+13 CFR 120.101 — Credit Elsewhere Test (reinstated under SOP 50 10 8):
+The Applicant must demonstrate it cannot obtain credit from other sources on reasonable terms. Under SOP 50 10 8, the credit elsewhere test has been reinstated with a detailed narrative requirement — the lender must document why the applicant cannot obtain credit on reasonable terms from non-Federal sources, including analysis of the applicant's personal resources.
 
 13 CFR 120.120 — Use of Proceeds:
 SBA loan proceeds may be used for: acquiring land and existing buildings, constructing new buildings, purchasing equipment, providing working capital, refinancing existing debt (with conditions). Proceeds may NOT be used for: speculation, lending activities, passive real estate investment, gambling enterprises.
 
-Personal Guaranty Requirement (SBA SOP 50 10):
+Personal Guaranty Requirement (SBA SOP 50 10 8):
 SBA requires unlimited personal guaranty from each owner with 20% or more ownership interest. Guaranty must be of payment, not collection.`;
 
 const SBA_504_ADDITIONAL_REFS = `SBA 504 Program Structure (13 CFR 120.800 et seq.):
@@ -220,7 +218,7 @@ const SBA_504_ADDITIONAL_REFS = `SBA 504 Program Structure (13 CFR 120.800 et se
 - Equity: Borrower injection (minimum 10% of project cost; 15% if new business OR special-use property; 20% if BOTH new business AND special-use property)
 
 13 CFR 120.861-862 — Job Creation Requirements:
-For every $95,000 of CDC debenture ($150,000 for small manufacturers and energy projects), at least one job must be created or retained. Community development goals may substitute for job creation in certain circumstances.
+For every $90,000 of CDC debenture ($140,000 for small manufacturers and energy projects, per October 2025 adjustment), at least one job must be created or retained. Community development goals may substitute for job creation in certain circumstances.
 
 Occupancy Requirement:
 Existing buildings: Borrower must occupy at least 51% of total usable square footage.
@@ -256,7 +254,16 @@ SEC Staff Guidance on Digital Assets:
 Framework for "Investment Contract" Analysis of Digital Assets — whether a particular digital asset is a security depends on facts and circumstances under the Howey test (SEC v. W.J. Howey Co., 328 U.S. 293 (1946)).
 
 State Digital Asset Lending Laws:
-Several states have enacted digital asset-specific lending regulations. Wyoming (W.S. 34-29-101 et seq.) — Digital Asset Act providing for custody and lending. New York BitLicense (23 NYCRR 200) — requires license for virtual currency business activity. California — Digital Financial Assets Law (licensure effective July 2026 per AB 1934). Lender must comply with all applicable state digital asset and money transmission laws in the borrower's state.`;
+Several states have enacted digital asset-specific lending regulations. Wyoming (W.S. 34-29-101 et seq.) — Digital Asset Act providing for custody and lending. New York BitLicense (23 NYCRR 200) — requires license for virtual currency business activity. California — Digital Financial Assets Law (licensure effective July 2026 per AB 1934). Lender must comply with all applicable state digital asset and money transmission laws in the borrower's state.
+
+SEC Staff Accounting Bulletin No. 122 (SAB 122):
+SAB 121 (which required entities to record crypto-asset custodial obligations as liabilities on the balance sheet) was rescinded in January 2025. SAB 122 replaced it, permitting banks and financial institutions to custody crypto assets without the onerous balance-sheet liability treatment. Lenders accepting digital assets as collateral should verify that custodial arrangements comply with SAB 122 accounting guidance.
+
+Banking Regulator Crypto Guidance Withdrawal (2025):
+In 2025, the OCC, FDIC, and Federal Reserve withdrew their prior restrictive guidance that had required banks to obtain supervisory non-objection before engaging in crypto-related activities. Banks may now engage in legally permissible crypto custody, lending, and related activities subject to standard safety-and-soundness principles without prior regulatory approval, though they should maintain appropriate risk management frameworks.
+
+GENIUS Act — Federal Stablecoin Framework (P.L. 119-XX, signed July 18, 2025):
+The Guiding and Establishing National Innovation for U.S. Stablecoins (GENIUS) Act establishes a federal regulatory framework for payment stablecoins. Key provisions: (1) stablecoin issuers must maintain 1:1 reserves in U.S. Treasuries, insured deposits, or approved reserve assets; (2) issuers must register with a federal prudential regulator or approved state regulator; (3) monthly reserve attestation reports required and must be publicly available; (4) algorithmic stablecoins without qualifying reserves are prohibited from marketing as "stablecoins." Lenders accepting stablecoin collateral must verify the issuer is a licensed payment stablecoin issuer under the GENIUS Act.`;
 
 const BRIDGE_REFS = `Bridge Loan Specific Requirements:
 Exit strategy documentation must demonstrate viable path to permanent financing or property disposition. Acceptable exit strategies include: (1) refinance with permanent lender (provide term sheet or pre-qualification), (2) property sale (provide market analysis or listing agreement), (3) construction completion and lease-up (provide pro forma and lease pipeline).
@@ -267,7 +274,7 @@ Extension options must specify: (1) maximum number and duration of extensions (t
 const COMMERCIAL_CRE_REFS = `Commercial Real Estate Lending Regulations:
 
 FIRREA Appraisal Requirements (12 U.S.C. § 3331 et seq.):
-The Financial Institutions Reform, Recovery, and Enforcement Act requires that federally related transactions involving commercial real estate with a value exceeding the applicable de minimis threshold (currently $1,000,000 per the 2024 interagency rule) must be supported by an appraisal performed by a state-certified or licensed appraiser. The appraisal must conform to the Uniform Standards of Professional Appraisal Practice (USPAP).
+The Financial Institutions Reform, Recovery, and Enforcement Act requires that federally related transactions involving commercial real estate with a value exceeding the applicable de minimis threshold (currently $500,000 per the 2019 interagency rule) must be supported by an appraisal performed by a state-certified or licensed appraiser. Note: the $1,000,000 threshold applies to the distinction between state-certified and state-licensed appraisers, not the appraisal requirement itself. The appraisal must conform to the Uniform Standards of Professional Appraisal Practice (USPAP).
 
 CRA — Community Reinvestment Act (12 U.S.C. § 2901 et seq.):
 The Community Reinvestment Act requires regulated financial institutions to help meet the credit needs of the communities in which they do business, including low- and moderate-income neighborhoods. Examiners consider the institution's record of lending, investment, and service in CRA evaluations.
@@ -284,7 +291,19 @@ UCC Article 9 — Secured Transactions:
 Conventional business term loans secured by personal property (equipment, inventory, accounts receivable, or blanket liens) are governed by UCC Article 9 for perfection and priority of security interests. Filing a UCC-1 financing statement with the Secretary of State in the debtor's state of organization is required for perfection.
 
 Prudential Lending Standards — Interagency Guidelines:
-The OCC, FDIC, Federal Reserve, and NCUA have issued interagency guidelines on prudent commercial lending practices, including appropriate underwriting standards, loan administration, and credit risk management. These guidelines emphasize the importance of documented repayment sources, appropriate collateral coverage, and regular portfolio monitoring.`;
+The OCC, FDIC, Federal Reserve, and NCUA have issued interagency guidelines on prudent commercial lending practices, including appropriate underwriting standards, loan administration, and credit risk management. These guidelines emphasize the importance of documented repayment sources, appropriate collateral coverage, and regular portfolio monitoring.
+
+OFAC Compliance — Consolidated Sanctions List:
+All parties to the transaction must be screened against the OFAC Consolidated Sanctions List (which includes the Specially Designated Nationals (SDN) list, the Sectoral Sanctions Identifications (SSI) list, the Foreign Sanctions Evaders (FSE) list, and all other OFAC sanctions lists). Screening against only the SDN list is insufficient — the full Consolidated Sanctions List must be used.
+
+Section 1071 — Small Business Lending Data Collection (12 CFR Part 1002, Subpart B):
+Under Section 1071 of the Dodd-Frank Act, covered financial institutions must collect and report data on small business credit applications. Tier 1 institutions (those originating at least 2,500 covered credit transactions in each of the two preceding calendar years) must begin data collection by July 1, 2026. Data collected includes: application date, credit type, credit purpose, amount applied for and approved, action taken, census tract, gross annual revenue, NAICS code, number of workers, and applicant demographic information (race, sex, ethnicity).
+
+ECOA Adverse Action — AI in Lending Decisions (15 U.S.C. Section 1691, 12 CFR 1002.9):
+When AI or automated models are used in credit decisions, lenders must still provide specific and accurate reasons for adverse actions under ECOA/Regulation B. Generic "model-based" explanations are insufficient. The CFPB has clarified that the use of complex algorithms does not excuse creditors from providing the specific reasons for denial. Lenders using AI models for credit decisions should implement a fair lending testing framework to monitor for disparate impact and ensure compliance with ECOA and the Fair Housing Act.
+
+Regulation Z Section 1026.36 — Loan Originator Compensation Rules:
+Loan originator compensation must comply with Reg Z Section 1026.36. Key requirements: (1) a loan originator may not receive compensation based on the terms of the transaction (other than loan amount); (2) dual compensation is prohibited — a loan originator may not receive compensation from both the consumer and another person; (3) loan originators must be qualified and, where applicable, registered or licensed under the SAFE Act; (4) steering prohibitions — loan originators may not steer consumers to transactions not in their interest to increase compensation.`;
 
 const LINE_OF_CREDIT_REFS = `Revolving Credit Facility Regulations:
 
@@ -311,6 +330,24 @@ A perfected purchase money security interest in goods other than inventory has p
 IRS Section 179 and Bonus Depreciation:
 Equipment acquisitions may qualify for accelerated depreciation under IRC Section 179 (up to the annual limit) or bonus depreciation provisions. While these are tax provisions rather than lending regulations, they are relevant to the economic analysis of equipment financing transactions and may be referenced in the loan documentation.`;
 
+const COMMERCIAL_FINANCING_DISCLOSURE_REFS = `Commercial Financing Disclosure Laws:
+
+Eleven states now require TILA-like disclosures for commercial financing transactions. These laws generally require disclosure of the total cost of financing, APR or estimated APR, total repayment amount, payment schedule, and prepayment policies.
+
+- California (SB 1235, Cal. Fin. Code §22800 et seq.) — Effective Dec 9, 2022. Applies to commercial financing ≤$500K.
+- New York (S5470-B, N.Y. Fin. Serv. Law §801 et seq.) — Effective Aug 1, 2023 (as amended). Applies to commercial financing to NY businesses.
+- Virginia (HB 1027/SB 784, Va. Code §6.2-2227 et seq.) — Effective July 1, 2022. Applies to commercial financing to VA businesses.
+- Utah (SB 183, Utah Code §7-27-101 et seq.) — Effective May 2023. Applies to commercial financing to UT businesses.
+- Florida (HB 751, Fla. Stat. §559.9601 et seq.) — Effective July 1, 2023. Applies to commercial financing ≤$500K.
+- Georgia (SB 90, Ga. Code §7-8-1 et seq.) — Effective July 1, 2024. Applies to commercial financing to GA businesses.
+- Connecticut (SB 1032) — Effective July 1, 2024. Applies to commercial financing to CT businesses.
+- Kansas (SB 345) — Effective July 1, 2024. Applies to commercial financing to KS businesses.
+- Missouri (HB 990) — Effective Aug 28, 2024. Applies to commercial financing to MO businesses.
+- Texas (HB 4182) — Effective Sept 1, 2024. Applies to commercial financing to TX businesses.
+- Louisiana (SB 89) — Effective Jan 1, 2025. Applies to commercial financing to LA businesses.
+
+Lenders must verify whether the borrower's state requires commercial financing disclosures and ensure all applicable disclosures are provided prior to consummation. Failure to provide required disclosures may result in state enforcement actions and borrower rescission rights.`;
+
 const PROGRAM_REFS: Record<string, string> = {
   sba_7a: SBA_PROGRAM_REFS,
   sba_504: SBA_PROGRAM_REFS + "\n\n" + SBA_504_ADDITIONAL_REFS,
@@ -319,9 +356,9 @@ const PROGRAM_REFS: Record<string, string> = {
   crypto_collateral: CRYPTO_REFS,
   bridge: BRIDGE_REFS,
   commercial_cre: COMMERCIAL_CRE_REFS,
-  conventional_business: CONVENTIONAL_BUSINESS_REFS,
-  line_of_credit: LINE_OF_CREDIT_REFS,
-  equipment_financing: EQUIPMENT_FINANCING_REFS,
+  conventional_business: CONVENTIONAL_BUSINESS_REFS + "\n\n" + COMMERCIAL_FINANCING_DISCLOSURE_REFS,
+  line_of_credit: LINE_OF_CREDIT_REFS + "\n\n" + COMMERCIAL_FINANCING_DISCLOSURE_REFS,
+  equipment_financing: EQUIPMENT_FINANCING_REFS + "\n\n" + COMMERCIAL_FINANCING_DISCLOSURE_REFS,
 };
 
 // Document types that return empty strings (pure deterministic docs)

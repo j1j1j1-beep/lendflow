@@ -1,9 +1,7 @@
-// =============================================================================
 // patriot-act-notice.ts
 // Generates a DOCX USA PATRIOT Act Customer Identification Program Notice.
 // ZERO AI — pure deterministic data mapping from DocumentInput.
 // Short document (~1 page).
-// =============================================================================
 
 import {
   Document,
@@ -23,16 +21,12 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildPatriotActNotice(input: DocumentInput): Document {
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // 1. Title
-  // -------------------------------------------------------------------------
   children.push(
     documentTitle(
       "USA PATRIOT Act Notice \u2014 Customer Identification Program",
@@ -40,9 +34,7 @@ export function buildPatriotActNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 2. Important Information Header
-  // -------------------------------------------------------------------------
   children.push(
     bodyText(
       "IMPORTANT INFORMATION ABOUT PROCEDURES FOR OPENING A NEW ACCOUNT",
@@ -51,9 +43,7 @@ export function buildPatriotActNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 3. Statutory Notice
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Federal Requirements"));
 
   children.push(
@@ -63,9 +53,7 @@ export function buildPatriotActNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 4. What This Means
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("What This Means for You"));
 
   children.push(
@@ -75,48 +63,82 @@ export function buildPatriotActNotice(input: DocumentInput): Document {
   );
   children.push(spacer(4));
 
-  children.push(
-    bodyText(
-      "For entities such as corporations, partnerships, and LLCs, we may require documentation including but not limited to:",
-    ),
-  );
-  children.push(spacer(4));
+  const isIndividual = !input.entityType || input.entityType === "sole_proprietor";
 
-  children.push(
-    bodyTextRuns([
-      { text: "\u2022 ", bold: true },
-      { text: "Articles of incorporation, organization, or partnership agreement" },
-    ]),
-  );
-  children.push(
-    bodyTextRuns([
-      { text: "\u2022 ", bold: true },
-      { text: "Employer Identification Number (EIN)" },
-    ]),
-  );
-  children.push(
-    bodyTextRuns([
-      { text: "\u2022 ", bold: true },
-      { text: "Government-issued identification for all authorized signers and beneficial owners (25% or more ownership)" },
-    ]),
-  );
-  children.push(
-    bodyTextRuns([
-      { text: "\u2022 ", bold: true },
-      { text: "Certificate of Good Standing or existence" },
-    ]),
-  );
-  children.push(
-    bodyTextRuns([
-      { text: "\u2022 ", bold: true },
-      { text: "Operating agreement or bylaws (if applicable)" },
-    ]),
-  );
+  if (isIndividual) {
+    children.push(
+      bodyText(
+        "For individual borrowers, we may require documentation including but not limited to:",
+      ),
+    );
+    children.push(spacer(4));
+
+    children.push(
+      bodyTextRuns([
+        { text: "\u2022 ", bold: true },
+        { text: "Government-issued photo identification (e.g., driver\u2019s license, passport)" },
+      ]),
+    );
+    children.push(
+      bodyTextRuns([
+        { text: "\u2022 ", bold: true },
+        { text: "Social Security Number" },
+      ]),
+    );
+    children.push(
+      bodyTextRuns([
+        { text: "\u2022 ", bold: true },
+        { text: "Date of birth" },
+      ]),
+    );
+    children.push(
+      bodyTextRuns([
+        { text: "\u2022 ", bold: true },
+        { text: "Residential address" },
+      ]),
+    );
+  } else {
+    children.push(
+      bodyText(
+        "For entities such as corporations, partnerships, and LLCs, we may require documentation including but not limited to:",
+      ),
+    );
+    children.push(spacer(4));
+
+    children.push(
+      bodyTextRuns([
+        { text: "\u2022 ", bold: true },
+        { text: "Articles of incorporation, organization, or partnership agreement" },
+      ]),
+    );
+    children.push(
+      bodyTextRuns([
+        { text: "\u2022 ", bold: true },
+        { text: "Employer Identification Number (EIN)" },
+      ]),
+    );
+    children.push(
+      bodyTextRuns([
+        { text: "\u2022 ", bold: true },
+        { text: "Government-issued identification for all authorized signers and beneficial owners (25% or more ownership)" },
+      ]),
+    );
+    children.push(
+      bodyTextRuns([
+        { text: "\u2022 ", bold: true },
+        { text: "Certificate of Good Standing or existence" },
+      ]),
+    );
+    children.push(
+      bodyTextRuns([
+        { text: "\u2022 ", bold: true },
+        { text: "Operating agreement or bylaws (if applicable)" },
+      ]),
+    );
+  }
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 5. Beneficial Ownership
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Beneficial Ownership Requirements"));
 
   children.push(
@@ -126,9 +148,7 @@ export function buildPatriotActNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 6. Lender Identification
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Financial Institution"));
 
   children.push(
@@ -140,9 +160,7 @@ export function buildPatriotActNotice(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 7. Borrower Acknowledgment
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Borrower Acknowledgment"));
 
   children.push(
@@ -166,9 +184,7 @@ export function buildPatriotActNotice(input: DocumentInput): Document {
 
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 8. Regulatory Reference
-  // -------------------------------------------------------------------------
   children.push(
     bodyText(
       "Provided pursuant to Section 326 of the USA PATRIOT Act (31 U.S.C. \u00A7 5318(l)) and 31 CFR \u00A7 1020.220. This notice is provided in compliance with the Bank Secrecy Act and the implementing regulations of the Financial Crimes Enforcement Network (FinCEN).",
@@ -176,9 +192,7 @@ export function buildPatriotActNotice(input: DocumentInput): Document {
     ),
   );
 
-  // -------------------------------------------------------------------------
   // 9. Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "USA PATRIOT Act Notice",
     headerRight: `PATRIOT Act Notice \u2014 ${input.borrowerName}`,

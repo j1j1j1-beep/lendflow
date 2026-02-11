@@ -18,9 +18,7 @@ const textract = new TextractClient({
   },
 });
 
-// ---------------------------------------------------------------------------
 // Existing types (unchanged — downstream verification code depends on these)
-// ---------------------------------------------------------------------------
 
 export interface TextractKeyValuePair {
   key: string;
@@ -42,9 +40,7 @@ export interface TextractResult {
   pageCount: number;
 }
 
-// ---------------------------------------------------------------------------
 // Lending API types
-// ---------------------------------------------------------------------------
 
 export interface LendingAnalysisResult {
   jobId: string;
@@ -70,9 +66,7 @@ export interface LendingFieldResult {
   confidence: number;
 }
 
-// ---------------------------------------------------------------------------
 // Existing synchronous AnalyzeDocument functions (unchanged)
-// ---------------------------------------------------------------------------
 
 /**
  * Run Textract AnalyzeDocument on a PDF stored in S3.
@@ -153,9 +147,7 @@ function parseTextractResponse(
   };
 }
 
-// ---------------------------------------------------------------------------
 // Lending API functions
-// ---------------------------------------------------------------------------
 
 /**
  * Start a Textract Lending analysis job on a document in S3.
@@ -269,9 +261,7 @@ export async function getLendingAnalysisSummary(jobId: string) {
   return response;
 }
 
-// ---------------------------------------------------------------------------
 // Lending response parser
-// ---------------------------------------------------------------------------
 
 function parseLendingResponse(
   jobId: string,
@@ -355,9 +345,7 @@ function parseLendingResponse(
   };
 }
 
-// ---------------------------------------------------------------------------
 // Shared helpers (used by both sync AnalyzeDocument and Lending parsers)
-// ---------------------------------------------------------------------------
 
 function extractKeyValuePairs(
   blocks: Block[],

@@ -1,9 +1,7 @@
-// =============================================================================
 // commitment-letter.ts
 // Generates a DOCX Commitment Letter from deterministic deal terms + AI prose.
 // The commitment letter is the lender's formal offer to the borrower specifying
 // all loan terms and conditions. It is what the borrower receives and signs.
-// =============================================================================
 
 import {
   Document,
@@ -31,9 +29,7 @@ import {
 
 import type { DocumentInput, ConditionItem, CommitmentLetterProse } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function conditionsByCategory(
   conditions: ConditionItem[],
@@ -53,9 +49,7 @@ function categoryLabel(cat: ConditionItem["category"]): string {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildCommitmentLetter(
   input: DocumentInput,
@@ -82,9 +76,7 @@ export function buildCommitmentLetter(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Letterhead — Lender name, date, title
-  // -----------------------------------------------------------------------
   children.push(
     bodyText(input.lenderName, { bold: true, color: COLORS.primary }),
   );
@@ -93,21 +85,15 @@ export function buildCommitmentLetter(
   children.push(documentTitle("Commitment Letter"));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 2. Addressee
-  // -----------------------------------------------------------------------
   children.push(bodyText(`Dear ${input.borrowerName},`));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 3. Opening paragraph (AI prose)
-  // -----------------------------------------------------------------------
   children.push(bodyText(prose.openingParagraph));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 4. Loan Terms Summary Table
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Loan Terms Summary"));
 
   const loanTermsRows: Array<{ label: string; value: string }> = [
@@ -176,9 +162,7 @@ export function buildCommitmentLetter(
   children.push(keyTermsTable(loanTermsRows));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 5. Fees Schedule
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Fees Schedule"));
 
   if (terms.fees.length > 0) {
@@ -209,9 +193,7 @@ export function buildCommitmentLetter(
   }
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 6. Collateral
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Collateral"));
 
   if (input.collateralTypes.length > 0) {
@@ -230,9 +212,7 @@ export function buildCommitmentLetter(
   }
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 7. Covenants
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Financial Covenants"));
 
   if (terms.covenants.length > 0) {
@@ -261,9 +241,7 @@ export function buildCommitmentLetter(
   }
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 8. Conditions Precedent (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Conditions Precedent"));
   children.push(
     bodyText(
@@ -276,9 +254,7 @@ export function buildCommitmentLetter(
   }
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 9. Conditions from Deal — grouped by category
-  // -----------------------------------------------------------------------
   if (terms.conditions.length > 0) {
     children.push(sectionHeading("Additional Conditions"));
 
@@ -311,9 +287,7 @@ export function buildCommitmentLetter(
     }
   }
 
-  // -----------------------------------------------------------------------
   // 10. Special Terms
-  // -----------------------------------------------------------------------
   if (terms.specialTerms && terms.specialTerms.length > 0) {
     children.push(sectionHeading("Special Terms"));
 
@@ -332,23 +306,17 @@ export function buildCommitmentLetter(
     children.push(spacer(8));
   }
 
-  // -----------------------------------------------------------------------
   // 11. Representations Required (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Representations"));
   children.push(bodyText(prose.representationsRequired));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 12. Commitment Expiration (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Commitment Expiration"));
   children.push(bodyText(prose.expirationClause));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // Material Adverse Change Clause (deterministic — not AI)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Material Adverse Change"));
   children.push(
     bodyText(
@@ -357,9 +325,7 @@ export function buildCommitmentLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // Commitment Termination Events
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Commitment Termination"));
   children.push(
     bodyText(
@@ -368,9 +334,7 @@ export function buildCommitmentLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // Indemnification and Expenses (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Indemnification and Expenses"));
   children.push(
     bodyText(
@@ -379,9 +343,7 @@ export function buildCommitmentLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // Confidentiality (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Confidentiality"));
   children.push(
     bodyText(
@@ -390,9 +352,7 @@ export function buildCommitmentLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // Assignability (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Assignability"));
   children.push(
     bodyText(
@@ -401,9 +361,7 @@ export function buildCommitmentLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // Time is of the Essence
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Time is of the Essence"));
   children.push(
     bodyText(
@@ -412,9 +370,7 @@ export function buildCommitmentLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // Disclaimer (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Disclaimer"));
   children.push(
     bodyText(
@@ -423,16 +379,12 @@ export function buildCommitmentLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 13. Governing Law (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Governing Law"));
   children.push(bodyText(prose.governingLaw));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // Standard legal provisions
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Additional Standard Provisions"));
   children.push(
     bodyText(
@@ -453,9 +405,7 @@ export function buildCommitmentLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 14. Acceptance Block — signatures for lender and borrower
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Acceptance"));
   children.push(
     bodyText(
@@ -492,9 +442,7 @@ export function buildCommitmentLetter(
   );
   children.push(...signatureBlock(input.borrowerName, "Authorized Signatory"));
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Commitment Letter",
     headerRight: `Commitment Letter — ${input.borrowerName}`,

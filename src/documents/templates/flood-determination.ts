@@ -1,8 +1,6 @@
-// =============================================================================
 // flood-determination.ts
 // Generates a DOCX Standard Flood Hazard Determination Form (FEMA Form 086-0-32).
 // ZERO AI — pure deterministic data mapping from DocumentInput.
-// =============================================================================
 
 import {
   Document,
@@ -24,17 +22,13 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildFloodDetermination(input: DocumentInput): Document {
   const { terms } = input;
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // 1. Title
-  // -------------------------------------------------------------------------
   children.push(
     documentTitle("Standard Flood Hazard Determination Form"),
   );
@@ -48,9 +42,7 @@ export function buildFloodDetermination(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 2. Section A — Loan Information
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Section A \u2014 Loan Information"));
 
   children.push(
@@ -68,9 +60,7 @@ export function buildFloodDetermination(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 3. Section B — Property Information
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Section B \u2014 Property Information"));
 
   children.push(
@@ -89,9 +79,7 @@ export function buildFloodDetermination(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 4. Section C — Flood Hazard Determination
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Section C \u2014 Flood Hazard Determination"));
 
   children.push(
@@ -115,9 +103,7 @@ export function buildFloodDetermination(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 5. Section D — Mandatory Flood Insurance Purchase Requirements
-  // -------------------------------------------------------------------------
   children.push(
     sectionHeading("Section D \u2014 Mandatory Flood Insurance Purchase Requirements"),
   );
@@ -144,9 +130,7 @@ export function buildFloodDetermination(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 6. Notice to Borrower
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Notice to Borrower"));
 
   children.push(
@@ -179,9 +163,7 @@ export function buildFloodDetermination(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 7. Determination Company
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Determination Information"));
 
   children.push(
@@ -198,9 +180,7 @@ export function buildFloodDetermination(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 8. Borrower Acknowledgment
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Borrower Acknowledgment"));
 
   children.push(
@@ -228,9 +208,7 @@ export function buildFloodDetermination(input: DocumentInput): Document {
 
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 9. Regulatory Reference
-  // -------------------------------------------------------------------------
   children.push(
     bodyText(
       "Per 42 U.S.C. \u00A7 4012a; Biggert-Waters Flood Insurance Reform Act of 2012; Homeowner Flood Insurance Affordability Act of 2014. This determination is made in accordance with the Standard Flood Hazard Determination Form requirements under 12 CFR Part 339 (OCC), 12 CFR Part 208 (Federal Reserve), 12 CFR Part 365 (FDIC), and 12 CFR Part 614 (Farm Credit).",
@@ -238,9 +216,7 @@ export function buildFloodDetermination(input: DocumentInput): Document {
     ),
   );
 
-  // -------------------------------------------------------------------------
   // 10. Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "Standard Flood Hazard Determination Form",
     headerRight: `Flood Determination \u2014 ${input.borrowerName}`,

@@ -1,10 +1,8 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // OpenShut — Sample Extraction Data
 // Realistic CRE borrower data that mimics AWS Textract + AI extraction output.
 // Used by the /api/deals/sample endpoint to create a demo deal without OCR.
-// ─────────────────────────────────────────────────────────────────────────────
 
-// ─── Borrower Profile ────────────────────────────────────────────────────────
+// Borrower Profile
 
 export const SAMPLE_BORROWER = {
   borrowerName: "Greenfield Commercial Properties LLC",
@@ -17,7 +15,7 @@ export const SAMPLE_BORROWER = {
   proposedTerm: 360,
 };
 
-// ─── Document Metadata ───────────────────────────────────────────────────────
+// Document Metadata
 // Maps to Prisma DocType enum values and file names for Document records.
 
 export const SAMPLE_DOCUMENTS = [
@@ -27,7 +25,7 @@ export const SAMPLE_DOCUMENTS = [
   { docType: "PROFIT_AND_LOSS" as const, fileName: "2024_Annual_PnL.pdf" },
 ];
 
-// ─── Extraction Data ─────────────────────────────────────────────────────────
+// Extraction Data
 // Each entry matches the schemas in src/extraction/schemas/ and is consumed
 // by the analysis engine (src/analysis/).
 //
@@ -42,7 +40,7 @@ export const SAMPLE_EXTRACTIONS: Array<{
   data: Record<string, unknown>;
   year?: number;
 }> = [
-  // ─── 1. Form 1040 (2024) — Personal Federal Tax Return ───────────────────
+  // 1. Form 1040 (2024) — Personal Federal Tax Return
   {
     docType: "FORM_1040",
     year: 2024,
@@ -230,7 +228,7 @@ export const SAMPLE_EXTRACTIONS: Array<{
     },
   },
 
-  // ─── 2. Schedule E (2024) — Standalone Rental Income Detail ──────────────
+  // 2. Schedule E (2024) — Standalone Rental Income Detail
   // Stored as a second FORM_1040 document; docType in the extraction lets
   // the income analyzer route it to extractScheduleEIncome().
   {
@@ -291,7 +289,7 @@ export const SAMPLE_EXTRACTIONS: Array<{
     },
   },
 
-  // ─── 3. Bank Statement — Chase Checking (Jul-Dec 2024, 6 months) ─────────
+  // 3. Bank Statement — Chase Checking (Jul-Dec 2024, 6 months)
   // Monthly summaries + regularPaymentsDetected. Matches bank-statement.schema.
   //
   // Consistency checks:
@@ -453,7 +451,7 @@ export const SAMPLE_EXTRACTIONS: Array<{
     },
   },
 
-  // ─── 4. Profit & Loss Statement (2024 Annual) ────────────────────────────
+  // 4. Profit & Loss Statement (2024 Annual)
   // Matches pnl.schema.ts. Revenue = property management fees + rental income.
   {
     docType: "PROFIT_AND_LOSS",

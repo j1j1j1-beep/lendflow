@@ -1,4 +1,4 @@
-// ─── Balance Sheet Extraction Prompt ──────────────────────────────────────────
+// Balance Sheet Extraction Prompt
 // This is the PRIMARY extraction method for Balance Sheets / Statements of
 // Financial Position. Textract extracts raw text and tables, then Claude
 // structures the data. Balance sheets have no standardized format across

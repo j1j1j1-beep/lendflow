@@ -1,7 +1,5 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // OpenShut Analysis Engine — Debt-to-Income Ratio (DTI)
 // 100% deterministic. Zero AI. Pure TypeScript math.
-// ─────────────────────────────────────────────────────────────────────────────
 
 export interface DtiAnalysis {
   frontEndDti: number | null; // housing expense / gross monthly income
@@ -14,9 +12,7 @@ export interface DtiAnalysis {
   notes: string[];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 function num(val: unknown): number {
   if (typeof val === "number" && Number.isFinite(val)) return val;
@@ -78,9 +74,7 @@ function toMonthly(amount: number, frequency: string): number {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Main DTI calculation
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function calculateDti(params: {
   incomeAnalysis: { qualifyingIncome: number };
@@ -92,14 +86,14 @@ export function calculateDti(params: {
   const notes: string[] = [];
   const debtItems: Array<{ description: string; monthlyAmount: number }> = [];
 
-  // ── Gross monthly income ───────────────────────────────────────────────────
+  // Gross monthly income
   const grossMonthlyIncome = Math.round((incomeAnalysis.qualifyingIncome / 12) * 100) / 100;
 
   if (grossMonthlyIncome <= 0) {
     notes.push("Qualifying income is zero or negative. DTI cannot be meaningfully calculated.");
   }
 
-  // ── Detect debt payments from bank statements ──────────────────────────────
+  // Detect debt payments from bank statements
   let monthlyHousingExpense = 0;
   let totalNonHousingDebt = 0;
 
@@ -133,7 +127,7 @@ export function calculateDti(params: {
     }
   }
 
-  // ── Proposed loan payment ──────────────────────────────────────────────────
+  // Proposed loan payment
   if (proposedMonthlyPayment && proposedMonthlyPayment > 0) {
     debtItems.push({
       description: "Proposed loan payment",
@@ -153,7 +147,7 @@ export function calculateDti(params: {
     }
   }
 
-  // ── Compute DTI ────────────────────────────────────────────────────────────
+  // Compute DTI
   const totalMonthlyDebt = monthlyHousingExpense + totalNonHousingDebt;
 
   let frontEndDti: number | null = null;
@@ -164,7 +158,7 @@ export function calculateDti(params: {
     backEndDti = Math.round((totalMonthlyDebt / grossMonthlyIncome) * 10000) / 10000;
   }
 
-  // ── Rating ─────────────────────────────────────────────────────────────────
+  // Rating
   // Thresholds: front-end / back-end
   // excellent: <=28% / <=36%
   // good:      <=31% / <=43%
@@ -201,7 +195,7 @@ export function calculateDti(params: {
     }
   }
 
-  // ── Informational notes ────────────────────────────────────────────────────
+  // Informational notes
   if (debtItems.length === 0 && !proposedMonthlyPayment) {
     notes.push("No debt obligations detected. DTI is effectively 0%.");
   }

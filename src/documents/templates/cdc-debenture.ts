@@ -1,9 +1,7 @@
-// =============================================================================
 // cdc-debenture.ts
 // Builds a CDC Debenture DOCX for SBA 504 loans.
 // Mixed: deterministic 504 structure table, job creation/occupancy requirements,
 // standard conditions + AI prose for project description and CDC terms.
-// =============================================================================
 
 import type { DocumentInput, CdcDebentureProse } from "../types";
 import {
@@ -30,9 +28,7 @@ import {
 
 export type { CdcDebentureProse };
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildCdcDebenture(
   input: DocumentInput,
@@ -44,15 +40,26 @@ export function buildCdcDebenture(
   // 504 structure: CDC/SBA debenture = 40% of total project cost
   // Estimate total project cost from the loan amount (which is the CDC portion)
   const cdcPortion = terms.approvedAmount;
+
+  // Dynamic equity percentage per SBA SOP 50 10 8:
+  //   10% standard (established business, standard property)
+  //   15% for new businesses (less than 2 years operating history)
+  //   20% for special-use properties (single-purpose buildings: gas stations, car washes, hotels, etc.)
+  // Note: When DocumentInput gains `isNewBusiness` and `isSpecialUse` fields, use them here.
+  // For now, default to 10% and include the full SBA schedule in the output text.
+  const equityPercent = 10;
+  const equityDecimal = equityPercent / 100;
+
   const totalProjectCost = cdcPortion / 0.4;
   const firstLienPortion = totalProjectCost * 0.5;
-  const borrowerEquity = totalProjectCost * 0.1;
+  const borrowerEquity = totalProjectCost * equityDecimal;
 
-  // Job creation: 1 job per $95,000 of debenture per 13 CFR 120.861
-  const jobsRequired = Math.max(1, Math.ceil(cdcPortion / 95_000));
+  // Job creation: 1 job per $90,000 of debenture per 13 CFR 120.861
+  // (October 2025 inflation-adjusted threshold: $90K standard / $140K manufacturing)
+  const jobsRequired = Math.max(1, Math.ceil(cdcPortion / 90_000));
 
   const children: (Paragraph | Table)[] = [
-    // ---- Title ----
+    // Title
     documentTitle("Certified Development Company Debenture"),
     spacer(4),
 
@@ -62,7 +69,7 @@ export function buildCdcDebenture(
     bodyText(`Date: ${effectiveDate}`),
     spacer(8),
 
-    // ---- Parties ----
+    // Parties
     articleHeading("I", "Parties"),
     partyBlock(
       "Certified Development Company (CDC)",
@@ -78,7 +85,7 @@ export function buildCdcDebenture(
     ),
     spacer(8),
 
-    // ---- 504 Structure Table ----
+    // 504 Structure Table
     sectionHeading("504 Project Structure"),
     createTable(
       ["Component", "Percentage", "Amount"],
@@ -93,7 +100,7 @@ export function buildCdcDebenture(
           "40%",
           formatCurrency(cdcPortion),
         ],
-        ["Borrower Equity Injection", "10%", formatCurrency(borrowerEquity)],
+        ["Borrower Equity Injection", `${equityPercent}%`, formatCurrency(borrowerEquity)],
         [
           "Total Project Cost",
           "100%",
@@ -102,9 +109,13 @@ export function buildCdcDebenture(
       ],
       { columnWidths: [45, 20, 35], alternateRows: true },
     ),
+    spacer(2),
+    bodyText(
+      `Equity injection of ${equityPercent}%, based on SBA 504 requirements (10% standard; 15% for new businesses under 2 years; 20% for special-use properties per SBA SOP 50 10 8).`,
+    ),
     spacer(8),
 
-    // ---- Debenture Terms ----
+    // Debenture Terms
     sectionHeading("Debenture Terms"),
     keyTermsTable([
       {
@@ -135,15 +146,15 @@ export function buildCdcDebenture(
     ]),
     spacer(8),
 
-    // ---- Project Description (AI prose) ----
+    // Project Description (AI prose)
     sectionHeading("Project Description"),
     bodyText(prose.projectDescription),
     spacer(8),
 
-    // ---- Job Creation Requirement ----
+    // Job Creation Requirement
     sectionHeading("Job Creation / Retention Requirement"),
     bodyText(
-      `For every $95,000 of debenture proceeds (per 13 CFR 120.861), the Borrower must create or retain at least one (1) job within two (2) years of final disbursement. Based on the debenture amount of ${formatCurrency(cdcPortion)}, Borrower must create or retain a minimum of ${jobsRequired} job(s).`,
+      `For every $90,000 of debenture proceeds (per 13 CFR 120.861, October 2025 inflation-adjusted threshold; $140,000 for small manufacturers), the Borrower must create or retain at least one (1) job within two (2) years of final disbursement. Based on the debenture amount of ${formatCurrency(cdcPortion)}, Borrower must create or retain a minimum of ${jobsRequired} job(s).`,
     ),
     spacer(2),
     bodyText(
@@ -151,7 +162,7 @@ export function buildCdcDebenture(
     ),
     spacer(8),
 
-    // ---- Occupancy Requirement ----
+    // Occupancy Requirement
     sectionHeading("Occupancy Requirement"),
     bodyText(
       "Borrower must occupy at least 51% of the usable square footage of the project property for an existing business, or at least 60% for new construction. Borrower shall certify occupancy annually to the CDC.",
@@ -162,7 +173,7 @@ export function buildCdcDebenture(
     ),
     spacer(8),
 
-    // ---- Standard 504 Conditions ----
+    // Standard 504 Conditions
     sectionHeading("Standard 504 Conditions"),
     bodyText(
       "This debenture is subject to the following standard conditions:",
@@ -195,12 +206,12 @@ export function buildCdcDebenture(
     ),
     spacer(8),
 
-    // ---- CDC Terms and Conditions (AI prose) ----
+    // CDC Terms and Conditions (AI prose)
     sectionHeading("CDC Terms and Conditions"),
     bodyText(prose.cdcTermsAndConditions),
     spacer(8),
 
-    // ---- Default ----
+    // Default
     sectionHeading("Events of Default"),
     bodyText(
       "An Event of Default shall include, without limitation:",
@@ -229,7 +240,7 @@ export function buildCdcDebenture(
     ),
     spacer(8),
 
-    // ---- Governing Law ----
+    // Governing Law
     sectionHeading("Governing Law"),
     bodyText(prose.governingLaw),
     spacer(4),
@@ -242,14 +253,14 @@ export function buildCdcDebenture(
     ]),
     spacer(8),
 
-    // ---- Certification ----
+    // Certification
     bodyText(
       "IN WITNESS WHEREOF, the parties hereto have caused this Debenture to be executed as of the date first written above.",
       { bold: true },
     ),
     spacer(4),
 
-    // ---- Signatures ----
+    // Signatures
     bodyText("CDC EXECUTIVE DIRECTOR:", { bold: true, color: COLORS.primary }),
     ...signatureBlock("[CDC Executive Director Name]", "Executive Director, [CDC Name]"),
 

@@ -3,9 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { logAudit } from "@/lib/audit";
 
-// ---------------------------------------------------------------------------
 // GET /api/billing/members — list all members of the authed org
-// ---------------------------------------------------------------------------
 
 export async function GET() {
   try {
@@ -37,9 +35,7 @@ export async function GET() {
   }
 }
 
-// ---------------------------------------------------------------------------
 // POST /api/billing/members — invite/add a new member
-// ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
   try {
@@ -116,9 +112,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ---------------------------------------------------------------------------
 // DELETE /api/billing/members — remove a member from the org
-// ---------------------------------------------------------------------------
 
 export async function DELETE(request: NextRequest) {
   try {

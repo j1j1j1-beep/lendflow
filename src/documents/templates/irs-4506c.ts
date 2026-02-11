@@ -1,8 +1,6 @@
-// =============================================================================
 // irs-4506c.ts
 // Generates a DOCX IRS Form 4506-C — IVES Request for Transcript of Tax Return.
 // ZERO AI — pure deterministic data mapping from DocumentInput.
-// =============================================================================
 
 import {
   Document,
@@ -22,9 +20,7 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Determine tax form numbers based on program category.
@@ -60,16 +56,12 @@ function getTaxYears(generatedAt: Date): string {
   return `${currentYear - 2}, ${currentYear - 1}`;
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildIrs4506c(input: DocumentInput): Document {
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // 1. Title
-  // -------------------------------------------------------------------------
   children.push(
     documentTitle(
       "IRS Form 4506-C \u2014 IVES Request for Transcript of Tax Return",
@@ -77,9 +69,7 @@ export function buildIrs4506c(input: DocumentInput): Document {
   );
   children.push(spacer(4));
 
-  // -------------------------------------------------------------------------
   // 2. Reference & Purpose
-  // -------------------------------------------------------------------------
   children.push(
     bodyText(
       "Per IRS Form 4506-C (Rev. 10-2022). This form is used to request tax return transcripts through the Income Verification Express Service (IVES) program.",
@@ -88,9 +78,7 @@ export function buildIrs4506c(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 3. Line 1a — Taxpayer Name
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Taxpayer Information"));
 
   children.push(
@@ -107,9 +95,7 @@ export function buildIrs4506c(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 4. Lines 3-4 — Address Information
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Address Information"));
 
   const currentAddress =
@@ -127,9 +113,7 @@ export function buildIrs4506c(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 5. Lines 5a-5c — Third Party / IVES Participant Information
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Third Party (IVES Participant) Information"));
 
   children.push(
@@ -145,9 +129,7 @@ export function buildIrs4506c(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 6. Line 6 — Transcript Type
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Transcript Requested"));
 
   children.push(
@@ -173,9 +155,7 @@ export function buildIrs4506c(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 7. Line 7 — Tax Form Number
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Tax Form Information"));
 
   const taxForms = getTaxForms(input.programCategory);
@@ -188,9 +168,7 @@ export function buildIrs4506c(input: DocumentInput): Document {
   );
   children.push(spacer(4));
 
-  // -------------------------------------------------------------------------
   // 8. Line 8 — Year(s) or Period(s) Requested
-  // -------------------------------------------------------------------------
   const taxYears = getTaxYears(input.generatedAt);
 
   children.push(
@@ -201,9 +179,7 @@ export function buildIrs4506c(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 9. Authorization / Disclosure
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Authorization"));
 
   children.push(
@@ -228,9 +204,7 @@ export function buildIrs4506c(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 10. Line 9 — Signature Section
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Signature"));
 
   children.push(
@@ -255,9 +229,7 @@ export function buildIrs4506c(input: DocumentInput): Document {
 
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 11. Reference
-  // -------------------------------------------------------------------------
   children.push(
     bodyText(
       "Per IRS Form 4506-C (Rev. 10-2022). This document is prepared for use in connection with the loan transaction between the above-named taxpayer and the IVES participant.",
@@ -265,9 +237,7 @@ export function buildIrs4506c(input: DocumentInput): Document {
     ),
   );
 
-  // -------------------------------------------------------------------------
   // 12. Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "IRS Form 4506-C",
     headerRight: `IRS Form 4506-C \u2014 ${input.borrowerName}`,

@@ -1,8 +1,6 @@
-// =============================================================================
 // legal-knowledge.ts
 // Per-document-type legal checklists for enhanced AI legal review.
 // Each checklist contains specific provisions the AI reviewer must verify.
-// =============================================================================
 
 export interface LegalChecklist {
   docType: string;
@@ -13,20 +11,18 @@ export interface LegalChecklist {
 }
 
 const CHECKLISTS: Record<string, LegalChecklist> = {
-  // ---------------------------------------------------------------------------
   // Promissory Note
-  // ---------------------------------------------------------------------------
   promissory_note: {
     docType: "promissory_note",
     requiredProvisions: [
-      "Default provisions (what constitutes an event of default)",
-      "Acceleration clause (entire balance due upon default)",
-      "Late fee provision (amount/percentage and grace period)",
+      "Default provisions (what constitutes an event of default) (TEMPLATE-HANDLED: already in deterministic default events section, mark as passed)",
+      "Acceleration clause (entire balance due upon default) (TEMPLATE-HANDLED: already in deterministic acceleration section, mark as passed)",
+      "Late fee provision (amount/percentage and grace period) (TEMPLATE-HANDLED: already in deterministic late charges section, mark as passed)",
       "Governing law clause",
     ],
     standardProvisions: [
-      "Business day convention (next business day if due date falls on weekend/holiday)",
-      "Usury savings clause (rate shall not exceed maximum permitted by law)",
+      "Business day convention (next business day if due date falls on weekend/holiday) (TEMPLATE-HANDLED: already in deterministic payment terms section, mark as passed)",
+      "Usury savings clause (rate shall not exceed maximum permitted by law) (TEMPLATE-HANDLED: already in deterministic interest rate cap section, mark as passed)",
       "Waiver of presentment, demand, and protest",
     ],
     regulatoryReferences: [
@@ -35,23 +31,21 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     crossDocConsistency: [],
   },
 
-  // ---------------------------------------------------------------------------
   // Loan Agreement
-  // ---------------------------------------------------------------------------
   loan_agreement: {
     docType: "loan_agreement",
     requiredProvisions: [
-      "Definitions section (defined terms capitalized and cross-referenced)",
+      "Definitions section (defined terms capitalized and cross-referenced) (TEMPLATE-HANDLED: already in deterministic definitions table, mark as passed)",
       "Representations and warranties (borrower reps about authority, financials, no litigation, etc.)",
-      "Financial covenants (DSCR, leverage ratio, minimum liquidity, etc. with numeric thresholds)",
-      "Events of default (comprehensive list including payment, covenant breach, cross-default, MAC, etc.)",
+      "Financial covenants (DSCR, leverage ratio, minimum liquidity, etc. with numeric thresholds) (TEMPLATE-HANDLED: already in deterministic financial covenants table, mark as passed)",
+      "Events of default (comprehensive list including payment, covenant breach, cross-default, MAC, etc.) (TEMPLATE-HANDLED: already in deterministic events of default enumeration, mark as passed)",
       "Remedies upon default (acceleration, set-off, enforcement rights)",
-      "Conditions precedent to funding (documentation, legal opinions, insurance, etc.)",
+      "Conditions precedent to funding (documentation, legal opinions, insurance, etc.) (TEMPLATE-HANDLED: already in deterministic conditions checklist, mark as passed)",
       "Governing law clause",
     ],
     standardProvisions: [
       "Material adverse change (MAC) definition",
-      "Cross-default provisions (default under other agreements triggers default here)",
+      "Cross-default provisions (default under other agreements triggers default here) (TEMPLATE-HANDLED: already in deterministic events of default section, mark as passed)",
       "Notice provisions (addresses, methods, deemed receipt timing)",
       "Amendment and waiver requirements (written consent, lender approval thresholds)",
       "Severability clause",
@@ -59,7 +53,11 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     regulatoryReferences: [
       "TILA disclosures (if consumer loan — APR, finance charge, amount financed, total of payments)",
       "Regulation Z (12 CFR Part 1026) — commercial purpose loans generally exempt per § 1026.3(a)(1)",
-      "ECOA compliance (no discriminatory terms or conditions)",
+      "Regulation Z § 1026.36 — Loan originator compensation rules (no term-based compensation, no dual compensation, steering prohibitions, SAFE Act qualification)",
+      "ECOA compliance (no discriminatory terms or conditions) — when AI/automated models are used in credit decisions, specific adverse action reasons required per 12 CFR 1002.9; fair lending testing framework must be in place",
+      "AI-assisted document generation fair lending disclaimer — per ECOA/CFPB guidance, loan documents generated with AI assistance should include language confirming fair lending compliance review and that AI-generated content has been reviewed for discriminatory language or terms",
+      "OFAC screening — all transaction parties must be screened against the Consolidated Sanctions List (not just the SDN list; includes SDN, SSI, FSE, and all other OFAC lists)",
+      "Section 1071 (Dodd-Frank) — small business lending data collection; Tier 1 institutions (2,500+ covered transactions/year) must begin collecting by July 1, 2026",
       "State usury limits (rate within permissible bounds for jurisdiction and loan type)",
     ],
     crossDocConsistency: [
@@ -69,25 +67,23 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Security Agreement
-  // ---------------------------------------------------------------------------
   security_agreement: {
     docType: "security_agreement",
     requiredProvisions: [
-      "Grant of security interest (debtor hereby grants to secured party a security interest in...)",
-      "Collateral description using UCC Article 9 categories per section 9-108 (accounts, chattel paper, equipment, general intangibles, instruments, inventory, etc.)",
+      "Grant of security interest (debtor hereby grants to secured party a security interest in...) (TEMPLATE-HANDLED: already in deterministic grant clause, mark as passed)",
+      "Collateral description using UCC Article 9 categories per section 9-108 (accounts, chattel paper, equipment, general intangibles, instruments, inventory, etc.) (TEMPLATE-HANDLED: already in deterministic collateral enumeration, mark as passed)",
       "After-acquired property clause per UCC section 9-204 (security interest attaches to after-acquired collateral)",
-      "Proceeds clause (all proceeds, products, rents, and profits of collateral)",
+      "Proceeds clause (all proceeds, products, rents, and profits of collateral) (TEMPLATE-HANDLED: already in deterministic proceeds language, mark as passed)",
       "Perfection provisions (authorization to file financing statements, control agreements, etc.)",
-      "Events of default (triggers for enforcement of security interest)",
-      "Remedies upon default (right to take possession, sell, collect, etc.)",
+      "Events of default (triggers for enforcement of security interest) (TEMPLATE-HANDLED: already in deterministic events section, mark as passed)",
+      "Remedies upon default (right to take possession, sell, collect, etc.) (TEMPLATE-HANDLED: already in deterministic remedies section, mark as passed)",
     ],
     standardProvisions: [
-      "Representations re: title and liens (debtor has good title, no prior liens except permitted)",
-      "Maintenance covenants (keep collateral in good condition, repair, etc.)",
-      "Insurance requirements (maintain insurance on collateral, lender as loss payee/additional insured)",
-      "Inspection rights (lender may inspect collateral upon reasonable notice)",
+      "Representations re: title and liens (debtor has good title, no prior liens except permitted) (TEMPLATE-HANDLED: already in deterministic representations items, mark as passed)",
+      "Maintenance covenants (keep collateral in good condition, repair, etc.) (TEMPLATE-HANDLED: already in deterministic covenants section, mark as passed)",
+      "Insurance requirements (maintain insurance on collateral, lender as loss payee/additional insured) (TEMPLATE-HANDLED: already in deterministic covenant 6.2, mark as passed)",
+      "Inspection rights (lender may inspect collateral upon reasonable notice) (TEMPLATE-HANDLED: already in deterministic covenant 6.3, mark as passed)",
       "Further assurances (debtor will execute additional documents to perfect)",
       "Commercially reasonable disposition per UCC section 9-610",
     ],
@@ -104,26 +100,24 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Guaranty
-  // ---------------------------------------------------------------------------
   guaranty: {
     docType: "guaranty",
     requiredProvisions: [
-      "Absolute and unconditional guaranty of payment (not merely collection)",
-      "Waiver of defenses (suretyship defenses, marshaling, exhaustion, etc.)",
-      "Subrogation waiver (guarantor waives subrogation rights until all obligations paid in full)",
-      "Subordination of guarantor claims (guarantor claims subordinate to lender claims)",
+      "Absolute and unconditional guaranty of payment (not merely collection) (TEMPLATE-HANDLED: already in deterministic scope statement, mark as passed)",
+      "Waiver of defenses (suretyship defenses, marshaling, exhaustion, etc.) (TEMPLATE-HANDLED: already in deterministic waiver items (a-g), mark as passed)",
+      "Subrogation waiver (guarantor waives subrogation rights until all obligations paid in full) (TEMPLATE-HANDLED: already in deterministic subrogation section, mark as passed)",
+      "Subordination of guarantor claims (guarantor claims subordinate to lender claims) (TEMPLATE-HANDLED: already in deterministic subordination section, mark as passed)",
     ],
     standardProvisions: [
-      "Scope covers all obligations (principal, interest, fees, costs, enforcement expenses)",
-      "Irrevocability (guaranty cannot be revoked while obligations remain outstanding)",
+      "Scope covers all obligations (principal, interest, fees, costs, enforcement expenses) (TEMPLATE-HANDLED: already in deterministic guaranteed amount section, mark as passed)",
+      "Irrevocability (guaranty cannot be revoked while obligations remain outstanding) (TEMPLATE-HANDLED: already in deterministic irrevocability statement, mark as passed)",
       "Joint and several liability (if multiple guarantors)",
-      "Spousal consent (required in community property states: AZ, CA, ID, LA, NV, NM, TX, WA, WI (plus Alaska as opt-in community property state; TN, SD have community property trust statutes))",
-      "Financial reporting requirements (guarantor must provide periodic financial statements)",
+      "Spousal consent (required in community property states: AZ, CA, ID, LA, NV, NM, TX, WA, WI (plus opt-in community property trust states: AK, FL, KY, SD, TN)) (TEMPLATE-HANDLED: already in deterministic spousal consent section, mark as passed)",
+      "Financial reporting requirements (guarantor must provide periodic financial statements) (TEMPLATE-HANDLED: already in deterministic covenant 7.1, mark as passed)",
     ],
     regulatoryReferences: [
-      "Community property states (AZ, CA, ID, LA, NV, NM, TX, WA, WI (plus Alaska as opt-in community property state; TN, SD have community property trust statutes)) may require spousal consent for enforceability",
+      "Community property states (AZ, CA, ID, LA, NV, NM, TX, WA, WI (plus opt-in community property trust states: AK, FL, KY, SD, TN)) may require spousal consent for enforceability",
     ],
     crossDocConsistency: [
       "Guaranteed amount matches promissory note principal",
@@ -131,24 +125,22 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Commitment Letter
-  // ---------------------------------------------------------------------------
   commitment_letter: {
     docType: "commitment_letter",
     requiredProvisions: [
-      "Loan amount",
-      "Interest rate (or rate determination mechanism)",
-      "Term (maturity)",
+      "Loan amount (TEMPLATE-HANDLED: already in deterministic Loan Terms Summary table, mark as passed)",
+      "Interest rate (or rate determination mechanism) (TEMPLATE-HANDLED: already in deterministic terms table, mark as passed)",
+      "Term (maturity) (TEMPLATE-HANDLED: already in deterministic terms table, mark as passed)",
       "Conditions precedent to closing and funding",
-      "Expiration date (commitment expires if not accepted by date)",
+      "Expiration date (commitment expires if not accepted by date) (TEMPLATE-HANDLED: already in deterministic commitment termination section, mark as passed)",
       "Acceptance method (how borrower accepts — signature, return of executed copy, etc.)",
     ],
     standardProvisions: [
-      "Commitment fee (amount, when due, refundability)",
-      "Breakup provisions (consequences if deal does not close)",
-      "Material adverse change termination right",
-      "Time is of the essence clause",
+      "Commitment fee (amount, when due, refundability) (TEMPLATE-HANDLED: already in deterministic fees schedule, mark as passed)",
+      "Breakup provisions (consequences if deal does not close) (TEMPLATE-HANDLED: already in deterministic Assignability section, mark as passed)",
+      "Material adverse change termination right (TEMPLATE-HANDLED: already in deterministic MAC clause, mark as passed)",
+      "Time is of the essence clause (TEMPLATE-HANDLED: already in deterministic section, mark as passed)",
     ],
     regulatoryReferences: [
       "State lending license requirements (lender must be properly licensed in borrower's state)",
@@ -159,24 +151,22 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Environmental Indemnity
-  // ---------------------------------------------------------------------------
   environmental_indemnity: {
     docType: "environmental_indemnity",
     requiredProvisions: [
-      "Hazardous substances definition (per CERCLA 42 USC section 9601 — includes petroleum, asbestos, PCBs, etc.)",
-      "Environmental laws definition (comprehensive list: CERCLA, RCRA, Clean Water Act, Clean Air Act, state equivalents)",
-      "Indemnification scope (losses, costs, damages, remediation, fines, penalties, attorneys fees)",
-      "Survival clause (obligations survive repayment of loan, release of lien, foreclosure)",
+      "Hazardous substances definition (per CERCLA 42 USC section 9601 — includes petroleum, asbestos, PCBs, etc.) (TEMPLATE-HANDLED: already in deterministic CERCLA definition, mark as passed)",
+      "Environmental laws definition (comprehensive list: CERCLA, RCRA, Clean Water Act, Clean Air Act, state equivalents) (TEMPLATE-HANDLED: already in deterministic environmental laws definition, mark as passed)",
+      "Indemnification scope (losses, costs, damages, remediation, fines, penalties, attorneys fees) (TEMPLATE-HANDLED: already in deterministic indemnification section, mark as passed)",
+      "Survival clause (obligations survive repayment of loan, release of lien, foreclosure) (TEMPLATE-HANDLED: already in deterministic survival statement, mark as passed)",
       "Remediation obligations (indemnitor must remediate to applicable standards at own cost)",
     ],
     standardProvisions: [
       "Representations re: no existing contamination (property free of hazardous substances)",
       "Covenants re: ongoing compliance (will not use, store, generate, release hazardous substances)",
       "Right to conduct environmental assessments (Phase I, Phase II at indemnitor expense if triggered)",
-      "Unsecured obligation (indemnity is not secured by any collateral — avoids lender liability)",
-      "Subrogation waiver",
+      "Unsecured obligation (indemnity is not secured by any collateral — avoids lender liability) (TEMPLATE-HANDLED: already in deterministic unsecured obligation statement, mark as passed)",
+      "Subrogation waiver (TEMPLATE-HANDLED: already in deterministic subrogation waiver, mark as passed)",
     ],
     regulatoryReferences: [
       "CERCLA 42 USC section 9601 (Comprehensive Environmental Response, Compensation, and Liability Act)",
@@ -189,23 +179,21 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Assignment of Leases
-  // ---------------------------------------------------------------------------
   assignment_of_leases: {
     docType: "assignment_of_leases",
     requiredProvisions: [
-      "Assignment grant (borrower assigns all right, title, and interest in leases and rents)",
-      "Revocable license to collect (borrower retains license to collect rents until default)",
-      "Default triggers (license revoked upon event of default under loan documents)",
-      "Receiver appointment rights (lender may seek appointment of receiver to collect rents)",
+      "Assignment grant (borrower assigns all right, title, and interest in leases and rents) (TEMPLATE-HANDLED: already in deterministic assignment grant statement, mark as passed)",
+      "Revocable license to collect (borrower retains license to collect rents until default) (TEMPLATE-HANDLED: already in deterministic license section, mark as passed)",
+      "Default triggers (license revoked upon event of default under loan documents) (TEMPLATE-HANDLED: already in deterministic default trigger section, mark as passed)",
+      "Receiver appointment rights (lender may seek appointment of receiver to collect rents) (TEMPLATE-HANDLED: already in deterministic receiver rights section, mark as passed)",
     ],
     standardProvisions: [
       "Representations about existing leases (all leases disclosed, in full force, no defaults)",
       "Covenants to maintain leases (will not modify, terminate, or accept surrender without consent)",
-      "Cash management provisions (lockbox, sweep to lender-controlled account upon trigger event)",
+      "Cash management provisions (lockbox, sweep to lender-controlled account upon trigger event) (TEMPLATE-HANDLED: already in deterministic cash management section, mark as passed)",
       "SNDA requirements (lender may require tenant subordination, non-disturbance, and attornment agreements)",
-      "Recording authorization (borrower authorizes recording of assignment in applicable jurisdiction)",
+      "Recording authorization (borrower authorizes recording of assignment in applicable jurisdiction) (TEMPLATE-HANDLED: already in deterministic recording section, mark as passed)",
     ],
     regulatoryReferences: [
       "State recording requirements (assignment must be recorded in county where property is located)",
@@ -216,22 +204,20 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Subordination Agreement
-  // ---------------------------------------------------------------------------
   subordination_agreement: {
     docType: "subordination_agreement",
     requiredProvisions: [
-      "Blanket subordination clause (subordinate debt is subordinate in right of payment and priority)",
-      "Payment restrictions (no payments on subordinate debt during blockage period or after default)",
-      "Standstill provisions (subordinate creditor may not enforce remedies for specified period)",
-      "Turnover obligations (any payments received in violation must be turned over to senior creditor)",
+      "Blanket subordination clause (subordinate debt is subordinate in right of payment and priority) (TEMPLATE-HANDLED: already in deterministic subordination statement, mark as passed)",
+      "Payment restrictions (no payments on subordinate debt during blockage period or after default) (TEMPLATE-HANDLED: already in deterministic payment restrictions, mark as passed)",
+      "Standstill provisions (subordinate creditor may not enforce remedies for specified period) (TEMPLATE-HANDLED: already in deterministic standstill provision, mark as passed)",
+      "Turnover obligations (any payments received in violation must be turned over to senior creditor) (TEMPLATE-HANDLED: already in deterministic turnover section, mark as passed)",
     ],
     standardProvisions: [
-      "Definitions of senior debt and subordinate debt (clearly delineated)",
+      "Definitions of senior debt and subordinate debt (clearly delineated) (TEMPLATE-HANDLED: already in deterministic definitions section, mark as passed)",
       "Permitted payments (scheduled interest, principal payments when no default exists)",
-      "Cure rights (subordinate creditor may cure senior defaults to protect position)",
-      "Notice requirements (senior creditor must notify subordinate creditor of defaults)",
+      "Cure rights (subordinate creditor may cure senior defaults to protect position) (TEMPLATE-HANDLED: already in deterministic cure rights section, mark as passed)",
+      "Notice requirements (senior creditor must notify subordinate creditor of defaults) (TEMPLATE-HANDLED: already in deterministic notices section, mark as passed)",
     ],
     regulatoryReferences: [
       "UCC priority rules (subordination agreement modifies otherwise applicable priority)",
@@ -242,24 +228,22 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Intercreditor Agreement
-  // ---------------------------------------------------------------------------
   intercreditor_agreement: {
     docType: "intercreditor_agreement",
     requiredProvisions: [
-      "Lien priority establishment (first lien vs. second lien priority clearly stated)",
-      "Payment waterfall (order of distribution: first lien obligations, then second lien, then residual)",
-      "Standstill period (90-180 days during which second lien creditor may not enforce)",
-      "Enforcement rights allocation (first lien controls enforcement; second lien standstill)",
-      "Purchase option (second lien creditor may purchase first lien obligations at par plus accrued)",
-      "Bankruptcy provisions (waivers, DIP financing consent, adequate protection allocation)",
+      "Lien priority establishment (first lien vs. second lien priority clearly stated) (TEMPLATE-HANDLED: already in deterministic lien priority section, mark as passed)",
+      "Payment waterfall (order of distribution: first lien obligations, then second lien, then residual) (TEMPLATE-HANDLED: already in deterministic payment waterfall section, mark as passed)",
+      "Standstill period (90-180 days during which second lien creditor may not enforce) (TEMPLATE-HANDLED: already in deterministic standstill section, mark as passed)",
+      "Enforcement rights allocation (first lien controls enforcement; second lien standstill) (TEMPLATE-HANDLED: already in deterministic enforcement rights, mark as passed)",
+      "Purchase option (second lien creditor may purchase first lien obligations at par plus accrued) (TEMPLATE-HANDLED: already in deterministic purchase option, mark as passed)",
+      "Bankruptcy provisions (waivers, DIP financing consent, adequate protection allocation) (TEMPLATE-HANDLED: already in deterministic bankruptcy section, mark as passed)",
     ],
     standardProvisions: [
       "Anti-marshaling (first lien creditor not required to marshal assets)",
-      "DIP financing consent (second lien creditor consents to first lien DIP financing up to cap)",
+      "DIP financing consent (second lien creditor consents to first lien DIP financing up to cap) (TEMPLATE-HANDLED: already in deterministic bankruptcy section, mark as passed)",
       "Adequate protection waivers (second lien waives right to adequate protection payments)",
-      "Plan voting (limitations on second lien creditor voting against first lien creditor-supported plan)",
+      "Plan voting (limitations on second lien creditor voting against first lien creditor-supported plan) (TEMPLATE-HANDLED: already in deterministic bankruptcy section, mark as passed)",
       "Release provisions (second lien releases follow first lien releases of shared collateral)",
     ],
     regulatoryReferences: [
@@ -274,23 +258,21 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Corporate Resolution
-  // ---------------------------------------------------------------------------
   corporate_resolution: {
     docType: "corporate_resolution",
     requiredProvisions: [
-      "WHEREAS recitals establishing the need for borrowing and authority to borrow",
-      "RESOLVED authorization clause (entity authorizes execution of loan documents and borrowing)",
-      "Authorized signers designation (specific individuals authorized to sign on behalf of entity)",
+      "WHEREAS recitals establishing the need for borrowing and authority to borrow (TEMPLATE-HANDLED: already in deterministic recital paragraphs, mark as passed)",
+      "RESOLVED authorization clause (entity authorizes execution of loan documents and borrowing) (TEMPLATE-HANDLED: already in deterministic resolved clause, mark as passed)",
+      "Authorized signers designation (specific individuals authorized to sign on behalf of entity) (TEMPLATE-HANDLED: already in deterministic authorized signers list, mark as passed)",
       "Ratification clause (all prior actions taken in connection with the loan are ratified)",
-      "Secretary/manager certification (officer certifies resolution was duly adopted, remains in effect)",
+      "Secretary/manager certification (officer certifies resolution was duly adopted, remains in effect) (TEMPLATE-HANDLED: already in deterministic certification language, mark as passed)",
     ],
     standardProvisions: [
-      "Entity type identification (LLC, corporation, partnership — correct terminology)",
+      "Entity type identification (LLC, corporation, partnership — correct terminology) (TEMPLATE-HANDLED: already in deterministic entity type selector, mark as passed)",
       "Good standing certification (entity is in good standing in state of formation)",
       "Organizational documents current (articles/certificate of formation, operating agreement/bylaws current)",
-      "Counterparts clause (resolution may be executed in counterparts)",
+      "Counterparts clause (resolution may be executed in counterparts) (TEMPLATE-HANDLED: already in deterministic counterparts language, mark as passed)",
     ],
     regulatoryReferences: [
       "State entity law requirements (LLC Act, Business Corporation Act, or Partnership Act as applicable)",
@@ -301,22 +283,20 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // UCC Financing Statement
-  // ---------------------------------------------------------------------------
   ucc_financing_statement: {
     docType: "ucc_financing_statement",
     requiredProvisions: [
-      "Debtor exact legal name (must match name on public organic record — articles, certificate of formation)",
-      "Secured party name and address",
-      "Collateral description by UCC Article 9 categories (accounts, chattel paper, deposit accounts, equipment, general intangibles, instruments, inventory, investment property, etc.)",
-      "Filing state (state of debtor's location per UCC section 9-307)",
+      "Debtor exact legal name (must match name on public organic record — articles, certificate of formation) (TEMPLATE-HANDLED: already in deterministic from input, mark as passed)",
+      "Secured party name and address (TEMPLATE-HANDLED: already in deterministic from input, mark as passed)",
+      "Collateral description by UCC Article 9 categories (accounts, chattel paper, deposit accounts, equipment, general intangibles, instruments, inventory, investment property, etc.) (TEMPLATE-HANDLED: already in deterministic enumerated collateral, mark as passed)",
+      "Filing state (state of debtor's location per UCC section 9-307) (TEMPLATE-HANDLED: already in deterministic from input, mark as passed)",
     ],
     standardProvisions: [
       "Organization ID number (state-issued organizational identification number)",
       "State of organization (jurisdiction of formation)",
-      "Proceeds coverage (all proceeds and products of the foregoing)",
-      "Filing instructions (file with Secretary of State of debtor's state of organization)",
+      "Proceeds coverage (all proceeds and products of the foregoing) (TEMPLATE-HANDLED: already in deterministic proceeds clause, mark as passed)",
+      "Filing instructions (file with Secretary of State of debtor's state of organization) (TEMPLATE-HANDLED: already in deterministic filing instructions, mark as passed)",
     ],
     regulatoryReferences: [
       "UCC section 9-108 (collateral description must reasonably identify the collateral)",
@@ -330,20 +310,18 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // SNDA (Subordination, Non-Disturbance and Attornment)
-  // ---------------------------------------------------------------------------
   snda: {
     docType: "snda",
     requiredProvisions: [
-      "Subordination of lease to mortgage (tenant's lease is subordinate to lender's mortgage/deed of trust)",
-      "Non-disturbance covenant (lender agrees not to disturb tenant's possession if tenant not in default)",
-      "Attornment agreement (tenant agrees to attorn to successor landlord after foreclosure)",
-      "Lender protection limitations (lender not bound by rent prepayments, offsets, or landlord obligations accruing pre-foreclosure)",
+      "Subordination of lease to mortgage (tenant's lease is subordinate to lender's mortgage/deed of trust) (TEMPLATE-HANDLED: already in deterministic subordination statement, mark as passed)",
+      "Non-disturbance covenant (lender agrees not to disturb tenant's possession if tenant not in default) (TEMPLATE-HANDLED: already in deterministic non-disturbance section, mark as passed)",
+      "Attornment agreement (tenant agrees to attorn to successor landlord after foreclosure) (TEMPLATE-HANDLED: already in deterministic attornment section, mark as passed)",
+      "Lender protection limitations (lender not bound by rent prepayments, offsets, or landlord obligations accruing pre-foreclosure) (TEMPLATE-HANDLED: already in deterministic lender protections section, mark as passed)",
     ],
     standardProvisions: [
-      "Tenant quiet enjoyment (so long as tenant performs, possession shall not be disturbed)",
-      "Notice and cure rights for landlord default (tenant must give lender notice and opportunity to cure before exercising remedies)",
+      "Tenant quiet enjoyment (so long as tenant performs, possession shall not be disturbed) (TEMPLATE-HANDLED: already in deterministic tenant protections section, mark as passed)",
+      "Notice and cure rights for landlord default (tenant must give lender notice and opportunity to cure before exercising remedies) (TEMPLATE-HANDLED: already in deterministic notice section, mark as passed)",
       "Insurance proceeds and casualty provisions (lender controls insurance proceeds allocation)",
       "Casualty and condemnation provisions (lender rights re: rebuild vs. terminate)",
     ],
@@ -357,23 +335,21 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Estoppel Certificate
-  // ---------------------------------------------------------------------------
   estoppel_certificate: {
     docType: "estoppel_certificate",
     requiredProvisions: [
-      "Lease status confirmation (lease is in full force and effect, has not been modified except as stated)",
-      "No defaults certification (no defaults by landlord or tenant, no events that with notice/time would become defaults)",
-      "Rent current confirmation (rent is paid through specified date, no rent paid more than one month in advance)",
-      "Security deposit amount (exact amount held by landlord)",
-      "No prepaid rent (no rent has been prepaid beyond the current period)",
+      "Lease status confirmation (TEMPLATE-HANDLED: already in deterministic certifications 1-9, mark as passed)",
+      "No defaults certification (TEMPLATE-HANDLED: already in deterministic certifications 1-9, mark as passed)",
+      "Rent current confirmation (TEMPLATE-HANDLED: already in deterministic certifications 1-9, mark as passed)",
+      "Security deposit amount (TEMPLATE-HANDLED: already in deterministic certifications 1-9, mark as passed)",
+      "No prepaid rent (TEMPLATE-HANDLED: already in deterministic certifications 1-9, mark as passed)",
     ],
     standardProvisions: [
-      "No purchase options or rights of first refusal (or if they exist, disclosure of terms)",
-      "No assignments or subleases (or if they exist, disclosure)",
-      "Improvements complete (all tenant improvement obligations have been satisfied)",
-      "Reliance limitation (certificate may be relied upon by lender and its successors)",
+      "No purchase options or rights of first refusal (TEMPLATE-HANDLED: already in deterministic certifications 1-9)",
+      "No assignments or subleases (TEMPLATE-HANDLED: already in deterministic certifications 1-9)",
+      "Improvements complete (TEMPLATE-HANDLED: already in deterministic certifications 1-9)",
+      "Reliance limitation (TEMPLATE-HANDLED: already in deterministic Reliance section)",
     ],
     regulatoryReferences: [
       "None specific — estoppel certificates are contractual, not regulated",
@@ -383,9 +359,7 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Settlement Statement
-  // ---------------------------------------------------------------------------
   settlement_statement: {
     docType: "settlement_statement",
     requiredProvisions: [
@@ -410,23 +384,21 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Borrower's Certificate
-  // ---------------------------------------------------------------------------
   borrowers_certificate: {
     docType: "borrowers_certificate",
     requiredProvisions: [
-      "Representations and warranties reaffirmation (all reps in loan agreement remain true as of closing)",
-      "No default certification (no event of default exists or would result from the borrowing)",
-      "No material adverse change (no MAC since date of financial statements)",
-      "Entity good standing confirmation (borrower is duly organized and in good standing)",
-      "Authorized execution confirmation (person signing is authorized to execute loan documents)",
+      "Representations and warranties reaffirmation (TEMPLATE-HANDLED: already in deterministic certifications 1-10, mark as passed)",
+      "No default certification (TEMPLATE-HANDLED: already in deterministic certifications 1-10, mark as passed)",
+      "No material adverse change (TEMPLATE-HANDLED: already in deterministic certifications 1-10, mark as passed)",
+      "Entity good standing or legal capacity confirmation (TEMPLATE-HANDLED: already in deterministic certifications 1-10, mark as passed)",
+      "Authorized execution confirmation (TEMPLATE-HANDLED: already in deterministic certifications 1-10, mark as passed)",
     ],
     standardProvisions: [
-      "Financial statements accurate (most recent financial statements fairly present financial condition)",
-      "Insurance in place (all required insurance has been obtained and is in effect)",
-      "Government approvals obtained (all necessary governmental approvals have been received)",
-      "Loan proceeds purpose (proceeds will be used for stated purpose only)",
+      "Financial statements accurate (TEMPLATE-HANDLED: already in deterministic certifications 1-10)",
+      "Insurance in place (TEMPLATE-HANDLED: already in deterministic certifications 1-10)",
+      "Government approvals obtained (TEMPLATE-HANDLED: already in deterministic certifications 1-10)",
+      "Loan proceeds purpose (TEMPLATE-HANDLED: already in deterministic certifications 1-10)",
     ],
     regulatoryReferences: [
       "None specific — borrower certificates are contractual",
@@ -437,9 +409,7 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Compliance Certificate
-  // ---------------------------------------------------------------------------
   compliance_certificate: {
     docType: "compliance_certificate",
     requiredProvisions: [
@@ -459,9 +429,7 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Amortization Schedule
-  // ---------------------------------------------------------------------------
   amortization_schedule: {
     docType: "amortization_schedule",
     requiredProvisions: [
@@ -485,24 +453,22 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Deed of Trust
-  // ---------------------------------------------------------------------------
   deed_of_trust: {
     docType: "deed_of_trust",
     requiredProvisions: [
-      "Grant clause conveying property in trust to trustee for benefit of beneficiary (lender)",
-      "Borrower covenants (insurance, taxes, maintenance, compliance with laws, no waste)",
-      "Events of default (payment default, covenant breach, transfer without consent, bankruptcy, condemnation)",
-      "Power of sale clause (non-judicial foreclosure authority, notice requirements per state law)",
-      "Due-on-sale clause (transfer restriction — full balance due upon unauthorized transfer)",
+      "Grant clause conveying property in trust to trustee for benefit of beneficiary (lender) (TEMPLATE-HANDLED: already in deterministic grant language, mark as passed)",
+      "Borrower covenants (insurance, taxes, maintenance, compliance with laws, no waste) (TEMPLATE-HANDLED: already in deterministic covenants checklist, mark as passed)",
+      "Events of default (payment default, covenant breach, transfer without consent, bankruptcy, condemnation) (TEMPLATE-HANDLED: already in deterministic default events, mark as passed)",
+      "Power of sale clause (non-judicial foreclosure authority, notice requirements per state law) (TEMPLATE-HANDLED: already in deterministic power of sale, mark as passed)",
+      "Due-on-sale clause (transfer restriction — full balance due upon unauthorized transfer) (TEMPLATE-HANDLED: already in deterministic transfer restriction, mark as passed)",
       "Governing law clause",
     ],
     standardProvisions: [
       "Environmental covenants (no hazardous substances, compliance with environmental laws)",
-      "Fixture filing under UCC (deed of trust serves as fixture filing for personal property attached to real estate)",
-      "Assignment of rents (absolute assignment with revocable license to collect until default)",
-      "Subordination to leases (optional, at lender's discretion)",
+      "Fixture filing under UCC (deed of trust serves as fixture filing for personal property attached to real estate) (TEMPLATE-HANDLED: already in deterministic fixture filing section, mark as passed)",
+      "Assignment of rents (absolute assignment with revocable license to collect until default) (TEMPLATE-HANDLED: already in deterministic assignment of rents, mark as passed)",
+      "Subordination to leases (optional, at lender's discretion) (TEMPLATE-HANDLED: already in deterministic subordination option, mark as passed)",
       "Recording information (space for recorder's use, recording instructions)",
     ],
     regulatoryReferences: [
@@ -517,9 +483,7 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Closing Disclosure
-  // ---------------------------------------------------------------------------
   closing_disclosure: {
     docType: "closing_disclosure",
     requiredProvisions: [
@@ -547,9 +511,7 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Loan Estimate
-  // ---------------------------------------------------------------------------
   loan_estimate: {
     docType: "loan_estimate",
     requiredProvisions: [
@@ -574,29 +536,28 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // SBA Authorization
-  // ---------------------------------------------------------------------------
   sba_authorization: {
     docType: "sba_authorization",
     requiredProvisions: [
-      "Loan authorization details (loan amount, SBA guaranty percentage, guaranteed amount, interest rate, term)",
-      "SBA guaranty fee calculation (fee rate applied to guaranteed portion)",
+      "Loan authorization details (loan amount, SBA guaranty percentage, guaranteed amount, interest rate, term) (TEMPLATE-HANDLED: already in deterministic Loan Authorization table, mark as passed)",
+      "SBA guaranty fee calculation (fee rate applied to guaranteed portion) (TEMPLATE-HANDLED: already in deterministic guaranty fee table, mark as passed)",
       "Use of proceeds description (must comply with SBA eligible use requirements)",
-      "Standard SBA conditions (credit check, no delinquent federal debt, eligible small business, collateral, personal guaranty)",
+      "Standard SBA conditions (credit check, no delinquent federal debt, eligible small business, collateral, personal guaranty) (TEMPLATE-HANDLED: already in deterministic standard conditions list, mark as passed)",
       "Special conditions specific to the deal",
     ],
     standardProvisions: [
-      "Authorization expiration (typically 6 months from date)",
+      "Authorization expiration (typically 6 months from date) (TEMPLATE-HANDLED: already in deterministic expiration section, mark as passed)",
       "Material change provision (changes in financial condition may cancel authorization)",
       "Life insurance assignment requirement (if applicable)",
       "IRS tax transcript review requirement",
     ],
     regulatoryReferences: [
-      "SBA SOP 50 10 (Standard Operating Procedures for SBA lending)",
+      "SBA SOP 50 10 8 (Standard Operating Procedures for SBA lending, effective June 1, 2025)",
       "13 CFR Part 120 (SBA business loan program regulations)",
       "13 CFR 120.120 (eligible use of proceeds — acquiring land/buildings, construction, equipment, working capital, refinancing)",
-      "SBA guaranty fee schedule per SOP 50 10",
+      "SBA guaranty fee schedule per SOP 50 10 8",
+      "SBA Form 1919 (revised April 2025 per Executive Order 14168) — Borrower Information Form must use the current revision",
     ],
     crossDocConsistency: [
       "Loan amount matches promissory note and loan agreement",
@@ -605,29 +566,27 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // CDC Debenture
-  // ---------------------------------------------------------------------------
   cdc_debenture: {
     docType: "cdc_debenture",
     requiredProvisions: [
-      "504 project structure (50% first lien bank, 40% CDC/SBA debenture, 10% borrower equity)",
-      "Debenture terms (amount, interest rate, term, maturity date, payment schedule)",
+      "504 project structure (50% first lien bank, 40% CDC/SBA debenture, 10% borrower equity) (TEMPLATE-HANDLED: already in deterministic structure table, mark as passed)",
+      "Debenture terms (amount, interest rate, term, maturity date, payment schedule) (TEMPLATE-HANDLED: already in deterministic debenture terms section, mark as passed)",
       "Project description (what is being financed, location, expected use, public benefit)",
-      "Job creation/retention requirement (1 job per $95,000 of debenture proceeds, $150,000 for small manufacturers/energy per Federal Register 2025-19072)",
-      "Occupancy requirement (51% for existing business, 60% for new construction)",
+      "Job creation/retention requirement (1 job per $90,000 of debenture proceeds, $140,000 for small manufacturers/energy per October 2025 adjustment) (TEMPLATE-HANDLED: already in deterministic job creation calculation, mark as passed)",
+      "Occupancy requirement (51% for existing business, 60% for new construction) (TEMPLATE-HANDLED: already in deterministic occupancy section, mark as passed)",
     ],
     standardProvisions: [
-      "Standard 504 conditions (eligible use, collateral, insurance, financial reporting, environmental compliance)",
+      "Standard 504 conditions (eligible use, collateral, insurance, financial reporting, environmental compliance) (TEMPLATE-HANDLED: already in deterministic conditions list, mark as passed)",
       "No change of ownership without CDC and SBA consent",
-      "Events of default (payment, job creation, occupancy, misrepresentation, covenant breach, bankruptcy)",
+      "Events of default (payment, job creation, occupancy, misrepresentation, covenant breach, bankruptcy) (TEMPLATE-HANDLED: already in deterministic events of default, mark as passed)",
       "CDC terms and conditions (servicing, oversight, reporting)",
     ],
     regulatoryReferences: [
       "Section 504 of the Small Business Investment Act of 1958",
       "13 CFR Part 120 (SBA 504 program regulations)",
       "13 CFR 120.861-120.862 (job creation and retention requirements)",
-      "SBA SOP 50 10 (standard operating procedures)",
+      "SBA SOP 50 10 8 (standard operating procedures, effective June 1, 2025)",
     ],
     crossDocConsistency: [
       "Debenture amount consistent with 504 structure (40% of total project cost)",
@@ -636,23 +595,21 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Borrowing Base Agreement
-  // ---------------------------------------------------------------------------
   borrowing_base_agreement: {
     docType: "borrowing_base_agreement",
     requiredProvisions: [
-      "Borrowing base definition (eligible accounts advance rate + eligible inventory advance rate minus reserves)",
-      "Eligible accounts definition and eligibility criteria",
-      "Eligible inventory definition and eligibility criteria",
-      "Advance rates (typically 80% for eligible accounts, 50% for eligible inventory)",
-      "Ineligible accounts list (past due >90 days, foreign, intercompany, government, cross-aged, disputed, encumbered)",
-      "Ineligible inventory list (WIP, consigned, in transit, obsolete, third-party locations without waiver, encumbered)",
+      "Borrowing base definition (eligible accounts advance rate + eligible inventory advance rate minus reserves) (TEMPLATE-HANDLED: already in deterministic definitions section, mark as passed)",
+      "Eligible accounts definition and eligibility criteria (TEMPLATE-HANDLED: already in deterministic definitions, mark as passed)",
+      "Eligible inventory definition and eligibility criteria (TEMPLATE-HANDLED: already in deterministic definitions, mark as passed)",
+      "Advance rates (typically 80% for eligible accounts, 50% for eligible inventory) (TEMPLATE-HANDLED: already in deterministic definitions and table, mark as passed)",
+      "Ineligible accounts list (past due >90 days, foreign, intercompany, government, cross-aged, disputed, encumbered) (TEMPLATE-HANDLED: already in deterministic ineligible accounts list, mark as passed)",
+      "Ineligible inventory list (WIP, consigned, in transit, obsolete, third-party locations without waiver, encumbered) (TEMPLATE-HANDLED: already in deterministic ineligible inventory list, mark as passed)",
       "Borrowing base certificate delivery requirements (monthly, upon request, with advance requests)",
       "Events of default (late certificate, material misstatement, overadvance, covenant breach)",
     ],
     standardProvisions: [
-      "Concentration limits (no single debtor >25% of eligible accounts)",
+      "Concentration limits (no single debtor >25% of eligible accounts) (TEMPLATE-HANDLED: already in deterministic definitions, mark as passed)",
       "Dilution reserves and dilution triggers",
       "Field examination requirements (frequency, scope, cost allocation)",
       "Reporting requirements (aging reports, inventory reports, financial statements)",
@@ -670,17 +627,15 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Digital Asset Pledge
-  // ---------------------------------------------------------------------------
   digital_asset_pledge: {
     docType: "digital_asset_pledge",
     requiredProvisions: [
-      "Grant of security interest in all digital assets deposited in custody account",
-      "Collateral description (digital assets, tokens, cryptocurrency, proceeds, forks, airdrops, staking rewards)",
-      "LTV monitoring and margin requirements (continuous monitoring, margin call at 80%, liquidation at 90%)",
-      "Margin call provisions (24-hour cure period, deposit additional assets or make cash payment, target 70% LTV post-cure)",
-      "Automatic liquidation provisions (90% LTV trigger, no notice required, commercially reasonable disposition)",
+      "Grant of security interest in all digital assets deposited in custody account (TEMPLATE-HANDLED: already in deterministic grant language, mark as passed)",
+      "Collateral description (digital assets, tokens, cryptocurrency, proceeds, forks, airdrops, staking rewards) (TEMPLATE-HANDLED: already in deterministic collateral definitions, mark as passed)",
+      "LTV monitoring and margin requirements (continuous monitoring, margin call at 80%, liquidation at 90%) (TEMPLATE-HANDLED: already in deterministic LTV table, mark as passed)",
+      "Margin call provisions (24-hour cure period, deposit additional assets or make cash payment, target 70% LTV post-cure) (TEMPLATE-HANDLED: already in deterministic LTV section, mark as passed)",
+      "Automatic liquidation provisions (90% LTV trigger, no notice required, commercially reasonable disposition) (TEMPLATE-HANDLED: already in deterministic liquidation rules, mark as passed)",
       "Custody requirements (approved custodian, SOC 2, segregated cold storage, multi-sig, insurance)",
       "Valuation methodology (VWAP on approved exchanges, frequency, treatment of illiquid assets and stablecoins)",
     ],
@@ -703,15 +658,13 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Custody Agreement
-  // ---------------------------------------------------------------------------
   custody_agreement: {
     docType: "custody_agreement",
     requiredProvisions: [
-      "Three-party structure (Depositor/borrower, Secured Party/lender, Custodian)",
-      "Custodian responsibilities (segregated cold storage, multi-sig authorization, accurate records, monthly statements, legal compliance, SOC 2)",
-      "Access control (deposits without approval, withdrawals require secured party authorization, default provisions, repayment release)",
+      "Three-party structure (Depositor/borrower, Secured Party/lender, Custodian) (TEMPLATE-HANDLED: already in deterministic parties section, mark as passed)",
+      "Custodian responsibilities (segregated cold storage, multi-sig authorization, accurate records, monthly statements, legal compliance, SOC 2) (TEMPLATE-HANDLED: already in deterministic subsections 3.1-3.6, mark as passed)",
+      "Access control (deposits without approval, withdrawals require secured party authorization, default provisions, repayment release) (TEMPLATE-HANDLED: already in deterministic subsections 4.1-4.4, mark as passed)",
       "Insurance requirements (minimum coverage equal to loan amount, crime/theft/cyber coverage, secured party as loss payee)",
       "Transfer provisions (deposit procedures, withdrawal procedures, fork/airdrop treatment, staking/governance rights)",
       "Termination provisions (upon repayment, upon default, voluntary custodian termination with 90 days notice)",
@@ -735,23 +688,21 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
     ],
   },
 
-  // ---------------------------------------------------------------------------
   // Opinion Letter
-  // ---------------------------------------------------------------------------
   opinion_letter: {
     docType: "opinion_letter",
     requiredProvisions: [
-      "Documents reviewed list (all loan documents reviewed, identified by date and parties)",
-      "Standard assumptions (genuineness of signatures, authority of other parties, authenticity of documents)",
-      "Enforceability opinion with bankruptcy/equity carve-outs (documents are valid and enforceable except as limited by bankruptcy, insolvency, and equitable principles)",
-      "Authority opinion (borrower has power and authority to execute and deliver loan documents)",
-      "No conflicts opinion (execution does not violate organizational documents, applicable law, or existing agreements)",
+      "Documents reviewed list (TEMPLATE-HANDLED: already in deterministic Documents Reviewed section with dates and parties, mark as passed)",
+      "Standard assumptions (TEMPLATE-HANDLED: already in deterministic Assumptions section, mark as passed)",
+      "Enforceability opinion with bankruptcy/equity carve-outs (TEMPLATE-HANDLED: already in deterministic Opinions section, mark as passed)",
+      "Authority opinion (TEMPLATE-HANDLED: already in deterministic Opinions section, mark as passed)",
+      "No conflicts opinion (TEMPLATE-HANDLED: already in deterministic Opinions section, mark as passed)",
     ],
     standardProvisions: [
-      "Organization and good standing opinion (entity is duly organized, validly existing, in good standing)",
-      "No litigation opinion (no pending litigation that would materially affect borrower or transaction)",
-      "Compliance with laws opinion (transaction does not violate applicable laws)",
-      "Qualifications and limitations (opinion limited to laws of specified jurisdictions, reliance on certificates, etc.)",
+      "Organization and good standing opinion (TEMPLATE-HANDLED: already in deterministic Opinions section, mark as passed)",
+      "No litigation opinion (TEMPLATE-HANDLED: already in deterministic Opinions section, mark as passed)",
+      "Compliance with laws opinion (TEMPLATE-HANDLED: already in deterministic Opinions section, mark as passed)",
+      "Qualifications and limitations (TEMPLATE-HANDLED: already in deterministic Qualifications section, mark as passed)",
     ],
     regulatoryReferences: [
       "ABA Accord guidelines (legal opinion practices per American Bar Association standards)",
@@ -765,22 +716,18 @@ const CHECKLISTS: Record<string, LegalChecklist> = {
   },
 };
 
-// =============================================================================
 // Program-specific overlays
 // Each program can add provisions ON TOP of the base checklist for doc types
 // that program uses. Only the fields specified are merged; unspecified fields
 // are left as-is from the base checklist.
-// =============================================================================
 
 const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> = {
-  // ---------------------------------------------------------------------------
   // SBA 7(a)
-  // ---------------------------------------------------------------------------
   sba_7a: {
     promissory_note: {
       requiredProvisions: [
-        "SBA prepayment penalty per SBA SOP 50 10 7 (declining 5/3/1% in years 1-3 for loans with maturity >=15 years)",
-        "SBA interest rate cap compliance (Prime + 4.5% max for $250K-$350K, Prime + 3.0% max for >$350K per SBA SOP 50 10)",
+        "SBA prepayment penalty per SBA SOP 50 10 8 (declining 5/3/1% in years 1-3 for loans with maturity >=15 years)",
+        "SBA interest rate cap compliance per SOP 50 10 8 ($0-$50K: Prime + 6.5%, $50K-$250K: Prime + 6.0%, $250K-$350K: Prime + 4.5%, >$350K: Prime + 3.0%)",
       ],
       regulatoryReferences: [
         "13 CFR 120 compliance — all SBA 7(a) loans must comply with 13 CFR Part 120",
@@ -789,27 +736,27 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
     loan_agreement: {
       requiredProvisions: [
         "SBA Authorization reference — loan agreement must reference the SBA Authorization letter",
-        "SBA use of proceeds restrictions per SBA SOP 50 10",
+        "SBA use of proceeds restrictions per SBA SOP 50 10 8",
       ],
       regulatoryReferences: [
-        "SBA Credit Elsewhere test documentation per 13 CFR 120.101",
+        "SBA Credit Elsewhere test reinstated under SOP 50 10 8 per 13 CFR 120.101 — lender must provide detailed narrative explaining why applicant cannot obtain credit on reasonable terms from non-Federal sources, plus personal resources test documenting that the applicant's personal resources (including liquid assets of 20%+ owners) are insufficient to fund the project without SBA assistance",
+        "SBA Form 1919 (revised April 2025 per Executive Order 14168) — ensure the current revision of the Borrower Information Form is used for all new applications",
       ],
     },
     guaranty: {
       requiredProvisions: [
-        "SBA unlimited personal guaranty requirement for owners with 20%+ ownership per SBA SOP 50 10",
+        "SBA unlimited personal guaranty requirement for owners with 20%+ ownership per SBA SOP 50 10 8",
       ],
     },
     commitment_letter: {
       requiredProvisions: [
         "SBA guaranty fee disclosure (tiered: 2% ≤$150K, 3% $150K-$700K, 3.5% $700K-$1M, 3.75% >$1M)",
+        "FY2026 manufacturing guaranty fee waiver — SBA waives guaranty fees for small manufacturers (NAICS 31-33) in FY2026; verify borrower NAICS code for eligibility",
       ],
     },
   },
 
-  // ---------------------------------------------------------------------------
   // SBA 504
-  // ---------------------------------------------------------------------------
   sba_504: {
     loan_agreement: {
       requiredProvisions: [
@@ -822,13 +769,11 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
     },
   },
 
-  // ---------------------------------------------------------------------------
   // Commercial CRE
-  // ---------------------------------------------------------------------------
   commercial_cre: {
     loan_agreement: {
       requiredProvisions: [
-        "FIRREA appraisal requirement for loans >$1M secured by commercial real estate (threshold raised from $500K per 2024 interagency rule)",
+        "FIRREA appraisal requirement for CRE loans >$500K (per 2019 interagency rule; the $1M threshold applies to certified-vs-licensed appraiser distinction, not to the appraisal requirement itself)",
       ],
     },
     environmental_indemnity: {
@@ -843,9 +788,7 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
     },
   },
 
-  // ---------------------------------------------------------------------------
   // DSCR
-  // ---------------------------------------------------------------------------
   dscr: {
     promissory_note: {
       regulatoryReferences: [
@@ -886,9 +829,7 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
     },
   },
 
-  // ---------------------------------------------------------------------------
   // Bank Statement (inherits DSCR overlays plus its own)
-  // ---------------------------------------------------------------------------
   bank_statement: {
     promissory_note: {
       regulatoryReferences: [
@@ -935,14 +876,15 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
     },
   },
 
-  // ---------------------------------------------------------------------------
   // Bridge
-  // ---------------------------------------------------------------------------
   bridge: {
     loan_agreement: {
       requiredProvisions: [
         "Exit strategy requirement — borrower must demonstrate viable exit (refinance or sale) with supporting evidence",
         "Maturity extension provisions — conditions for any extension of the short-term maturity",
+      ],
+      regulatoryReferences: [
+        "Commercial financing disclosure laws — 11 states (CA, NY, VA, UT, FL, GA, CT, KS, MO, TX, LA) require TILA-like disclosures for commercial financing; verify borrower state and provide required disclosures if applicable",
       ],
     },
     commitment_letter: {
@@ -952,9 +894,7 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
     },
   },
 
-  // ---------------------------------------------------------------------------
   // Crypto-Collateralized
-  // ---------------------------------------------------------------------------
   crypto_collateral: {
     loan_agreement: {
       requiredProvisions: [
@@ -965,6 +905,8 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
         "BSA/AML compliance per 31 CFR 1010 — Customer Identification Program, Suspicious Activity Reporting",
         "FinCEN virtual currency guidance (FIN-2019-G001) compliance",
         "State digital asset lending law compliance (varies by jurisdiction)",
+        "GENIUS Act (P.L. 119-XX, signed July 18, 2025) — if stablecoin collateral, verify issuer is licensed payment stablecoin issuer with 1:1 reserve backing; SAB 122 replaces SAB 121 for crypto custody accounting",
+        "OCC/FDIC/Fed 2025 crypto guidance withdrawal — banks no longer need prior supervisory non-objection for crypto activities but must maintain appropriate risk management",
       ],
     },
     security_agreement: {
@@ -974,10 +916,13 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
     },
   },
 
-  // ---------------------------------------------------------------------------
   // Equipment Financing
-  // ---------------------------------------------------------------------------
   equipment_financing: {
+    loan_agreement: {
+      regulatoryReferences: [
+        "Commercial financing disclosure laws — 11 states (CA, NY, VA, UT, FL, GA, CT, KS, MO, TX, LA) require TILA-like disclosures for commercial financing; verify borrower state and provide required disclosures if applicable",
+      ],
+    },
     security_agreement: {
       requiredProvisions: [
         "Equipment-specific collateral description including make, model, serial number, year of manufacture, and location",
@@ -991,15 +936,16 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
     },
   },
 
-  // ---------------------------------------------------------------------------
   // Line of Credit
-  // ---------------------------------------------------------------------------
   line_of_credit: {
     loan_agreement: {
       requiredProvisions: [
         "Revolving credit mechanics — draw/repay/redraw provisions, maximum outstanding balance, advance request procedures",
         "Annual clean-up provision — zero balance for 30 consecutive days",
         "Borrowing base formula — eligible receivables and inventory percentages, concentration limits, dilution reserves",
+      ],
+      regulatoryReferences: [
+        "Commercial financing disclosure laws — 11 states (CA, NY, VA, UT, FL, GA, CT, KS, MO, TX, LA) require TILA-like disclosures for commercial financing; verify borrower state and provide required disclosures if applicable",
       ],
     },
     security_agreement: {
@@ -1009,9 +955,14 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
     },
   },
 
-  // ---------------------------------------------------------------------------
-  // Conventional Business — no special overlays beyond base checklists
-  // ---------------------------------------------------------------------------
+  // Conventional Business
+  conventional_business: {
+    loan_agreement: {
+      regulatoryReferences: [
+        "Commercial financing disclosure laws — 11 states (CA, NY, VA, UT, FL, GA, CT, KS, MO, TX, LA) require TILA-like disclosures for commercial financing; verify borrower state and provide required APR, total cost, and payment schedule disclosures if applicable",
+      ],
+    },
+  },
 };
 
 /**

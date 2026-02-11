@@ -1,4 +1,4 @@
-// ─── Core Extraction Orchestrator ─────────────────────────────────────────────
+// Core Extraction Orchestrator
 // This file orchestrates all extraction. It does NOT call Textract (that happens
 // in the Inngest pipeline). It receives Textract output and routes to the right
 // extraction method:
@@ -47,7 +47,7 @@ import { rentRollSchema } from "./schemas/rent-roll.schema";
 import { w2Schema } from "./schemas/w2.schema";
 import { k1Schema } from "./schemas/k1.schema";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// Types
 
 export interface ClassificationResult {
   docType: string;
@@ -74,7 +74,7 @@ export interface ValidationResult {
   errors: Array<{ path: string; message: string }>;
 }
 
-// ─── Prompt Map ──────────────────────────────────────────────────────────────
+// Prompt Map
 
 export const PROMPT_MAP: Record<
   string,
@@ -167,7 +167,7 @@ const VALID_DOC_TYPES = new Set([
   "OTHER",
 ]);
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// Helpers
 
 /**
  * Parse a dollar/numeric string into a number.
@@ -320,7 +320,7 @@ export function buildKeyValueSummary(
   return sections.join("\n");
 }
 
-// ─── Classification ──────────────────────────────────────────────────────────
+// Classification
 
 /**
  * Classify a document using Claude's native PDF support.
@@ -407,7 +407,7 @@ export async function classifyDocument(
   };
 }
 
-// ─── Lending Extraction ──────────────────────────────────────────────────────
+// Lending Extraction
 
 /**
  * Extract structured data from a Textract Lending page using deterministic
@@ -446,7 +446,7 @@ function extractFromLending(
   };
 }
 
-// ─── Main Extraction Orchestrator ────────────────────────────────────────────
+// Main Extraction Orchestrator
 
 /**
  * Extract structured data from a document. Routes to the appropriate extraction
@@ -479,7 +479,7 @@ export async function extractDocument(
   return extractNonStandardDoc(textractResult, docType, pdfBuffer);
 }
 
-// ─── Non-Standard Document Extraction ────────────────────────────────────────
+// Non-Standard Document Extraction
 
 /**
  * Extract data from a non-standard document (bank statements, P&Ls, etc.)
@@ -595,7 +595,7 @@ async function extractWithClaude(
   };
 }
 
-// ─── Validation ──────────────────────────────────────────────────────────────
+// Validation
 
 /**
  * Validate extracted data against the appropriate Zod schema for the document type.

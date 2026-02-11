@@ -1,8 +1,6 @@
-// =============================================================================
 // borrowers-certificate.ts
 // Generates a DOCX Borrower's Certificate — closing-day certificate where
 // borrower certifies that all representations and warranties remain true.
-// =============================================================================
 
 import {
   Document,
@@ -24,9 +22,7 @@ import {
 
 import type { DocumentInput, BorrowersCertificateProse } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildBorrowersCertificate(
   input: DocumentInput,
@@ -38,14 +34,10 @@ export function buildBorrowersCertificate(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("Borrower's Certificate"));
 
-  // -----------------------------------------------------------------------
   // 2. Header
-  // -----------------------------------------------------------------------
   children.push(
     bodyTextRuns([
       { text: "This Borrower's Certificate is delivered in connection with the Loan Agreement dated as of " },
@@ -59,9 +51,7 @@ export function buildBorrowersCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 3. Key Terms Table
-  // -----------------------------------------------------------------------
   children.push(
     keyTermsTable([
       { label: "Borrower", value: input.borrowerName },
@@ -73,9 +63,7 @@ export function buildBorrowersCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 4. Certifications (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Certifications"));
   children.push(
     bodyText(
@@ -109,9 +97,12 @@ export function buildBorrowersCertificate(
       "Since the date of the most recent financial statements delivered to Lender, there has been no Material Adverse Change (as defined in the Loan Agreement) in the business, operations, property, or financial condition of Borrower.",
     ),
   );
+  const isIndividual = !input.entityType || input.entityType === "sole_proprietor";
   children.push(
     bulletPoint(
-      "Borrower is duly organized, validly existing, and in good standing under the laws of its state of organization, and is qualified to do business in all jurisdictions where the nature of its business requires such qualification.",
+      isIndividual
+        ? "Borrower has full legal capacity to execute, deliver, and perform the Borrower's obligations under the Loan Agreement and all related Loan Documents."
+        : "Borrower is duly organized, validly existing, and in good standing under the laws of its state of organization, and is qualified to do business in all jurisdictions where the nature of its business requires such qualification.",
     ),
   );
   children.push(
@@ -136,23 +127,17 @@ export function buildBorrowersCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 5. Additional Certifications (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Additional Certifications"));
   children.push(bodyText(prose.additionalCertifications));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 6. Governing Law (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Governing Law"));
   children.push(bodyText(prose.governingLaw));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 7. Jury Trial Waiver, Severability, Counterparts
-  // -----------------------------------------------------------------------
   children.push(
     bodyText(
       "JURY TRIAL WAIVER: BORROWER HEREBY KNOWINGLY, VOLUNTARILY, AND INTENTIONALLY WAIVES ANY RIGHT TO A TRIAL BY JURY IN RESPECT OF ANY LITIGATION ARISING OUT OF, UNDER, OR IN CONNECTION WITH THIS CERTIFICATE OR ANY LOAN DOCUMENT.",
@@ -172,9 +157,7 @@ export function buildBorrowersCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 8. Signature
-  // -----------------------------------------------------------------------
   children.push(
     bodyText("BORROWER:", { bold: true, color: COLORS.primary }),
   );
@@ -186,9 +169,7 @@ export function buildBorrowersCertificate(
   children.push(bodyText("Print Name: ____________________________"));
   children.push(bodyText("Title: ____________________________"));
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Borrower's Certificate",
     headerRight: `Borrower's Certificate — ${input.borrowerName}`,

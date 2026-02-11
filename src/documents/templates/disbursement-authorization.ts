@@ -1,8 +1,6 @@
-// =============================================================================
 // disbursement-authorization.ts
 // Generates a DOCX Disbursement Authorization / Direction Letter.
 // ZERO AI — pure deterministic data mapping from DocumentInput.
-// =============================================================================
 
 import {
   Document,
@@ -25,9 +23,7 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Calculate prepaid interest days between generatedAt and firstPaymentDate.
@@ -38,25 +34,19 @@ function daysBetween(a: Date, b: Date): number {
   return Math.ceil((utcB - utcA) / (1000 * 60 * 60 * 24));
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildDisbursementAuthorization(input: DocumentInput): Document {
   const { terms } = input;
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // 1. Title
-  // -------------------------------------------------------------------------
   children.push(
     documentTitle("Disbursement Authorization and Direction Letter"),
   );
   children.push(spacer(4));
 
-  // -------------------------------------------------------------------------
   // 2. Letter Header
-  // -------------------------------------------------------------------------
   children.push(
     bodyText(`Date: ${formatDate(input.generatedAt)}`),
   );
@@ -86,9 +76,7 @@ export function buildDisbursementAuthorization(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 3. Key Terms
-  // -------------------------------------------------------------------------
   children.push(
     keyTermsTable([
       { label: "Deal Reference", value: input.dealId },
@@ -101,9 +89,7 @@ export function buildDisbursementAuthorization(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 4. Authorization
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Authorization to Disburse"));
 
   children.push(
@@ -113,9 +99,7 @@ export function buildDisbursementAuthorization(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 5. Disbursement Table
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Disbursement Schedule"));
 
   const disbursementRows: string[][] = [];
@@ -195,9 +179,7 @@ export function buildDisbursementAuthorization(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 6. Wire Instructions
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Wire Transfer Instructions"));
 
   children.push(
@@ -225,9 +207,7 @@ export function buildDisbursementAuthorization(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 7. Certification
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Certification"));
 
   children.push(
@@ -260,9 +240,7 @@ export function buildDisbursementAuthorization(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 8. Signature
-  // -------------------------------------------------------------------------
   children.push(
     bodyText("BORROWER:", { bold: true, color: COLORS.primary }),
   );
@@ -297,9 +275,7 @@ export function buildDisbursementAuthorization(input: DocumentInput): Document {
     ...signatureBlock(input.lenderName, "Lender / Authorized Signatory"),
   );
 
-  // -------------------------------------------------------------------------
   // 9. Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "Disbursement Authorization",
     headerRight: `Disbursement Authorization \u2014 ${input.borrowerName}`,

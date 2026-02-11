@@ -1,11 +1,9 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // OpenShut Analysis Engine — Master Orchestrator
 // 100% deterministic. Zero AI. Pure TypeScript math.
 //
 // Runs the full analysis pipeline on verified extraction data.
 // Input: structured extractions that have passed verification (or human review).
 // Output: complete financial analysis with risk assessment.
-// ─────────────────────────────────────────────────────────────────────────────
 
 import { analyzeIncome, type IncomeAnalysis } from "./income";
 import { calculateDscr, type DscrAnalysis } from "./dscr";
@@ -19,9 +17,7 @@ import {
   type RiskFlag,
 } from "./risk-flags";
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Types
-// ─────────────────────────────────────────────────────────────────────────────
 
 export interface FullAnalysis {
   income: IncomeAnalysis;
@@ -41,9 +37,7 @@ export interface FullAnalysis {
   };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 function num(val: unknown): number {
   if (typeof val === "number" && Number.isFinite(val)) return val;
@@ -137,9 +131,7 @@ function classifyExtractions(extractions: Array<{ docType: string; data: any; ye
   return { taxForms, bankStatements, profitAndLoss, balanceSheets, rentRolls, other };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Master orchestrator
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function runFullAnalysis(params: {
   extractions: Array<{ docType: string; data: any; year?: number }>;
@@ -156,15 +148,11 @@ export function runFullAnalysis(params: {
     proposedMonthlyPayment,
   } = params;
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // Step 1: Classify extractions by document type
-  // ═══════════════════════════════════════════════════════════════════════════
 
   const classified = classifyExtractions(extractions);
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // Step 2: Income Analysis — runs on all tax forms and P&Ls
-  // ═══════════════════════════════════════════════════════════════════════════
 
   const allIncomeExtractions = [
     ...classified.taxForms,
@@ -173,9 +161,7 @@ export function runFullAnalysis(params: {
 
   const income = analyzeIncome(allIncomeExtractions);
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // Step 3: Business Analysis — only if business docs present
-  // ═══════════════════════════════════════════════════════════════════════════
 
   const businessExtractions = [
     ...classified.taxForms,
@@ -184,9 +170,7 @@ export function runFullAnalysis(params: {
 
   const business = analyzeBusiness(businessExtractions);
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // Step 4: Cash Flow Analysis — bank statements
-  // ═══════════════════════════════════════════════════════════════════════════
 
   const bankStatementDataArray = classified.bankStatements.map((e) => e.data);
 
@@ -195,9 +179,7 @@ export function runFullAnalysis(params: {
     reportedIncome: income.qualifyingIncome,
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // Step 5: Calculate proposed monthly payment if not provided
-  // ═══════════════════════════════════════════════════════════════════════════
 
   let proposedMonthly = proposedMonthlyPayment ?? 0;
 
@@ -216,9 +198,7 @@ export function runFullAnalysis(params: {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // Step 6: DSCR — income + bank data + proposed loan
-  // ═══════════════════════════════════════════════════════════════════════════
 
   // Merge bank statement data for DSCR detection (use first statement or aggregate)
   const mergedBankData =
@@ -247,9 +227,7 @@ export function runFullAnalysis(params: {
     loanAmount: proposedLoanAmount,
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // Step 7: DTI — income + bank data + proposed loan
-  // ═══════════════════════════════════════════════════════════════════════════
 
   const dti = calculateDti({
     incomeAnalysis: income,
@@ -257,9 +235,7 @@ export function runFullAnalysis(params: {
     proposedMonthlyPayment: proposedMonthly > 0 ? proposedMonthly : undefined,
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // Step 8: Liquidity — bank statements + balance sheet
-  // ═══════════════════════════════════════════════════════════════════════════
 
   const balanceSheetData =
     classified.balanceSheets.length > 0 ? classified.balanceSheets[0].data : undefined;
@@ -276,9 +252,7 @@ export function runFullAnalysis(params: {
     monthlyDebtService,
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // Step 9: Risk Flag Detection
-  // ═══════════════════════════════════════════════════════════════════════════
 
   const riskFlags = detectRiskFlags({
     incomeAnalysis: income,
@@ -290,9 +264,7 @@ export function runFullAnalysis(params: {
     extractions,
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // Step 10: Risk Score + Summary
-  // ═══════════════════════════════════════════════════════════════════════════
 
   const riskScore = calculateRiskScore(riskFlags);
 
@@ -326,9 +298,7 @@ export function runFullAnalysis(params: {
   };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Internal: merge multiple bank statement data objects for DSCR/DTI detection
-// ─────────────────────────────────────────────────────────────────────────────
 
 function mergeBankStatementData(
   statements: any[]
@@ -361,9 +331,7 @@ function mergeBankStatementData(
   };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Re-exports for convenience
-// ─────────────────────────────────────────────────────────────────────────────
 
 export type {
   IncomeAnalysis,

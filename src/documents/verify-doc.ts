@@ -1,4 +1,3 @@
-// =============================================================================
 // verify-doc.ts
 // Deterministic verification of generated document prose. No AI — uses string
 // matching to confirm that key data from the rules engine appears correctly.
@@ -8,7 +7,6 @@
 // deterministically. The AI prose is NOT expected to repeat principal amounts,
 // interest rates, or payment figures. This verifier only checks prose for
 // content the AI is actually responsible for generating.
-// =============================================================================
 
 import type {
   DocumentInput,
@@ -21,9 +19,7 @@ import {
   formatCurrencyDetailed,
 } from "@/documents/doc-helpers";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 /** Flatten all prose values into a single searchable string. */
 function flattenProse(prose: AiDocProse): string {
@@ -80,9 +76,7 @@ const TEMPLATE_HANDLED_TYPES = new Set([
   "disbursement_authorization",
 ]);
 
-// ---------------------------------------------------------------------------
 // Individual checks
-// ---------------------------------------------------------------------------
 
 /**
  * For non-template doc types, check that the approved amount appears in prose.
@@ -104,7 +98,7 @@ function checkAmount(
     issues.push({
       field: "approvedAmount",
       expected,
-      found: "not found in prose",
+      found: "not found in document",
       severity: "critical",
     });
     return false;
@@ -137,7 +131,7 @@ function checkRate(
     issues.push({
       field: "interestRate",
       expected: `${rate.toFixed(3)}%`,
-      found: "not found in prose",
+      found: "not found in document",
       severity: "critical",
     });
     return false;
@@ -172,7 +166,7 @@ function checkTerm(
     issues.push({
       field: "termMonths",
       expected: `${months} months`,
-      found: "not found in prose",
+      found: "not found in document",
       severity: "warning",
     });
     return false;
@@ -194,7 +188,7 @@ function checkBorrowerName(
   issues.push({
     field: "borrowerName",
     expected: input.borrowerName,
-    found: "not found in prose",
+    found: "not found in document",
     severity: "warning",
   });
   return false;
@@ -224,7 +218,7 @@ function checkFees(
       issues.push({
         field: `fee:${fee.name}`,
         expected: `${fee.name}: ${expectedCurrency}`,
-        found: "fee amount not found in prose",
+        found: "fee amount not found in document",
         severity: "warning",
       });
     }
@@ -262,7 +256,7 @@ function checkCovenantThresholds(
       issues.push({
         field: `covenant:${covenant.name}`,
         expected: `${covenant.name} threshold: ${threshold}`,
-        found: "covenant threshold not found in prose",
+        found: "covenant threshold not found in document",
         severity: "warning",
       });
     }
@@ -378,9 +372,7 @@ function checkProseKeys(
   return allPresent;
 }
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 export function verifyDocument(
   docType: string,
@@ -422,11 +414,14 @@ export function verifyDocument(
   checksPassed += checkFees(docType, input, proseText, issues);
 
   // 7. Covenant threshold checks (soft — warning only)
-  const covenantCount = input.terms.covenants.filter(
-    (c) => c.threshold !== undefined,
-  ).length;
-  checksRun += covenantCount;
-  checksPassed += checkCovenantThresholds(input, proseText, issues);
+  //    Skip for template-handled types — covenants are in tables, not prose
+  if (!TEMPLATE_HANDLED_TYPES.has(docType)) {
+    const covenantCount = input.terms.covenants.filter(
+      (c) => c.threshold !== undefined,
+    ).length;
+    checksRun += covenantCount;
+    checksPassed += checkCovenantThresholds(input, proseText, issues);
+  }
 
   // Determine pass/fail: critical issues mean failure
   const hasCritical = issues.some((i) => i.severity === "critical");

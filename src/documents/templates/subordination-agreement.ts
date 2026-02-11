@@ -1,9 +1,7 @@
-// =============================================================================
 // subordination-agreement.ts
 // Generates a DOCX Subordination Agreement from deterministic deal terms + AI prose.
 // Establishes priority between creditors when borrower has existing debt that
 // needs to be subordinated to the new (senior) loan.
-// =============================================================================
 
 import {
   Document,
@@ -26,9 +24,7 @@ import {
 
 import type { DocumentInput, SubordinationProse } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildSubordinationAgreement(
   input: DocumentInput,
@@ -42,14 +38,10 @@ export function buildSubordinationAgreement(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("Subordination Agreement"));
 
-  // -----------------------------------------------------------------------
   // 2. Parties — Senior Creditor (lender), Subordinate Creditor, Borrower
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Parties"));
   children.push(
     bodyText(
@@ -74,9 +66,7 @@ export function buildSubordinationAgreement(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 3. Recitals
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Recitals"));
   children.push(
     bodyTextRuns([
@@ -114,9 +104,7 @@ export function buildSubordinationAgreement(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // 4. Key Terms Table
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Key Terms"));
   children.push(
     keyTermsTable([
@@ -132,9 +120,7 @@ export function buildSubordinationAgreement(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 5. Subordination Terms (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("1. Subordination Terms"));
   children.push(
     bodyText(
@@ -147,21 +133,15 @@ export function buildSubordinationAgreement(
   );
   children.push(bodyText(prose.subordinationTerms));
 
-  // -----------------------------------------------------------------------
   // 6. Senior Debt Description (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("2. Senior Debt Description"));
   children.push(bodyText(prose.seniorDebtDescription));
 
-  // -----------------------------------------------------------------------
   // 7. Subordinate Debt Description (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("3. Subordinate Debt Description"));
   children.push(bodyText(prose.subordinateDebtDescription));
 
-  // -----------------------------------------------------------------------
   // 8. Payment Restrictions (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("4. Payment Restrictions"));
   children.push(
     bodyText(
@@ -174,9 +154,7 @@ export function buildSubordinationAgreement(
   );
   children.push(bodyText(prose.paymentRestrictions));
 
-  // -----------------------------------------------------------------------
   // 9. Standstill Provisions (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("5. Standstill Provisions"));
   children.push(
     bodyText(
@@ -189,9 +167,7 @@ export function buildSubordinationAgreement(
   );
   children.push(bodyText(prose.standstillProvisions));
 
-  // -----------------------------------------------------------------------
   // 10. Turnover Provisions (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("6. Turnover Provisions"));
   children.push(
     bodyText(
@@ -204,9 +180,7 @@ export function buildSubordinationAgreement(
   );
   children.push(bodyText(prose.turnoverProvisions));
 
-  // -----------------------------------------------------------------------
   // Representations and Warranties
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("7. Representations and Warranties"));
   children.push(
     bodyText(
@@ -215,9 +189,7 @@ export function buildSubordinationAgreement(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Amendment and Modification Restriction
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("8. Amendments and Modifications"));
   children.push(
     bodyText(
@@ -226,9 +198,7 @@ export function buildSubordinationAgreement(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Insurance and Condemnation Proceeds
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("9. Insurance and Condemnation Proceeds"));
   children.push(
     bodyText(
@@ -237,9 +207,7 @@ export function buildSubordinationAgreement(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Notices
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("10. Notices"));
   children.push(
     bodyText(
@@ -248,15 +216,11 @@ export function buildSubordinationAgreement(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 11. Governing Law (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("11. Governing Law"));
   children.push(bodyText(prose.governingLaw));
 
-  // -----------------------------------------------------------------------
   // 12. Additional Standard Provisions
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("12. Additional Standard Provisions"));
   children.push(
     bodyText(
@@ -282,9 +246,7 @@ export function buildSubordinationAgreement(
     ),
   );
 
-  // -----------------------------------------------------------------------
   // 13. Signature blocks
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("IN WITNESS WHEREOF"));
   children.push(
     bodyText(
@@ -321,9 +283,7 @@ export function buildSubordinationAgreement(
     ...signatureBlock(input.borrowerName, "Authorized Signatory"),
   );
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Subordination Agreement",
     headerRight: `Subordination Agreement — ${input.borrowerName}`,

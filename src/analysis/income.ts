@@ -1,7 +1,5 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // OpenShut Analysis Engine — Income Analysis
 // 100% deterministic. Zero AI. Pure TypeScript math.
-// ─────────────────────────────────────────────────────────────────────────────
 
 export interface IncomeSource {
   type:
@@ -36,9 +34,7 @@ export interface IncomeAnalysis {
   notes: string[];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 function num(val: unknown): number {
   if (typeof val === "number" && Number.isFinite(val)) return val;
@@ -50,9 +46,7 @@ function num(val: unknown): number {
   return 0;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Extraction helpers — pull income sources from each document type
-// ─────────────────────────────────────────────────────────────────────────────
 
 function extractW2Income(data: any, year: number): IncomeSource[] {
   const sources: IncomeSource[] = [];
@@ -270,9 +264,7 @@ function extractK1Income(data: any, year: number): IncomeSource[] {
   return sources;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Main analysis function
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function analyzeIncome(
   extractions: Array<{ docType: string; data: any; year?: number }>
@@ -323,7 +315,7 @@ export function analyzeIncome(
     }
   }
 
-  // ── Aggregate by year ──────────────────────────────────────────────────────
+  // Aggregate by year
   const incomeByYear: Record<number, { gross: number; net: number }> = {};
   for (const src of sources) {
     if (!incomeByYear[src.year]) {
@@ -337,14 +329,14 @@ export function analyzeIncome(
     .map(Number)
     .sort((a, b) => a - b);
 
-  // ── Totals (most recent year) ──────────────────────────────────────────────
+  // Totals (most recent year)
   const latestYear = years[years.length - 1] ?? currentYear;
   const latestYearSources = sources.filter((s) => s.year === latestYear);
 
   const totalGrossIncome = latestYearSources.reduce((sum, s) => sum + s.grossAmount, 0);
   const totalNetIncome = latestYearSources.reduce((sum, s) => sum + s.netAmount, 0);
 
-  // ── Income by category ─────────────────────────────────────────────────────
+  // Income by category
   const w2Income = latestYearSources
     .filter((s) => s.type === "w2")
     .reduce((sum, s) => sum + s.netAmount, 0);
@@ -359,7 +351,7 @@ export function analyzeIncome(
     )
     .reduce((sum, s) => sum + s.netAmount, 0);
 
-  // ── Trend calculation ──────────────────────────────────────────────────────
+  // Trend calculation
   let trend: "increasing" | "stable" | "declining" = "stable";
   let trendPercent = 0;
 
@@ -381,7 +373,7 @@ export function analyzeIncome(
     }
   }
 
-  // ── Qualifying income (underwriting rules) ─────────────────────────────────
+  // Qualifying income (underwriting rules)
   let qualifyingIncome = 0;
 
   // W-2: use most recent year
@@ -456,7 +448,7 @@ export function analyzeIncome(
     .reduce((sum, s) => sum + s.netAmount, 0);
   qualifyingIncome += otherPassive;
 
-  // ── Additional notes ───────────────────────────────────────────────────────
+  // Additional notes
   if (sources.length === 0) {
     notes.push("No income sources identified from provided documents.");
   }

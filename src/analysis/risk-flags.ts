@@ -1,7 +1,5 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // OpenShut Analysis Engine — Risk Flag Detection
 // 100% deterministic. Zero AI. Pure TypeScript math.
-// ─────────────────────────────────────────────────────────────────────────────
 
 export interface RiskFlag {
   severity: "high" | "medium" | "low";
@@ -11,9 +9,7 @@ export interface RiskFlag {
   recommendation: string;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 function num(val: unknown): number {
   if (typeof val === "number" && Number.isFinite(val)) return val;
@@ -30,9 +26,7 @@ function flag(
   return { severity, category, title, description, recommendation };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Main risk flag detection
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function detectRiskFlags(params: {
   incomeAnalysis: any;
@@ -55,11 +49,9 @@ export function detectRiskFlags(params: {
 
   const flags: RiskFlag[] = [];
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // HIGH SEVERITY FLAGS
-  // ═══════════════════════════════════════════════════════════════════════════
 
-  // ── DSCR < 1.0 ─────────────────────────────────────────────────────────────
+  // DSCR < 1.0
   const globalDscr = num(dscrAnalysis?.globalDscr);
   if (dscrAnalysis?.globalDscr !== null && globalDscr < 1.0) {
     flags.push(
@@ -73,7 +65,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── DTI back-end > 50% ─────────────────────────────────────────────────────
+  // DTI back-end > 50%
   const backEndDti = num(dtiAnalysis?.backEndDti);
   if (dtiAnalysis?.backEndDti !== null && backEndDti > 0.50) {
     flags.push(
@@ -87,7 +79,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── NSF count > 3 ──────────────────────────────────────────────────────────
+  // NSF count > 3
   const nsfCount = num(cashflowAnalysis?.nsfCount);
   if (nsfCount > 3) {
     flags.push(
@@ -101,7 +93,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── Declining income > 20% ─────────────────────────────────────────────────
+  // Declining income > 20%
   const trendPercent = num(incomeAnalysis?.trendPercent);
   if (incomeAnalysis?.trend === "declining" && trendPercent < -0.20) {
     flags.push(
@@ -115,7 +107,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── Less than 3 months reserves ────────────────────────────────────────────
+  // Less than 3 months reserves
   const monthsOfReserves = num(liquidityAnalysis?.monthsOfReserves);
   if (liquidityAnalysis && monthsOfReserves < 3) {
     flags.push(
@@ -129,7 +121,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── Balance sheet doesn't balance ──────────────────────────────────────────
+  // Balance sheet doesn't balance
   for (const extraction of extractions) {
     const type = extraction.docType.toLowerCase().replace(/[\s\-_]/g, "");
     if (type === "balancesheet" || type === "bs") {
@@ -158,11 +150,9 @@ export function detectRiskFlags(params: {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // MEDIUM SEVERITY FLAGS
-  // ═══════════════════════════════════════════════════════════════════════════
 
-  // ── DSCR 1.0-1.25 ──────────────────────────────────────────────────────────
+  // DSCR 1.0-1.25
   if (dscrAnalysis?.globalDscr !== null && globalDscr >= 1.0 && globalDscr < 1.25) {
     flags.push(
       flag(
@@ -175,7 +165,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── DTI back-end 43-50% ────────────────────────────────────────────────────
+  // DTI back-end 43-50%
   if (dtiAnalysis?.backEndDti !== null && backEndDti > 0.43 && backEndDti <= 0.50) {
     flags.push(
       flag(
@@ -188,7 +178,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── 1-3 NSFs ───────────────────────────────────────────────────────────────
+  // 1-3 NSFs
   if (nsfCount >= 1 && nsfCount <= 3) {
     flags.push(
       flag(
@@ -201,7 +191,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── Large unexplained deposits ─────────────────────────────────────────────
+  // Large unexplained deposits
   const largeDeposits = cashflowAnalysis?.largeDeposits ?? [];
   if (Array.isArray(largeDeposits) && largeDeposits.length > 0) {
     const totalLarge = largeDeposits.reduce(
@@ -220,7 +210,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── Declining revenue trend (business) ─────────────────────────────────────
+  // Declining revenue trend (business)
   if (businessAnalysis?.revenueTrend === "declining") {
     const bTrend = num(businessAnalysis.revenueTrendPercent);
     flags.push(
@@ -234,7 +224,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── High expense ratio (>85%) ──────────────────────────────────────────────
+  // High expense ratio (>85%)
   if (businessAnalysis && num(businessAnalysis.expenseRatio) > 0.85) {
     flags.push(
       flag(
@@ -247,7 +237,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── 3-6 months reserves ────────────────────────────────────────────────────
+  // 3-6 months reserves
   if (liquidityAnalysis && monthsOfReserves >= 3 && monthsOfReserves < 6) {
     flags.push(
       flag(
@@ -260,7 +250,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── Deposit-to-income ratio outliers ───────────────────────────────────────
+  // Deposit-to-income ratio outliers
   const dtiRatio = cashflowAnalysis?.depositToIncomeRatio;
   if (dtiRatio !== null && dtiRatio !== undefined) {
     if (num(dtiRatio) > 1.5) {
@@ -288,11 +278,9 @@ export function detectRiskFlags(params: {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // LOW SEVERITY FLAGS
-  // ═══════════════════════════════════════════════════════════════════════════
 
-  // ── Self-employed < 2 years history ────────────────────────────────────────
+  // Self-employed < 2 years history
   const seIncome = num(incomeAnalysis?.selfEmployedIncome);
   if (seIncome > 0) {
     const seYears = new Set<number>();
@@ -314,7 +302,7 @@ export function detectRiskFlags(params: {
     }
   }
 
-  // ── Multiple businesses ────────────────────────────────────────────────────
+  // Multiple businesses
   if (businessAnalysis) {
     // Check if there are multiple business documents in the same year
     const businessDocsByYear: Record<number, number> = {};
@@ -341,7 +329,7 @@ export function detectRiskFlags(params: {
     }
   }
 
-  // ── Seasonal income patterns ───────────────────────────────────────────────
+  // Seasonal income patterns
   const monthlyDeposits = cashflowAnalysis?.monthlyDeposits ?? [];
   if (Array.isArray(monthlyDeposits) && monthlyDeposits.length >= 6) {
     const amounts = monthlyDeposits.map((m: any) => num(m.total)).filter((a: number) => a > 0);
@@ -369,7 +357,7 @@ export function detectRiskFlags(params: {
     }
   }
 
-  // ── First-time landlord ────────────────────────────────────────────────────
+  // First-time landlord
   const rentalSources = (incomeAnalysis?.sources ?? []).filter(
     (s: any) => s.type === "rental"
   );
@@ -388,7 +376,7 @@ export function detectRiskFlags(params: {
     }
   }
 
-  // ── Declining income 5-20% (low severity, not yet high) ───────────────────
+  // Declining income 5-20% (low severity, not yet high)
   if (
     incomeAnalysis?.trend === "declining" &&
     trendPercent >= -0.20 &&
@@ -405,7 +393,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ── Overdraft occurrences ──────────────────────────────────────────────────
+  // Overdraft occurrences
   const overdraftCount = num(cashflowAnalysis?.overdraftCount);
   if (overdraftCount > 0) {
     const severity: RiskFlag["severity"] = overdraftCount > 3 ? "medium" : "low";
@@ -420,9 +408,7 @@ export function detectRiskFlags(params: {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // Sort: high first, then medium, then low — alphabetically within severity
-  // ═══════════════════════════════════════════════════════════════════════════
 
   const severityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
 
@@ -435,9 +421,7 @@ export function detectRiskFlags(params: {
   return flags;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Risk Score Calculation
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function calculateRiskScore(flags: RiskFlag[]): number {
   let score = 0;

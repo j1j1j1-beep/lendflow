@@ -7,7 +7,7 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─── Organizations & Users ────────────────────────────────────────────────────
+// Organizations & Users
 
 model Organization {
   id         String   @id @default(cuid())
@@ -19,9 +19,14 @@ model Organization {
   deals      Deal[]
   subscription Subscription?
   usageLogs  UsageLog[]
+
+  // Bio vertical
+  bioPrograms      BioProgram[]
+  bioSubscription  BioSubscription?
+  bioUsageLogs     BioUsageLog[]
 }
 
-// ─── Billing ──────────────────────────────────────────────────────────────────
+// Billing
 
 model Subscription {
   id                   String    @id @default(cuid())
@@ -54,7 +59,7 @@ model UsageLog {
   @@unique([orgId, month])
 }
 
-// ─── Audit Trail ─────────────────────────────────────────────────────────────
+// Audit Trail
 
 model AuditLog {
   id        String   @id @default(cuid())
@@ -80,11 +85,12 @@ model User {
   role      String       @default("loan_officer")
   orgId     String
   org       Organization @relation(fields: [orgId], references: [id])
-  deals     Deal[]
-  createdAt DateTime     @default(now())
+  deals       Deal[]
+  bioPrograms BioProgram[]
+  createdAt   DateTime     @default(now())
 }
 
-// ─── Deals ────────────────────────────────────────────────────────────────────
+// Deals
 
 model Deal {
   id              String     @id @default(cuid())
@@ -138,7 +144,7 @@ enum DealStatus {
   ERROR
 }
 
-// ─── Documents ────────────────────────────────────────────────────────────────
+// Documents
 
 model Document {
   id             String         @id @default(cuid())
@@ -185,7 +191,7 @@ enum DocumentStatus {
   ERROR
 }
 
-// ─── Extractions ──────────────────────────────────────────────────────────────
+// Extractions
 
 model Extraction {
   id               String   @id @default(cuid())
@@ -203,7 +209,7 @@ model Extraction {
   createdAt        DateTime @default(now())
 }
 
-// ─── Verification ─────────────────────────────────────────────────────────────
+// Verification
 
 model VerificationReport {
   id     String @id @default(cuid())
@@ -229,7 +235,7 @@ model VerificationReport {
   createdAt DateTime @default(now())
 }
 
-// ─── Review Gate ──────────────────────────────────────────────────────────────
+// Review Gate
 
 model ReviewItem {
   id             String       @id @default(cuid())
@@ -256,7 +262,7 @@ enum ReviewStatus {
   NOTED
 }
 
-// ─── Analysis ─────────────────────────────────────────────────────────────────
+// Analysis
 
 model Analysis {
   id     String @id @default(cuid())
@@ -299,7 +305,7 @@ model Analysis {
   createdAt DateTime @default(now())
 }
 
-// ─── Credit Memo ──────────────────────────────────────────────────────────────
+// Credit Memo
 
 model CreditMemo {
   id        String   @id @default(cuid())
@@ -310,7 +316,7 @@ model CreditMemo {
   createdAt DateTime @default(now())
 }
 
-// ─── Deal Terms (Phase 11: Structuring Output) ──────────────────────────────
+// Deal Terms (Phase 11: Structuring Output)
 
 model DealTerms {
   id     String @id @default(cuid())
@@ -359,7 +365,7 @@ model DealTerms {
   updatedAt DateTime @updatedAt
 }
 
-// ─── Property Details ────────────────────────────────────────────────────────
+// Property Details
 
 model PropertyDetails {
   id     String @id @default(cuid())
@@ -391,7 +397,7 @@ model PropertyDetails {
   updatedAt DateTime @updatedAt
 }
 
-// ─── Generated Documents (Phase 12) ─────────────────────────────────────────
+// Generated Documents (Phase 12)
 
 model GeneratedDocument {
   id     String @id @default(cuid())
@@ -417,7 +423,7 @@ model GeneratedDocument {
   updatedAt DateTime @updatedAt
 }
 
-// ─── Conditions (Pre-closing checklist) ──────────────────────────────────────
+// Conditions (Pre-closing checklist)
 
 model Condition {
   id     String @id @default(cuid())
@@ -433,6 +439,346 @@ model Condition {
   satisfiedBy String?
   satisfiedAt DateTime?
   notes       String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Bio Vertical (separate from lending — shares Org, User, AuditLog only)
+
+model BioSubscription {
+  id                   String    @id @default(cuid())
+  orgId                String    @unique
+  org                  Organization @relation(fields: [orgId], references: [id])
+  stripeCustomerId     String    @unique
+  stripeSubscriptionId String?   @unique
+  stripePriceIdBase    String?   // Stripe price ID for base subscription
+  stripePriceIdSeat    String?   // Stripe price ID for per-seat billing
+  licensePaid          Boolean   @default(false)
+  licensePaymentId     String?
+  plan                 String    @default("trial") // "trial", "active", "canceled"
+  status               String    @default("trialing") // "trialing", "active", "past_due", "canceled", "unpaid"
+  maxSeats             Int       @default(5)
+  currentSeats         Int       @default(1)
+  pricePerSeat         Int?      // cents/month per additional seat (for display/reference)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model BioUsageLog {
+  id                 String       @id @default(cuid())
+  orgId              String
+  org                Organization @relation(fields: [orgId], references: [id])
+  month              String       // "2026-02" format
+  programsProcessed  Int          @default(0)
+  docsGenerated      Int          @default(0)
+  pagesExtracted     Int          @default(0)
+  complianceAudits   Int          @default(0)
+  aiTokensUsed       Int          @default(0)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@unique([orgId, month])
+}
+
+model BioProgram {
+  id          String           @id @default(cuid())
+  name        String           // e.g. "DEM301 IND Submission"
+  toolType    BioToolType      // data_analysis, regulatory_docs, compliance_audit
+  status      BioProgramStatus @default(CREATED)
+  errorMessage String?
+  errorStep    String?
+
+  // Drug / product identification
+  drugName    String?          // e.g. "DEM301"
+  drugClass   String?          // "adc", "small_molecule", "biologic", "gene_therapy", "cell_therapy", "vaccine"
+  target      String?          // e.g. "Nectin-4"
+  mechanism   String?          // e.g. "ADC targeting Nectin-4 expressing solid tumors"
+  indication  String?          // e.g. "Urothelial carcinoma, solid tumors"
+  phase       DrugPhase?       // PRECLINICAL → APPROVED
+
+  // ADC-specific (nullable — only populated for ADC drugClass)
+  antibodyType String?         // e.g. "Humanized IgG1"
+  linkerType   String?         // e.g. "Cleavable valine-citrulline"
+  payloadType  String?         // e.g. "MMAE"
+  dar          Float?          // Drug-to-antibody ratio, e.g. 4.0
+
+  // Regulatory identifiers
+  indNumber   String?          // FDA IND number
+  nctNumber   String?          // ClinicalTrials.gov NCT number
+  fdaDivision String?          // "CDER", "CBER"
+  sponsorName String?          // Legal sponsor entity
+
+  // Organization
+  orgId  String
+  org    Organization @relation(fields: [orgId], references: [id])
+  userId String
+  user   User         @relation(fields: [userId], references: [id])
+
+  // Relations
+  bioDocuments          BioDocument[]
+  bioExtractions        BioExtraction[]
+  bioAnalysis           BioAnalysis?
+  bioParameters         BioParameters?
+  bioGeneratedDocuments BioGeneratedDocument[]
+  bioConditions         BioCondition[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum BioToolType {
+  DATA_ANALYSIS       // Extract + verify + analyze lab/clinical data
+  REGULATORY_DOCS     // Generate IND sections, protocols, IB, CMC summaries
+  COMPLIANCE_AUDIT    // Check existing docs against FDA regs (21 CFR Part 11, GLP, GMP)
+}
+
+enum BioProgramStatus {
+  CREATED
+  UPLOADING
+  EXTRACTING
+  CLASSIFYING
+  VERIFYING
+  ANALYZING
+  GENERATING_DOCS
+  COMPLIANCE_REVIEW
+  NEEDS_REVIEW
+  COMPLETE
+  ERROR
+}
+
+enum DrugPhase {
+  PRECLINICAL
+  IND_FILING
+  PHASE_1
+  PHASE_1B
+  PHASE_2
+  PHASE_2B
+  PHASE_3
+  NDA_BLA
+  APPROVED
+  POST_MARKET
+}
+
+model BioDocument {
+  id             String            @id @default(cuid())
+  programId      String
+  program        BioProgram        @relation(fields: [programId], references: [id], onDelete: Cascade)
+  fileName       String
+  s3Key          String
+  fileSize       Int
+  pageCount      Int?
+  docType        BioDocType?
+  status         BioDocumentStatus @default(PENDING)
+  textractOutput Json?
+  ocrText        String?           @db.Text
+  extractions    BioExtraction[]
+  createdAt      DateTime          @default(now())
+}
+
+enum BioDocType {
+  // Manufacturing & Quality (CMC)
+  BATCH_RECORD
+  CERTIFICATE_OF_ANALYSIS
+  STABILITY_DATA
+  MANUFACTURING_PROCESS
+  RAW_MATERIAL_SPEC
+  DRUG_SUBSTANCE_SPEC
+  DRUG_PRODUCT_SPEC
+  ANALYTICAL_METHOD_VALIDATION
+
+  // Nonclinical
+  TOXICOLOGY_REPORT
+  PHARMACOLOGY_REPORT
+  PK_STUDY                // Pharmacokinetics
+  PD_STUDY                // Pharmacodynamics
+  ADME_STUDY              // Absorption, distribution, metabolism, excretion
+  GENOTOXICITY_REPORT
+  CARCINOGENICITY_REPORT
+
+  // Clinical
+  CLINICAL_PROTOCOL
+  CLINICAL_STUDY_REPORT
+  SAFETY_REPORT
+  ADVERSE_EVENT_REPORT
+  INFORMED_CONSENT_FORM
+  CASE_REPORT_FORM
+
+  // Regulatory
+  REGULATORY_CORRESPONDENCE
+  MEETING_MINUTES_FDA
+  ANNUAL_REPORT
+  IND_SAFETY_REPORT
+
+  // General
+  STANDARD_OPERATING_PROCEDURE
+  QUALITY_MANUAL
+  VALIDATION_REPORT
+  AUDIT_REPORT
+  BIO_OTHER
+}
+
+enum BioDocumentStatus {
+  PENDING
+  OCR_PROCESSING
+  OCR_COMPLETE
+  CLASSIFYING
+  CLASSIFIED
+  EXTRACTING
+  EXTRACTED
+  VERIFIED
+  ERROR
+}
+
+model BioExtraction {
+  id             String      @id @default(cuid())
+  documentId     String
+  document       BioDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  programId      String
+  program        BioProgram  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  model          String      // AI model used
+  promptVersion  String
+  rawResponse    Json
+  structuredData Json        // Typed per BioDocType (CMC fields, PK parameters, tox endpoints, etc.)
+  validationErrors Json?
+  tokensUsed     Int         @default(0)
+  costUsd        Float       @default(0)
+  createdAt      DateTime    @default(now())
+}
+
+model BioAnalysis {
+  id        String     @id @default(cuid())
+  programId String     @unique
+  program   BioProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  // CMC Summary
+  cmcData          Json?  // Formulation, manufacturing process, controls, specifications
+  stabilityProfile Json?  // Stability conditions, timepoints, results, shelf life
+
+  // Nonclinical Summary
+  toxSummary     Json?    // NOAEL, LOAEL, MTD, target organs, dose-limiting toxicities
+  pkSummary      Json?    // Cmax, AUC, t½, clearance, Vd, bioavailability
+  safetyMargins  Json?    // Human-equivalent dose calculations, safety multiples
+
+  // ADC-Specific Analytics (nullable)
+  darDistribution  Json?  // DAR species distribution, average DAR, conjugation efficiency
+  freePayload      Float? // Unconjugated payload percentage
+  adccPotency      Float? // Antibody-dependent cellular cytotoxicity
+  bindingAffinity  Json?  // Kd, kon, koff for target binding
+  internalization  Json?  // Rate and efficiency of ADC internalization
+
+  // Clinical Summary (if applicable)
+  clinicalData   Json?    // Efficacy endpoints, response rates, survival data
+  adverseEvents  Json?    // AE frequency, grade, relatedness
+  doseEscalation Json?    // DLT, MTD, RP2D (Project Optimus)
+
+  // Risk Assessment
+  riskFlags      Json?    // Identified risks and concerns
+  riskScore      Float?
+  regulatoryFlags Json?   // Specific FDA requirements triggered
+
+  // Full computed results
+  fullResults    Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BioParameters {
+  id        String     @id @default(cuid())
+  programId String     @unique
+  program   BioProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  // Dosing & Formulation
+  routeOfAdmin     String?  // "IV", "SC", "oral", "intrathecal"
+  doseRange        String?  // e.g. "0.3 - 10 mg/kg"
+  dosingSchedule   String?  // e.g. "Q3W" (every 3 weeks)
+  formulation      String?  // e.g. "Lyophilized powder for IV infusion"
+
+  // Manufacturing
+  manufacturer     String?
+  manufacturingSite String?
+  batchSize        String?
+  scaleUpStatus    String?  // "lab", "pilot", "commercial"
+
+  // Regulatory Strategy
+  regulatoryPathway String? // "505(b)(1)", "505(b)(2)", "351(a)", "351(k)"
+  designations      Json?   // Orphan drug, fast track, breakthrough therapy, accelerated approval
+  specialProtocol   Boolean @default(false)
+
+  // Study Design (for clinical programs)
+  studyDesign        String? // "open-label dose escalation", "randomized double-blind", etc.
+  primaryEndpoint    String?
+  secondaryEndpoints Json?
+  sampleSize         Int?
+  enrollmentStatus   String? // "not_started", "enrolling", "fully_enrolled", "completed"
+
+  // Compliance Status
+  complianceStatus String  @default("PENDING") // PENDING, COMPLIANT, NON_COMPLIANT, WAIVED
+  complianceIssues Json?
+  complianceReview Json?
+
+  status    String   @default("DRAFT") // DRAFT, PROPOSED, ACCEPTED, LOCKED
+  lockedAt  DateTime?
+  lockedBy  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BioGeneratedDocument {
+  id        String     @id @default(cuid())
+  programId String
+  program   BioProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  docType   String     // "ind_module_1", "ind_module_2_quality", "investigator_brochure", etc.
+  s3Key     String
+  version   Int        @default(1)
+  status    String     @default("DRAFT") // DRAFT, REVIEWED, APPROVED, SIGNED
+
+  // Compliance & Review
+  complianceStatus   String? // PENDING, PASSED, FLAGGED
+  complianceIssues   Json?
+  verificationStatus String? // PENDING, PASSED, FAILED
+  verificationIssues Json?
+  regulatoryChecks   Json?   // FDA requirement checks (21 CFR Part 11, GLP, GMP, etc.)
+
+  // 21 CFR Part 11 — Electronic Signatures
+  signedBy         String?   // User ID / name of signer
+  signedByTitle    String?   // e.g. "VP Regulatory Affairs", "Medical Director"
+  signedByEmail    String?
+  signatureReason  String?   // "I have reviewed and approve this document"
+  signedAt         DateTime?
+  signatureMethod  String?   // "electronic", "wet_ink", "digital_certificate"
+
+  // Review chain (Part 11 requires documented review)
+  reviewedBy       String?
+  reviewedByTitle  String?
+  reviewedAt       DateTime?
+  reviewNotes      String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BioCondition {
+  id        String     @id @default(cuid())
+  programId String
+  program   BioProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  category    String   // "pre_ind", "ind_submission", "clinical_hold", "post_approval", "manufacturing"
+  description String
+  regulation  String?  // e.g. "21 CFR 312.23(a)(8)", "ICH E6(R2) Section 4.5"
+  source      String   // "fda_requirement", "ich_guideline", "rules_engine", "ai_recommendation", "manual"
+  priority    String   @default("required") // "required", "recommended", "optional"
+
+  status      String   @default("OPEN") // OPEN, SATISFIED, WAIVED, NOT_APPLICABLE
+  satisfiedBy String?
+  satisfiedAt DateTime?
+  evidence    String?  @db.Text  // Link to or description of evidence satisfying the condition
+  notes       String?  @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

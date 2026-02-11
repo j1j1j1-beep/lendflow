@@ -1,8 +1,6 @@
-// =============================================================================
 // compliance-certificate.ts
 // Generates a DOCX Compliance Certificate — periodic covenant compliance
 // worksheet. ZERO AI — pure deterministic math and rules engine data.
-// =============================================================================
 
 import {
   Document,
@@ -24,9 +22,7 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function formatThreshold(name: string, value: number): string {
   const lower = name.toLowerCase();
@@ -42,9 +38,7 @@ function formatThreshold(name: string, value: number): string {
   return value.toString();
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildComplianceCertificate(
   input: DocumentInput,
@@ -55,14 +49,10 @@ export function buildComplianceCertificate(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("Compliance Certificate"));
 
-  // -----------------------------------------------------------------------
   // 2. Header
-  // -----------------------------------------------------------------------
   children.push(
     bodyText(
       `This Compliance Certificate is delivered pursuant to the Loan Agreement dated as of ${dateFormatted} between ${input.borrowerName} ("Borrower") and ${input.lenderName} ("Lender").`,
@@ -70,9 +60,7 @@ export function buildComplianceCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 3. Key Terms Table
-  // -----------------------------------------------------------------------
   children.push(
     keyTermsTable([
       { label: "Borrower", value: input.borrowerName },
@@ -84,9 +72,7 @@ export function buildComplianceCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 4. Certification
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Certification"));
   children.push(
     bodyText(
@@ -95,9 +81,7 @@ export function buildComplianceCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 5. Financial Covenant Compliance
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Financial Covenant Compliance"));
 
   if (terms.covenants.length > 0) {
@@ -120,9 +104,7 @@ export function buildComplianceCertificate(
   }
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 6. Covenant Descriptions
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Covenant Descriptions"));
 
   if (terms.covenants.length > 0) {
@@ -136,9 +118,7 @@ export function buildComplianceCertificate(
   }
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 7. Financial Reporting Status
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Financial Reporting Status"));
 
   const reportingRows: string[][] = [
@@ -173,9 +153,7 @@ export function buildComplianceCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 8. Additional Reporting Requirements
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Additional Reporting Requirements"));
 
   const postClosingConditions = terms.conditions.filter(
@@ -193,9 +171,7 @@ export function buildComplianceCertificate(
   }
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 9. Certification Statement
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Certification Statement"));
   children.push(
     bodyText(
@@ -204,9 +180,7 @@ export function buildComplianceCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 10. Jury Trial Waiver, Severability, Counterparts
-  // -----------------------------------------------------------------------
   children.push(
     bodyText(
       "JURY TRIAL WAIVER: BORROWER AND LENDER HEREBY KNOWINGLY, VOLUNTARILY, AND INTENTIONALLY WAIVE ANY RIGHT TO A TRIAL BY JURY IN RESPECT OF ANY LITIGATION ARISING OUT OF, UNDER, OR IN CONNECTION WITH THIS CERTIFICATE OR ANY LOAN DOCUMENT.",
@@ -226,9 +200,7 @@ export function buildComplianceCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 11. Governing Law
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Governing Law"));
   children.push(
     bodyText(
@@ -237,9 +209,7 @@ export function buildComplianceCertificate(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 12. Signatures
-  // -----------------------------------------------------------------------
   children.push(
     bodyText("BORROWER:", { bold: true, color: COLORS.primary }),
   );
@@ -260,9 +230,7 @@ export function buildComplianceCertificate(
     ...signatureBlock("____________________________", "Chief Financial Officer / Controller"),
   );
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Compliance Certificate",
     headerRight: `Compliance Certificate — ${input.borrowerName}`,

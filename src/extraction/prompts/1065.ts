@@ -1,4 +1,4 @@
-// ─── IRS Form 1065 (Partnership) Extraction Prompt ────────────────────────────
+// IRS Form 1065 (Partnership) Extraction Prompt
 // FALLBACK prompt for when deterministic line mapping (irs-field-map.ts) fails.
 // Used for edge cases: unusual formatting, guaranteed payments in non-standard
 // locations, fields Textract can't identify, or low-confidence results.

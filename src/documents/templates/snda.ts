@@ -1,10 +1,8 @@
-// =============================================================================
 // snda.ts
 // Builds a Subordination, Non-Disturbance and Attornment Agreement (SNDA).
 // Signed by lender, tenant, and landlord/borrower for multi-tenant CRE deals.
 // Protects tenant occupancy rights while preserving lender's mortgage priority.
 // All financial numbers from DocumentInput; AI writes prose.
-// =============================================================================
 
 import type { DocumentInput, SndaProse } from "../types";
 import {
@@ -28,9 +26,7 @@ import {
   COLORS,
 } from "../doc-helpers";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildSnda(
   input: DocumentInput,
@@ -43,15 +39,11 @@ export function buildSnda(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("Subordination, Non-Disturbance and Attornment Agreement"));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 2. Parties
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Parties"));
   children.push(
     bodyText(
@@ -70,9 +62,7 @@ export function buildSnda(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 3. Recitals
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Recitals"));
   children.push(
     bodyTextRuns([
@@ -115,9 +105,7 @@ export function buildSnda(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 4. Key Terms Table
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Key Terms"));
   children.push(
     keyTermsTable([
@@ -132,9 +120,7 @@ export function buildSnda(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 5. Subordination of Lease (AI prose + deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("1. Subordination of Lease"));
   children.push(bodyText(prose.subordinationTerms));
   children.push(spacer(2));
@@ -145,9 +131,7 @@ export function buildSnda(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 6. Non-Disturbance (AI prose + deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("2. Non-Disturbance"));
   children.push(bodyText(prose.nonDisturbanceTerms));
   children.push(spacer(2));
@@ -158,9 +142,7 @@ export function buildSnda(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 7. Attornment (AI prose + deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("3. Attornment"));
   children.push(bodyText(prose.attornmentTerms));
   children.push(spacer(2));
@@ -171,9 +153,7 @@ export function buildSnda(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 8. Lender Protections (AI prose + deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("4. Lender Protections"));
   children.push(bodyText(prose.lenderProtections));
   children.push(spacer(2));
@@ -184,9 +164,7 @@ export function buildSnda(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 9. Tenant Protections (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("5. Tenant Protections"));
   children.push(
     bulletPoint(
@@ -205,9 +183,7 @@ export function buildSnda(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 10. Notice Requirements (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("6. Notice Requirements"));
   children.push(
     bodyText(
@@ -222,16 +198,12 @@ export function buildSnda(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 11. Governing Law (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("7. Governing Law"));
   children.push(bodyText(prose.governingLaw));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // Standard legal provisions
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("8. Additional Standard Provisions"));
   children.push(
     bodyText(
@@ -252,9 +224,7 @@ export function buildSnda(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 12. Signatures
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("IN WITNESS WHEREOF"));
   children.push(
     bodyText(
@@ -285,9 +255,7 @@ export function buildSnda(
   children.push(...signatureBlock(input.borrowerName, "Landlord / Authorized Signatory"));
   children.push(...notaryBlock(input.stateAbbr));
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Subordination, Non-Disturbance and Attornment Agreement",
     headerRight: `SNDA \u2014 ${input.borrowerName}`,

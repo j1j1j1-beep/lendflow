@@ -1,9 +1,7 @@
-// =============================================================================
 // opinion-letter.ts
 // Generates a DOCX Legal Opinion Letter — formal opinion from borrower's
 // counsel confirming due organization, authority, enforceability, and
 // compliance with applicable law.
-// =============================================================================
 
 import {
   Document,
@@ -25,9 +23,7 @@ import {
 
 import type { DocumentInput, OpinionLetterProse } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildOpinionLetter(
   input: DocumentInput,
@@ -41,37 +37,27 @@ export function buildOpinionLetter(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("Legal Opinion Letter"));
 
-  // -----------------------------------------------------------------------
   // 2. Letterhead placeholder
-  // -----------------------------------------------------------------------
   children.push(bodyText("[Law Firm Name]", { italic: true }));
   children.push(bodyText("[Address]", { italic: true }));
   children.push(bodyText("[City, State ZIP]", { italic: true }));
   children.push(bodyText("[Phone/Fax]", { italic: true }));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 3. Date
-  // -----------------------------------------------------------------------
   children.push(bodyText(dateFormatted));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 4. Addressee
-  // -----------------------------------------------------------------------
   children.push(bodyText(input.lenderName, { bold: true }));
   children.push(bodyText("[Address]", { italic: true }));
   children.push(bodyText("[City, State ZIP]", { italic: true }));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 5. Reference line
-  // -----------------------------------------------------------------------
   children.push(
     bodyTextRuns([
       { text: "Re: ", bold: true },
@@ -80,15 +66,11 @@ export function buildOpinionLetter(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 6. Opening
-  // -----------------------------------------------------------------------
   children.push(bodyText("Ladies and Gentlemen:"));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 7. Introductory paragraph (deterministic)
-  // -----------------------------------------------------------------------
   children.push(
     bodyText(
       // TODO: The "Section [___]" placeholder below should ideally be populated
@@ -97,11 +79,17 @@ export function buildOpinionLetter(
       `We have acted as counsel to ${input.borrowerName} (the "Borrower") in connection with the loan (the "Loan") in the original principal amount of ${principalFormatted} (${principalWords} dollars) from ${input.lenderName} (the "Lender") to the Borrower. This opinion is delivered to you pursuant to Section [___] of the Loan Agreement dated ${dateFormatted} between the Borrower and the Lender (the "Loan Agreement").`,
     ),
   );
+  children.push(spacer(4));
+
+  // 7a. ABA Legal Opinion Accord & TriBar Opinion Committee reference
+  children.push(
+    bodyText(
+      "This opinion is rendered in accordance with the guidelines set forth in the American Bar Association Legal Opinion Accord (the \"Accord\") and the recommendations of the TriBar Opinion Committee, except as otherwise noted herein. Certain terms used herein have the meanings ascribed to them in the Accord. To the extent any opinion expressed herein differs from the standard assumptions and qualifications of the Accord, such differences are expressly noted in the Qualifications and Limitations section below.",
+    ),
+  );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 8. Documents Reviewed
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Documents Reviewed"));
   children.push(
     bodyText(
@@ -123,23 +111,26 @@ export function buildOpinionLetter(
   }
 
   // Organizational document label based on entity type
-  const orgDocLabel = (() => {
-    switch (input.entityType) {
-      case "llc":
-        return "certificate of formation";
-      case "corporation":
-        return "articles of incorporation";
-      case "partnership":
-        return "partnership agreement";
-      default:
-        return "certificate of formation/articles of incorporation/partnership agreement";
-    }
-  })();
-  children.push(
-    bulletPoint(
-      `The organizational documents of the Borrower, including ${orgDocLabel}`,
-    ),
-  );
+  const isIndividual = !input.entityType || input.entityType === "sole_proprietor";
+  if (!isIndividual) {
+    const orgDocLabel = (() => {
+      switch (input.entityType) {
+        case "llc":
+          return "certificate of formation";
+        case "corporation":
+          return "articles of incorporation";
+        case "partnership":
+          return "partnership agreement";
+        default:
+          return "certificate of formation/articles of incorporation/partnership agreement";
+      }
+    })();
+    children.push(
+      bulletPoint(
+        `The organizational documents of the Borrower, including ${orgDocLabel}`,
+      ),
+    );
+  }
 
   children.push(
     bulletPoint(
@@ -148,9 +139,7 @@ export function buildOpinionLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 9. Assumptions
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Assumptions"));
   children.push(
     bodyText(
@@ -186,9 +175,7 @@ export function buildOpinionLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 10. Opinions (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Opinions"));
   children.push(
     bodyText(
@@ -197,34 +184,48 @@ export function buildOpinionLetter(
   );
   children.push(spacer(4));
 
-  const entityTypeLabel = (() => {
-    switch (input.entityType) {
-      case "llc":
-        return "limited liability company";
-      case "corporation":
-        return "corporation";
-      case "partnership":
-        return "partnership";
-      default:
-        return "limited liability company";
-    }
-  })();
+  if (isIndividual) {
+    // Individual / sole proprietor — no organization or good standing opinion
+    children.push(
+      bulletPoint(
+        `The Borrower, ${input.borrowerName}, is an individual with full legal capacity to execute, deliver, and perform the Borrower's obligations under the Loan Documents.`,
+      ),
+    );
+    children.push(
+      bulletPoint(
+        "The execution, delivery, and performance by the Borrower of the Loan Documents do not and will not violate any law, rule, or regulation applicable to the Borrower, or result in a breach of, or constitute a default under, any material agreement to which the Borrower is a party.",
+      ),
+    );
+  } else {
+    const entityTypeLabel = (() => {
+      switch (input.entityType) {
+        case "llc":
+          return "limited liability company";
+        case "corporation":
+          return "corporation";
+        case "partnership":
+          return "partnership";
+        default:
+          return "limited liability company";
+      }
+    })();
 
-  children.push(
-    bulletPoint(
-      `The Borrower is a ${entityTypeLabel} duly organized, validly existing, and in good standing under the laws of ${stateDisplay}, and has all requisite power and authority to own its properties and to conduct its business as currently conducted.`,
-    ),
-  );
-  children.push(
-    bulletPoint(
-      "The Borrower has the power and authority to execute, deliver, and perform its obligations under the Loan Agreement, the Promissory Note, and all other Loan Documents to which it is a party. The execution, delivery, and performance of the Loan Documents have been duly authorized by all necessary action on the part of the Borrower.",
-    ),
-  );
-  children.push(
-    bulletPoint(
-      "The execution, delivery, and performance by the Borrower of the Loan Documents do not and will not: (a) violate the organizational documents of the Borrower; (b) violate any law, rule, or regulation applicable to the Borrower; or (c) result in a breach of, or constitute a default under, any material agreement to which the Borrower is a party.",
-    ),
-  );
+    children.push(
+      bulletPoint(
+        `The Borrower is a ${entityTypeLabel} duly organized, validly existing, and in good standing under the laws of ${stateDisplay}, and has all requisite power and authority to own its properties and to conduct its business as currently conducted.`,
+      ),
+    );
+    children.push(
+      bulletPoint(
+        "The Borrower has the power and authority to execute, deliver, and perform its obligations under the Loan Agreement, the Promissory Note, and all other Loan Documents to which it is a party. The execution, delivery, and performance of the Loan Documents have been duly authorized by all necessary action on the part of the Borrower.",
+      ),
+    );
+    children.push(
+      bulletPoint(
+        "The execution, delivery, and performance by the Borrower of the Loan Documents do not and will not: (a) violate the organizational documents of the Borrower; (b) violate any law, rule, or regulation applicable to the Borrower; or (c) result in a breach of, or constitute a default under, any material agreement to which the Borrower is a party.",
+      ),
+    );
+  }
   children.push(
     bulletPoint(
       "Each of the Loan Documents to which the Borrower is a party constitutes a legal, valid, and binding obligation of the Borrower, enforceable against the Borrower in accordance with its terms, except as enforcement may be limited by: (a) applicable bankruptcy, insolvency, reorganization, moratorium, or similar laws affecting the enforcement of creditors' rights generally; (b) general principles of equity (regardless of whether enforcement is sought in a proceeding in equity or at law); and (c) applicable fraudulent transfer, fraudulent conveyance, and preference laws.",
@@ -242,16 +243,12 @@ export function buildOpinionLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 11. Additional Opinions (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Additional Opinions"));
   children.push(bodyText(prose.additionalOpinions));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 12. Qualifications and Limitations
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Qualifications and Limitations"));
   children.push(
     bodyText(
@@ -307,26 +304,18 @@ export function buildOpinionLetter(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 13. Governing Law (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Governing Law"));
   children.push(bodyText(prose.governingLaw));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 14. Closing
-  // -----------------------------------------------------------------------
   children.push(bodyText("Very truly yours,", { italic: true }));
 
-  // -----------------------------------------------------------------------
   // 15. Signature
-  // -----------------------------------------------------------------------
   children.push(...signatureBlock("[Law Firm Name]", "Counsel to Borrower"));
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Legal Opinion Letter",
     headerRight: `Legal Opinion Letter — ${input.borrowerName}`,

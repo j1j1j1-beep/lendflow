@@ -1,17 +1,13 @@
-// =============================================================================
 // ai-structuring.ts
 // AI enhancement layer for deal structuring. Takes the rules engine output
 // and adds custom covenant language, condition recommendations, and narrative
 // justification. Claude writes PROSE ONLY — never changes numbers.
-// =============================================================================
 
 import type { FullAnalysis } from "@/analysis/analyze";
 import type { LoanProgram } from "@/config/loan-programs";
 import type { RulesEngineOutput } from "./rules-engine";
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 export interface AiStructuringInput {
   rulesOutput: RulesEngineOutput;
@@ -40,9 +36,7 @@ export interface AiEnhancement {
   justification: string;
 }
 
-// ---------------------------------------------------------------------------
 // System prompt
-// ---------------------------------------------------------------------------
 
 function buildSystemPrompt(program: LoanProgram): string {
   return `You are a senior commercial lending officer structuring a ${program.name} loan.
@@ -74,9 +68,7 @@ Respond in JSON format matching this schema:
 }`;
 }
 
-// ---------------------------------------------------------------------------
 // User prompt
-// ---------------------------------------------------------------------------
 
 function buildUserPrompt(input: AiStructuringInput): string {
   const { rulesOutput, analysis, program, borrowerName, loanPurpose } = input;
@@ -119,9 +111,7 @@ ${rulesOutput.conditions.map((c) => `- [${c.category}] ${c.description}`).join("
 Based on this borrower's specific risk profile, provide ONLY additional covenants, conditions, and terms that are warranted beyond the standard ones already listed. If the deal is clean with low risk, it's acceptable to return empty arrays — don't add unnecessary restrictions.`;
 }
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 export async function runAiStructuring(input: AiStructuringInput): Promise<AiEnhancement> {
   const { claudeJson } = await import("@/lib/claude");

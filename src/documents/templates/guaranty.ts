@@ -1,9 +1,7 @@
-// =============================================================================
 // guaranty.ts
 // Builds a Guaranty Agreement docx where a guarantor personally guarantees
 // the borrower's obligations. All financial numbers from DocumentInput;
 // AI writes prose.
-// =============================================================================
 
 import type { DocumentInput, GuarantyProse } from "../types";
 import {
@@ -26,9 +24,7 @@ import {
   COLORS,
 } from "../doc-helpers";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildGuaranty(
   input: DocumentInput,
@@ -39,7 +35,7 @@ export function buildGuaranty(
   const loanAmountWords = numberToWords(input.terms.approvedAmount);
 
   const children = [
-    // ---- Title ----
+    // Title
     documentTitle("Guaranty Agreement"),
     spacer(4),
 
@@ -48,13 +44,13 @@ export function buildGuaranty(
     ),
     spacer(4),
 
-    // ---- Parties ----
+    // Parties
     articleHeading("I", "Parties"),
     partyBlock("Guarantor", input.guarantorName ?? input.borrowerName, "the \"Guarantor\""),
     partyBlock("Lender", input.lenderName, "the \"Lender\""),
     spacer(4),
 
-    // ---- Recitals ----
+    // Recitals
     articleHeading("II", "Recitals"),
     bodyText(
       `WHEREAS, Lender has agreed to make a loan (the "Loan") to ${input.borrowerName} (the "Borrower") in the original principal amount of ${loanAmount} (${loanAmountWords} dollars) pursuant to that certain Loan Agreement of even date herewith (the "Loan Agreement");`,
@@ -70,7 +66,7 @@ export function buildGuaranty(
     ),
     spacer(4),
 
-    // ---- Guaranty Scope ----
+    // Guaranty Scope
     articleHeading("III", "Guaranty"),
     sectionSubheading("3.1", "Scope of Guaranty"),
     bodyText(
@@ -81,7 +77,7 @@ export function buildGuaranty(
     bodyText(prose.guarantyScope),
     spacer(2),
 
-    // ---- Guaranty Amount ----
+    // Guaranty Amount
     sectionSubheading("3.2", "Guaranteed Amount"),
     bodyText(
       `Guarantor unconditionally and irrevocably guarantees to Lender the full and punctual payment when due, whether at stated maturity, by acceleration, or otherwise, of all amounts owing under the Loan Agreement, the Promissory Note, and all related loan documents, including but not limited to:`,
@@ -114,7 +110,7 @@ export function buildGuaranty(
     ]),
     spacer(4),
 
-    // ---- Waiver of Defenses ----
+    // Waiver of Defenses
     articleHeading("IV", "Waiver of Defenses"),
     bodyText(
       "Guarantor hereby irrevocably waives each of the following defenses, to the fullest extent permitted by applicable law:",
@@ -141,9 +137,29 @@ export function buildGuaranty(
       "Any defense based on Lender's election of remedies, including any election to proceed against collateral or to exercise any right of setoff;",
     ),
     ...ensureProseArray(prose.waiverOfDefenses).map((item) => bulletPoint(item)),
+    spacer(2),
+
+    // Anti-Deficiency Statute Waivers
+    sectionSubheading("4.1", "Anti-Deficiency Statute Waivers"),
+    bodyText(
+      "Guarantor hereby waives, to the fullest extent permitted by applicable law, any and all rights or defenses arising under anti-deficiency statutes in any jurisdiction, including but not limited to:",
+    ),
+    bulletPoint(
+      "California: Guarantor waives all protections under California Code of Civil Procedure Section 580b (purchase money anti-deficiency protection) and Section 580d (anti-deficiency protection following non-judicial foreclosure under power of sale), to the extent such waiver is permitted by applicable law;",
+    ),
+    bulletPoint(
+      "Arizona: Guarantor waives all protections under Arizona Revised Statutes Section 33-814 (anti-deficiency protection for residential property), to the extent such waiver is permitted by applicable law;",
+    ),
+    bulletPoint(
+      "General Waiver: Guarantor further waives any and all rights or defenses arising under any similar anti-deficiency, one-action, or fair-value limitation statutes in any other jurisdiction that might otherwise limit or bar Lender's right to recover a deficiency judgment against Guarantor or to proceed against Guarantor without first exhausting collateral or other remedies.",
+    ),
+    bodyText(
+      "This waiver is made with full knowledge of the protections afforded by such statutes and after Guarantor has been advised to consult with independent legal counsel regarding the effect of this waiver.",
+      { italic: true },
+    ),
     spacer(4),
 
-    // ---- Subrogation Waiver ----
+    // Subrogation Waiver
     articleHeading("V", "Subrogation Waiver"),
     bodyText(
       "Until all Obligations have been indefeasibly paid and performed in full and all commitments under the Loan Documents have been terminated, Guarantor waives any right of subrogation, reimbursement, indemnification, or contribution from Borrower, whether arising by contract, operation of law, or otherwise, and any right to enforce any remedy that Lender may have against Borrower or any collateral.",
@@ -157,7 +173,7 @@ export function buildGuaranty(
     bodyText(prose.subrogationWaiver),
     spacer(4),
 
-    // ---- Subordination ----
+    // Subordination
     articleHeading("VI", "Subordination"),
     bodyText(
       "All indebtedness of Borrower to Guarantor, whether now existing or hereafter arising, is hereby subordinated to the Obligations. Guarantor shall not accept any payment from Borrower on account of such subordinated indebtedness while any Obligations remain outstanding without the prior written consent of Lender.",
@@ -171,7 +187,7 @@ export function buildGuaranty(
     bodyText(prose.subordination),
     spacer(4),
 
-    // ---- Covenants ----
+    // Covenants
     articleHeading("VII", "Covenants"),
     bodyText(
       "Guarantor covenants and agrees that, until all guaranteed obligations are fully satisfied:",
@@ -198,7 +214,7 @@ export function buildGuaranty(
     ),
     spacer(4),
 
-    // ---- Miscellaneous ----
+    // Miscellaneous
     articleHeading("VIII", "Miscellaneous"),
     bodyText(
       "Irrevocability: This Guaranty is irrevocable and may not be revoked, terminated, or modified by Guarantor without the prior written consent of Lender. This Guaranty shall be binding upon Guarantor and Guarantor's heirs, executors, administrators, successors, and assigns.",
@@ -228,15 +244,29 @@ export function buildGuaranty(
     bodyText(prose.miscellaneous),
     spacer(4),
 
-    // ---- Governing Law ----
-    articleHeading("IX", "Governing Law"),
+    // Reinstatement
+    articleHeading("IX", "Reinstatement"),
+    bodyText(
+      "If any payment made by Borrower or Guarantor to Lender is avoided, recovered, or returned (whether in whole or in part) under any bankruptcy, insolvency, receivership, or similar law, including but not limited to avoidance of preferential transfers or fraudulent transfers or obligations under 11 U.S.C. Sections 547 and 548, or any applicable state fraudulent transfer or voidable transactions statute, this Guaranty shall be reinstated to the extent of such avoided, recovered, or returned payment, and the amount thereof shall be deemed to remain outstanding as if such payment had never been made. The provisions of this Section shall survive the termination of this Guaranty and the repayment of the Obligations.",
+    ),
+    spacer(4),
+
+    // Death / Incapacity
+    articleHeading("X", "Death, Incapacity, and Binding Effect"),
+    bodyText(
+      "This Guaranty shall be binding upon the Guarantor and upon Guarantor's heirs, executors, administrators, legal representatives, successors, and assigns. The death, incapacity, or disability of Guarantor shall not release, diminish, or otherwise affect the liability of Guarantor's estate under this Guaranty. Upon the death or incapacity of Guarantor, Lender may proceed against Guarantor's estate for the full amount of the Obligations without first proceeding against Borrower, any collateral, or any other guarantor.",
+    ),
+    spacer(4),
+
+    // Governing Law
+    articleHeading("XI", "Governing Law"),
     bodyText(prose.governingLaw),
     spacer(4),
 
     // Spousal Consent (community property states)
-    articleHeading("X", "Spousal Consent"),
+    articleHeading("XII", "Spousal Consent"),
     bodyText(
-      "If Guarantor is married and resides in a community property state (Arizona, California, Idaho, Louisiana, Nevada, New Mexico, Texas, Washington, or Wisconsin), Guarantor's spouse should execute a spousal consent acknowledging this Guaranty. Spousal consent may be required for enforceability of this Guaranty against community property assets.",
+      "If Guarantor is married and resides in a community property state (Arizona, California, Idaho, Louisiana, Nevada, New Mexico, Texas, Washington, or Wisconsin) or an opt-in community property trust state (Alaska, Florida, Kentucky, South Dakota, or Tennessee), Guarantor's spouse should execute a spousal consent acknowledging this Guaranty. Spousal consent may be required for enforceability of this Guaranty against community property assets.",
     ),
     spacer(4),
     bodyText("SPOUSAL CONSENT (if applicable):"),
@@ -246,7 +276,7 @@ export function buildGuaranty(
     bodyText("Spouse Signature: _________________________________    Date: ________________"),
     spacer(8),
 
-    // ---- Signature ----
+    // Signature
     bodyTextRuns([
       {
         text: "IN WITNESS WHEREOF, Guarantor has executed this Guaranty Agreement as of the date first written above.",

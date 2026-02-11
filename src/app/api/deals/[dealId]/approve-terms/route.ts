@@ -6,9 +6,7 @@ import { logAudit } from "@/lib/audit";
 import { withRateLimit } from "@/lib/with-rate-limit";
 import { writeLimit } from "@/lib/rate-limit";
 
-// ---------------------------------------------------------------------------
 // POST /api/deals/[dealId]/approve-terms - Approve deal terms and resume pipeline
-// ---------------------------------------------------------------------------
 
 export async function POST(
   request: NextRequest,

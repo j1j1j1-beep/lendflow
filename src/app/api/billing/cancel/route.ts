@@ -4,9 +4,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { stripe } from "@/lib/stripe";
 import { logAudit } from "@/lib/audit";
 
-// ---------------------------------------------------------------------------
 // POST /api/billing/cancel — cancel subscription at period end
-// ---------------------------------------------------------------------------
 
 export async function POST() {
   try {

@@ -17,9 +17,7 @@ import { sendAnalysisComplete, sendReviewNeeded } from "@/lib/resend";
 import { logAudit } from "@/lib/audit";
 import type { DocType } from "@/generated/prisma/client";
 
-// ---------------------------------------------------------------------------
 // Shared helper: step-level timeout
-// ---------------------------------------------------------------------------
 
 /** Wrap a promise with a timeout. Throws a descriptive error on timeout. */
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
@@ -35,9 +33,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 }
 
-// ---------------------------------------------------------------------------
 // Shared helper: build DocumentInput for loan document generation
-// ---------------------------------------------------------------------------
 
 /** Build the DocumentInput object for loan document generation. Shared across all pipeline paths. */
 async function buildDocInput(dealId: string) {
@@ -116,9 +112,7 @@ async function buildDocInput(dealId: string) {
   return { docInput, docsToGenerate, deal };
 }
 
-// ---------------------------------------------------------------------------
 // Shared helper: generate a single doc, upload to S3, save record
-// ---------------------------------------------------------------------------
 
 /**
  * Generate one document, upload to S3, and save the GeneratedDocument record.
@@ -198,9 +192,7 @@ async function generateAndSaveDocument(
   });
 }
 
-// ---------------------------------------------------------------------------
 // Main analysis pipeline
-// ---------------------------------------------------------------------------
 
 export const analysisPipeline = inngest.createFunction(
   {
@@ -247,12 +239,10 @@ export const analysisPipeline = inngest.createFunction(
       // Audit: pipeline started
       void logAudit({ orgId, dealId, action: "deal.pipeline_started" });
 
-      // -----------------------------------------------------------------------
       // Step 1: OCR + Classification via Textract Lending
       // Textract Lending auto-classifies documents AND extracts standardized
       // fields in one pass. For unsupported types, we fall back to basic
       // Textract OCR + Claude classification.
-      // -----------------------------------------------------------------------
       lastStep = "PROCESSING_OCR";
       const documents = await step.run("fetch-documents", async () => {
         await prisma.deal.update({
@@ -383,10 +373,8 @@ export const analysisPipeline = inngest.createFunction(
       // Audit: OCR complete
       void logAudit({ orgId, dealId, action: "deal.ocr_complete", metadata: { successCount: ocrSuccessIds.length, totalCount: documents.length } });
 
-      // -----------------------------------------------------------------------
       // Step 2: Classify — Lending-supported types auto-classified by Textract,
       //         others fall back to Claude classification
-      // -----------------------------------------------------------------------
       lastStep = "CLASSIFYING";
       await step.run("update-status-classifying", async () => {
         await prisma.deal.update({
@@ -513,10 +501,8 @@ export const analysisPipeline = inngest.createFunction(
         });
       }
 
-      // -----------------------------------------------------------------------
       // Step 3: Extract — Lending-supported types use deterministic mapping,
       //         others use Claude extraction
-      // -----------------------------------------------------------------------
       lastStep = "EXTRACTING";
       const classifiedDocs = await step.run("fetch-classified-docs", async () => {
         await prisma.deal.update({
@@ -667,9 +653,7 @@ export const analysisPipeline = inngest.createFunction(
         return { success: false, dealId, error: "No extractions succeeded" };
       }
 
-      // -----------------------------------------------------------------------
       // Step 4: Verify - Run all verification checks
-      // -----------------------------------------------------------------------
       lastStep = "VERIFYING";
       const verificationReport = await step.run("verify", async () => {
         await prisma.deal.update({
@@ -783,9 +767,7 @@ export const analysisPipeline = inngest.createFunction(
       // Audit: verification complete
       void logAudit({ orgId, dealId, action: "deal.verification_complete", metadata: { overallStatus: verificationReport.overallStatus } });
 
-      // -----------------------------------------------------------------------
       // Step 5: Self-resolve - Attempt to fix failures
-      // -----------------------------------------------------------------------
       lastStep = "RESOLVING";
       await step.run("self-resolve", async () => {
         await prisma.deal.update({
@@ -855,9 +837,7 @@ export const analysisPipeline = inngest.createFunction(
         });
       });
 
-      // -----------------------------------------------------------------------
       // Step 5b: Re-verify after resolution — so review gate sees FIXED data
-      // -----------------------------------------------------------------------
       await step.run("re-verify-after-resolve", async () => {
         const currentExtractions = await prisma.extraction.findMany({
           where: { dealId },
@@ -944,9 +924,7 @@ export const analysisPipeline = inngest.createFunction(
         });
       });
 
-      // -----------------------------------------------------------------------
       // Step 6: Review Gate - Check if human review needed
-      // -----------------------------------------------------------------------
       lastStep = "REVIEW_GATE";
       const reviewGateResult = await step.run("review-gate", async () => {
         const latestReport = await prisma.verificationReport.findUnique({
@@ -1012,9 +990,7 @@ export const analysisPipeline = inngest.createFunction(
         };
       }
 
-      // -----------------------------------------------------------------------
       // Step 7: Analyze - Run full analysis
-      // -----------------------------------------------------------------------
       lastStep = "ANALYZING";
       const analysis = await step.run("analyze", async () => {
         await prisma.deal.update({
@@ -1079,12 +1055,10 @@ export const analysisPipeline = inngest.createFunction(
         return analysisRecord;
       });
 
-      // -----------------------------------------------------------------------
       // Step 8: Structure deal (Phase 11)
       // Runs the 4-layer structuring engine: rules → AI enhancement →
       // compliance review → final check. If the deal has a loan program,
       // structure it; otherwise skip to memo.
-      // -----------------------------------------------------------------------
       lastStep = "STRUCTURING";
       const structuringResult = await step.run("structure-deal", async () => {
         const deal = await prisma.deal.findUniqueOrThrow({
@@ -1239,10 +1213,8 @@ export const analysisPipeline = inngest.createFunction(
         return { success: true, dealId, paused: "NEEDS_TERM_REVIEW" };
       }
 
-      // -----------------------------------------------------------------------
       // Step 9: Generate loan documents (Phase 12)
       // Each doc is its own parallel step — stays within Inngest HTTP timeout.
-      // -----------------------------------------------------------------------
       lastStep = "GENERATING_DOCS";
       const docGenSetup = await step.run("setup-doc-gen", async () => {
         const built = await buildDocInput(dealId);
@@ -1274,9 +1246,7 @@ export const analysisPipeline = inngest.createFunction(
         void logAudit({ orgId, dealId, action: "deal.docs_generated", metadata: { docCount: docGenSetup.docsToGenerate.length } });
       }
 
-      // -----------------------------------------------------------------------
       // Step 10: Generate memo
-      // -----------------------------------------------------------------------
       lastStep = "GENERATING_MEMO";
       await step.run("generate-memo", async () => {
         await prisma.deal.update({
@@ -1352,9 +1322,7 @@ export const analysisPipeline = inngest.createFunction(
         });
       });
 
-      // -----------------------------------------------------------------------
       // Step 11: Complete
-      // -----------------------------------------------------------------------
       lastStep = "COMPLETING";
       await step.run("complete", async () => {
         await prisma.deal.update({
@@ -1408,9 +1376,7 @@ export const analysisPipeline = inngest.createFunction(
   }
 );
 
-// ---------------------------------------------------------------------------
 // Resume after review gate
-// ---------------------------------------------------------------------------
 
 export const resumeAfterReview = inngest.createFunction(
   {
@@ -1972,9 +1938,7 @@ export const resumeAfterReview = inngest.createFunction(
   }
 );
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 /** Set a nested value on an object using a dot-delimited path. */
 function setNestedValue(obj: Record<string, any>, path: string, value: any): void {
@@ -1999,9 +1963,7 @@ function parseValue(value: string): string | number {
   return value;
 }
 
-// ---------------------------------------------------------------------------
 // Resume after term review
-// ---------------------------------------------------------------------------
 
 export const resumeAfterTermReview = inngest.createFunction(
   {
@@ -2180,11 +2142,9 @@ export const resumeAfterTermReview = inngest.createFunction(
   }
 );
 
-// ---------------------------------------------------------------------------
 // Sample deal pipeline
 // Skips OCR through Review Gate — extraction data is pre-loaded.
 // Runs: Analyze → Structure → Generate Docs → Generate Memo → Complete.
-// ---------------------------------------------------------------------------
 
 export const sampleDealPipeline = inngest.createFunction(
   {
@@ -2208,9 +2168,7 @@ export const sampleDealPipeline = inngest.createFunction(
       // Audit: sample pipeline started
       void logAudit({ orgId, dealId, action: "deal.sample_pipeline_started" });
 
-      // ---------------------------------------------------------------------
       // Step 1: Analyze — run full analysis on pre-loaded extraction data
-      // ---------------------------------------------------------------------
       lastStep = "ANALYZING";
       const analysis = await step.run("analyze", async () => {
         await prisma.deal.update({
@@ -2275,9 +2233,7 @@ export const sampleDealPipeline = inngest.createFunction(
         return analysisRecord;
       });
 
-      // ---------------------------------------------------------------------
       // Step 2: Structure deal
-      // ---------------------------------------------------------------------
       lastStep = "STRUCTURING";
       const structuringResult = await step.run("structure-deal", async () => {
         const deal = await prisma.deal.findUniqueOrThrow({
@@ -2432,9 +2388,7 @@ export const sampleDealPipeline = inngest.createFunction(
         return { success: true, dealId, paused: "NEEDS_TERM_REVIEW" };
       }
 
-      // ---------------------------------------------------------------------
       // Step 3: Generate loan documents — parallel per-doc steps
-      // ---------------------------------------------------------------------
       lastStep = "GENERATING_DOCS";
       const docGenSetup = await step.run("setup-doc-gen", async () => {
         const built = await buildDocInput(dealId);
@@ -2466,9 +2420,7 @@ export const sampleDealPipeline = inngest.createFunction(
         void logAudit({ orgId, dealId, action: "deal.docs_generated", metadata: { docCount: docGenSetup.docsToGenerate.length } });
       }
 
-      // ---------------------------------------------------------------------
       // Step 4: Generate memo
-      // ---------------------------------------------------------------------
       lastStep = "GENERATING_MEMO";
       await step.run("generate-memo", async () => {
         await prisma.deal.update({
@@ -2544,9 +2496,7 @@ export const sampleDealPipeline = inngest.createFunction(
         });
       });
 
-      // ---------------------------------------------------------------------
       // Step 5: Complete
-      // ---------------------------------------------------------------------
       lastStep = "COMPLETING";
       await step.run("complete", async () => {
         await prisma.deal.update({
@@ -2605,8 +2555,9 @@ export const sampleDealPipeline = inngest.createFunction(
   }
 );
 
-// ---------------------------------------------------------------------------
-// Exports
-// ---------------------------------------------------------------------------
+// Bio pipeline functions
+import { bioFunctions } from "./bio-functions";
 
-export const functions = [analysisPipeline, resumeAfterReview, resumeAfterTermReview, sampleDealPipeline];
+// Exports
+
+export const functions = [analysisPipeline, resumeAfterReview, resumeAfterTermReview, sampleDealPipeline, ...bioFunctions];

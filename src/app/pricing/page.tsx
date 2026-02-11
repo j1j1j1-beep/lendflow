@@ -32,7 +32,7 @@ const TIERS = [
     highlight: false,
     features: [
       "1 deal, fully processed",
-      "Up to 37 legal documents generated",
+      "Up to 28 legal documents generated",
       "Full credit analysis and deal structuring",
       "All 10 loan programs",
       "50-state compliance checks",
@@ -57,7 +57,7 @@ const TIERS = [
       "Unlimited deals",
       "Up to 25 seats per organization",
       "All 10 loan programs with full compliance",
-      "Up to 37 legal documents per deal",
+      "Up to 28 legal documents per deal",
       "Full audit trail on every action",
       "Inline document editing and review",
       "Download complete loan packages (ZIP)",
@@ -104,7 +104,7 @@ const INCLUDED_FEATURES = [
   },
   {
     icon: FileStack,
-    title: "Up to 37 legal documents",
+    title: "Up to 28 legal documents",
     desc: "Promissory notes, loan agreements, deeds of trust, UCC filings, disclosures, and more.",
     delay: "350ms",
   },

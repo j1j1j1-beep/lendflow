@@ -1,4 +1,4 @@
-// ─── Self-Resolution Logic ────────────────────────────────────────────────────
+// Self-Resolution Logic
 // When extraction verification finds a discrepancy on a specific field, this
 // module attempts to self-resolve before creating a ReviewItem for human review.
 //
@@ -16,7 +16,7 @@ import { parseDollarAmount, getLineNumber } from "@/lib/irs-field-map";
 import type { FormType } from "@/lib/irs-field-map";
 import type { TextractResult, TextractKeyValuePair } from "@/lib/textract";
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+// Types
 
 /**
  * Discriminated union type for resolution results.
@@ -87,7 +87,7 @@ export interface BulkResolutionResult {
   totalCostUsd: number;
 }
 
-// ─── Rounding and Format Tolerances ─────────────────────────────────────────
+// Rounding and Format Tolerances
 
 // Allow $1 difference for rounding (common in IRS forms)
 const ROUNDING_TOLERANCE = 1;
@@ -95,7 +95,7 @@ const ROUNDING_TOLERANCE = 1;
 // Allow 0.5% difference for percentage fields
 const PERCENTAGE_TOLERANCE = 0.005;
 
-// ─── Main Resolution Function ───────────────────────────────────────────────
+// Main Resolution Function
 
 /**
  * Attempt to resolve a single discrepancy through a multi-step pipeline.
@@ -307,7 +307,7 @@ export async function attemptBulkResolution(
   };
 }
 
-// ─── Resolution Strategies ──────────────────────────────────────────────────
+// Resolution Strategies
 
 /**
  * Strategy 1: Check if the extracted and expected values are the same number
@@ -767,7 +767,7 @@ RULES:
   }
 }
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+// Helpers
 
 /**
  * Extract raw text for a specific page from the Textract result.

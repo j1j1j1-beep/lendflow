@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// ─── Schedule L Balance Sheet ───────────────────────────────────────────────
+// Schedule L Balance Sheet
 
 const scheduleLAssetsSchema = z.object({
   cash: z.number().nullable(),
@@ -49,7 +49,7 @@ const scheduleLPeriodSchema = z.object({
   liabilitiesAndEquity: scheduleLLiabilitiesAndEquitySchema,
 }).passthrough();
 
-// ─── Officer Compensation ───────────────────────────────────────────────────
+// Officer Compensation
 
 const officerCompensationSchema = z.object({
   name: z.string().nullable(),
@@ -59,7 +59,7 @@ const officerCompensationSchema = z.object({
   compensationAmount: z.number().nullable(),
 }).passthrough();
 
-// ─── Form 1120-S Schema ────────────────────────────────────────────────────
+// Form 1120-S Schema
 
 export const form1120SSchema = z.object({
   metadata: z.object({

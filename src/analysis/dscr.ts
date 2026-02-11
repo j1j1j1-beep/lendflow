@@ -1,7 +1,5 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // OpenShut Analysis Engine — Debt Service Coverage Ratio (DSCR)
 // 100% deterministic. Zero AI. Pure TypeScript math.
-// ─────────────────────────────────────────────────────────────────────────────
 
 export interface DscrAnalysis {
   globalDscr: number | null; // total NOI / total debt service
@@ -14,9 +12,7 @@ export interface DscrAnalysis {
   notes: string[];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 function num(val: unknown): number {
   if (typeof val === "number" && Number.isFinite(val)) return val;
@@ -165,9 +161,7 @@ function extractPropertyNoi(rentalData: any): {
   return { noi, debtService: annualDebtService };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Main DSCR calculation
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function calculateDscr(params: {
   incomeAnalysis: { qualifyingIncome: number; sources: any[] };
@@ -190,7 +184,7 @@ export function calculateDscr(params: {
 
   const notes: string[] = [];
 
-  // ── Calculate proposed debt service ────────────────────────────────────────
+  // Calculate proposed debt service
   let proposedMonthly = 0;
 
   if (proposedLoanPayment && proposedLoanPayment > 0) {
@@ -205,7 +199,7 @@ export function calculateDscr(params: {
 
   const proposedDebtService = Math.round(proposedMonthly * 12 * 100) / 100;
 
-  // ── Detect existing debt from bank statements ──────────────────────────────
+  // Detect existing debt from bank statements
   const existingDebt = detectExistingDebtFromBankStatements(bankStatementData);
   const existingDebtService = Math.round(existingDebt.monthlyAmount * 12 * 100) / 100;
 
@@ -216,10 +210,10 @@ export function calculateDscr(params: {
     );
   }
 
-  // ── Total debt service ─────────────────────────────────────────────────────
+  // Total debt service
   const totalDebtService = existingDebtService + proposedDebtService;
 
-  // ── Cash flow for debt service ─────────────────────────────────────────────
+  // Cash flow for debt service
   // For investment properties, property NOI should be used instead of
   // personal qualifying income (which may include W-2 wages).
   const propertyInfo = extractPropertyNoi(rentalData);
@@ -233,7 +227,7 @@ export function calculateDscr(params: {
     );
   }
 
-  // ── Global DSCR ────────────────────────────────────────────────────────────
+  // Global DSCR
   let globalDscr: number | null = null;
   if (totalDebtService > 0) {
     globalDscr = Math.round((noi / totalDebtService) * 100) / 100;
@@ -241,7 +235,7 @@ export function calculateDscr(params: {
     notes.push("No debt service identified. DSCR cannot be calculated.");
   }
 
-  // ── Property-level DSCR (if rental data provided) ──────────────────────────
+  // Property-level DSCR (if rental data provided)
   let propertyDscr: number | null = null;
 
   if (propertyInfo.noi > 0) {
@@ -258,7 +252,7 @@ export function calculateDscr(params: {
     }
   }
 
-  // ── Rating ─────────────────────────────────────────────────────────────────
+  // Rating
   const dscrForRating = globalDscr ?? propertyDscr;
   let rating: DscrAnalysis["rating"] = "insufficient";
 

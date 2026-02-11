@@ -1,4 +1,4 @@
-// ─── Document Type Classifier Prompt ──────────────────────────────────────────
+// Document Type Classifier Prompt
 // Used with Grok's PDF support to classify uploaded documents.
 // The classifier runs BEFORE extraction — it determines which extraction
 // pipeline (deterministic IRS mapping vs. AI structuring) to use.

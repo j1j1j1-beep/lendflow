@@ -5,10 +5,8 @@ import { getS3Buffer, uploadToS3 } from "@/lib/s3";
 import HTMLtoDOCX from "html-to-docx";
 import { logAudit } from "@/lib/audit";
 
-// ---------------------------------------------------------------------------
 // GET /api/generated-documents/[docId]/content — Proxy DOCX from S3
 // Avoids CORS issues when rendering DOCX in-browser with docx-preview.
-// ---------------------------------------------------------------------------
 
 export async function GET(
   request: NextRequest,
@@ -49,11 +47,9 @@ export async function GET(
   }
 }
 
-// ---------------------------------------------------------------------------
 // POST /api/generated-documents/[docId]/content — Save edited HTML as DOCX
 // Converts HTML from the document viewer's contentEditable back to DOCX,
 // uploads to S3, and increments the document version.
-// ---------------------------------------------------------------------------
 
 export async function POST(
   request: NextRequest,

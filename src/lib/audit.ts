@@ -27,13 +27,32 @@ export type AuditAction =
   | "billing.subscription_created"
   | "billing.subscription_canceled"
   | "billing.payment_failed"
-  | "settings.updated";
+  | "settings.updated"
+  | "bio.program_created"
+  | "bio.pipeline_started"
+  | "bio.ocr_complete"
+  | "bio.classification_complete"
+  | "bio.extraction_complete"
+  | "bio.verification_complete"
+  | "bio.analysis_complete"
+  | "bio.review_complete"
+  | "bio.docs_generated"
+  | "bio.pipeline_complete"
+  | "bio.pipeline_error"
+  | "bio.doc.edited"
+  | "bio.doc.saved"
+  | "bio.doc.regenerated"
+  | "bio.doc.downloaded"
+  | "bio.doc.package_downloaded"
+  | "bio.sample_created"
+  | "bio.sample_pipeline_started";
 
 export async function logAudit(params: {
   orgId: string;
   userId?: string;
   userEmail?: string;
   dealId?: string;
+  programId?: string; // Bio program ID
   action: AuditAction;
   target?: string;
   metadata?: Record<string, unknown>;

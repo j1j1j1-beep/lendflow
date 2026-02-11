@@ -1,9 +1,7 @@
-// =============================================================================
 // assignment-of-leases.ts
 // Builds an Assignment of Leases and Rents docx assigning the borrower's rights
 // in rental income to the lender as additional collateral. Required for CRE and
 // rental property deals. All financial numbers from DocumentInput; AI writes prose.
-// =============================================================================
 
 import type { DocumentInput, AssignmentOfLeasesProse } from "../types";
 import {
@@ -28,9 +26,7 @@ import {
   COLORS,
 } from "../doc-helpers";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildAssignmentOfLeases(
   input: DocumentInput,
@@ -43,15 +39,11 @@ export function buildAssignmentOfLeases(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("Assignment of Leases and Rents"));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 2. Parties
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Parties"));
   children.push(
     bodyText(
@@ -67,9 +59,7 @@ export function buildAssignmentOfLeases(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 3. Recitals
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Recitals"));
   children.push(
     bodyTextRuns([
@@ -112,9 +102,7 @@ export function buildAssignmentOfLeases(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 4. Key Terms Table
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Key Terms"));
   children.push(
     keyTermsTable([
@@ -129,16 +117,12 @@ export function buildAssignmentOfLeases(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 5. Assignment Grant (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("1. Assignment of Leases and Rents"));
   children.push(bodyText(prose.assignmentGrant));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Assignment Type Clarification (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Nature of Assignment"));
   children.push(
     bodyText(
@@ -147,9 +131,7 @@ export function buildAssignmentOfLeases(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 6. Representations & Warranties (AI array)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("2. Representations and Warranties"));
   children.push(
     bodyText(
@@ -161,9 +143,7 @@ export function buildAssignmentOfLeases(
   }
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 7. Covenants (AI array)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("3. Covenants"));
   children.push(
     bodyText(
@@ -175,9 +155,7 @@ export function buildAssignmentOfLeases(
   }
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Cash Management Provisions (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Cash Management"));
   children.push(
     bodyText(
@@ -186,16 +164,12 @@ export function buildAssignmentOfLeases(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 8. Lender Rights Upon Default (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("4. Lender Rights Upon Default"));
   children.push(bodyText(prose.lenderRights));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Receivership Provisions (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Receivership"));
   children.push(
     bodyText(
@@ -204,16 +178,12 @@ export function buildAssignmentOfLeases(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 9. Tenant Notification (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("5. Tenant Notification"));
   children.push(bodyText(prose.tenantNotification));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Subordination, Non-Disturbance, and Attornment (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Subordination, Non-Disturbance, and Attornment"));
   children.push(
     bodyText(
@@ -222,9 +192,7 @@ export function buildAssignmentOfLeases(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Recording (deterministic)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Recording"));
   children.push(
     bodyText(
@@ -233,16 +201,12 @@ export function buildAssignmentOfLeases(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 10. Governing Law (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Governing Law"));
   children.push(bodyText(prose.governingLaw));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // Standard legal provisions
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Additional Standard Provisions"));
   children.push(
     bodyText(
@@ -263,9 +227,7 @@ export function buildAssignmentOfLeases(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 11. Signatures
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("IN WITNESS WHEREOF"));
   children.push(
     bodyText(
@@ -288,9 +250,7 @@ export function buildAssignmentOfLeases(
 
   children.push(...notaryBlock(input.stateAbbr));
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Assignment of Leases and Rents",
     headerRight: `Assignment of Leases — ${input.borrowerName}`,

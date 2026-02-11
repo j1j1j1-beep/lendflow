@@ -124,8 +124,12 @@ function CompliancePanel({
   complianceChecks?: ComplianceCheck[];
   verificationIssues?: VerificationIssue[];
 }) {
+  const hasCriticalVerification = verificationIssues?.some(
+    (vi) => vi.severity === "critical"
+  );
   const isPassed =
-    status === "REVIEWED" || status === "Passed" || status === "passed";
+    (status === "REVIEWED" || status === "Passed" || status === "passed") &&
+    !hasCriticalVerification;
   const grouped = complianceChecks ? groupByCategory(complianceChecks) : {};
 
   return (

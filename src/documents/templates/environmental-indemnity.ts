@@ -1,9 +1,7 @@
-// =============================================================================
 // environmental-indemnity.ts
 // Builds an Environmental Indemnity Agreement docx protecting the lender from
 // environmental liability on the collateral property. Required for all CRE deals.
 // All financial numbers come from DocumentInput; AI writes legal prose only.
-// =============================================================================
 
 import type { DocumentInput, EnvironmentalIndemnityProse } from "../types";
 import {
@@ -28,9 +26,7 @@ import {
   COLORS,
 } from "../doc-helpers";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildEnvironmentalIndemnity(
   input: DocumentInput,
@@ -43,15 +39,11 @@ export function buildEnvironmentalIndemnity(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("Environmental Indemnity Agreement"));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 2. Parties
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Parties"));
   children.push(
     bodyText(
@@ -67,9 +59,7 @@ export function buildEnvironmentalIndemnity(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 3. Recitals
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Recitals"));
   children.push(
     bodyTextRuns([
@@ -106,9 +96,7 @@ export function buildEnvironmentalIndemnity(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 4. Key Terms Table
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Key Terms"));
   children.push(
     keyTermsTable([
@@ -123,15 +111,13 @@ export function buildEnvironmentalIndemnity(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Definitions (deterministic — statutory references)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("1. Definitions"));
   children.push(
     bodyTextRuns([
       { text: '"Hazardous Substances"', bold: true },
       {
-        text: ' means any substance, material, or waste that is regulated by any federal, state, or local governmental authority, including but not limited to: (a) any substance defined as a "hazardous substance" under the Comprehensive Environmental Response, Compensation, and Liability Act (CERCLA), 42 U.S.C. § 9601 et seq.; (b) any "hazardous waste" under the Resource Conservation and Recovery Act (RCRA), 42 U.S.C. § 6901 et seq.; (c) any "pollutant" or "contaminant" under the Clean Water Act, 33 U.S.C. § 1251 et seq.; (d) petroleum and petroleum products, including crude oil and any fractions thereof; (e) asbestos and asbestos-containing materials; (f) polychlorinated biphenyls (PCBs); (g) lead and lead-based paint; (h) mold, mildew, or other biological agents at levels requiring remediation; (i) radon gas at levels exceeding applicable action levels; and (j) any other substance that requires investigation, removal, or remediation under applicable Environmental Laws.',
+        text: ' means any substance, material, or waste that is regulated by any federal, state, or local governmental authority, including but not limited to: (a) any substance defined as a "hazardous substance" under the Comprehensive Environmental Response, Compensation, and Liability Act (CERCLA), 42 U.S.C. § 9601 et seq.; (b) any "hazardous waste" under the Resource Conservation and Recovery Act (RCRA), 42 U.S.C. § 6901 et seq.; (c) any "pollutant" or "contaminant" under the Clean Water Act, 33 U.S.C. § 1251 et seq.; (d) petroleum and petroleum products, including crude oil and any fractions thereof; (e) asbestos and asbestos-containing materials; (f) polychlorinated biphenyls (PCBs); (g) lead and lead-based paint; (h) per- and polyfluoroalkyl substances (PFAS), including but not limited to perfluorooctanoic acid (PFOA) and perfluorooctane sulfonic acid (PFOS), which were designated as CERCLA hazardous substances effective September 2025 pursuant to EPA final rule under 42 U.S.C. § 9602; (i) mold, mildew, or other biological agents at levels requiring remediation; (j) radon gas at levels exceeding applicable action levels; and (k) any other substance that requires investigation, removal, or remediation under applicable Environmental Laws.',
       },
     ]),
   );
@@ -146,9 +132,7 @@ export function buildEnvironmentalIndemnity(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 5. Indemnification (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("2. Indemnification"));
   children.push(bodyText(prose.indemnificationScope));
   children.push(spacer(2));
@@ -160,9 +144,7 @@ export function buildEnvironmentalIndemnity(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 6. Representations & Warranties (AI array)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("3. Representations and Warranties"));
   children.push(
     bodyText(
@@ -174,9 +156,7 @@ export function buildEnvironmentalIndemnity(
   }
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 7. Covenants (AI array)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("4. Environmental Covenants"));
   children.push(
     bodyText(
@@ -188,23 +168,17 @@ export function buildEnvironmentalIndemnity(
   }
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 8. Remediation (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("5. Remediation Obligations"));
   children.push(bodyText(prose.remediationObligations));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 9. Survival (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("6. Survival"));
   children.push(bodyText(prose.survivalClause));
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Unsecured Obligation
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("7. Unsecured Obligation"));
   children.push(
     bodyText(
@@ -213,9 +187,7 @@ export function buildEnvironmentalIndemnity(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Right to Environmental Assessments
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("8. Right to Environmental Assessments"));
   children.push(
     bodyText(
@@ -224,9 +196,7 @@ export function buildEnvironmentalIndemnity(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Costs and Attorneys' Fees
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("9. Costs and Attorneys' Fees"));
   children.push(
     bodyText(
@@ -235,9 +205,7 @@ export function buildEnvironmentalIndemnity(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Waiver of Defenses
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("10. Waiver of Defenses"));
   children.push(
     bodyText(
@@ -246,9 +214,7 @@ export function buildEnvironmentalIndemnity(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // Subrogation Waiver
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("11. Subrogation Waiver"));
   children.push(
     bodyText(
@@ -257,16 +223,12 @@ export function buildEnvironmentalIndemnity(
   );
   children.push(spacer(4));
 
-  // -----------------------------------------------------------------------
   // 10. Governing Law (AI prose)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("12. Governing Law"));
   children.push(bodyText(prose.governingLaw));
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // Standard legal provisions
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("13. Additional Standard Provisions"));
   children.push(
     bodyText(
@@ -287,9 +249,7 @@ export function buildEnvironmentalIndemnity(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 11. Signatures
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("IN WITNESS WHEREOF"));
   children.push(
     bodyText(
@@ -312,9 +272,7 @@ export function buildEnvironmentalIndemnity(
 
   children.push(...notaryBlock(input.stateAbbr));
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "Environmental Indemnity Agreement",
     headerRight: `Environmental Indemnity — ${input.borrowerName}`,

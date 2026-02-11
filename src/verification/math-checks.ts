@@ -1,16 +1,12 @@
-// =============================================================================
 // math-checks.ts
 // Deterministic math verification for extracted financial data.
 // ZERO AI. Pure arithmetic comparisons with $1 absolute tolerance
 // and 2% relative tolerance for ratio checks.
-// =============================================================================
 
 const ABSOLUTE_TOLERANCE = 1; // $1 for rounding differences
 const PERCENT_TOLERANCE = 0.02; // 2% for ratio comparisons
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 export interface MathCheck {
   fieldPath: string;
@@ -22,9 +18,7 @@ export interface MathCheck {
   documentPage?: number;
 }
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Safely read a numeric value from a nested object path.
@@ -113,14 +107,12 @@ function hasField(obj: any, path: string): boolean {
   return current != null;
 }
 
-// ---------------------------------------------------------------------------
 // Document-specific check runners
-// ---------------------------------------------------------------------------
 
 function check1040(data: any): MathCheck[] {
   const checks: MathCheck[] = [];
 
-  // --- Main Form 1040 Income ---
+  // Main Form 1040 Income
   const income = data.income ?? data;
   const lines1through8 = sumFields(income, [
     "wages_line1",
@@ -170,7 +162,7 @@ function check1040(data: any): MathCheck[] {
     );
   }
 
-  // --- Schedule C ---
+  // Schedule C
   const scheduleCs = Array.isArray(data.scheduleC) ? data.scheduleC : data.scheduleC ? [data.scheduleC] : [];
   for (let i = 0; i < scheduleCs.length; i++) {
     const sc = scheduleCs[i];
@@ -235,7 +227,7 @@ function check1040(data: any): MathCheck[] {
     }
   }
 
-  // --- Schedule E ---
+  // Schedule E
   const scheduleEs = Array.isArray(data.scheduleE) ? data.scheduleE : data.scheduleE ? [data.scheduleE] : [];
   const properties = scheduleEs.length > 0
     ? (Array.isArray(scheduleEs[0].properties) ? scheduleEs[0].properties : scheduleEs)
@@ -280,7 +272,7 @@ function check1040(data: any): MathCheck[] {
     }
   }
 
-  // --- Tax / Payments ---
+  // Tax / Payments
   const tax = data.tax ?? data;
   const totalTax = get(tax, "totalTax_line24");
   const totalPayments = get(tax, "totalPayments_line33");
@@ -310,7 +302,7 @@ function check1040(data: any): MathCheck[] {
     }
   }
 
-  // --- W-2 wages sum vs line 1 ---
+  // W-2 wages sum vs line 1
   const w2s = Array.isArray(data.w2Summary) ? data.w2Summary : [];
   if (w2s.length > 0) {
     const w2WagesSum = w2s.reduce(
@@ -407,7 +399,7 @@ function check1120(data: any): MathCheck[] {
     )
   );
 
-  // --- Schedule L Balance Sheet ---
+  // Schedule L Balance Sheet
   checkScheduleL(data, checks);
 
   return checks;
@@ -501,7 +493,7 @@ function check1120S(data: any): MathCheck[] {
     );
   }
 
-  // --- Schedule L Balance Sheet ---
+  // Schedule L Balance Sheet
   checkScheduleL(data, checks);
 
   return checks;
@@ -618,7 +610,7 @@ function check1065(data: any): MathCheck[] {
     );
   }
 
-  // --- Schedule L Balance Sheet ---
+  // Schedule L Balance Sheet
   checkScheduleL(data, checks);
 
   return checks;
@@ -834,7 +826,7 @@ function checkProfitAndLoss(data: any): MathCheck[] {
     );
   }
 
-  // --- Add-backs ---
+  // Add-backs
   const addBacks = data.addBacks ?? {};
   const depreciation = get(addBacks, "depreciation");
   const amortization = get(addBacks, "amortization");
@@ -1025,9 +1017,7 @@ function checkRentRoll(data: any): MathCheck[] {
   return checks;
 }
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 export function runMathChecks(docType: string, data: any): MathCheck[] {
   if (!data) return [];

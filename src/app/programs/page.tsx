@@ -107,7 +107,7 @@ const PROGRAMS: Program[] = [
       "Investment property loans qualified on property cash flow, not borrower income. The property's net operating income is the underwriting basis.",
     useCase:
       "Rental property investors who qualify on property NOI rather than personal income",
-    documents: 17,
+    documents: 18,
     regulations: [
       "TILA / Regulation Z",
       "ATR/QM rule",
@@ -129,7 +129,7 @@ const PROGRAMS: Program[] = [
       "Loans qualified using bank statement deposits instead of traditional income documentation. Purpose-built for self-employed borrowers with complex tax situations.",
     useCase:
       "Self-employed borrowers with complex tax situations",
-    documents: 17,
+    documents: 18,
     regulations: [
       "TILA / Regulation Z",
       "ATR/QM rule",
@@ -190,7 +190,7 @@ const PROGRAMS: Program[] = [
       "Secured financing for equipment purchases with the equipment itself as collateral. UCC-compliant security interests with proper collateral descriptions.",
     useCase:
       "Manufacturing equipment, vehicles, technology, heavy machinery",
-    documents: 16,
+    documents: 17,
     regulations: [
       "UCC Article 9 (secured transactions)",
       "UCC 9-108 (collateral descriptions)",
@@ -373,8 +373,8 @@ export default function ProgramsPage() {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {[
               { value: "10", label: "Loan programs", delay: "100ms" },
-              { value: "199", label: "Total documents across all programs", delay: "150ms" },
-              { value: "20", suffix: "+", label: "Federal & state regulations", delay: "200ms" },
+              { value: "202", label: "Total documents across all programs", delay: "150ms" },
+              { value: "75", suffix: "+", label: "Federal & state regulations", delay: "200ms" },
               { value: "50", suffix: "-state", label: "Compliance coverage", delay: "250ms" },
             ].map((stat) => (
               <div

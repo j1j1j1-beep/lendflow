@@ -7,9 +7,7 @@ import { writeLimit } from "@/lib/rate-limit";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 
-// ---------------------------------------------------------------------------
 // POST /api/documents/upload - Upload a PDF via FormData (server-side S3)
-// ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
   const limited = await withRateLimit(request, writeLimit);

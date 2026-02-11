@@ -1,9 +1,7 @@
-// =============================================================================
 // deed-of-trust.ts
 // Builds a Deed of Trust DOCX — real property security instrument used in
 // trust-deed states as a mortgage equivalent. AI writes prose for covenants,
 // default provisions, power of sale, and environmental sections.
-// =============================================================================
 
 import type { DocumentInput, DeedOfTrustProse } from "../types";
 import {
@@ -33,9 +31,7 @@ import {
 
 export type { DeedOfTrustProse };
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildDeedOfTrust(
   input: DocumentInput,
@@ -47,13 +43,13 @@ export function buildDeedOfTrust(
   const stateName = input.stateAbbr ?? "[STATE]";
 
   const children: (Paragraph | Table)[] = [
-    // ---- Title ----
+    // Title
     documentTitle(
       "Deed of Trust, Assignment of Rents, Security Agreement and Fixture Filing",
     ),
     spacer(4),
 
-    // ---- Recording Information ----
+    // Recording Information
     bodyText("RECORDING REQUESTED BY:", { bold: true }),
     bodyText(input.lenderName),
     spacer(2),
@@ -64,7 +60,7 @@ export function buildDeedOfTrust(
     bodyText("SPACE ABOVE THIS LINE FOR RECORDER'S USE", { italic: true }),
     spacer(8),
 
-    // ---- Parties ----
+    // Parties
     articleHeading("I", "Parties"),
     bodyText(
       `This Deed of Trust, Assignment of Rents, Security Agreement and Fixture Filing (this "Deed of Trust") is made as of ${effectiveDate}, by and among:`,
@@ -79,7 +75,7 @@ export function buildDeedOfTrust(
     partyBlock("Beneficiary", input.lenderName, 'the "Beneficiary" or "Lender"'),
     spacer(4),
 
-    // ---- Key Terms ----
+    // Key Terms
     keyTermsTable([
       {
         label: "Principal Amount",
@@ -96,12 +92,12 @@ export function buildDeedOfTrust(
     ]),
     spacer(8),
 
-    // ---- Grant Clause ----
+    // Grant Clause
     articleHeading("II", "Grant of Trust"),
     bodyText(prose.grantClause),
     spacer(4),
 
-    // ---- Legal Description ----
+    // Legal Description
     articleHeading("III", "Property Description"),
     bodyText(
       "The property encumbered by this Deed of Trust (the \"Property\") is described as follows:",
@@ -121,7 +117,7 @@ export function buildDeedOfTrust(
     }),
     spacer(4),
 
-    // ---- Borrower Covenants ----
+    // Borrower Covenants
     articleHeading("IV", "Borrower Covenants"),
     bodyText(
       "Trustor covenants and agrees with Beneficiary as follows:",
@@ -149,12 +145,12 @@ export function buildDeedOfTrust(
     ),
     spacer(4),
 
-    // ---- Default Provisions ----
+    // Default Provisions
     articleHeading("V", "Events of Default"),
     bodyText(prose.defaultProvisions),
     spacer(4),
 
-    // ---- Power of Sale ----
+    // Power of Sale
     articleHeading("VI", "Power of Sale"),
     bodyText(prose.powerOfSale),
     spacer(2),
@@ -163,7 +159,7 @@ export function buildDeedOfTrust(
     ),
     spacer(4),
 
-    // ---- Assignment of Rents ----
+    // Assignment of Rents
     articleHeading("VII", "Assignment of Rents"),
     bodyText(
       "As additional security, Trustor hereby absolutely and unconditionally assigns to Beneficiary all rents, issues, profits, revenue, and income of the Property (collectively, \"Rents\"). Trustor grants to Beneficiary the right to enter and take possession of the Property for the purpose of collecting the Rents. This assignment is an absolute assignment and not merely an assignment for additional security.",
@@ -174,14 +170,36 @@ export function buildDeedOfTrust(
     ),
     spacer(4),
 
-    // ---- Due-on-Sale ----
+    // Due-on-Sale
     articleHeading("VIII", "Due-on-Sale Clause"),
     bodyText(
       "If all or any part of the Property or any interest in the Property is sold, transferred, or conveyed (or if Trustor is not a natural person and a beneficial interest in Trustor is sold, transferred, or conveyed) without Beneficiary's prior written consent, Beneficiary may require immediate payment in full of all sums secured by this Deed of Trust.",
     ),
+    spacer(2),
+
+    // Garn-St Germain Exempt Transfers
+    sectionSubheading("8.1", "Exempt Transfers Under Garn-St Germain Act"),
+    bodyText(
+      "Notwithstanding the due-on-sale provision above, Lender shall not exercise the option to accelerate upon the occurrence of any transfer exempt under 12 U.S.C. \u00A7 1701j-3(d) of the Garn-St Germain Depository Institutions Act of 1982. Exempt transfers include, without limitation:",
+    ),
+    bulletPoint(
+      "A transfer by devise, descent, or operation of law on the death of a joint tenant or tenant by the entirety;",
+    ),
+    bulletPoint(
+      "A transfer to a spouse or children of the Borrower resulting from a decree of dissolution of marriage, legal separation agreement, or incidental property settlement agreement;",
+    ),
+    bulletPoint(
+      "A transfer to a relative of the Borrower resulting from the death of the Borrower;",
+    ),
+    bulletPoint(
+      "A transfer to an inter vivos trust in which the Borrower is and remains a beneficiary and which does not relate to a transfer of rights of occupancy in the Property;",
+    ),
+    bulletPoint(
+      "A transfer where a lien is created by a junior encumbrance that does not transfer rights of occupancy in the Property.",
+    ),
     spacer(4),
 
-    // ---- Fixture Filing ----
+    // Fixture Filing
     articleHeading("IX", "Fixture Filing"),
     bodyText(
       "This Deed of Trust constitutes a fixture filing under the Uniform Commercial Code with respect to all goods that are or may become fixtures related to the Property. For purposes of the fixture filing, the following information is provided:",
@@ -197,25 +215,77 @@ export function buildDeedOfTrust(
     ),
     spacer(4),
 
-    // ---- Environmental Covenants ----
+    // Environmental Covenants
     articleHeading("X", "Environmental Covenants"),
     bodyText(prose.environmentalCovenants),
     spacer(4),
 
-    // ---- Subordination to Leases ----
-    articleHeading("XI", "Subordination to Leases"),
+    // Condemnation / Eminent Domain
+    articleHeading("XI", "Condemnation and Eminent Domain"),
+    bodyText(
+      "If the Property or any part thereof is taken or damaged by eminent domain, condemnation, or any similar proceeding, the following provisions shall apply:",
+    ),
+    spacer(2),
+    sectionSubheading("11.1", "Application of Proceeds"),
+    bodyText(
+      "All awards, compensation, and proceeds resulting from any taking or condemnation of the Property or any part thereof (collectively, \"Condemnation Proceeds\") shall be paid to Lender and applied first to the Secured Obligation, including any prepayment premium or penalty, in such order as Lender may determine in its sole discretion.",
+    ),
+    sectionSubheading("11.2", "Notice of Proceedings"),
+    bodyText(
+      "Borrower shall promptly notify Lender of any condemnation proceeding, proposed taking, or notice of intent to condemn affecting the Property. Borrower shall deliver to Lender copies of all notices, pleadings, and correspondence relating to any such proceeding within five (5) business days of receipt.",
+    ),
+    sectionSubheading("11.3", "Lender Participation"),
+    bodyText(
+      "Lender shall have the right to participate in and approve any condemnation settlement or proceeding. Borrower shall not settle, compromise, or adjust any claim for Condemnation Proceeds without Lender's prior written consent.",
+    ),
+    sectionSubheading("11.4", "Total Taking"),
+    bodyText(
+      "If the taking is total, or renders the Property unsuitable for the use contemplated at the time the loan was originated, the entire Secured Obligation shall become immediately due and payable, and all Condemnation Proceeds shall be applied to the Secured Obligation.",
+    ),
+    sectionSubheading("11.5", "Partial Taking"),
+    bodyText(
+      "If the taking is partial, Lender may, at its sole option, either: (a) apply the Condemnation Proceeds to the Secured Obligation, whether or not then due, in such order as Lender determines; or (b) permit Borrower to use Condemnation Proceeds for restoration of the Property, subject to such conditions as Lender may impose, including but not limited to Lender's approval of restoration plans and disbursement of proceeds in installments upon satisfactory completion of restoration milestones.",
+    ),
+    spacer(4),
+
+    // Insurance Proceeds
+    articleHeading("XII", "Insurance Proceeds"),
+    bodyText(
+      "In the event of casualty loss or damage to the Property, the following provisions shall govern the application of insurance proceeds:",
+    ),
+    spacer(2),
+    sectionSubheading("12.1", "Payment of Proceeds"),
+    bodyText(
+      "All insurance proceeds resulting from casualty loss or damage to the Property shall be paid to Lender, or held in escrow jointly by Lender and Borrower, as Lender may direct. Borrower hereby assigns to Lender all rights to receive insurance proceeds and authorizes Lender to collect such proceeds directly from the insurer.",
+    ),
+    sectionSubheading("12.2", "Application or Restoration"),
+    bodyText(
+      "Lender may, at its sole option, either: (a) apply insurance proceeds to the Secured Obligation, whether or not then due, in such order as Lender determines; or (b) make insurance proceeds available for restoration of the Property, subject to such conditions as Lender may impose.",
+    ),
+    sectionSubheading("12.3", "Restoration Disbursement"),
+    bodyText(
+      "If Lender elects to permit restoration, insurance proceeds shall be disbursed in installments upon satisfactory completion of repair milestones, as determined by Lender or Lender's inspector. Lender may require evidence of completion, lien waivers, and such other documentation as Lender deems necessary before each disbursement.",
+    ),
+    sectionSubheading("12.4", "Failure to Restore"),
+    bodyText(
+      "If the Property is not restored within a reasonable time as determined by Lender (not to exceed twelve (12) months from the date of casualty, unless extended by Lender in writing), Lender may apply any remaining insurance proceeds to the Secured Obligation.",
+    ),
+    spacer(4),
+
+    // Subordination to Leases
+    articleHeading("XIII", "Subordination to Leases"),
     bodyText(
       "Beneficiary may, at its option, subordinate the lien of this Deed of Trust to any lease of the Property or any portion thereof. Any such subordination shall not constitute a waiver of any of the rights of Beneficiary under this Deed of Trust.",
     ),
     spacer(4),
 
-    // ---- Governing Law ----
-    articleHeading("XII", "Governing Law"),
+    // Governing Law
+    articleHeading("XIV", "Governing Law"),
     bodyText(prose.governingLaw),
     spacer(4),
 
-    // ---- Miscellaneous ----
-    articleHeading("XIII", "Miscellaneous"),
+    // Miscellaneous
+    articleHeading("XV", "Miscellaneous"),
     bodyTextRuns([
       { text: "JURY TRIAL WAIVER: ", bold: true },
       {
@@ -238,7 +308,7 @@ export function buildDeedOfTrust(
     ]),
     spacer(8),
 
-    // ---- Signatures ----
+    // Signatures
     bodyTextRuns([
       {
         text: "IN WITNESS WHEREOF, Trustor has executed this Deed of Trust as of the date first written above.",
@@ -255,12 +325,12 @@ export function buildDeedOfTrust(
     bodyText("TRUSTEE ACCEPTANCE:", { bold: true, color: COLORS.primary }),
     ...signatureBlock("[TITLE COMPANY NAME]", "Trustee"),
 
-    // ---- Notary Acknowledgment ----
+    // Notary Acknowledgment
     ...notaryBlock(input.stateAbbr),
 
     spacer(16),
 
-    // ---- Exhibit A ----
+    // Exhibit A
     sectionHeading("Exhibit A"),
     bodyText("Legal Description of Property", { bold: true }),
     spacer(4),

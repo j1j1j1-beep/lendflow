@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// ─── Unit Schema ─────────────────────────────────────────────────────────────
+// Unit Schema
 
 const unitSchema = z.object({
   unitNumber: z.string().nullable(),
@@ -29,7 +29,7 @@ const unitSchema = z.object({
   notes: z.string().nullable(),
 }).passthrough();
 
-// ─── Unit Mix Schema ─────────────────────────────────────────────────────────
+// Unit Mix Schema
 
 const unitMixSchema = z.object({
   unitType: z.string().nullable(),
@@ -40,14 +40,14 @@ const unitMixSchema = z.object({
   vacantCount: z.number().nullable(),
 }).passthrough();
 
-// ─── Delinquency Bucket Schema ───────────────────────────────────────────────
+// Delinquency Bucket Schema
 
 const delinquencyBucketSchema = z.object({
   unitCount: z.number().nullable(),
   totalAmount: z.number().nullable(),
 }).passthrough();
 
-// ─── Lease Expiration Entry Schema ───────────────────────────────────────────
+// Lease Expiration Entry Schema
 
 const leaseExpirationEntrySchema = z.object({
   period: z.string().nullable(),
@@ -56,7 +56,7 @@ const leaseExpirationEntrySchema = z.object({
   percentOfTotal: z.number().nullable(),
 }).passthrough();
 
-// ─── Other Income Breakdown Schema ───────────────────────────────────────────
+// Other Income Breakdown Schema
 
 const otherIncomeBreakdownSchema = z.object({
   category: z.string().nullable(),
@@ -64,7 +64,7 @@ const otherIncomeBreakdownSchema = z.object({
   annualAmount: z.number().nullable(),
 }).passthrough();
 
-// ─── Main Rent Roll Schema ───────────────────────────────────────────────────
+// Main Rent Roll Schema
 
 export const rentRollSchema = z.object({
   metadata: z.object({

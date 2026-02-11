@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// ─── Schedule L Balance Sheet Assets ──────────────────────────────────────────
+// Schedule L Balance Sheet Assets
 
 const scheduleLAssetsSchema = z.object({
   cash: z.number().nullable(),
@@ -27,7 +27,7 @@ const scheduleLAssetsSchema = z.object({
   totalAssets: z.number().nullable(),
 }).passthrough();
 
-// ─── Schedule L Liabilities and Capital ───────────────────────────────────────
+// Schedule L Liabilities and Capital
 
 const scheduleLLiabilitiesAndCapitalSchema = z.object({
   accountsPayable: z.number().nullable(),
@@ -47,7 +47,7 @@ const scheduleLPeriodSchema = z.object({
   liabilitiesAndCapital: scheduleLLiabilitiesAndCapitalSchema,
 }).passthrough();
 
-// ─── Main Form 1065 Schema ───────────────────────────────────────────────────
+// Main Form 1065 Schema
 
 export const form1065Schema = z.object({
   metadata: z.object({

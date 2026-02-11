@@ -15,6 +15,7 @@ import {
   Crown,
   Activity,
   Download,
+  FlaskConical,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,33 @@ type AuditResponse = {
   limit: number;
 };
 
+type BioBillingResponse = {
+  subscription: {
+    plan: string;
+    status: string;
+    licensePaid: boolean;
+    maxSeats: number;
+    currentSeats: number;
+    currentPeriodEnd: string | null;
+    cancelAtPeriodEnd: boolean;
+  } | null;
+  usage: {
+    programsProcessed: number;
+    docsGenerated: number;
+    pagesExtracted: number;
+    month: string;
+  };
+  programCount: number;
+  trialProgramsRemaining: number | null;
+};
+
+type BioUsageMonth = {
+  month: string;
+  programs: number;
+  docs: number;
+  pages: number;
+};
+
 // ─── Action Label Mapping ────────────────────────────────────────────────────
 
 const ACTION_LABELS: Record<string, string> = {
@@ -166,6 +194,14 @@ export default function SettingsPage() {
   const [loadingBilling, setLoadingBilling] = useState(true);
   const [loadingMembers, setLoadingMembers] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // Bio billing
+  const [bioData, setBioData] = useState<BioBillingResponse | null>(null);
+  const [bioUsage, setBioUsage] = useState<BioUsageMonth[]>([]);
+  const [loadingBio, setLoadingBio] = useState(false);
+  const [bioLoaded, setBioLoaded] = useState(false);
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "billing");
 
   // Invite form
   const [inviteEmail, setInviteEmail] = useState("");
@@ -295,6 +331,71 @@ export default function SettingsPage() {
     }
   };
 
+  // ─── Fetch bio billing (lazy — only when Bio tab is selected) ──────────────
+
+  useEffect(() => {
+    if (activeTab === "bio" && !bioLoaded) {
+      setLoadingBio(true);
+      Promise.all([
+        fetch("/api/bio/billing").then((r) => r.json()),
+        fetch("/api/bio/billing/usage").then((r) => r.json()),
+      ])
+        .then(([billingData, usageData]) => {
+          setBioData(billingData);
+          setBioUsage(usageData.months ?? []);
+          setBioLoaded(true);
+        })
+        .catch(() => {
+          toast.error("Failed to load bio billing data");
+        })
+        .finally(() => {
+          setLoadingBio(false);
+        });
+    }
+  }, [activeTab, bioLoaded]);
+
+  // ─── Bio billing actions ──────────────────────────────────────────────────
+
+  const handleBioCheckout = async (type: "license" | "monthly") => {
+    setActionLoading(`bio_${type}`);
+    try {
+      const res = await fetch("/api/bio/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to create checkout session");
+      }
+      const { url } = await res.json();
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bio checkout failed");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleBioCancelSubscription = async () => {
+    setActionLoading("bio_cancel");
+    try {
+      const res = await fetch("/api/bio/billing/cancel", { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to cancel bio subscription");
+      }
+      toast.success("Bio subscription canceled");
+      setBioLoaded(false); // Trigger refetch
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Cancel failed");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // ─── Derived values ────────────────────────────────────────────────────────
 
   const sub = billing?.subscription;
@@ -303,6 +404,12 @@ export default function SettingsPage() {
   const seatCount = members?.members.length ?? 0;
   const maxSeats = members?.maxSeats ?? 25;
   const atSeatLimit = seatCount >= maxSeats;
+
+  // Bio derived values
+  const bioSub = bioData?.subscription;
+  const bioLicensePaid = bioSub?.licensePaid ?? false;
+  const bioSubscriptionActive = bioSub?.status === "active";
+  const bioIsTrial = !bioSub || bioSub.plan === "trial" || bioSub.status === "trialing";
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
@@ -313,7 +420,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="billing" className="space-y-6">
+      <Tabs defaultValue="billing" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="billing" className="gap-1.5">
             <CreditCard className="h-3.5 w-3.5" />
@@ -330,6 +437,10 @@ export default function SettingsPage() {
           <TabsTrigger value="activity" className="gap-1.5">
             <Activity className="h-3.5 w-3.5" />
             Activity
+          </TabsTrigger>
+          <TabsTrigger value="bio" className="gap-1.5">
+            <FlaskConical className="h-3.5 w-3.5" />
+            Bio
           </TabsTrigger>
         </TabsList>
 
@@ -777,6 +888,254 @@ export default function SettingsPage() {
           <Suspense fallback={<div>Loading...</div>}>
             <ActivityLog />
           </Suspense>
+        </TabsContent>
+
+        {/* ─── BIO TAB ────────────────────────────────────────────────────────────── */}
+        <TabsContent value="bio">
+          {loadingBio ? (
+            <div className="space-y-4">
+              <Skeleton className="h-40" />
+              <Skeleton className="h-32" />
+              <Skeleton className="h-64" />
+            </div>
+          ) : bioData ? (
+            <div className="space-y-6">
+              {/* Bio Plan Status */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <FlaskConical className="h-4 w-4 text-emerald-600" />
+                        Bio Plan Status
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        Your biopharma vertical subscription and license status.
+                      </CardDescription>
+                    </div>
+                    <StatusBadge status={bioSub?.status ?? "trialing"} />
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Bio License status */}
+                    <div className="rounded-lg border p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        {bioLicensePaid ? (
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4 text-amber-500" />
+                        )}
+                        <p className="text-sm font-medium">Bio Platform License</p>
+                      </div>
+                      <Badge
+                        variant={bioLicensePaid ? "default" : "outline"}
+                        className={`text-xs ${bioLicensePaid ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
+                      >
+                        {bioLicensePaid ? "Paid" : bioIsTrial ? "Trial" : "Unpaid"}
+                      </Badge>
+                      {bioIsTrial && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {bioData.trialProgramsRemaining !== null
+                            ? `${bioData.trialProgramsRemaining} trial program${bioData.trialProgramsRemaining !== 1 ? "s" : ""} remaining`
+                            : "Trial active"}
+                        </p>
+                      )}
+                      {!bioLicensePaid && (
+                        <Button
+                          className="w-full mt-3 bg-emerald-600 hover:bg-emerald-700"
+                          size="sm"
+                          disabled={actionLoading === "bio_license"}
+                          onClick={() => handleBioCheckout("license")}
+                        >
+                          {actionLoading === "bio_license" ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                              Processing...
+                            </>
+                          ) : (
+                            "Upgrade to Licensed"
+                          )}
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Bio Subscription status */}
+                    <div className="rounded-lg border p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        {bioSubscriptionActive ? (
+                          <Crown className="h-4 w-4 text-emerald-600" />
+                        ) : (
+                          <CreditCard className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <p className="text-sm font-medium">Monthly Subscription</p>
+                      </div>
+                      <Badge
+                        variant={bioSubscriptionActive ? "default" : "outline"}
+                        className={`text-xs ${bioSubscriptionActive ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
+                      >
+                        {bioSubscriptionActive ? "Active" : "Inactive"}
+                      </Badge>
+                      {bioSub?.maxSeats && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {bioSub.currentSeats} of {bioSub.maxSeats} seats used
+                        </p>
+                      )}
+                      {bioSubscriptionActive && bioSub?.currentPeriodEnd && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Next billing:{" "}
+                          {new Date(bioSub.currentPeriodEnd).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </p>
+                      )}
+                      {bioSub?.cancelAtPeriodEnd && (
+                        <p className="text-xs text-amber-600 mt-1">
+                          Cancels at end of billing period
+                        </p>
+                      )}
+                      {bioSubscriptionActive && !bioSub?.cancelAtPeriodEnd ? (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full mt-3 text-destructive hover:text-destructive"
+                              disabled={actionLoading === "bio_cancel"}
+                            >
+                              {actionLoading === "bio_cancel" ? (
+                                <>
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                                  Canceling...
+                                </>
+                              ) : (
+                                "Cancel Subscription"
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Cancel bio subscription?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Your bio subscription will remain active until the end of the current
+                                billing period. After that, you will lose access to biopharma features.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={handleBioCancelSubscription}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Cancel Subscription
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      ) : !bioSubscriptionActive && bioLicensePaid ? (
+                        <Button
+                          className="w-full mt-3 bg-emerald-600 hover:bg-emerald-700"
+                          size="sm"
+                          disabled={actionLoading === "bio_monthly"}
+                          onClick={() => handleBioCheckout("monthly")}
+                        >
+                          {actionLoading === "bio_monthly" ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                              Processing...
+                            </>
+                          ) : (
+                            "Add Monthly Subscription"
+                          )}
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Bio Usage This Month */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Bio Usage This Month</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="rounded-lg border bg-muted/30 p-4 transition-all duration-200 hover:-translate-y-px hover:shadow-sm">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Programs Processed
+                      </p>
+                      <p className="text-3xl font-semibold tracking-tight mt-1 tabular-nums text-emerald-600">
+                        {bioData.usage.programsProcessed}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border bg-muted/30 p-4 transition-all duration-200 hover:-translate-y-px hover:shadow-sm">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Documents Generated
+                      </p>
+                      <p className="text-3xl font-semibold tracking-tight mt-1 tabular-nums text-emerald-600">
+                        {bioData.usage.docsGenerated}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border bg-muted/30 p-4 transition-all duration-200 hover:-translate-y-px hover:shadow-sm">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Pages Extracted
+                      </p>
+                      <p className="text-3xl font-semibold tracking-tight mt-1 tabular-nums text-emerald-600">
+                        {bioData.usage.pagesExtracted}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Bio Usage History */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Bio Usage History</CardTitle>
+                  <CardDescription>Monthly biopharma usage over the past 12 months.</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {bioUsage.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Month</TableHead>
+                          <TableHead className="text-right">Programs</TableHead>
+                          <TableHead className="text-right">Documents</TableHead>
+                          <TableHead className="text-right">Pages</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {bioUsage.map((row) => (
+                          <TableRow key={row.month}>
+                            <TableCell className="font-medium">{row.month}</TableCell>
+                            <TableCell className="text-right tabular-nums">{row.programs}</TableCell>
+                            <TableCell className="text-right tabular-nums">{row.docs}</TableCell>
+                            <TableCell className="text-right tabular-nums">{row.pages}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      No bio usage history available yet.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  Unable to load bio billing information. Please try again later.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>

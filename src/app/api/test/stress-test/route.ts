@@ -16,9 +16,7 @@ import { uploadToS3 } from "@/lib/s3";
 import { inngest } from "@/inngest/client";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
-// ---------------------------------------------------------------------------
 // PDF Generator — Courier text on letter-size pages
-// ---------------------------------------------------------------------------
 
 async function createPdf(text: string, title: string): Promise<Buffer> {
   const doc = await PDFDocument.create();
@@ -60,9 +58,7 @@ async function createPdf(text: string, title: string): Promise<Buffer> {
   return Buffer.from(await doc.save());
 }
 
-// ---------------------------------------------------------------------------
 // Document Generators — All Courier text
-// ---------------------------------------------------------------------------
 
 function generate1040Thompson(): Promise<Buffer> {
   return createPdf(`
@@ -671,9 +667,7 @@ Average Rent: $2,000.00/unit/month
 `, "RENT ROLL - 4520 NW 7th Street, Miami FL");
 }
 
-// ---------------------------------------------------------------------------
 // Edge Case Document Generators
-// ---------------------------------------------------------------------------
 
 function generate1040MinimalPatel(): Promise<Buffer> {
   return createPdf(`
@@ -832,9 +826,7 @@ This is inconsistent with both 1040 ($150K) and W-2 ($120K).
 `, "MOUNTAIN WEST CREDIT UNION - Checking Statement");
 }
 
-// ---------------------------------------------------------------------------
 // Edge Case: Blank/Empty PDF (nearly empty — only a header, no data)
-// ---------------------------------------------------------------------------
 
 async function generateBlankPdf(): Promise<Buffer> {
   const doc = await PDFDocument.create();
@@ -883,9 +875,7 @@ REFUND
 `, "Form 1040 - U.S. Individual Income Tax Return 2023");
 }
 
-// ---------------------------------------------------------------------------
 // Edge Case: Large Document (12-page bank statement with 6 months of detail)
-// ---------------------------------------------------------------------------
 
 function generateLargeBankStmtReeves(): Promise<Buffer> {
   const months = [
@@ -1019,9 +1009,7 @@ REFUND
 `, "Form 1040 - U.S. Individual Income Tax Return 2023");
 }
 
-// ---------------------------------------------------------------------------
 // Test Scenarios
-// ---------------------------------------------------------------------------
 
 interface TestScenario {
   name: string;
@@ -1177,9 +1165,7 @@ function getTestScenarios(): TestScenario[] {
   ];
 }
 
-// ---------------------------------------------------------------------------
 // POST — Run stress tests
-// ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
   if (process.env.NODE_ENV === "production") {
@@ -1254,9 +1240,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ---------------------------------------------------------------------------
 // GET — Check status of test deals
-// ---------------------------------------------------------------------------
 
 export async function GET() {
   if (process.env.NODE_ENV === "production") {
@@ -1332,9 +1316,7 @@ export async function GET() {
   }
 }
 
-// ---------------------------------------------------------------------------
 // PATCH — Auto-approve all pending reviews and terms for test deals
-// ---------------------------------------------------------------------------
 
 export async function PATCH() {
   if (process.env.NODE_ENV === "production") {
@@ -1384,9 +1366,7 @@ export async function PATCH() {
   }
 }
 
-// ---------------------------------------------------------------------------
 // DELETE — Clean up all test data
-// ---------------------------------------------------------------------------
 
 export async function DELETE() {
   if (process.env.NODE_ENV === "production") {

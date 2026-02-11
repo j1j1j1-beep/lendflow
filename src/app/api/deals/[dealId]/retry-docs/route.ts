@@ -4,9 +4,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { uploadToS3 } from "@/lib/s3";
 import { logAudit } from "@/lib/audit";
 
-// ---------------------------------------------------------------------------
 // POST /api/deals/[dealId]/retry-docs — Retry all FAILED / FLAGGED documents
-// ---------------------------------------------------------------------------
 
 export async function POST(
   request: NextRequest,

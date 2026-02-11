@@ -1,8 +1,6 @@
-// =============================================================================
 // ucc-financing-statement.ts
 // Generates a DOCX UCC-1 Financing Statement to perfect a security interest
 // in personal property collateral (equipment, inventory, accounts, etc.).
-// =============================================================================
 
 import {
   Document,
@@ -22,9 +20,7 @@ import {
 
 import type { DocumentInput, UccFinancingProse } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildUccFinancingStatement(
   input: DocumentInput,
@@ -35,14 +31,10 @@ export function buildUccFinancingStatement(
 
   const children: (Paragraph | Table)[] = [];
 
-  // -----------------------------------------------------------------------
   // 1. Title
-  // -----------------------------------------------------------------------
   children.push(documentTitle("UCC-1 FINANCING STATEMENT WORKSHEET"));
 
-  // -----------------------------------------------------------------------
   // 2. Filing Information Table
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Filing Information"));
   const stateOfOrg = input.debtorStateOfOrganization ?? filingState;
   const orgId = input.debtorOrganizationId ?? "_______________";
@@ -59,9 +51,7 @@ export function buildUccFinancingStatement(
   );
   children.push(spacer(8));
 
-  // -----------------------------------------------------------------------
   // 3. Collateral Description (AI)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("1. Collateral Description"));
   children.push(
     bodyText(
@@ -86,9 +76,7 @@ export function buildUccFinancingStatement(
   );
   children.push(bodyText(prose.collateralDescription));
 
-  // -----------------------------------------------------------------------
   // 4. Proceeds (AI)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("2. Proceeds and Products"));
   children.push(
     bodyText(
@@ -98,15 +86,11 @@ export function buildUccFinancingStatement(
   children.push(spacer(2));
   children.push(bodyText(prose.proceedsClause));
 
-  // -----------------------------------------------------------------------
   // 5. Additional Provisions (AI)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("3. Additional Provisions"));
   children.push(bodyText(prose.additionalProvisions));
 
-  // -----------------------------------------------------------------------
   // 6. Filing Instructions (AI)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("4. Filing Instructions"));
   children.push(
     bodyText(
@@ -116,9 +100,7 @@ export function buildUccFinancingStatement(
   children.push(spacer(2));
   children.push(bodyText(prose.filingInstructions));
 
-  // -----------------------------------------------------------------------
   // 7. Authorized Signature — Secured Party (Lender)
-  // -----------------------------------------------------------------------
   children.push(sectionHeading("Authorization"));
   children.push(
     bodyText(
@@ -134,9 +116,7 @@ export function buildUccFinancingStatement(
     ...signatureBlock(input.lenderName, "Authorized Signatory"),
   );
 
-  // -----------------------------------------------------------------------
   // Wrap in legal document shell
-  // -----------------------------------------------------------------------
   return buildLegalDocument({
     title: "UCC-1 Financing Statement Worksheet",
     headerRight: `UCC-1 Worksheet — ${input.borrowerName}`,

@@ -1,6 +1,4 @@
-// ---------------------------------------------------------------------------
 // In-memory sliding window rate limiter
-// ---------------------------------------------------------------------------
 
 export interface RateLimitConfig {
   /** Maximum number of requests allowed in the window */
@@ -119,9 +117,7 @@ export function rateLimit(
   return limiter.check(identifier);
 }
 
-// ---------------------------------------------------------------------------
 // Pre-configured limiters
-// ---------------------------------------------------------------------------
 
 /** 200 requests per minute — for GET/read endpoints */
 export const generalLimit = createLimiter({

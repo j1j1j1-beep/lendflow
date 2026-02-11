@@ -1,4 +1,4 @@
-// ─── Rent Roll Extraction Prompt ──────────────────────────────────────────────
+// Rent Roll Extraction Prompt
 // This is the PRIMARY extraction method for Rent Rolls. Textract extracts raw
 // text and tables, then Claude structures the data. Rent rolls come in many
 // formats — property management software exports, landlord spreadsheets, or

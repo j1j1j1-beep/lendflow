@@ -1,9 +1,7 @@
-// =============================================================================
 // sba-authorization.ts
 // Builds an SBA Authorization letter DOCX for 7(a) and 504 loans.
 // Mixed: deterministic SBA conditions + guaranty fee calc + AI prose for
 // special conditions and use of proceeds.
-// =============================================================================
 
 import type { DocumentInput, SbaAuthorizationProse } from "../types";
 import {
@@ -30,9 +28,7 @@ import {
 
 export type { SbaAuthorizationProse };
 
-// ---------------------------------------------------------------------------
 // SBA Guaranty Fee Calculation (per SOP 50 10)
-// ---------------------------------------------------------------------------
 
 function computeSbaGuarantyPercent(loanAmount: number): number {
   if (loanAmount <= 150_000) return 0.85;
@@ -46,9 +42,7 @@ function computeSbaGuarantyFeePercent(guaranteedAmount: number): number {
   return 0.0375;
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildSbaAuthorization(
   input: DocumentInput,
@@ -64,7 +58,7 @@ export function buildSbaAuthorization(
   const guarantyFee = guaranteedAmount * guarantyFeePercent;
 
   const children: (Paragraph | Table)[] = [
-    // ---- Header ----
+    // Header
     documentTitle("U.S. Small Business Administration"),
     bodyText("AUTHORIZATION", {
       bold: true,
@@ -76,7 +70,7 @@ export function buildSbaAuthorization(
     bodyText(`Date: ${effectiveDate}`),
     spacer(4),
 
-    // ---- Parties ----
+    // Parties
     sectionHeading("Parties"),
     bodyTextRuns([
       { text: "Borrower: ", bold: true },
@@ -94,7 +88,7 @@ export function buildSbaAuthorization(
     ),
     spacer(4),
 
-    // ---- Authorization Table ----
+    // Authorization Table
     sectionHeading("Loan Authorization"),
     keyTermsTable([
       {
@@ -125,7 +119,7 @@ export function buildSbaAuthorization(
     ]),
     spacer(8),
 
-    // ---- SBA Guaranty Fee ----
+    // SBA Guaranty Fee
     sectionHeading("SBA Guaranty Fee"),
     createTable(
       ["Component", "Value"],
@@ -146,12 +140,12 @@ export function buildSbaAuthorization(
     ),
     spacer(8),
 
-    // ---- Use of Proceeds ----
+    // Use of Proceeds
     sectionHeading("Use of Proceeds"),
     bodyText(prose.useOfProceeds),
     spacer(8),
 
-    // ---- Standard SBA Conditions ----
+    // Standard SBA Conditions
     sectionHeading("Standard SBA Conditions"),
     bodyText(
       "This authorization is subject to the following standard conditions:",
@@ -196,7 +190,7 @@ export function buildSbaAuthorization(
     ),
     spacer(8),
 
-    // ---- Special Conditions (AI prose) ----
+    // Special Conditions (AI prose)
     sectionHeading("Special Conditions"),
     bodyText(
       "In addition to the standard conditions above, the following special conditions apply to this authorization:",
@@ -205,12 +199,12 @@ export function buildSbaAuthorization(
     ...ensureProseArray(prose.specialConditions).map((item) => bulletPoint(item)),
     spacer(8),
 
-    // ---- Governing Law ----
+    // Governing Law
     sectionHeading("Governing Law"),
     bodyText(prose.governingLaw),
     spacer(4),
 
-    // ---- Expiration ----
+    // Expiration
     sectionHeading("Authorization Expiration"),
     bodyText(
       "This authorization shall expire six (6) months from the date hereof unless the loan is disbursed or an extension is granted in writing by SBA.",
@@ -221,14 +215,14 @@ export function buildSbaAuthorization(
     ),
     spacer(8),
 
-    // ---- Certification ----
+    // Certification
     bodyText(
       "By signing below, the parties acknowledge and agree to the terms and conditions set forth in this authorization.",
       { bold: true },
     ),
     spacer(4),
 
-    // ---- Signatures ----
+    // Signatures
     bodyText("SBA LOAN OFFICER:", { bold: true, color: COLORS.primary }),
     ...signatureBlock("[SBA Loan Officer Name]", "SBA Loan Officer"),
 

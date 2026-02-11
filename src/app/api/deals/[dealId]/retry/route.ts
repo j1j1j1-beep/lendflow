@@ -7,9 +7,7 @@ import { logAudit } from "@/lib/audit";
 import { withRateLimit } from "@/lib/with-rate-limit";
 import { heavyLimit } from "@/lib/rate-limit";
 
-// ---------------------------------------------------------------------------
 // POST /api/deals/[dealId]/retry - Retry a failed deal pipeline
-// ---------------------------------------------------------------------------
 
 export async function POST(
   request: NextRequest,

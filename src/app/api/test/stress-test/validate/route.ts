@@ -131,7 +131,7 @@ export async function GET() {
       const expected = EXPECTED_DOCS[deal.borrowerName] ?? {};
       const expectMismatch = MISMATCH_SCENARIOS.has(deal.borrowerName);
 
-      // -- Timing instrumentation --
+      // Timing instrumentation
       // Compute per-step timing from record timestamps
       const docTimestamps = deal.documents.map((d) => d.createdAt.getTime());
       const extractionTimestamps = deal.documents

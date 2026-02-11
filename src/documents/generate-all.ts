@@ -1,9 +1,7 @@
-// =============================================================================
 // generate-all.ts
 // Orchestrator: generates all required loan documents for a deal.
 // Follows the triple-verification pattern:
 //   1. AI prose generation → 2. Template builder → 3. Legal review + verify
-// =============================================================================
 
 import { Packer } from "docx";
 import type { DocumentInput, DocumentGenerationResult, AiDocProse } from "./types";
@@ -66,9 +64,7 @@ import type {
 } from "./types";
 import { formatCurrency, buildLegalDocument, documentTitle, bodyText } from "./doc-helpers";
 
-// ---------------------------------------------------------------------------
 // Prose shape validation — ensures AI returned the expected keys
-// ---------------------------------------------------------------------------
 
 const REQUIRED_KEYS: Record<string, string[]> = {
   promissory_note: [
@@ -168,9 +164,7 @@ function validateProse(docType: string, prose: AiDocProse): void {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Template dispatcher
-// ---------------------------------------------------------------------------
 
 function buildDocFromTemplate(
   docType: string,
@@ -265,9 +259,7 @@ function buildDocFromTemplate(
   }
 }
 
-// ---------------------------------------------------------------------------
 // Single document generation pipeline
-// ---------------------------------------------------------------------------
 
 // Doc types that are 100% deterministic — no AI prose, no review needed
 const ZERO_AI_DOCS = new Set([
@@ -370,9 +362,7 @@ export async function generateSingleDocument(
   };
 }
 
-// ---------------------------------------------------------------------------
 // Main entry point — generate all docs for a deal
-// ---------------------------------------------------------------------------
 
 /**
  * Filter the required doc list by applying skip logic based on deal context.

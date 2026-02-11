@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// ─── Schedule L Balance Sheet (shared between BOY and EOY) ──────────────────
+// Schedule L Balance Sheet (shared between BOY and EOY)
 
 const assetsSchema = z.object({
   cash: z.number().nullable(),
@@ -56,7 +56,7 @@ const scheduleLSchema = z.object({
   endOfYear: balanceSheetPeriodSchema,
 }).passthrough();
 
-// ─── Officer Compensation ───────────────────────────────────────────────────
+// Officer Compensation
 
 const officerCompensationSchema = z.object({
   name: z.string().nullable(),
@@ -67,7 +67,7 @@ const officerCompensationSchema = z.object({
   compensationAmount: z.number().nullable(),
 }).passthrough();
 
-// ─── Form 1120 Schema ──────────────────────────────────────────────────────
+// Form 1120 Schema
 
 export const form1120Schema = z.object({
   metadata: z.object({

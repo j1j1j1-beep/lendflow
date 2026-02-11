@@ -1,8 +1,6 @@
-// =============================================================================
 // amortization-schedule.ts
 // Generates a DOCX Amortization Schedule — pure math, zero AI prose.
 // All numbers derived from DocumentInput (rules engine output).
-// =============================================================================
 
 import {
   Document,
@@ -23,17 +21,13 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildAmortizationSchedule(input: DocumentInput): Document {
   const { terms } = input;
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // 1. Title
-  // -------------------------------------------------------------------------
   children.push(documentTitle("Amortization Schedule"));
   children.push(spacer(4));
 
@@ -45,9 +39,7 @@ export function buildAmortizationSchedule(input: DocumentInput): Document {
   );
   children.push(spacer(4));
 
-  // -------------------------------------------------------------------------
   // 2. Key Terms Table
-  // -------------------------------------------------------------------------
   children.push(
     keyTermsTable([
       { label: "Borrower", value: input.borrowerName },
@@ -82,9 +74,7 @@ export function buildAmortizationSchedule(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 3. Payment Schedule — amortization table
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Payment Schedule"));
 
   const principal = terms.approvedAmount;
@@ -180,9 +170,7 @@ export function buildAmortizationSchedule(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 4. Summary
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Summary"));
 
   const summaryRows: string[][] = [
@@ -210,9 +198,7 @@ export function buildAmortizationSchedule(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // 5. Important Notes
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Important Notes"));
 
   children.push(
@@ -260,9 +246,7 @@ export function buildAmortizationSchedule(input: DocumentInput): Document {
     ),
   );
 
-  // -------------------------------------------------------------------------
   // 6. Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "Amortization Schedule",
     headerRight: `Amortization Schedule — ${input.borrowerName}`,

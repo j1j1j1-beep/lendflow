@@ -84,9 +84,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
-// ---------------------------------------------------------------------------
 // checkout.session.completed — license payment completed
-// ---------------------------------------------------------------------------
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const orgId = session.metadata?.orgId;
@@ -128,9 +126,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   // For subscription mode, the customer.subscription.created event handles it
 }
 
-// ---------------------------------------------------------------------------
 // customer.subscription.created — monthly subscription started
-// ---------------------------------------------------------------------------
 
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   const orgId = subscription.metadata?.orgId;
@@ -177,9 +173,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   });
 }
 
-// ---------------------------------------------------------------------------
 // customer.subscription.updated — status changes (past_due, etc.)
-// ---------------------------------------------------------------------------
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const sub = await prisma.subscription.findUnique({
@@ -206,9 +200,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   });
 }
 
-// ---------------------------------------------------------------------------
 // customer.subscription.deleted — canceled
-// ---------------------------------------------------------------------------
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const sub = await prisma.subscription.findUnique({
@@ -231,9 +223,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   });
 }
 
-// ---------------------------------------------------------------------------
 // invoice.payment_failed — set status to past_due
-// ---------------------------------------------------------------------------
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   const invoiceSub = (invoice as unknown as { subscription?: string | { id: string } }).subscription;

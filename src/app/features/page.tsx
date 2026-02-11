@@ -109,13 +109,13 @@ export default function FeaturesPage() {
               {
                 icon: Upload,
                 title: "Multi-format document ingestion",
-                desc: "Tax returns, bank statements, P&Ls, balance sheets, rent rolls, personal financial statements. Any format: PDF, scanned images, digital files. Every upload encrypted with AES-256 and processed automatically.",
+                desc: "Tax returns, bank statements, P&Ls, balance sheets, rent rolls, personal financial statements. Any format: PDF, scanned images, digital files. Every upload end-to-end encrypted and processed automatically.",
                 delay: "100ms",
               },
               {
                 icon: FileSearch,
                 title: "Dual-layer extraction engine",
-                desc: "Dual-layer extraction pipeline. The first pass handles document parsing and table detection. A second independent system extracts semantic fields, resolves ambiguity, and maps data to IRS form specifications. Both layers run independently, then results are compared.",
+                desc: "Dual-layer extraction pipeline. The first pass handles document parsing and table detection. A second independent system extracts each data field, resolves ambiguity, and maps data to IRS form specifications. Both layers run independently, then results are compared.",
                 delay: "150ms",
               },
               {
@@ -400,7 +400,7 @@ export default function FeaturesPage() {
                   Rules engine owns all numbers
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-3xl">
-                  The platform generates prose, including credit analysis
+                  The platform writes the credit analysis
                   narrative, risk commentary, and deal recommendations. It
                   never sets rates, LTV caps, fees, or covenants. Every
                   numerical deal term is determined by a deterministic rules
@@ -436,7 +436,7 @@ export default function FeaturesPage() {
               className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
               style={{ animationDelay: "50ms" }}
             >
-              Up to 37 legal documents per deal. Each one verified.
+              Up to 28 legal documents per deal. Each one verified.
             </h2>
             <p
               className="mt-4 text-muted-foreground leading-relaxed animate-fade-up"
@@ -747,7 +747,7 @@ export default function FeaturesPage() {
                 {
                   step: "1",
                   title: "Generate",
-                  desc: "The platform generates prose. Rules engine sets numbers. Template builds the document structure. Every field populated from verified deal data.",
+                  desc: "The platform writes the document. Rules engine sets numbers. Template builds the document structure. Every field populated from verified deal data.",
                 },
                 {
                   step: "2",
@@ -877,12 +877,12 @@ export default function FeaturesPage() {
                 icon: Lock,
                 category: "Security & Data",
                 items: [
-                  "AES-256 encryption on every upload",
-                  "TLS encryption in transit",
+                  "End-to-end encrypted uploads",
+                  "Encrypted in transit",
                   "Full audit trail on all actions",
                   "Secure document access with expiring links",
-                  "Org-level tenant isolation",
-                  "Borrower data never stored in plaintext",
+                  "Organization-level data isolation",
+                  "No borrower data shared or used for training",
                 ],
                 delay: "400ms",
               },

@@ -3,9 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 
-// ---------------------------------------------------------------------------
 // GET /api/documents/[docId] - Get document status and info
-// ---------------------------------------------------------------------------
 
 export async function GET(
   request: NextRequest,

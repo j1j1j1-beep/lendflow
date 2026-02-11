@@ -18,7 +18,7 @@ const otherIncomeBreakdownSchema = z.object({
   annualAmount: z.number().nullable(),
 }).passthrough();
 
-// ─── Asset Sections ─────────────────────────────────────────────────────────
+// Asset Sections
 
 const currentAssetsSchema = z.object({
   cashAndCashEquivalents: z.number().nullable(),
@@ -72,7 +72,7 @@ const otherAssetsSchema = z.object({
   otherAssetBreakdown: z.array(categoryAmountSchema).default([]),
 }).passthrough();
 
-// ─── Liability Sections ─────────────────────────────────────────────────────
+// Liability Sections
 
 const currentLiabilitiesSchema = z.object({
   accountsPayable: z.number().nullable(),
@@ -108,7 +108,7 @@ const longTermLiabilitiesSchema = z.object({
   longTermLiabilityBreakdown: z.array(categoryAmountSchema).default([]),
 }).passthrough();
 
-// ─── Equity ─────────────────────────────────────────────────────────────────
+// Equity
 
 const equitySchema = z.object({
   commonStock: z.number().nullable(),
@@ -127,7 +127,7 @@ const equitySchema = z.object({
   equityBreakdown: z.array(categoryAmountSchema).default([]),
 }).passthrough();
 
-// ─── Main Balance Sheet Schema ───────────────────────────────────────────────
+// Main Balance Sheet Schema
 
 export const balanceSheetSchema = z.object({
   metadata: z.object({

@@ -1,18 +1,14 @@
-// =============================================================================
 // rules-engine.ts
 // Deterministic deal structuring engine. Takes FullAnalysis + LoanProgram config
 // and outputs recommended deal terms. ZERO AI. Pure rules.
 //
 // THIS IS THE SOURCE OF TRUTH FOR ALL NUMBERS.
 // AI never sets rates, LTV, fees, or financial values.
-// =============================================================================
 
 import type { FullAnalysis } from "@/analysis/analyze";
 import type { LoanProgram } from "@/config/loan-programs";
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 export interface RulesEngineInput {
   analysis: FullAnalysis;
@@ -85,15 +81,15 @@ export interface RulesEngineOutput {
   projectedDscrWithProposedPayment: number | null;
 }
 
-// ---------------------------------------------------------------------------
-// Current base rates (static fallbacks — in production these would come from
-// a rate feed API like FRED or Bloomberg)
-// ---------------------------------------------------------------------------
+// IMPORTANT: These base rates are static fallbacks as of Feb 2026.
+// In production, these should be fetched from a live rate feed (FRED API, Bloomberg, or similar).
+// Stale rates directly impact loan pricing for every deal.
+// Last updated: 2026-02-11
 
 const BASE_RATES: Record<string, number> = {
-  prime: 0.0850,    // WSJ Prime Rate
-  sofr: 0.0530,     // Secured Overnight Financing Rate
-  treasury: 0.0450, // 10-year Treasury
+  prime: 0.0675,    // WSJ Prime Rate (updated Feb 2026)
+  sofr: 0.0430,     // Secured Overnight Financing Rate (updated Feb 2026)
+  treasury: 0.0415, // 10-year Treasury (updated Feb 2026)
 };
 
 /** Get the current base rate. In production, this would call a rate API. */
@@ -101,9 +97,7 @@ export function getBaseRate(type: "prime" | "sofr" | "treasury"): number {
   return BASE_RATES[type];
 }
 
-// ---------------------------------------------------------------------------
 // Eligibility check
-// ---------------------------------------------------------------------------
 
 function checkEligibility(input: RulesEngineInput): EligibilityResult {
   const { analysis, program, requestedAmount } = input;
@@ -195,9 +189,7 @@ function checkEligibility(input: RulesEngineInput): EligibilityResult {
   };
 }
 
-// ---------------------------------------------------------------------------
 // Amount calculation
-// ---------------------------------------------------------------------------
 
 function calculateApprovedAmount(input: RulesEngineInput): { amount: number; ltv: number | null } {
   const { requestedAmount, program, propertyValue, collateralValue } = input;
@@ -230,9 +222,7 @@ function calculateApprovedAmount(input: RulesEngineInput): { amount: number; ltv
   return { amount: Math.round(finalAmount * 100) / 100, ltv };
 }
 
-// ---------------------------------------------------------------------------
 // Rate calculation
-// ---------------------------------------------------------------------------
 
 function calculateRate(input: RulesEngineInput): RateCalculation {
   const { analysis, program } = input;
@@ -277,9 +267,7 @@ function calculateRate(input: RulesEngineInput): RateCalculation {
   };
 }
 
-// ---------------------------------------------------------------------------
 // Term & amortization
-// ---------------------------------------------------------------------------
 
 function calculateTerms(input: RulesEngineInput): {
   termMonths: number;
@@ -299,9 +287,7 @@ function calculateTerms(input: RulesEngineInput): {
   return { termMonths, amortizationMonths, interestOnly };
 }
 
-// ---------------------------------------------------------------------------
 // Payment calculation
-// ---------------------------------------------------------------------------
 
 export function calculateMonthlyPayment(
   principal: number,
@@ -328,9 +314,7 @@ export function calculateMonthlyPayment(
   return Math.round(payment * 100) / 100;
 }
 
-// ---------------------------------------------------------------------------
 // Fee calculation
-// ---------------------------------------------------------------------------
 
 function calculateFees(approvedAmount: number, program: LoanProgram): FeeCalculation[] {
   return program.standardFees.map((fee) => {
@@ -348,9 +332,7 @@ function calculateFees(approvedAmount: number, program: LoanProgram): FeeCalcula
   });
 }
 
-// ---------------------------------------------------------------------------
 // Covenant generation (from program config)
-// ---------------------------------------------------------------------------
 
 function generateCovenants(program: LoanProgram) {
   return program.standardCovenants.map((cov) => ({
@@ -359,9 +341,7 @@ function generateCovenants(program: LoanProgram) {
   }));
 }
 
-// ---------------------------------------------------------------------------
 // Condition generation (deterministic, from program requirements)
-// ---------------------------------------------------------------------------
 
 function generateConditions(input: RulesEngineInput): ConditionItem[] {
   const { program } = input;
@@ -479,9 +459,7 @@ function generateConditions(input: RulesEngineInput): ConditionItem[] {
   return conditions;
 }
 
-// ---------------------------------------------------------------------------
 // Projected DSCR with proposed payment
-// ---------------------------------------------------------------------------
 
 /**
  * Projects borrower payment coverage ratio using qualifying income (not NOI).
@@ -501,9 +479,7 @@ function projectDscrWithPayment(
   return Math.round((monthlyIncome / monthlyPayment) * 100) / 100;
 }
 
-// ---------------------------------------------------------------------------
 // Main entry point
-// ---------------------------------------------------------------------------
 
 export function runRulesEngine(input: RulesEngineInput): RulesEngineOutput {
   // 1. Eligibility

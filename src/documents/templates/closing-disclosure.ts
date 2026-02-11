@@ -1,9 +1,12 @@
-// =============================================================================
 // closing-disclosure.ts
 // Generates a DOCX TRID-compliant Closing Disclosure — pure math, zero AI prose.
 // All numbers derived from DocumentInput (rules engine output).
 // Follows CFPB model form structure (Dodd-Frank / Reg Z).
-// =============================================================================
+//
+// IMPORTANT: This custom DOCX output does NOT constitute the exact CFPB model form
+// H-25 (Closing Disclosure) and therefore does NOT provide safe harbor protection
+// under TILA-RESPA Integrated Disclosure (TRID) rules. The lender must verify their
+// own form compliance with 12 CFR 1026.38 and Appendix H-25 before use in production.
 
 import {
   Document,
@@ -30,9 +33,7 @@ import {
 
 import type { DocumentInput } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function daysBetween(a: Date, b: Date): number {
   const utcA = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
@@ -46,17 +47,29 @@ function perDiem(principal: number, rate: number): number {
 }
 
 /**
- * APR approximation using the N-ratio method:
- * APR = (2 * n * financeCharge) / (amountFinanced * (n + 1))
- * This is the standard consumer lending approximation for TRID purposes.
+ * APR calculation using the actuarial method per Reg Z Appendix J.
+ * Uses Newton-Raphson iteration to solve for the periodic rate r in:
+ *   loanAmount = monthlyPayment * [(1 - (1+r)^-n) / r]
+ * This is REQUIRED by Regulation Z; the N-ratio approximation can diverge
+ * 20-40bps on 30-year loans, exceeding the 1/8% (12.5bps) tolerance.
  */
-function approximateAPR(
-  amountFinanced: number,
-  financeCharge: number,
-  numPayments: number,
+function calculateAPR_actuarial(
+  loanAmount: number,
+  totalFinanceCharge: number,
+  monthlyPayment: number,
+  termMonths: number,
 ): number {
-  if (amountFinanced <= 0 || numPayments <= 0) return 0;
-  return (2 * numPayments * financeCharge) / (amountFinanced * (numPayments + 1));
+  if (loanAmount <= 0 || termMonths <= 0 || monthlyPayment <= 0) return 0;
+  // Newton-Raphson to find monthly rate
+  let r = monthlyPayment / loanAmount; // initial guess
+  for (let i = 0; i < 100; i++) {
+    const pv = monthlyPayment * (1 - Math.pow(1 + r, -termMonths)) / r;
+    const dpv = monthlyPayment * ((-termMonths * Math.pow(1 + r, -termMonths - 1) * r - (1 - Math.pow(1 + r, -termMonths))) / (r * r));
+    const newR = r - (pv - loanAmount) / dpv;
+    if (Math.abs(newR - r) < 1e-10) break;
+    r = newR;
+  }
+  return r * 12 * 100; // annualize and convert to percentage
 }
 
 /** Categorize fees into origination, services not shopped, and services shopped */
@@ -95,9 +108,7 @@ function categorizeFees(fees: DocumentInput["terms"]["fees"]): {
   return { origination, notShopped, shopped };
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildClosingDisclosure(input: DocumentInput): Document {
   const { terms } = input;
@@ -121,13 +132,11 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
     balloonAmount = terms.approvedAmount;
   }
 
-  // =========================================================================
   // PAGE 1: General Information + Loan Terms
-  // =========================================================================
   children.push(documentTitle("Closing Disclosure"));
   children.push(spacer(4));
 
-  // -- Closing Information --
+  // Closing Information
   children.push(sectionHeading("Closing Information"));
   children.push(
     createTable(
@@ -145,7 +154,7 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
   );
   children.push(spacer(6));
 
-  // -- Transaction Information --
+  // Transaction Information
   children.push(sectionHeading("Transaction Information"));
   children.push(
     createTable(
@@ -160,7 +169,7 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
   );
   children.push(spacer(6));
 
-  // -- Loan Information --
+  // Loan Information
   children.push(sectionHeading("Loan Information"));
 
   const loanType = (() => {
@@ -189,7 +198,7 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
   );
   children.push(spacer(6));
 
-  // -- Loan Terms Table --
+  // Loan Terms Table
   children.push(sectionHeading("Loan Terms"));
   children.push(
     createTable(
@@ -226,7 +235,7 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
   );
   children.push(spacer(6));
 
-  // -- Projected Payments --
+  // Projected Payments
   children.push(sectionHeading("Projected Payments"));
 
   const estimatedEscrow = 0; // Placeholder — escrow depends on property specifics
@@ -253,12 +262,10 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
     ),
   );
 
-  // -- Page break --
+  // Page break
   children.push(new Paragraph({ children: [new PageBreak()] }));
 
-  // =========================================================================
   // PAGE 2: Closing Cost Details
-  // =========================================================================
   children.push(sectionHeading("Closing Cost Details"));
 
   const categorized = categorizeFees(terms.fees);
@@ -408,12 +415,10 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
     ]),
   );
 
-  // -- Page break --
+  // Page break
   children.push(new Paragraph({ children: [new PageBreak()] }));
 
-  // =========================================================================
   // PAGE 3: Summaries + Cash to Close
-  // =========================================================================
   children.push(sectionHeading("Calculating Cash to Close"));
 
   const closingCostsPaidBefore = 0;
@@ -444,7 +449,7 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
   );
   children.push(spacer(6));
 
-  // -- Summaries of Transactions --
+  // Summaries of Transactions
   children.push(sectionHeading("Summaries of Transactions"));
 
   children.push(bodyText("Borrower's Transaction", { bold: true }));
@@ -461,12 +466,10 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
     ),
   );
 
-  // -- Page break --
+  // Page break
   children.push(new Paragraph({ children: [new PageBreak()] }));
 
-  // =========================================================================
   // PAGE 4: Loan Calculations + Other Disclosures
-  // =========================================================================
   children.push(sectionHeading("Loan Calculations"));
 
   // Total of Payments
@@ -480,8 +483,8 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
   // Amount Financed
   const amountFinanced = terms.approvedAmount - totalPrepaidFinanceCharges;
 
-  // APR (N-ratio approximation)
-  const apr = approximateAPR(amountFinanced, financeCharge, terms.termMonths);
+  // APR (Reg Z Appendix J actuarial method — Newton-Raphson iteration)
+  const apr = calculateAPR_actuarial(amountFinanced, financeCharge, terms.monthlyPayment, terms.termMonths);
 
   // Total Interest Percentage (TIP)
   const totalInterest = totalOfPayments - terms.approvedAmount;
@@ -494,7 +497,7 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
         ["Total of Payments", formatCurrencyDetailed(totalOfPayments)],
         ["Finance Charge", formatCurrencyDetailed(financeCharge)],
         ["Amount Financed", formatCurrencyDetailed(amountFinanced)],
-        ["Annual Percentage Rate (APR)", `${(apr * 100).toFixed(3)}%`],
+        ["Annual Percentage Rate (APR)", `${apr.toFixed(3)}%`],
         ["Total Interest Percentage (TIP)", `${tip.toFixed(3)}%`],
       ],
       { columnWidths: [50, 50], alternateRows: true },
@@ -529,7 +532,7 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
   );
   children.push(spacer(6));
 
-  // -- Other Disclosures --
+  // Other Disclosures
   children.push(sectionHeading("Other Disclosures"));
 
   children.push(bodyText("Appraisal", { bold: true }));
@@ -565,12 +568,10 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
     ),
   );
 
-  // -- Page break --
+  // Page break
   children.push(new Paragraph({ children: [new PageBreak()] }));
 
-  // =========================================================================
   // PAGE 5: Contact Information + Confirm Receipt
-  // =========================================================================
   children.push(sectionHeading("Contact Information"));
 
   children.push(
@@ -586,7 +587,7 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -- Confirm Receipt --
+  // Confirm Receipt
   children.push(sectionHeading("Confirm Receipt"));
   children.push(
     bodyText(
@@ -612,9 +613,7 @@ export function buildClosingDisclosure(input: DocumentInput): Document {
     ...signatureBlock("____________________________", "Co-Borrower"),
   );
 
-  // -------------------------------------------------------------------------
   // Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "Closing Disclosure",
     headerRight: `Closing Disclosure — ${input.borrowerName}`,

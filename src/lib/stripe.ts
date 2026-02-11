@@ -26,4 +26,9 @@ export const STRIPE_PRICES = {
   get monthly() { return process.env.STRIPE_MONTHLY_PRICE_ID ?? ""; },
 };
 
+export const STRIPE_BIO_PRICES = {
+  get license() { return process.env.STRIPE_BIO_LICENSE_PRICE_ID ?? ""; },
+  get monthly() { return process.env.STRIPE_BIO_MONTHLY_PRICE_ID ?? ""; },
+};
+
 export const MAX_SEATS = 25;

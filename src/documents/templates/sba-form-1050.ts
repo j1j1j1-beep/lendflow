@@ -1,10 +1,8 @@
-// =============================================================================
 // sba-form-1050.ts
 // Generates a DOCX SBA Form 1050 — SBA Settlement Sheet.
 // ZERO AI — pure deterministic data mapping from DocumentInput.
 // Calculates net proceeds from loan amount minus all known fees and
 // disbursement items. Unknown amounts use placeholder text.
-// =============================================================================
 
 import {
   Document,
@@ -27,9 +25,7 @@ import {
 
 import type { DocumentInput, Fee } from "../types";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Search fees for one matching a keyword (case-insensitive).
@@ -46,17 +42,13 @@ function findFee(fees: Fee[], keyword: string): Fee | null {
   );
 }
 
-// ---------------------------------------------------------------------------
 // Builder
-// ---------------------------------------------------------------------------
 
 export function buildSbaForm1050(input: DocumentInput): Document {
   const { terms } = input;
   const children: (Paragraph | Table)[] = [];
 
-  // -------------------------------------------------------------------------
   // Title
-  // -------------------------------------------------------------------------
   children.push(documentTitle("SBA Form 1050"));
   children.push(spacer(2));
   children.push(
@@ -74,9 +66,7 @@ export function buildSbaForm1050(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Loan Identification
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Loan Identification"));
   children.push(spacer(4));
 
@@ -92,9 +82,7 @@ export function buildSbaForm1050(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Gross Loan Amount
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Gross Loan Amount"));
   children.push(spacer(4));
 
@@ -106,9 +94,7 @@ export function buildSbaForm1050(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Disbursement Breakdown
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Disbursement Breakdown"));
   children.push(spacer(4));
   children.push(
@@ -255,9 +241,7 @@ export function buildSbaForm1050(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Summary
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Settlement Summary"));
   children.push(spacer(4));
 
@@ -295,9 +279,7 @@ export function buildSbaForm1050(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Pay to Borrower
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Disbursement Instructions"));
   children.push(spacer(4));
 
@@ -323,9 +305,7 @@ export function buildSbaForm1050(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Certification
-  // -------------------------------------------------------------------------
   children.push(sectionHeading("Certification"));
   children.push(spacer(4));
 
@@ -345,9 +325,7 @@ export function buildSbaForm1050(input: DocumentInput): Document {
   );
   children.push(spacer(8));
 
-  // -------------------------------------------------------------------------
   // Signature Blocks
-  // -------------------------------------------------------------------------
   children.push(
     bodyText("BORROWER:", { bold: true, color: COLORS.primary }),
   );
@@ -392,9 +370,7 @@ export function buildSbaForm1050(input: DocumentInput): Document {
   children.push(bodyText("Print Name: ____________________________"));
   children.push(bodyText("Date: ____________________________"));
 
-  // -------------------------------------------------------------------------
   // Wrap in legal document shell
-  // -------------------------------------------------------------------------
   return buildLegalDocument({
     title: "SBA Form 1050 — Settlement Sheet",
     headerRight: `SBA Form 1050 — ${input.borrowerName}`,

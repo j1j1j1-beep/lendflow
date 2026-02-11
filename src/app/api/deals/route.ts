@@ -14,9 +14,7 @@ const VALID_STATUSES = new Set([
   "NEEDS_TERM_REVIEW", "GENERATING_DOCS", "GENERATING_MEMO", "COMPLETE", "ERROR",
 ]);
 
-// ---------------------------------------------------------------------------
 // POST /api/deals - Create a new deal
-// ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
   const limited = await withRateLimit(request, writeLimit);
@@ -108,9 +106,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ---------------------------------------------------------------------------
 // GET /api/deals - List deals for the org
-// ---------------------------------------------------------------------------
 
 export async function GET(request: NextRequest) {
   try {

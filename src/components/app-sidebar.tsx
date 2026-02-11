@@ -7,6 +7,7 @@ import { useTheme } from "next-themes";
 import {
   LayoutDashboard,
   FilePlus,
+  FlaskConical,
   Moon,
   Sun,
   Settings,
@@ -42,6 +43,19 @@ const NAV_ITEMS = [
     label: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
+  },
+];
+
+const BIO_NAV_ITEMS = [
+  {
+    label: "Bio Programs",
+    href: "/dashboard/bio",
+    icon: FlaskConical,
+  },
+  {
+    label: "New Program",
+    href: "/dashboard/bio/new",
+    icon: FilePlus,
   },
 ];
 
@@ -82,6 +96,30 @@ export function AppSidebar() {
                 const isActive =
                   item.href === "/dashboard"
                     ? pathname === "/dashboard"
+                    : pathname.startsWith(item.href);
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                      <Link href={item.href}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Biopharma</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {BIO_NAV_ITEMS.map((item) => {
+                const isActive =
+                  item.href === "/dashboard/bio"
+                    ? pathname === "/dashboard/bio"
                     : pathname.startsWith(item.href);
                 return (
                   <SidebarMenuItem key={item.href}>
