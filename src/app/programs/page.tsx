@@ -463,7 +463,7 @@ export default function ProgramsPage() {
                       <div className="flex items-center gap-2 mb-3">
                         <Scale className="h-4 w-4 text-muted-foreground" />
                         <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                          Key Regulations
+                          Regulations
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-2">

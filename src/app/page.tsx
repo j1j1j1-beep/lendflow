@@ -370,7 +370,7 @@ export default async function Home() {
               { value: "Up to 37", label: "Legal documents per deal", delay: "100ms" },
               { value: "50", suffix: "-state", label: "Regulatory compliance", delay: "150ms" },
               { value: "10", label: "Loan programs supported", delay: "200ms" },
-              { value: "20", suffix: "+", label: "Federal and state regulations", delay: "250ms" },
+              { value: "75", suffix: "+", label: "Federal and state regulations", delay: "250ms" },
             ].map((stat) => (
               <div
                 key={stat.label}
