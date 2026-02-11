@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Landmark } from "lucide-react";
+import { Landmark, FlaskConical } from "lucide-react";
 
 export function MarketingFooter() {
   return (
@@ -8,40 +8,54 @@ export function MarketingFooter() {
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-1">
-            <Link href="/" className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Landmark className="h-4 w-4" />
               </div>
               <span className="text-lg font-semibold tracking-tight text-foreground">
                 OpenShut
               </span>
-            </Link>
+            </div>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-xs">
-              AI-powered loan origination. From borrower file to ready-to-sign deal terms.
+              AI-powered platforms for lending and biopharma regulatory submissions.
             </p>
           </div>
 
-          {/* Product */}
+          {/* Products */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3">Product</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-3">Products</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/" className="group flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                  <Landmark className="h-3 w-3 transition-transform duration-150 group-hover:scale-110" />
+                  OpenShut Lending
+                </Link>
+              </li>
+              <li>
+                <Link href="/bio" className="group flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-150 hover:text-emerald-500">
+                  <FlaskConical className="h-3 w-3 transition-transform duration-150 group-hover:scale-110" />
+                  OpenShut Bio
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Lending */}
+          <div>
+            <h4 className="text-sm font-semibold text-foreground mb-3">Lending</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/features" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="/how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  How It Works
-                </Link>
-              </li>
-              <li>
-                <Link href="/programs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/programs" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                   Loan Programs
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/pricing" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                   Pricing
                 </Link>
               </li>
@@ -57,19 +71,6 @@ export function MarketingFooter() {
               </li>
               <li>
                 <span className="text-sm text-muted-foreground">Terms of Service</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3">Resources</h4>
-            <ul className="space-y-2">
-              <li>
-                <span className="text-sm text-muted-foreground">Documentation</span>
-              </li>
-              <li>
-                <span className="text-sm text-muted-foreground">Support</span>
               </li>
             </ul>
           </div>

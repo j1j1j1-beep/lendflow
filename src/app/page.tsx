@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { SignInButton } from "@clerk/nextjs";
+import Link from "next/link";
 import {
   FileText,
   ShieldCheck,
@@ -18,9 +19,6 @@ import {
   Lock,
   BookOpen,
   Landmark,
-  FlaskConical,
-  Microscope,
-  TestTubes,
 } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
@@ -32,16 +30,14 @@ export default async function Home() {
 
   return (
     <div className="dark flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
-      {/* ── Gradient Orbs ── */}
+      {/* Gradient Orbs */}
       <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-primary/5 blur-3xl" />
       <div className="pointer-events-none absolute top-1/3 -left-40 h-[500px] w-[500px] rounded-full bg-primary/3 blur-3xl" />
       <div className="pointer-events-none absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-primary/4 blur-3xl" />
 
       <MarketingNav />
 
-      {/* ══════════════════════════════════════════════
-          1. HERO
-      ══════════════════════════════════════════════ */}
+      {/* 1. HERO */}
       <section className="relative w-full">
         <div className="mx-auto max-w-6xl px-6 pt-24 pb-20 sm:pt-32 sm:pb-28 lg:pt-40 lg:pb-32">
           <div className="max-w-4xl">
@@ -69,9 +65,9 @@ export default async function Home() {
               style={{ animationDelay: "150ms" }}
             >
               <SignInButton mode="modal">
-                <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
+                <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
                   Try It Free
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
               </SignInButton>
             </div>
@@ -79,15 +75,11 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════
-          2. LOAN PROGRAMS
-      ══════════════════════════════════════════════ */}
+      {/* 2. LOAN PROGRAMS */}
       <section className="w-full border-y border-border/50 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <h2
-              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
-            >
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up">
               10 loan programs, each with its own regulatory framework
             </h2>
             <p className="mt-4 text-muted-foreground animate-fade-up" style={{ animationDelay: "50ms" }}>
@@ -110,7 +102,7 @@ export default async function Home() {
             ].map((program) => (
               <div
                 key={program.name}
-                className="rounded-lg border bg-card p-4 text-center animate-fade-up"
+                className="rounded-lg border bg-card p-4 text-center transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-foreground/15 animate-fade-up"
                 style={{ animationDelay: program.delay }}
               >
                 <div className="text-sm font-semibold text-card-foreground">{program.name}</div>
@@ -121,15 +113,11 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════
-          3. HOW IT WORKS
-      ══════════════════════════════════════════════ */}
+      {/* 3. HOW IT WORKS */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2
-              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
-            >
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up">
               Upload to loan package in three steps
             </h2>
           </div>
@@ -160,10 +148,10 @@ export default async function Home() {
             ].map((step) => (
               <div
                 key={step.step}
-                className="relative text-center animate-fade-up"
+                className="group relative text-center animate-fade-up"
                 style={{ animationDelay: step.delay }}
               >
-                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-200 group-hover:shadow-xl group-hover:shadow-primary/30 group-hover:scale-105">
                   <step.icon className="h-6 w-6" />
                 </div>
                 <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -181,15 +169,11 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════
-          4. WHAT OPENSHUT HANDLES
-      ══════════════════════════════════════════════ */}
+      {/* 4. WHAT OPENSHUT HANDLES */}
       <section className="w-full border-t border-border/50 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2
-              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
-            >
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up">
               What OpenShut handles
             </h2>
           </div>
@@ -241,15 +225,11 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════
-          5. REGULATORY FRAMEWORK
-      ══════════════════════════════════════════════ */}
+      {/* 5. REGULATORY FRAMEWORK */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-2xl mx-auto mb-6">
-            <h2
-              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
-            >
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up">
               Built on the regulations that govern your deals
             </h2>
             <p className="mt-4 text-muted-foreground animate-fade-up" style={{ animationDelay: "50ms" }}>
@@ -340,11 +320,11 @@ export default async function Home() {
             ].map((group) => (
               <div
                 key={group.category}
-                className="rounded-xl border bg-card p-7 animate-fade-up"
+                className="group rounded-xl border bg-card p-7 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 animate-fade-up"
                 style={{ animationDelay: group.delay }}
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <group.icon className="h-5 w-5 text-primary" />
+                  <group.icon className="h-5 w-5 text-primary transition-transform duration-200 group-hover:scale-110" />
                   <h3 className="text-sm font-semibold text-card-foreground">
                     {group.category}
                   </h3>
@@ -363,9 +343,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════
-          6. STATS
-      ══════════════════════════════════════════════ */}
+      {/* 6. STATS */}
       <section className="w-full border-y border-border/50 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
@@ -395,14 +373,10 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════
-          7. THE PROBLEM
-      ══════════════════════════════════════════════ */}
+      {/* 7. THE PROBLEM */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-          <h2
-            className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl text-center mb-4 animate-fade-up"
-          >
+          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl text-center mb-4 animate-fade-up">
             You already know what&apos;s broken
           </h2>
           <p className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "50ms" }}>
@@ -434,7 +408,7 @@ export default async function Home() {
             ].map((problem) => (
               <div
                 key={problem.label}
-                className="rounded-xl border border-destructive/20 bg-destructive/5 p-7 animate-fade-up"
+                className="rounded-xl border border-destructive/20 bg-destructive/5 p-7 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-destructive/30 animate-fade-up"
                 style={{ animationDelay: problem.delay }}
               >
                 <problem.icon className="h-5 w-5 text-destructive mb-4" />
@@ -447,342 +421,10 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════
-          BIO VERTICAL — TRANSITION
-      ══════════════════════════════════════════════ */}
-      <section className="w-full border-t border-border/50" id="bio">
-        <div className="mx-auto max-w-6xl px-6 py-16 sm:py-20 text-center">
-          <div
-            className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-400 animate-fade-up"
-          >
-            <FlaskConical className="h-3.5 w-3.5" />
-            Also from OpenShut
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          BIO HERO
-      ══════════════════════════════════════════════ */}
-      <section className="relative w-full border-t border-emerald-500/10 bg-emerald-500/[0.02]">
-        <div className="pointer-events-none absolute top-0 left-1/3 h-[500px] w-[500px] rounded-full bg-emerald-500/5 blur-3xl" />
-        <div className="mx-auto max-w-6xl px-6 pt-16 pb-20 sm:pt-24 sm:pb-28">
-          <div className="max-w-4xl">
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 animate-fade-up">
-              <FlaskConical className="h-6 w-6" />
-            </div>
-            <h2
-              className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl animate-fade-up"
-              style={{ animationDelay: "50ms" }}
-            >
-              From raw lab data to
-              <br />
-              <span className="text-emerald-500">FDA-ready IND submission in hours.</span>
-            </h2>
-            <p
-              className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-4xl leading-relaxed animate-fade-up"
-              style={{ animationDelay: "100ms" }}
-            >
-              Upload your batch records, stability data, toxicology reports, and PK studies.
-              OpenShut Bio extracts every data point, runs it through a deterministic rules engine
-              built on 21 CFR Part 312, ICH guidelines, and FDA Project Optimus, then generates
-              all 11 IND submission documents. Every number verified. Every regulatory reference cited.
-            </p>
-            <div
-              className="mt-10 flex flex-wrap items-center gap-4 animate-fade-up"
-              style={{ animationDelay: "150ms" }}
-            >
-              <SignInButton mode="modal">
-                <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-8 text-sm font-medium text-white shadow-sm transition-all duration-150 ease-out hover:bg-emerald-700 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
-                  Try Bio Free
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </SignInButton>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          BIO DOCUMENT TYPES
-      ══════════════════════════════════════════════ */}
-      <section className="w-full border-y border-emerald-500/10 bg-emerald-500/[0.03]">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <h2
-              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
-            >
-              11 IND submission documents, generated and verified
-            </h2>
-            <p className="mt-4 text-muted-foreground animate-fade-up" style={{ animationDelay: "50ms" }}>
-              Every document follows the CTD (Common Technical Document) format required by FDA, with regulatory citations to the governing guideline.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {[
-              { name: "Module 1", sub: "Administrative", delay: "50ms" },
-              { name: "Module 2", sub: "Summaries", delay: "100ms" },
-              { name: "Module 3", sub: "Quality (CMC)", delay: "150ms" },
-              { name: "Module 4", sub: "Nonclinical", delay: "200ms" },
-              { name: "Module 5", sub: "Clinical", delay: "250ms" },
-              { name: "Investigator Brochure", sub: "IB", delay: "300ms" },
-              { name: "Clinical Protocol", sub: "Phase 1", delay: "350ms" },
-              { name: "Pre-IND Briefing", sub: "FDA Meeting", delay: "400ms" },
-              { name: "Informed Consent", sub: "ICF", delay: "450ms" },
-              { name: "Diversity Action Plan", sub: "FDA 2024", delay: "500ms" },
-              { name: "FDA Form 1571", sub: "IND Application", delay: "550ms" },
-            ].map((doc) => (
-              <div
-                key={doc.name}
-                className="rounded-lg border border-emerald-500/20 bg-card p-4 text-center animate-fade-up"
-                style={{ animationDelay: doc.delay }}
-              >
-                <div className="text-sm font-semibold text-card-foreground">{doc.name}</div>
-                <div className="mt-1 text-xs text-muted-foreground">{doc.sub}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          BIO HOW IT WORKS
-      ══════════════════════════════════════════════ */}
-      <section className="w-full bg-emerald-500/[0.02]">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2
-              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
-            >
-              Upload lab data to IND package in three steps
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-            {[
-              {
-                step: "01",
-                icon: Upload,
-                title: "Drop in your lab data",
-                desc: "Batch records, certificates of analysis, stability reports, tox studies, PK data, clinical protocols. Any format. Every upload encrypted.",
-                delay: "100ms",
-              },
-              {
-                step: "02",
-                icon: Microscope,
-                title: "AI extracts, rules engine verifies",
-                desc: "Every data point is extracted and validated against 21 CFR Part 312 requirements. DAR, purity, NOAEL, HED calculations, stability trending, dose escalation design -- all verified deterministically.",
-                delay: "175ms",
-              },
-              {
-                step: "03",
-                icon: Download,
-                title: "Download the complete IND package",
-                desc: "All 11 CTD modules and supporting documents, each with compliance checks and regulatory citations. Download individually, edit inline, or grab the entire submission as a ZIP.",
-                delay: "250ms",
-              },
-            ].map((s) => (
-              <div
-                key={s.step}
-                className="relative text-center animate-fade-up"
-                style={{ animationDelay: s.delay }}
-              >
-                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/20">
-                  <s.icon className="h-6 w-6" />
-                </div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  Step {s.step}
-                </div>
-                <h3 className="text-lg font-semibold text-foreground">
-                  {s.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
-                  {s.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          BIO REGULATORY FRAMEWORK
-      ══════════════════════════════════════════════ */}
-      <section className="w-full border-y border-emerald-500/10 bg-emerald-500/[0.03]">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <div className="text-center max-w-2xl mx-auto mb-6">
-            <h2
-              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up"
-            >
-              Built on the regulations that govern your submission
-            </h2>
-            <p className="mt-4 text-muted-foreground animate-fade-up" style={{ animationDelay: "50ms" }}>
-              Every document is verified against the actual FDA regulations and ICH guidelines. Not summaries. The regulations themselves.
-            </p>
-          </div>
-
-          <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                icon: Landmark,
-                category: "FDA IND Requirements",
-                items: [
-                  "21 CFR Part 312 (IND Regulations)",
-                  "21 CFR Part 312.23 (IND Content)",
-                  "21 CFR Part 312.32 (Safety Reporting)",
-                  "FDA Guidance: Content and Format of INDs",
-                  "FDA Project Optimus (Dose Optimization)",
-                  "FDA Diversity Action Plan Guidance (2024)",
-                ],
-                delay: "100ms",
-              },
-              {
-                icon: BookOpen,
-                category: "ICH Guidelines",
-                items: [
-                  "ICH M4 (CTD Format & Structure)",
-                  "ICH S6(R1) (Biotechnology Products)",
-                  "ICH S9 (Anticancer Pharmaceuticals)",
-                  "ICH E6(R2) (Good Clinical Practice)",
-                  "ICH Q1A (Stability Testing)",
-                  "ICH Q6B (Specifications for Biologics)",
-                ],
-                delay: "150ms",
-              },
-              {
-                icon: TestTubes,
-                category: "GLP / GMP / GCP",
-                items: [
-                  "21 CFR Part 58 (GLP for Nonclinical)",
-                  "21 CFR Part 210/211 (cGMP)",
-                  "21 CFR Part 11 (Electronic Records)",
-                  "21 CFR Part 50 (Informed Consent)",
-                  "21 CFR Part 56 (IRB Requirements)",
-                  "USP <1> Injections",
-                ],
-                delay: "200ms",
-              },
-              {
-                icon: ShieldCheck,
-                category: "ADC-Specific Requirements",
-                items: [
-                  "DAR validation (HIC-HPLC, mass spec)",
-                  "Free payload quantitation (<2% spec)",
-                  "Linker stability assessment",
-                  "Conjugation site characterization",
-                  "Potency assay (cytotoxicity IC50)",
-                  "Aggregation monitoring (SE-HPLC)",
-                ],
-                delay: "250ms",
-              },
-              {
-                icon: Scale,
-                category: "Safety & Dose Selection",
-                items: [
-                  "NOAEL to HED conversion (FDA guidance)",
-                  "Safety margin calculations",
-                  "Starting dose justification (1/10 HED)",
-                  "3+3 dose escalation design",
-                  "DLT definitions per CTCAE v5.0",
-                  "Therapeutic index assessment",
-                ],
-                delay: "300ms",
-              },
-              {
-                icon: Lock,
-                category: "Security & Compliance",
-                items: [
-                  "End-to-end encryption at rest and in transit",
-                  "21 CFR Part 11 electronic signatures",
-                  "Full audit trail on all actions",
-                  "Role-based access controls",
-                  "Organization-level data isolation",
-                  "No data shared or used for training",
-                ],
-                delay: "350ms",
-              },
-            ].map((group) => (
-              <div
-                key={group.category}
-                className="rounded-xl border border-emerald-500/20 bg-card p-7 animate-fade-up"
-                style={{ animationDelay: group.delay }}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <group.icon className="h-5 w-5 text-emerald-500" />
-                  <h3 className="text-sm font-semibold text-card-foreground">
-                    {group.category}
-                  </h3>
-                </div>
-                <ul className="space-y-2">
-                  {group.items.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          BIO CTA
-      ══════════════════════════════════════════════ */}
-      <section className="w-full bg-emerald-500/[0.02]">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <div
-            className="relative rounded-2xl border border-emerald-500/20 bg-card p-12 sm:p-16 text-center overflow-hidden animate-fade-up"
-          >
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="h-64 w-64 rounded-full bg-emerald-500/5 blur-3xl" />
-            </div>
-
-            <div className="relative">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Your IND submission,
-                <br className="hidden sm:block" /> verified and ready.
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                One program, fully processed. See what the platform does with real preclinical data.
-              </p>
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                <SignInButton mode="modal">
-                  <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-8 text-sm font-medium text-white shadow-sm transition-all duration-150 ease-out hover:bg-emerald-700 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
-                    Try Bio Free
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </SignInButton>
-              </div>
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <Lock className="h-3.5 w-3.5 text-emerald-500" />
-                  Every upload encrypted
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                  21 CFR Part 11 compliant
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                  Verified against FDA regulations
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          8. BOTTOM CTA
-      ══════════════════════════════════════════════ */}
+      {/* 8. BOTTOM CTA */}
       <section className="w-full border-t border-border/50">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <div
-            className="relative rounded-2xl border bg-card p-12 sm:p-16 text-center overflow-hidden animate-fade-up"
-          >
+          <div className="relative rounded-2xl border bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 hover:border-foreground/15 hover:shadow-xl animate-fade-up">
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
             </div>
@@ -797,9 +439,9 @@ export default async function Home() {
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                 <SignInButton mode="modal">
-                  <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
+                  <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
                     Try It Free
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </button>
                 </SignInButton>
               </div>
@@ -819,6 +461,19 @@ export default async function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Cross-sell */}
+      <section className="w-full py-8">
+        <div className="mx-auto max-w-6xl px-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            Also available:{" "}
+            <Link href="/bio" className="text-emerald-500 hover:text-emerald-400 font-medium transition-colors">
+              OpenShut Bio
+            </Link>
+            {" "}&mdash; FDA-ready IND submissions for biopharma
+          </p>
         </div>
       </section>
 

@@ -11,7 +11,6 @@ import {
   Moon,
   Sun,
   Settings,
-  Landmark,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,36 +26,18 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Switch } from "@/components/ui/switch";
+import { ProductSwitcher, useActiveProduct } from "@/components/product-switcher";
 
-const NAV_ITEMS = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "New Deal",
-    href: "/dashboard/deals/new",
-    icon: FilePlus,
-  },
-  {
-    label: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-  },
+const LENDING_NAV_ITEMS = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "New Deal", href: "/dashboard/deals/new", icon: FilePlus },
+  { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 const BIO_NAV_ITEMS = [
-  {
-    label: "Bio Programs",
-    href: "/dashboard/bio",
-    icon: FlaskConical,
-  },
-  {
-    label: "New Program",
-    href: "/dashboard/bio/new",
-    icon: FilePlus,
-  },
+  { label: "Programs", href: "/dashboard/bio", icon: FlaskConical },
+  { label: "New Program", href: "/dashboard/bio/new", icon: FilePlus },
+  { label: "Settings", href: "/dashboard/settings?tab=bio", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -64,25 +45,17 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const activeProduct = useActiveProduct();
+  const isBio = activeProduct === "bio";
+
+  const navItems = isBio ? BIO_NAV_ITEMS : LENDING_NAV_ITEMS;
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
       <SidebarHeader className="border-b border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard" className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm shadow-primary/20 transition-shadow duration-200 group-hover:shadow-md group-hover:shadow-primary/25">
-                  <Landmark className="h-4 w-4" />
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold tracking-tight">OpenShut</span>
-                  <span className="text-xs text-muted-foreground">
-                    Loan Origination
-                  </span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
+            <ProductSwitcher />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -92,40 +65,27 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => {
+              {navItems.map((item) => {
                 const isActive =
                   item.href === "/dashboard"
                     ? pathname === "/dashboard"
-                    : pathname.startsWith(item.href);
+                    : item.href.startsWith("/dashboard/settings")
+                      ? pathname.startsWith("/dashboard/settings")
+                      : pathname.startsWith(item.href);
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.label}
+                      className={`transition-all duration-150 ease-out ${
+                        isActive && isBio
+                          ? "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/15"
+                          : ""
+                      }`}
+                    >
                       <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Biopharma</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {BIO_NAV_ITEMS.map((item) => {
-                const isActive =
-                  item.href === "/dashboard/bio"
-                    ? pathname === "/dashboard/bio"
-                    : pathname.startsWith(item.href);
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
-                      <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className={`h-4 w-4 ${isActive && isBio ? "text-emerald-500" : ""}`} />
                         <span>{item.label}</span>
                       </Link>
                     </SidebarMenuButton>

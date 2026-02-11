@@ -3,36 +3,38 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignInButton } from "@clerk/nextjs";
-import { Landmark, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { MarketingLogo, useActiveProduct } from "@/components/product-switcher";
 
-const NAV_LINKS = [
+const LENDING_NAV_LINKS = [
   { href: "/features", label: "Features" },
   { href: "/how-it-works", label: "How It Works" },
   { href: "/programs", label: "Programs" },
-  { href: "#bio", label: "Bio" },
   { href: "/pricing", label: "Pricing" },
+];
+
+const BIO_NAV_LINKS = [
+  { href: "/bio#documents", label: "Documents" },
+  { href: "/bio#how-it-works", label: "How It Works" },
+  { href: "/bio#regulatory", label: "Regulatory" },
 ];
 
 export function MarketingNav() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const activeProduct = useActiveProduct();
+  const navLinks = activeProduct === "bio" ? BIO_NAV_LINKS : LENDING_NAV_LINKS;
+  const isBio = activeProduct === "bio";
 
   return (
     <nav className="w-full border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="mx-auto max-w-6xl flex items-center justify-between px-6 py-4">
-        {/* Logo + Desktop Links */}
+        {/* Logo (dropdown) + Desktop Links */}
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Landmark className="h-4 w-4" />
-            </div>
-            <span className="text-lg font-semibold tracking-tight text-foreground">
-              OpenShut
-            </span>
-          </Link>
+          <MarketingLogo />
           <div className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -56,8 +58,14 @@ export function MarketingNav() {
             </button>
           </SignInButton>
           <SignInButton mode="modal">
-            <button className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md">
-              Try It Free
+            <button
+              className={`inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md ${
+                isBio
+                  ? "bg-emerald-600 hover:bg-emerald-700"
+                  : "bg-primary hover:bg-primary/90"
+              }`}
+            >
+              {isBio ? "Try Bio Free" : "Try It Free"}
             </button>
           </SignInButton>
         </div>
@@ -75,7 +83,7 @@ export function MarketingNav() {
       {mobileOpen && (
         <div className="md:hidden border-t border-border/50 bg-background px-6 pb-4 pt-2">
           <div className="flex flex-col gap-1">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -97,8 +105,14 @@ export function MarketingNav() {
               </button>
             </SignInButton>
             <SignInButton mode="modal">
-              <button className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90">
-                Try It Free
+              <button
+                className={`w-full rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition-all ${
+                  isBio
+                    ? "bg-emerald-600 hover:bg-emerald-700"
+                    : "bg-primary hover:bg-primary/90"
+                }`}
+              >
+                {isBio ? "Try Bio Free" : "Try It Free"}
               </button>
             </SignInButton>
           </div>
