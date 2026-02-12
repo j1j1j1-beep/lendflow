@@ -90,7 +90,7 @@ export function DealCard({ deal }: DealCardProps) {
   const isProcessing = PROCESSING_STATUSES.includes(deal.status);
 
   return (
-    <Link href={`/dashboard/deals/${deal.id}`}>
+    <Link href={`/dashboard/lending/${deal.id}`}>
       <Card className="group transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm">
         <CardContent className="pt-0">
           <div className="flex items-start justify-between mb-3">

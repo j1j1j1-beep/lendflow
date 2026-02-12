@@ -135,7 +135,7 @@ export default function ReviewPage() {
       }
 
       toast.success("Review submitted! Resuming analysis pipeline.");
-      router.push(`/dashboard/deals/${dealId}`);
+      router.push(`/dashboard/lending/${dealId}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to submit review");
       setSubmitting(false);
@@ -176,7 +176,7 @@ export default function ReviewPage() {
           <AlertDescription>
             This deal does not currently require review.{" "}
             <button
-              onClick={() => router.push(`/dashboard/deals/${dealId}`)}
+              onClick={() => router.push(`/dashboard/lending/${dealId}`)}
               className="font-medium underline"
             >
               Return to deal
@@ -191,7 +191,7 @@ export default function ReviewPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
       <div className="mb-6">
         <button
-          onClick={() => router.push(`/dashboard/deals/${dealId}`)}
+          onClick={() => router.push(`/dashboard/lending/${dealId}`)}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-150 hover:-translate-x-0.5 mb-3"
         >
           <ArrowLeft className="h-3.5 w-3.5" />

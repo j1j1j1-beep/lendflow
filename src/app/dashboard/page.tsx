@@ -151,7 +151,7 @@ export default function DashboardPage() {
               </button>
             )}
           </div>
-          <Link href="/dashboard/deals/new" className="shrink-0">
+          <Link href="/dashboard/lending/new" className="shrink-0">
             <Button size="sm">
               <Plus className="h-4 w-4" />
               New Deal
@@ -240,14 +240,14 @@ export default function DashboardPage() {
             Upload borrower documents to generate a complete loan package — credit analysis, deal structuring, and legal documents in minutes.
           </p>
           <div className="flex items-center gap-3">
-            <Link href="/dashboard/deals/new">
+            <Link href="/dashboard/lending/new">
               <Button size="sm">
                 <Plus className="h-4 w-4" />
                 New Deal
               </Button>
             </Link>
             <span className="text-xs text-muted-foreground">or</span>
-            <Link href="/dashboard/deals/new">
+            <Link href="/dashboard/lending/new">
               <Button size="sm" variant="outline">
                 Try Sample Deal
               </Button>

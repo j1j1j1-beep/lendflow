@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Landmark, FlaskConical, ChevronsUpDown } from "lucide-react";
+import { Landmark, TestTubes, ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +29,7 @@ const PRODUCTS = {
   },
   bio: {
     label: "Bio",
-    icon: FlaskConical,
+    icon: TestTubes,
     iconBg: "bg-emerald-600 text-white",
     dashboardHref: "/dashboard/bio",
     marketingHref: "/bio",

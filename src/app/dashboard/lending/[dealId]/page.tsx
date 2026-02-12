@@ -751,7 +751,7 @@ export default function DealDetailPage() {
         throw new Error(err.error || "Failed to delete deal");
       }
       toast.success("Deal permanently deleted.");
-      router.push("/dashboard");
+      router.push("/dashboard/lending");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to delete deal");
       setDeleting(false);
@@ -805,7 +805,7 @@ export default function DealDetailPage() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <Link
-            href="/dashboard"
+            href="/dashboard/lending"
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-150 hover:-translate-x-0.5 mb-2"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -899,7 +899,7 @@ export default function DealDetailPage() {
           <AlertDescription>
             Some values in the uploaded documents need your confirmation before the analysis can continue.
             <Link
-              href={`/dashboard/deals/${dealId}/review`}
+              href={`/dashboard/lending/${dealId}/review`}
               className="ml-2 font-medium underline"
             >
               Review Now

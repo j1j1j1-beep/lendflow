@@ -61,7 +61,7 @@ export default function NewDealPage() {
       }
       const { deal } = await res.json();
       toast.success("Sample deal created! Watch the pipeline process it.");
-      router.push(`/dashboard/deals/${deal.id}`);
+      router.push(`/dashboard/lending/${deal.id}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
@@ -149,7 +149,7 @@ export default function NewDealPage() {
         toast.success("Deal created! Analysis pipeline started.");
       }
 
-      router.push(`/dashboard/deals/${dealId}`);
+      router.push(`/dashboard/lending/${dealId}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
@@ -160,7 +160,7 @@ export default function NewDealPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
       <div className="mb-6">
         <Link
-          href="/dashboard"
+          href="/dashboard/lending"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-150 hover:-translate-x-0.5 mb-3"
         >
           <ArrowLeft className="h-3.5 w-3.5" />

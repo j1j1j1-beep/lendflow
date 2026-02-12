@@ -20,6 +20,12 @@ model Organization {
   subscription Subscription?
   usageLogs  UsageLog[]
 
+  // Capital, M&A, Syndication, Compliance verticals
+  capitalProjects       CapitalProject[]
+  maProjects            MAProject[]
+  syndicationProjects   SyndicationProject[]
+  complianceProjects    ComplianceProject[]
+
   // Bio vertical
   bioPrograms      BioProgram[]
   bioSubscription  BioSubscription?
@@ -67,6 +73,8 @@ model AuditLog {
   userId    String?
   userEmail String?
   dealId    String?
+  entityType  String?  // "deal", "capital", "ma", "syndication", "compliance", "bio"
+  entityId    String?  // The project/deal ID
   action    String   // "deal.created", "deal.analyzed", "doc.edited", "doc.saved", "terms.approved", "member.invited", "member.removed", "billing.checkout", "billing.canceled", etc.
   target    String?  // What was acted on — e.g. docType, member email, etc.
   metadata  Json?    // Extra context — old/new values, status changes, etc.
@@ -75,6 +83,7 @@ model AuditLog {
 
   @@index([orgId, createdAt])
   @@index([dealId, createdAt])
+  @@index([entityType, entityId, createdAt])
 }
 
 model User {
@@ -86,6 +95,10 @@ model User {
   orgId     String
   org       Organization @relation(fields: [orgId], references: [id])
   deals       Deal[]
+  capitalProjects       CapitalProject[]
+  maProjects            MAProject[]
+  syndicationProjects   SyndicationProject[]
+  complianceProjects    ComplianceProject[]
   bioPrograms BioProgram[]
   createdAt   DateTime     @default(now())
 }
@@ -442,6 +455,782 @@ model Condition {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// Capital (Fund Formation / Private Placements)
+// ──────────────────────────────────────────────
+
+enum CapitalProjectStatus {
+  CREATED
+  GENERATING_DOCS
+  COMPLIANCE_REVIEW
+  NEEDS_REVIEW
+  COMPLETE
+  ERROR
+}
+
+enum FundType {
+  PRIVATE_EQUITY
+  VENTURE_CAPITAL
+  REAL_ESTATE
+  HEDGE_FUND
+  CREDIT
+  INFRASTRUCTURE
+}
+
+enum ExemptionType {
+  REG_D_506B
+  REG_D_506C
+  REG_A_TIER1
+  REG_A_TIER2
+  REG_CF
+}
+
+enum ICAExemption {
+  SECTION_3C1
+  SECTION_3C7
+}
+
+enum DocGenerationStatus {
+  DRAFT
+  REVIEWED
+  APPROVED
+  SIGNED
+}
+
+enum ComplianceCheckStatus {
+  PENDING
+  APPROVED
+  FLAGGED
+  PASSED
+  FAILED
+}
+
+enum VerificationCheckStatus {
+  PENDING
+  PASSED
+  FAILED
+}
+
+enum EntityType {
+  LLC
+  LP
+}
+
+enum AccreditationStatus {
+  PENDING
+  VERIFIED
+  EXPIRED
+  FAILED
+}
+
+enum InvestorType {
+  ACCREDITED_INDIVIDUAL
+  ACCREDITED_ENTITY
+  QUALIFIED_PURCHASER
+  INSTITUTIONAL
+  NON_ACCREDITED
+}
+
+enum HSRStatus {
+  NOT_REQUIRED
+  PENDING_FILING
+  FILED
+  WAITING_PERIOD
+  SECOND_REQUEST
+  CLEARED
+  WITHDRAWN
+}
+
+enum TaxStructure {
+  SECTION_338H10
+  SECTION_338G
+  SECTION_1031
+  SECTION_368_A
+  SECTION_368_B
+  SECTION_368_C
+  QSBS_1202
+  STANDARD
+}
+
+model CapitalProject {
+  id              String               @id @default(cuid())
+  name            String               // e.g. "Fund III Capital Raise"
+  status          CapitalProjectStatus @default(CREATED)
+  errorMessage    String?
+  errorStep       String?
+
+  // Fund Details
+  fundName        String               // Legal fund name
+  fundType        FundType
+  gpEntityName    String               // General Partner entity
+  gpStateOfFormation String?
+
+  // Securities
+  exemptionType   ExemptionType        @default(REG_D_506B)
+  icaExemption    ICAExemption         @default(SECTION_3C1)
+
+  // Economics
+  targetRaise     Decimal?             @db.Decimal(18, 2)
+  minInvestment   Decimal?             @db.Decimal(18, 2)
+  managementFee   Float?               // e.g. 0.02 for 2%
+  carriedInterest Float?               // e.g. 0.20 for 20%
+  preferredReturn Float?               // e.g. 0.08 for 8%
+  hurdles         Json?                // Array of hurdle tiers
+
+  // Fund Terms
+  fundTermYears   Int?                 // e.g. 10
+  investmentPeriod Int?                // Years
+  gpCommitment    Decimal?             @db.Decimal(18, 2)
+
+  // Strategy
+  investmentStrategy String?           @db.Text
+  targetIndustries   Json?             // Array of strings
+  geographicFocus    String?
+
+  // Investor limits
+  maxInvestors        Int?
+  accreditedOnly      Boolean         @default(false)
+  nonAccreditedLimit  Int?
+
+  // Form D Filing
+  formDFilingDate     DateTime?
+  formDAmendmentDate  DateTime?
+
+  // Anti-fraud (Rule 10b-5)
+  riskFactorsIncluded    Boolean      @default(false)
+  useOfProceedsDisclosed Boolean      @default(false)
+
+  // State blue sky filings
+  stateFilings        Json?
+
+  // Key person
+  keyPersonProvision  Boolean         @default(false)
+  keyPersonNames      Json?
+
+  // Clawback
+  clawbackProvision   Boolean         @default(false)
+
+  // Audit fields
+  updatedBy          String?
+  deletedAt          DateTime?
+
+  // Organization
+  orgId           String
+  org             Organization         @relation(fields: [orgId], references: [id])
+  userId          String
+  user            User                 @relation(fields: [userId], references: [id])
+
+  // Relations
+  capitalDocuments CapitalDocument[]
+  capitalInvestors CapitalInvestor[]
+
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([orgId, status])
+  @@index([orgId, createdAt])
+}
+
+model CapitalDocument {
+  id              String          @id @default(cuid())
+  projectId       String
+  project         CapitalProject  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  docType         String          // "ppm", "subscription_agreement", "operating_agreement", "investor_questionnaire", "side_letter", "form_d_draft"
+  s3Key           String
+  version         Int             @default(1)
+  status          DocGenerationStatus @default(DRAFT)
+
+  complianceStatus   ComplianceCheckStatus?
+  complianceIssues   Json?
+  verificationStatus VerificationCheckStatus?
+  verificationIssues Json?
+
+  createdBy          String?
+  updatedBy          String?
+  deletedAt          DateTime?
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([projectId])
+  @@unique([projectId, docType, version])
+}
+
+model CapitalInvestor {
+  id              String              @id @default(cuid())
+  projectId       String
+  project         CapitalProject      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  investorName    String
+  investorType    InvestorType
+  accreditationStatus AccreditationStatus @default(PENDING)
+  accreditationDate   DateTime?
+  accreditationExpiry DateTime?
+  accreditationMethod String?
+
+  commitmentAmount    Decimal?        @db.Decimal(18, 2)
+  calledAmount        Decimal?        @db.Decimal(18, 2)
+  distributedAmount   Decimal?        @db.Decimal(18, 2)
+
+  subscriptionDate    DateTime?
+  sideLetterTerms     Json?
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([projectId])
+  @@index([projectId, accreditationStatus])
+}
+
+// ──────────────────────────────────────────────
+// MAProject (M&A Transactions / Deals)
+// ──────────────────────────────────────────────
+
+enum MAProjectStatus {
+  CREATED
+  GENERATING_DOCS
+  COMPLIANCE_REVIEW
+  NEEDS_REVIEW
+  COMPLETE
+  ERROR
+}
+
+enum TransactionType {
+  STOCK_PURCHASE
+  ASSET_PURCHASE
+  MERGER_FORWARD
+  MERGER_REVERSE_TRIANGULAR
+  MERGER_FORWARD_TRIANGULAR
+  REVERSE_MERGER
+  TENDER_OFFER
+  SECTION_363_SALE
+}
+
+model MAProject {
+  id                String           @id @default(cuid())
+  name              String           // e.g. "Acme Corp Acquisition"
+  status            MAProjectStatus  @default(CREATED)
+  errorMessage      String?
+  errorStep         String?
+
+  // Transaction Structure
+  transactionType   TransactionType
+
+  // Parties
+  buyerName         String
+  buyerEntity       String?          // Legal entity name
+  buyerCounsel      String?
+  sellerName        String
+  sellerEntity      String?
+  sellerCounsel     String?
+
+  // Target Company
+  targetCompany     String
+  targetIndustry    String?
+  targetRevenue     Decimal?         @db.Decimal(18, 2)
+  targetEbitda      Decimal?         @db.Decimal(18, 2)
+  targetEmployees   Int?
+  targetState       String?          // State of incorporation
+
+  // Deal Economics
+  purchasePrice     Decimal?         @db.Decimal(18, 2)
+  cashComponent     Decimal?         @db.Decimal(18, 2)
+  stockComponent    Decimal?         @db.Decimal(18, 2)
+  sellerNote        Decimal?         @db.Decimal(18, 2)
+  earnoutAmount     Decimal?         @db.Decimal(18, 2)
+  earnoutTermMonths Int?
+  workingCapitalTarget Decimal?      @db.Decimal(18, 2)
+  escrowPercent     Float?           // e.g. 0.10 for 10%
+  escrowTermMonths  Int?
+
+  // Timeline
+  exclusivityDays   Int?             // No-shop period
+  dueDiligenceDays  Int?
+  targetCloseDate   DateTime?
+  outsideDate       DateTime?        // Drop-dead date
+
+  // Governance
+  governingLaw      String?          @default("Delaware")
+  nonCompeteYears   Int?
+  nonCompeteRadius  String?          // e.g. "50 miles"
+
+  // HSR Act
+  hsrRequired         Boolean?
+  hsrFilingDate       DateTime?
+  hsrFilingFee        Decimal?        @db.Decimal(18, 2)
+  hsrClearanceDate    DateTime?
+  hsrStatus           HSRStatus?
+
+  // Tax Structure
+  taxStructure        TaxStructure?
+  section338Election  Boolean         @default(false)
+
+  // Insurance
+  rwiInsurance        Boolean         @default(false)
+  rwiPremiumPercent   Float?
+
+  // Material adverse change
+  macDefinition       String?         @db.Text
+  macCarveouts        Json?
+
+  // Regulatory approvals
+  requiredApprovals   Json?
+
+  // Employee matters
+  keyEmployeeRetention   Boolean      @default(false)
+  changeOfControlProvisions Boolean   @default(false)
+
+  // Audit fields
+  updatedBy          String?
+  deletedAt          DateTime?
+
+  // Organization
+  orgId             String
+  org               Organization     @relation(fields: [orgId], references: [id])
+  userId            String
+  user              User             @relation(fields: [userId], references: [id])
+
+  // Relations
+  maDocuments       MADocument[]
+
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([orgId, status])
+  @@index([orgId, createdAt])
+}
+
+model MADocument {
+  id                String       @id @default(cuid())
+  projectId         String
+  project           MAProject    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  docType           String       // "loi", "nda", "stock_purchase_agreement", "asset_purchase_agreement", "due_diligence_checklist", "disclosure_schedules"
+  s3Key             String
+  version           Int          @default(1)
+  status            DocGenerationStatus @default(DRAFT)
+
+  complianceStatus   ComplianceCheckStatus?
+  complianceIssues   Json?
+  verificationStatus VerificationCheckStatus?
+  verificationIssues Json?
+
+  createdBy          String?
+  updatedBy          String?
+  deletedAt          DateTime?
+
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([projectId])
+  @@unique([projectId, docType, version])
+}
+
+// ──────────────────────────────────────────────
+// SyndicationProject (Real Estate Syndication)
+// ──────────────────────────────────────────────
+
+enum SyndicationProjectStatus {
+  CREATED
+  GENERATING_DOCS
+  COMPLIANCE_REVIEW
+  NEEDS_REVIEW
+  COMPLETE
+  ERROR
+}
+
+enum SyndicationPropertyType {
+  MULTIFAMILY
+  OFFICE
+  RETAIL
+  INDUSTRIAL
+  MIXED_USE
+  SELF_STORAGE
+  MOBILE_HOME_PARK
+  HOTEL
+  NNN_RETAIL
+  SENIOR_HOUSING
+  STUDENT_HOUSING
+  BUILD_TO_RENT
+}
+
+model SyndicationProject {
+  id                String              @id @default(cuid())
+  name              String              // e.g. "Oak Park Apartments Fund"
+  status            SyndicationProjectStatus @default(CREATED)
+  errorMessage      String?
+  errorStep         String?
+
+  // Entity Structure
+  entityName        String              // SPV name
+  entityType        EntityType          @default(LLC)
+  stateOfFormation  String?             @default("Delaware")
+  exemptionType     ExemptionType       @default(REG_D_506B) // Reuse from Capital
+
+  // Sponsor
+  sponsorName       String
+  sponsorEntity     String?
+  sponsorEquity     Decimal?            @db.Decimal(18, 2)
+
+  // Property
+  propertyName      String?
+  propertyAddress   String
+  propertyType      SyndicationPropertyType
+  units             Int?
+  squareFeet        Int?
+  yearBuilt         Int?
+
+  // Acquisition
+  purchasePrice     Decimal?            @db.Decimal(18, 2)
+  renovationBudget  Decimal?            @db.Decimal(18, 2)
+  closingCosts      Decimal?            @db.Decimal(18, 2)
+
+  // Capital Stack
+  totalEquityRaise  Decimal?            @db.Decimal(18, 2)
+  minInvestment     Decimal?            @db.Decimal(18, 2)
+
+  // Financing
+  loanAmount        Decimal?            @db.Decimal(18, 2)
+  interestRate      Float?
+  loanTermYears     Int?
+  interestOnly      Boolean             @default(false)
+  ioTermMonths      Int?
+
+  // Returns
+  preferredReturn   Float?              // e.g. 0.08 for 8%
+  projectedHoldYears Int?
+  projectedIrr      Float?
+  projectedEquityMultiple Float?
+
+  // Fees
+  acquisitionFee    Float?              // e.g. 0.02 for 2%
+  assetMgmtFee      Float?              // Annual
+  dispositionFee    Float?
+
+  // Additional fees
+  constructionMgmtFee Float?
+  refinancingFee      Float?
+  guaranteeFee        Float?
+  propertyMgmtFee     Float?
+
+  // Tax
+  isQOZ               Boolean         @default(false)
+  is1031Exchange       Boolean         @default(false)
+  bonusDepreciationPct Float?
+  ubtiRisk             Boolean         @default(false)
+  passiveLossEligible  Boolean         @default(true)
+  repsQualified        Boolean         @default(false)
+
+  // Form D / Blue Sky
+  formDFilingDate      DateTime?
+  blueSkyFilings       Json?
+
+  // Sponsor track record
+  sponsorTrackRecord   Json?
+
+  // Operating Assumptions
+  currentNoi        Decimal?            @db.Decimal(18, 2)
+  proFormaNoi       Decimal?            @db.Decimal(18, 2)
+  vacancyRate       Float?
+  rentGrowthRate    Float?
+  expenseGrowthRate Float?
+  exitCapRate       Float?
+
+  // Audit fields
+  updatedBy          String?
+  deletedAt          DateTime?
+
+  // Organization
+  orgId             String
+  org               Organization        @relation(fields: [orgId], references: [id])
+  userId            String
+  user              User                @relation(fields: [userId], references: [id])
+
+  // Relations
+  syndicationDocuments     SyndicationDocument[]
+  waterfallTiers           WaterfallTier[]
+  syndicationInvestors     SyndicationInvestor[]
+  syndicationDistributions SyndicationDistribution[]
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([orgId, status])
+  @@index([orgId, createdAt])
+}
+
+model SyndicationDocument {
+  id                String               @id @default(cuid())
+  projectId         String
+  project           SyndicationProject   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  docType           String               // "ppm", "operating_agreement", "subscription_agreement", "investor_questionnaire", "pro_forma"
+  s3Key             String
+  version           Int                  @default(1)
+  status            DocGenerationStatus  @default(DRAFT)
+
+  complianceStatus   ComplianceCheckStatus?
+  complianceIssues   Json?
+  verificationStatus VerificationCheckStatus?
+  verificationIssues Json?
+
+  createdBy          String?
+  updatedBy          String?
+  deletedAt          DateTime?
+
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  @@index([projectId])
+  @@unique([projectId, docType, version])
+}
+
+model WaterfallTier {
+  id          String              @id @default(cuid())
+  projectId   String
+  project     SyndicationProject  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  tierOrder   Int
+  tierName    String?
+  hurdleRate  Float?
+  lpSplit     Float
+  gpSplit     Float
+  description String?
+
+  createdAt   DateTime            @default(now())
+
+  @@index([projectId])
+  @@unique([projectId, tierOrder])
+}
+
+model SyndicationInvestor {
+  id              String              @id @default(cuid())
+  projectId       String
+  project         SyndicationProject  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  investorName    String
+  investorType    InvestorType
+  accreditationStatus AccreditationStatus @default(PENDING)
+  accreditationDate   DateTime?
+  accreditationExpiry DateTime?
+  accreditationMethod String?
+
+  commitmentAmount    Decimal?        @db.Decimal(18, 2)
+  paidInAmount        Decimal?        @db.Decimal(18, 2)
+  ownershipPercent    Float?
+
+  subscriptionDate    DateTime?
+  sideLetterTerms     Json?
+
+  distributions       SyndicationDistribution[]
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([projectId])
+  @@index([projectId, accreditationStatus])
+}
+
+model SyndicationDistribution {
+  id              String              @id @default(cuid())
+  projectId       String
+  project         SyndicationProject  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  investorId      String?
+  investor        SyndicationInvestor? @relation(fields: [investorId], references: [id])
+
+  distributionDate DateTime
+  totalAmount      Decimal            @db.Decimal(18, 2)
+  returnOfCapital  Decimal?           @db.Decimal(18, 2)
+  preferredReturn  Decimal?           @db.Decimal(18, 2)
+  profitDistribution Decimal?         @db.Decimal(18, 2)
+
+  withholdingAmount Decimal?          @db.Decimal(18, 2)
+  withholdingRate   Float?
+
+  distributionType  String?
+  notes             String?           @db.Text
+
+  createdAt       DateTime            @default(now())
+
+  @@index([projectId])
+  @@index([investorId])
+  @@index([projectId, distributionDate])
+}
+
+// ──────────────────────────────────────────────
+// ComplianceProject (LP Reporting / Fund Admin)
+// ──────────────────────────────────────────────
+
+enum ComplianceProjectStatus {
+  CREATED
+  GENERATING_DOCS
+  COMPLIANCE_REVIEW
+  NEEDS_REVIEW
+  COMPLETE
+  ERROR
+}
+
+enum ReportType {
+  LP_QUARTERLY_REPORT
+  CAPITAL_CALL_NOTICE
+  DISTRIBUTION_NOTICE
+  K1_SUMMARY
+  ANNUAL_REPORT
+  FORM_ADV_SUMMARY
+  CAPITAL_ACCOUNT_STATEMENT
+  VALUATION_REPORT
+  AUDITED_FINANCIALS
+  SIDE_LETTER_SUMMARY
+}
+
+model ComplianceProject {
+  id                String                  @id @default(cuid())
+  name              String                  // e.g. "Q4 2025 LP Report"
+  status            ComplianceProjectStatus @default(CREATED)
+  errorMessage      String?
+  errorStep         String?
+
+  reportType        ReportType
+
+  // Fund Information
+  fundName          String
+  fundType          FundType?
+  vintageYear       Int?
+  fundSize          Decimal?                @db.Decimal(18, 2)
+
+  // Reporting Period
+  periodStart       DateTime?
+  periodEnd         DateTime?
+  reportingQuarter  String?                 // "Q1 2026", "Q2 2026", etc.
+
+  // Fund Metrics (for LP reports)
+  nav               Decimal?                @db.Decimal(18, 2)
+  totalContributions Decimal?               @db.Decimal(18, 2)
+  totalDistributions Decimal?               @db.Decimal(18, 2)
+  netIrr            Float?
+  grossIrr          Float?
+  moic              Float?                  // Multiple on Invested Capital
+  dpi               Float?                  // Distributions to Paid-In
+  rvpi              Float?                  // Residual Value to Paid-In
+  tvpi              Float?                  // Total Value to Paid-In
+
+  // Capital Call / Distribution specific
+  callAmount        Decimal?                @db.Decimal(18, 2)
+  callDueDate       DateTime?
+  callPurpose       String?                 @db.Text
+  distributionAmount Decimal?               @db.Decimal(18, 2)
+  distributionType  String?                 // "return_of_capital", "income", "gain"
+
+  // K-1 specific
+  taxYear           Int?
+  filingDeadline    DateTime?
+
+  // Portfolio Summary (JSON for flexibility)
+  portfolioSummary  Json?                   // Array of {company, invested, fairValue, irr, status}
+
+  // K-1 Extended (IRS Schedule K-1 Form 1065)
+  k1OrdinaryIncome       Decimal?    @db.Decimal(18, 2)
+  k1NetRentalIncome      Decimal?    @db.Decimal(18, 2)
+  k1GuaranteedPayments   Decimal?    @db.Decimal(18, 2)
+  k1InterestIncome       Decimal?    @db.Decimal(18, 2)
+  k1DividendIncome       Decimal?    @db.Decimal(18, 2)
+  k1ShortTermCapGain     Decimal?    @db.Decimal(18, 2)
+  k1LongTermCapGain      Decimal?    @db.Decimal(18, 2)
+  k1Section1231Gain      Decimal?    @db.Decimal(18, 2)
+  k1Section179Deduction  Decimal?    @db.Decimal(18, 2)
+  k1OtherDeductions      Decimal?    @db.Decimal(18, 2)
+  k1SelfEmploymentIncome Decimal?    @db.Decimal(18, 2)
+  k1ForeignTaxPaid       Decimal?    @db.Decimal(18, 2)
+  k1AMTItems             Decimal?    @db.Decimal(18, 2)
+  k1TaxExemptIncome      Decimal?    @db.Decimal(18, 2)
+  k1Distributions        Decimal?    @db.Decimal(18, 2)
+  k1EndingCapitalAccount Decimal?    @db.Decimal(18, 2)
+  k1UnrecapturedSec1250  Decimal?    @db.Decimal(18, 2)
+  k1QBIDeduction         Decimal?    @db.Decimal(18, 2)
+  k1UBTI                 Decimal?    @db.Decimal(18, 2)
+
+  // Capital Call Extended
+  callDefaultPenalty     Float?
+  callDefaultRemedy      String?
+  callNoticeRequiredDays Int?
+  unfundedCommitments    Decimal?    @db.Decimal(18, 2)
+
+  // Distribution Extended
+  withholdingRate        Float?
+  withholdingAmount      Decimal?    @db.Decimal(18, 2)
+  withholdingType        String?
+
+  // ILPA Alignment
+  ilpaCompliant          Boolean     @default(false)
+  ilpaTemplate           String?
+
+  // Valuation
+  valuationMethodology   String?
+  valuationDate          DateTime?
+  valuationProvider      String?
+  auditorName            String?
+  auditDate              DateTime?
+  auditOpinion           String?
+
+  // Side letter tracking
+  sideLetterId           String?
+  sideLetterTerms        Json?
+
+  // Audit fields
+  updatedBy          String?
+  deletedAt          DateTime?
+
+  // Organization
+  orgId             String
+  org               Organization            @relation(fields: [orgId], references: [id])
+  userId            String
+  user              User                    @relation(fields: [userId], references: [id])
+
+  // Relations
+  complianceDocuments ComplianceDocument[]
+
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([orgId, status])
+  @@index([orgId, createdAt])
+}
+
+model ComplianceDocument {
+  id                String              @id @default(cuid())
+  projectId         String
+  project           ComplianceProject   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  docType           String              // "lp_quarterly_report", "capital_call_notice", "distribution_notice", "k1_summary", "annual_report", "form_adv_summary"
+  s3Key             String
+  version           Int                 @default(1)
+  status            DocGenerationStatus @default(DRAFT)
+
+  complianceStatus   ComplianceCheckStatus?
+  complianceIssues   Json?
+  verificationStatus VerificationCheckStatus?
+  verificationIssues Json?
+
+  createdBy          String?
+  updatedBy          String?
+  deletedAt          DateTime?
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([projectId])
+  @@unique([projectId, docType, version])
 }
 
 // Bio Vertical (separate from lending — shares Org, User, AuditLog only)

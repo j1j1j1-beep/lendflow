@@ -16,7 +16,7 @@ export async function sendAnalysisComplete(params: {
     html: `
       <h2>Credit Analysis Ready</h2>
       <p>The analysis for <strong>${params.borrowerName}</strong> is complete.</p>
-      <p><a href="${appUrl}/dashboard/deals/${params.dealId}">View Results →</a></p>
+      <p><a href="${appUrl}/dashboard/lending/${params.dealId}">View Results →</a></p>
     `,
   });
 }
@@ -36,7 +36,7 @@ export async function sendReviewNeeded(params: {
     html: `
       <h2>Manual Review Required</h2>
       <p>The analysis for <strong>${params.borrowerName}</strong> has <strong>${params.reviewCount} item(s)</strong> that need your review before the analysis can continue.</p>
-      <p><a href="${appUrl}/dashboard/deals/${params.dealId}/review">Review Now →</a></p>
+      <p><a href="${appUrl}/dashboard/lending/${params.dealId}/review">Review Now →</a></p>
     `,
   });
 }

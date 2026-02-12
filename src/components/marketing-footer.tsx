@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Landmark, FlaskConical } from "lucide-react";
+import { Landmark, TestTubes } from "lucide-react";
 
 export function MarketingFooter() {
   return (
     <footer className="w-full border-t border-border/50">
       <div className="mx-auto max-w-6xl px-6 py-12">
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2.5">
@@ -33,7 +33,7 @@ export function MarketingFooter() {
               </li>
               <li>
                 <Link href="/bio" className="group flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-150 hover:text-emerald-500">
-                  <FlaskConical className="h-3 w-3 transition-transform duration-150 group-hover:scale-110" />
+                  <TestTubes className="h-3 w-3 transition-transform duration-150 group-hover:scale-110" />
                   OpenShut Bio
                 </Link>
               </li>
@@ -57,6 +57,18 @@ export function MarketingFooter() {
               <li>
                 <Link href="/pricing" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                   Pricing
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Bio */}
+          <div>
+            <h4 className="text-sm font-semibold text-foreground mb-3">Bio</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/bio" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-emerald-500">
+                  OpenShut Bio
                 </Link>
               </li>
             </ul>
