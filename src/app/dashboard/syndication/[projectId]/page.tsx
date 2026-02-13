@@ -149,10 +149,10 @@ const STATUS_CONFIG: Record<
   ERROR: { label: "Error", variant: "destructive" },
 };
 
-const PROCESSING_STATUSES = [
+const PROCESSING_STATUSES = new Set([
   "GENERATING_DOCS",
   "COMPLIANCE_REVIEW",
-];
+]);
 
 /* ---------- Helpers ---------- */
 
@@ -180,10 +180,8 @@ function formatPercent(value: number | null): string {
 
 function DocumentCard({
   doc,
-  onRefresh,
 }: {
   doc: SyndicationDocument;
-  onRefresh: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -317,7 +315,8 @@ function DocumentCard({
 
 export default function SyndicationDetailPage() {
   const params = useParams();
-  const projectId = params.projectId as string;
+  const rawProjectId = params.projectId;
+  const projectId = Array.isArray(rawProjectId) ? rawProjectId[0] : rawProjectId ?? "";
   const [project, setProject] = useState<SyndicationProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -350,7 +349,7 @@ export default function SyndicationDetailPage() {
   useEffect(() => {
     if (
       project &&
-      PROCESSING_STATUSES.includes(project.status) &&
+      PROCESSING_STATUSES.has(project.status) &&
       pollErrorCount < 3 // Stop polling after 3 consecutive errors
     ) {
       pollingRef.current = setInterval(fetchProject, 5000);
@@ -427,7 +426,7 @@ export default function SyndicationDetailPage() {
 
   /* ---------- Derived state ---------- */
 
-  const isProcessing = PROCESSING_STATUSES.includes(project.status);
+  const isProcessing = PROCESSING_STATUSES.has(project.status);
   const isComplete = project.status === "COMPLETE";
   const canGenerate =
     project.status === "CREATED" || project.status === "ERROR";
@@ -865,7 +864,6 @@ export default function SyndicationDetailPage() {
                 <DocumentCard
                   key={doc.id}
                   doc={doc}
-                  onRefresh={fetchProject}
                 />
               ))}
             </div>

@@ -209,6 +209,11 @@ export const IRS_1120_MAP: Record<string, string> = {
 };
 
 // Form 1120S (S-Corp)
+// ANNUAL REVIEW REQUIRED: IRS renumbers Schedule K lines periodically.
+// Last verified against 2024 Form 1120S (Rev. December 2024).
+// The 2025 revision may renumber Schedule K lines (particularly lines 11-12
+// for Section 179 / other deductions, and lines 16a-16b for distributions).
+// Check https://www.irs.gov/forms-pubs/about-form-1120-s before each tax season.
 
 export const IRS_1120S_MAP: Record<string, string> = {
   // Income
@@ -283,6 +288,8 @@ export const IRS_1120S_MAP: Record<string, string> = {
 };
 
 // Form 1065 (Partnership)
+// ANNUAL REVIEW REQUIRED: Check line numbers against current IRS revision.
+// Last verified against 2024 Form 1065.
 
 export const IRS_1065_MAP: Record<string, string> = {
   // Income

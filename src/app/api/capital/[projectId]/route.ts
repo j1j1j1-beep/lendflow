@@ -190,6 +190,9 @@ export async function PATCH(
       if (val !== null && (!Number.isFinite(val) || val <= 0)) {
         return NextResponse.json({ error: "targetRaise must be a positive number" }, { status: 400 });
       }
+      if (val !== null && val > 1e15) {
+        return NextResponse.json({ error: "targetRaise exceeds maximum allowed value" }, { status: 400 });
+      }
       data.targetRaise = val;
     }
     if (body.minInvestment !== undefined) {
@@ -197,12 +200,18 @@ export async function PATCH(
       if (val !== null && (!Number.isFinite(val) || val <= 0)) {
         return NextResponse.json({ error: "minInvestment must be a positive number" }, { status: 400 });
       }
+      if (val !== null && val > 1e15) {
+        return NextResponse.json({ error: "minInvestment exceeds maximum allowed value" }, { status: 400 });
+      }
       data.minInvestment = val;
     }
     if (body.gpCommitment !== undefined) {
       const val = body.gpCommitment != null ? Number(body.gpCommitment) : null;
       if (val !== null && (!Number.isFinite(val) || val <= 0)) {
         return NextResponse.json({ error: "gpCommitment must be a positive number" }, { status: 400 });
+      }
+      if (val !== null && val > 1e15) {
+        return NextResponse.json({ error: "gpCommitment exceeds maximum allowed value" }, { status: 400 });
       }
       data.gpCommitment = val;
     }
@@ -291,12 +300,36 @@ export async function PATCH(
       data.keyPersonNames = body.keyPersonNames;
     }
 
-    // Date fields
+    // Date fields with range validation (1970-2100)
     if (body.formDFilingDate !== undefined) {
-      data.formDFilingDate = body.formDFilingDate ? new Date(body.formDFilingDate) : null;
+      if (body.formDFilingDate) {
+        const d = new Date(body.formDFilingDate);
+        if (isNaN(d.getTime())) {
+          return NextResponse.json({ error: "formDFilingDate must be a valid date" }, { status: 400 });
+        }
+        const year = d.getFullYear();
+        if (year < 1970 || year > 2100) {
+          return NextResponse.json({ error: "formDFilingDate year must be between 1970 and 2100" }, { status: 400 });
+        }
+        data.formDFilingDate = d;
+      } else {
+        data.formDFilingDate = null;
+      }
     }
     if (body.formDAmendmentDate !== undefined) {
-      data.formDAmendmentDate = body.formDAmendmentDate ? new Date(body.formDAmendmentDate) : null;
+      if (body.formDAmendmentDate) {
+        const d = new Date(body.formDAmendmentDate);
+        if (isNaN(d.getTime())) {
+          return NextResponse.json({ error: "formDAmendmentDate must be a valid date" }, { status: 400 });
+        }
+        const year = d.getFullYear();
+        if (year < 1970 || year > 2100) {
+          return NextResponse.json({ error: "formDAmendmentDate year must be between 1970 and 2100" }, { status: 400 });
+        }
+        data.formDAmendmentDate = d;
+      } else {
+        data.formDAmendmentDate = null;
+      }
     }
 
     // Track who updated

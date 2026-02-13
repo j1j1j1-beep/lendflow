@@ -41,7 +41,21 @@ function daysBetween(a: Date, b: Date): number {
   return Math.ceil((utcB - utcA) / (1000 * 60 * 60 * 24));
 }
 
-/** Per diem interest: principal * rate / 365 */
+/**
+ * Per diem interest: principal * rate / 365
+ *
+ * DAY-COUNT CONVENTION: Actual/365
+ * The Closing Disclosure uses Actual/365, which is the TRID-required day-count
+ * convention per 12 CFR 1026.38 (Reg Z) for consumer loan disclosures. This
+ * produces a slightly lower per-diem interest than Actual/360.
+ *
+ * NOTE: The Settlement Statement (settlement-statement.ts) uses Actual/360,
+ * which is the standard commercial banking convention. These documents serve
+ * different purposes and intentionally use different day-count conventions:
+ *   - Closing Disclosure: TRID/Reg Z consumer compliance (Actual/365)
+ *   - Settlement Statement: commercial banking convention (Actual/360)
+ * For TRID-regulated transactions, this Closing Disclosure figure controls.
+ */
 function perDiem(principal: number, rate: number): number {
   return (principal * rate) / 365;
 }

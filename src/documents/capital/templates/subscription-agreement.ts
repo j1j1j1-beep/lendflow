@@ -47,7 +47,7 @@ ABSOLUTE RULES:
 4. Include all accredited investor criteria from 17 CFR 230.501(a):
    - $200K individual / $300K joint income (prior 2 years + reasonable expectation)
    - $1M net worth excluding primary residence
-   - Series 7, 65, 82, or CFA holder
+   - Series 7, 65, or 82 holder (per Rule 501(a)(10))
    - Knowledgeable employee of the fund
    - Entity with $5M+ assets (not formed to acquire these securities)
 
@@ -180,8 +180,8 @@ export async function buildSubscriptionAgreement(project: CapitalProjectFull): P
     children.push(bodyText("Individual Accredited Investor (check all that apply):", { bold: true }));
     children.push(bulletPoint("[ ] Income: Individual income exceeding $200,000 (or $300,000 jointly with spouse/spousal equivalent) in each of the two most recent years, with a reasonable expectation of the same for the current year."));
     children.push(bulletPoint("[ ] Net Worth: Individual net worth (or joint net worth with spouse/spousal equivalent) exceeding $1,000,000, excluding the value of the primary residence."));
-    children.push(bulletPoint("[ ] Professional Certification: Holder of a Series 7, Series 65, Series 82 license, or Chartered Financial Analyst (CFA) designation in good standing."));
-    children.push(bulletPoint("[ ] Knowledgeable Employee: Director, executive officer, or advisory committee member of the Fund per 17 CFR 270.3c-5(a)(4)."));
+    children.push(bulletPoint("[ ] Professional Certification: Holder of a Series 7, Series 65, or Series 82 license in good standing (per Rule 501(a)(10))."));
+    children.push(bulletPoint("[ ] Knowledgeable Employee: Director, executive officer, or general partner of the Fund or the Fund's investment manager, or an employee of the Fund's investment manager who has participated in the investment activities of the Fund or substantially similar funds for at least 12 months (per 17 CFR 270.3c-5(a)(4))."));
     children.push(bulletPoint("[ ] Family Office: Family office with at least $5,000,000 in assets under management that directs the investment."));
     children.push(spacer(4));
 
@@ -198,9 +198,24 @@ export async function buildSubscriptionAgreement(project: CapitalProjectFull): P
   children.push(bodyText(prose.accreditationCertification));
   children.push(spacer(8));
 
+  // PPM Receipt Acknowledgment
+  children.push(sectionHeading("5. Acknowledgment of Receipt of PPM"));
+  children.push(
+    bodyText(
+      `The Investor hereby acknowledges that the Investor has received, read, and understands the Confidential Private Placement Memorandum of ${project.fundName} dated as of the date set forth therein (the "Memorandum"), including all exhibits, supplements, and amendments thereto. The Investor has had the opportunity to ask questions of, and receive answers from, the General Partner and its representatives concerning the terms and conditions of the offering and the Fund, and all such questions have been answered to the Investor's satisfaction.`,
+    ),
+  );
+  children.push(spacer(4));
+  children.push(
+    bodyText(
+      "The Investor acknowledges that the Interests are being offered and sold without registration under the Securities Act of 1933, as amended, in reliance upon exemptions therefrom, and that the Memorandum is not a prospectus and has not been reviewed or approved by the Securities and Exchange Commission or any state securities commission or regulatory authority.",
+    ),
+  );
+  children.push(spacer(8));
+
   // Verification section for 506(c)
   if (is506c) {
-    children.push(sectionHeading("5. Accredited Investor Verification"));
+    children.push(sectionHeading("6. Accredited Investor Verification"));
     children.push(
       bodyText(
         "Pursuant to Rule 506(c) of Regulation D (17 CFR 230.506(c)(2)(ii)), the Investor must provide documentation to verify accredited investor status. Self-certification alone is NOT sufficient for 506(c) offerings.",
@@ -211,7 +226,7 @@ export async function buildSubscriptionAgreement(project: CapitalProjectFull): P
     children.push(bodyText("Acceptable verification methods (non-exclusive list):", { bold: true }));
     children.push(bulletPoint("Income Verification: IRS forms (W-2, 1040, K-1) for the prior two years, plus a written representation of expected income for the current year."));
     children.push(bulletPoint("Net Worth Verification: Bank statements, brokerage statements, and other documentation of assets, plus a credit report dated within 3 months, to evidence net worth in excess of $1,000,000 (excluding primary residence)."));
-    children.push(bulletPoint("Professional Certification: Evidence of current Series 7, Series 65, or Series 82 license, or CFA designation."));
+    children.push(bulletPoint("Professional Certification: Evidence of current Series 7, Series 65, or Series 82 license (the SEC-designated credentials under Rule 501(a)(10))."));
     children.push(bulletPoint("Third-Party Confirmation: Written confirmation from a registered broker-dealer, SEC-registered investment adviser, licensed attorney, or certified public accountant that such person or entity has taken reasonable steps to verify the Investor's accredited status within the prior 3 months."));
     children.push(bulletPoint("Existing Investor: If the Investor invested in the issuer's securities as an accredited investor within the preceding 5 years, a written representation of continued accredited status."));
     children.push(spacer(4));
@@ -220,17 +235,17 @@ export async function buildSubscriptionAgreement(project: CapitalProjectFull): P
   }
 
   // ERISA
-  const erisaSection = is506c ? "6" : "5";
+  const erisaSection = is506c ? "7" : "6";
   children.push(sectionHeading(`${erisaSection}. ERISA Representations`));
   children.push(bodyText(prose.erisaRepresentations));
   children.push(spacer(4));
   children.push(bodyText("The Investor certifies (check one):", { bold: true }));
   children.push(bulletPoint("[ ] The Investor is NOT a benefit plan investor subject to Title I of ERISA or Section 4975 of the Internal Revenue Code."));
-  children.push(bulletPoint("[ ] The Investor IS a benefit plan investor. The Investor's investment does not exceed 25% of the Fund's total assets (plan asset threshold under 29 CFR 2510.3-101)."));
+  children.push(bulletPoint("[ ] The Investor IS a benefit plan investor. The Investor understands that the Fund's assets will be treated as 'plan assets' under 29 CFR 2510.3-101(f) if benefit plan investors hold, in the aggregate, 25% or more of the value of any class of equity interests in the Fund. The Investor acknowledges that the General Partner monitors the aggregate benefit plan investor ownership to ensure compliance with this threshold."));
   children.push(spacer(8));
 
   // Tax Status
-  const taxSection = is506c ? "7" : "6";
+  const taxSection = is506c ? "8" : "7";
   children.push(sectionHeading(`${taxSection}. Tax Status`));
   children.push(bodyText(prose.taxRepresentations));
   children.push(spacer(4));
@@ -241,7 +256,7 @@ export async function buildSubscriptionAgreement(project: CapitalProjectFull): P
   children.push(spacer(8));
 
   // AML/KYC
-  const amlSection = is506c ? "8" : "7";
+  const amlSection = is506c ? "9" : "8";
   children.push(sectionHeading(`${amlSection}. Anti-Money Laundering / Know Your Customer`));
   children.push(bodyText(prose.amlKycRepresentations));
   children.push(spacer(4));
@@ -253,11 +268,11 @@ export async function buildSubscriptionAgreement(project: CapitalProjectFull): P
   children.push(spacer(8));
 
   // Commitment Amount
-  const commitSection = is506c ? "9" : "8";
+  const commitSection = is506c ? "10" : "9";
   children.push(sectionHeading(`${commitSection}. Commitment Amount`));
   children.push(
     bodyText(
-      "The Investor's capital commitment to the Fund is set forth below. Capital calls shall be made by the General Partner from time to time during the Investment Period, with not less than 10 business days' prior written notice.",
+      "The Investor's capital commitment to the Fund is set forth below. Capital calls shall be made by the General Partner from time to time during the Investment Period, with not less than 10 business days' prior written notice (or such longer period as may be provided in a side letter).",
     ),
   );
   children.push(spacer(4));
@@ -265,19 +280,19 @@ export async function buildSubscriptionAgreement(project: CapitalProjectFull): P
   children.push(spacer(8));
 
   // Indemnification
-  const indemnSection = is506c ? "10" : "9";
+  const indemnSection = is506c ? "11" : "10";
   children.push(sectionHeading(`${indemnSection}. Indemnification`));
   children.push(bodyText(prose.indemnification));
   children.push(spacer(8));
 
   // Miscellaneous
-  const miscSection = is506c ? "11" : "10";
+  const miscSection = is506c ? "12" : "11";
   children.push(sectionHeading(`${miscSection}. Miscellaneous`));
   children.push(bodyText(prose.miscellaneous));
   children.push(spacer(8));
 
   // Governing Law
-  const lawSection = is506c ? "12" : "11";
+  const lawSection = is506c ? "13" : "12";
   children.push(sectionHeading(`${lawSection}. Governing Law`));
   children.push(bodyText(prose.governingLaw));
   children.push(spacer(4));
@@ -325,7 +340,7 @@ export function runSubscriptionComplianceChecks(project: CapitalProjectFull): Co
     regulation: "17 CFR 230.501(a)",
     category: "investor_protection",
     passed: true,
-    note: "All accredited investor criteria from Rule 501(a) are included: income ($200K/$300K), net worth ($1M), professional certifications, knowledgeable employees, and entity thresholds.",
+    note: "All accredited investor criteria from Rule 501(a) are included: income ($200K/$300K), net worth ($1M), professional certifications (Series 7/65/82 per Rule 501(a)(10)), knowledgeable employees, and entity thresholds.",
   });
 
   if (is506c) {

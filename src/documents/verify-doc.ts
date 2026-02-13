@@ -64,7 +64,7 @@ const TEMPLATE_HANDLED_TYPES = new Set([
   "custody_agreement",
   // Zero-AI doc types — templates handle everything, no AI prose to verify
   "sba_form_1919",
-  "sba_form_1920",
+  // SBA Form 1920 was retired in August 2023 and is no longer generated.
   "sba_form_159",
   "sba_form_148",
   "sba_form_1050",

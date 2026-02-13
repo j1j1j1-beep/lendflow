@@ -1,3 +1,7 @@
+// NOTE: This in-memory rate limiter provides best-effort protection on serverless platforms.
+// For production use, consider upgrading to Upstash Redis (@upstash/ratelimit) for persistent rate limiting.
+// On Vercel, each cold start creates a new Map, so limits reset per instance.
+
 // In-memory sliding window rate limiter
 
 export interface RateLimitConfig {
@@ -28,14 +32,16 @@ const store = new Map<string, number[]>();
 const CLEANUP_INTERVAL_MS = 60_000;
 
 let cleanupTimer: ReturnType<typeof setInterval> | null = null;
+let maxRegisteredWindowMs = 0;
 
 function ensureCleanupRunning(windowMs: number) {
+  maxRegisteredWindowMs = Math.max(maxRegisteredWindowMs, windowMs);
   if (cleanupTimer !== null) return;
   cleanupTimer = setInterval(() => {
     const now = Date.now();
     for (const [key, timestamps] of store) {
-      // Remove entries whose entire window has expired
-      const filtered = timestamps.filter((t) => now - t < windowMs);
+      // Use max of all registered windows so no limiter's entries are prematurely evicted
+      const filtered = timestamps.filter((t) => now - t < maxRegisteredWindowMs);
       if (filtered.length === 0) {
         store.delete(key);
       } else {
@@ -144,6 +150,12 @@ export const writeLimit = createLimiter({
 /** 10 requests per minute — for heavy pipeline triggers */
 export const heavyLimit = createLimiter({
   maxRequests: 10,
+  windowMs: 60_000,
+});
+
+/** 5 requests per minute — for pipeline trigger endpoints */
+export const pipelineLimit = createLimiter({
+  maxRequests: 5,
   windowMs: 60_000,
 });
 

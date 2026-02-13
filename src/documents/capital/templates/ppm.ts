@@ -52,10 +52,10 @@ function buildSystemPrompt(project: CapitalProjectFull): string {
 
 ABSOLUTE RULES:
 1. NUMBERS ARE SACRED: Use the EXACT dollar amounts, percentages, fee rates, terms, and investor counts provided in the project data. Never round, approximate, or invent any number.
-2. CITE SPECIFIC STATUTES: Reference 17 CFR 230.501(a) for accredited investor definitions, 17 CFR 230.502(d) for the SEC legend, Rule 10b-5 (17 CFR 240.10b-5) for anti-fraud, Section 17(a) (15 U.S.C. Section 77q(a)) for securities fraud.
+2. CITE SPECIFIC STATUTES: Reference 17 CFR 230.501(a) for accredited investor definitions (note: income test is $200K individual or $300K joint with spouse or spousal equivalent per 2020 amendments to Rule 501(a)(6)), 17 CFR 230.502(d) for the SEC legend, Rule 10b-5 (17 CFR 240.10b-5) for anti-fraud, Section 17(a) (15 U.S.C. Section 77q(a)) for securities fraud.
 3. COMPLETE PROVISIONS: Write production-ready legal language. Every section must be a complete, standalone legal provision that would survive judicial scrutiny.
 4. RISK FACTORS: Must be specific to this fund type (${project.fundType}) and include: market risk, illiquidity, loss of capital, concentration risk, leverage risk, regulatory risk, tax risk, key person risk, and conflicts of interest.
-5. TAX CONSIDERATIONS: Address partnership taxation (26 U.S.C. Section 701 et seq.), UBTI concerns for tax-exempt investors (26 U.S.C. Section 511-514), FIRPTA for non-US investors (26 U.S.C. Section 1445), state tax nexus, and carried interest taxation (26 U.S.C. Section 1061).
+5. TAX CONSIDERATIONS: Address partnership taxation (26 U.S.C. Section 701 et seq.), UBTI concerns for tax-exempt investors (26 U.S.C. Section 511-514), FIRPTA for non-US investors (26 U.S.C. Section 1445), state tax nexus, and carried interest taxation under IRC Section 1061 (TCJA 2017) — specifically note the 3-year holding period requirement for carried interest to qualify for long-term capital gains treatment.
 6. ERISA: Address plan asset rules under 29 CFR 2510.3-101, VCOC/REOC exemptions.
 7. For 506(b): Emphasize no general solicitation permitted per 17 CFR 230.502(c).
 8. For 506(c): Emphasize verification requirements per 17 CFR 230.506(c)(2)(ii).
@@ -390,7 +390,7 @@ export async function buildPPM(project: CapitalProjectFull): Promise<Document> {
   children.push(bulletPoint(`First, 100% to all partners until each has received a return of its contributed capital.`));
   children.push(bulletPoint(`Second, ${(preferredReturn * 100).toFixed(1)}% preferred return to all partners (pro rata).`));
   if (carriedInterest > 0) {
-    children.push(bulletPoint(`Third, ${(carriedInterest * 100).toFixed(1)}% catch-up to the General Partner until the GP has received ${(carriedInterest * 100).toFixed(1)}% of all cumulative distributions.`));
+    children.push(bulletPoint(`Third, GP Catch-Up: 100% to the General Partner until the General Partner has received, cumulatively, an amount equal to ${(carriedInterest * 100).toFixed(1)}% of the aggregate amounts distributed under Steps 2 and 3 (the "catch-up").`));
     children.push(bulletPoint(`Fourth, ${(100 - carriedInterest * 100).toFixed(1)}% to Limited Partners and ${(carriedInterest * 100).toFixed(1)}% to the General Partner (as carried interest).`));
   }
 
@@ -553,8 +553,8 @@ export function runPPMComplianceChecks(project: CapitalProjectFull): ComplianceC
     name: "Risk Factors Disclosure",
     regulation: "Rule 10b-5 (17 CFR 240.10b-5)",
     category: "anti_fraud",
-    passed: project.riskFactorsIncluded,
-    note: project.riskFactorsIncluded
+    passed: project.riskFactorsIncluded === true,
+    note: project.riskFactorsIncluded === true
       ? "Risk factors are flagged as included in the project."
       : "WARNING: Risk factors not flagged as included. Anti-fraud rules require complete disclosure of material risks.",
   });
@@ -564,8 +564,8 @@ export function runPPMComplianceChecks(project: CapitalProjectFull): ComplianceC
     name: "Use of Proceeds Disclosure",
     regulation: "Section 17(a) (15 U.S.C. Section 77q(a))",
     category: "anti_fraud",
-    passed: project.useOfProceedsDisclosed,
-    note: project.useOfProceedsDisclosed
+    passed: project.useOfProceedsDisclosed === true,
+    note: project.useOfProceedsDisclosed === true
       ? "Use of proceeds is flagged as disclosed."
       : "WARNING: Use of proceeds not flagged as disclosed. This is a standard PPM requirement under anti-fraud rules.",
   });
@@ -577,7 +577,7 @@ export function runPPMComplianceChecks(project: CapitalProjectFull): ComplianceC
       regulation: "17 CFR 230.506(c)(2)(ii)",
       category: "investor_protection",
       passed: true,
-      note: "506(c) offering requires reasonable steps to verify accredited investor status. Verification methods include: income (W-2/1040), net worth (bank statements + credit report), professional certifications (Series 7/65/82/CFA), or third-party confirmation.",
+      note: "506(c) offering requires reasonable steps to verify accredited investor status. Verification methods include: income (W-2/1040), net worth (bank statements + credit report), professional certifications (Series 7/65/82 per Rule 501(a)(10)), or third-party confirmation.",
     });
   }
 

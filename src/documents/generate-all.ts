@@ -40,8 +40,8 @@ import { buildDigitalAssetPledge } from "./templates/digital-asset-pledge";
 import { buildCustodyAgreement } from "./templates/custody-agreement";
 
 // SBA regulatory form builders (zero AI)
+// Note: SBA Form 1920 was retired in August 2023 and has been removed.
 import { buildSbaForm1919 } from "./templates/sba-form-1919";
-import { buildSbaForm1920 } from "./templates/sba-form-1920";
 import { buildSbaForm159 } from "./templates/sba-form-159";
 import { buildSbaForm148 } from "./templates/sba-form-148";
 import { buildSbaForm1050 } from "./templates/sba-form-1050";
@@ -229,10 +229,9 @@ function buildDocFromTemplate(
       return buildCustodyAgreement(input, prose as unknown as CustodyAgreementProse);
 
     // SBA regulatory forms (zero AI — no prose needed)
+    // Note: SBA Form 1920 was retired in August 2023 and is no longer generated.
     case "sba_form_1919":
       return buildSbaForm1919(input);
-    case "sba_form_1920":
-      return buildSbaForm1920(input);
     case "sba_form_159":
       return buildSbaForm159(input);
     case "sba_form_148":
@@ -265,7 +264,7 @@ function buildDocFromTemplate(
 const ZERO_AI_DOCS = new Set([
   "settlement_statement", "compliance_certificate", "amortization_schedule",
   "closing_disclosure", "loan_estimate",
-  "sba_form_1919", "sba_form_1920", "sba_form_159", "sba_form_148", "sba_form_1050",
+  "sba_form_1919", "sba_form_159", "sba_form_148", "sba_form_1050",
   "irs_4506c", "irs_w9", "flood_determination",
   "privacy_notice", "patriot_act_notice", "disbursement_authorization",
 ]);
@@ -387,9 +386,9 @@ export function filterRequiredDocs(
     if ((docType === "sba_authorization" || docType === "cdc_debenture") && !input.programId.startsWith("sba_")) return false;
     if (docType === "cdc_debenture" && input.programId !== "sba_504") return false;
     // SBA regulatory forms — only for SBA programs
-    const sbaForms = ["sba_form_1919", "sba_form_1920", "sba_form_159", "sba_form_148", "sba_form_1050"];
+    // Note: SBA Form 1920 was retired in August 2023 and is no longer generated.
+    const sbaForms = ["sba_form_1919", "sba_form_159", "sba_form_148", "sba_form_1050"];
     if (sbaForms.includes(docType) && !input.programId.startsWith("sba_")) return false;
-    if (docType === "sba_form_1920" && input.programId !== "sba_7a") return false; // 1920 is 7(a) only
     if (docType === "sba_form_1050" && input.programId !== "sba_7a") return false; // 1050 is 7(a) only
     // Flood determination — only for real property
     if (docType === "flood_determination" && !hasRealProperty) return false;

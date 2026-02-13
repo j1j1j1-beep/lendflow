@@ -73,8 +73,14 @@ export async function POST(request: NextRequest) {
     if (targetRaise !== null && (!Number.isFinite(targetRaise) || targetRaise <= 0)) {
       return NextResponse.json({ error: "targetRaise must be a positive number" }, { status: 400 });
     }
+    if (targetRaise !== null && targetRaise > 1e15) {
+      return NextResponse.json({ error: "targetRaise exceeds maximum allowed value" }, { status: 400 });
+    }
     if (minInvestment !== null && (!Number.isFinite(minInvestment) || minInvestment <= 0)) {
       return NextResponse.json({ error: "minInvestment must be a positive number" }, { status: 400 });
+    }
+    if (minInvestment !== null && minInvestment > 1e15) {
+      return NextResponse.json({ error: "minInvestment exceeds maximum allowed value" }, { status: 400 });
     }
     if (managementFee !== null && (!Number.isFinite(managementFee) || managementFee < 0 || managementFee > 1)) {
       return NextResponse.json({ error: "managementFee must be between 0 and 1" }, { status: 400 });
@@ -94,11 +100,32 @@ export async function POST(request: NextRequest) {
     if (gpCommitment !== null && (!Number.isFinite(gpCommitment) || gpCommitment <= 0)) {
       return NextResponse.json({ error: "gpCommitment must be a positive number" }, { status: 400 });
     }
+    if (gpCommitment !== null && gpCommitment > 1e15) {
+      return NextResponse.json({ error: "gpCommitment exceeds maximum allowed value" }, { status: 400 });
+    }
     if (maxInvestors !== null && (!Number.isFinite(maxInvestors) || maxInvestors <= 0)) {
       return NextResponse.json({ error: "maxInvestors must be a positive integer" }, { status: 400 });
     }
     if (nonAccreditedLimit !== null && (!Number.isFinite(nonAccreditedLimit) || nonAccreditedLimit < 0)) {
       return NextResponse.json({ error: "nonAccreditedLimit must be a non-negative integer" }, { status: 400 });
+    }
+
+    // Date range validation (1970-2100)
+    const dateFields: Array<[string, unknown]> = [
+      ["formDFilingDate", body.formDFilingDate],
+      ["formDAmendmentDate", body.formDAmendmentDate],
+    ];
+    for (const [name, raw] of dateFields) {
+      if (raw) {
+        const d = new Date(raw as string);
+        if (isNaN(d.getTime())) {
+          return NextResponse.json({ error: `${name} must be a valid date` }, { status: 400 });
+        }
+        const year = d.getFullYear();
+        if (year < 1970 || year > 2100) {
+          return NextResponse.json({ error: `${name} year must be between 1970 and 2100` }, { status: 400 });
+        }
+      }
     }
 
     const project = await prisma.capitalProject.create({
@@ -127,6 +154,7 @@ export async function POST(request: NextRequest) {
         nonAccreditedLimit,
         formDFilingDate: body.formDFilingDate ? new Date(body.formDFilingDate) : null,
         formDAmendmentDate: body.formDAmendmentDate ? new Date(body.formDAmendmentDate) : null,
+
         riskFactorsIncluded: body.riskFactorsIncluded === true,
         useOfProceedsDisclosed: body.useOfProceedsDisclosed === true,
         stateFilings: body.stateFilings ?? undefined,

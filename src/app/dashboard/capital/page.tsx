@@ -28,7 +28,7 @@ const STATUS_FILTERS = [
   { label: "Complete", value: "COMPLETE" },
 ] as const;
 
-const PROCESSING_STATUSES = ["GENERATING_DOCS", "COMPLIANCE_REVIEW"];
+const PROCESSING_STATUSES = new Set(["GENERATING_DOCS", "COMPLIANCE_REVIEW"]);
 
 const STATUS_CONFIG: Record<
   string,
@@ -93,7 +93,7 @@ export default function CapitalListPage() {
 
       // Client-side filter for processing statuses
       if (filter === "processing") {
-        items = items.filter((p) => PROCESSING_STATUSES.includes(p.status));
+        items = items.filter((p) => PROCESSING_STATUSES.has(p.status));
       }
 
       setProjects(items);
@@ -220,7 +220,7 @@ export default function CapitalListPage() {
               label: project.status,
               variant: "outline" as const,
             };
-            const isProcessing = PROCESSING_STATUSES.includes(project.status);
+            const isProcessing = PROCESSING_STATUSES.has(project.status);
 
             return (
               <Link key={project.id} href={`/dashboard/capital/${project.id}`}>

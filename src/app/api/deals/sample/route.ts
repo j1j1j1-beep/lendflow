@@ -5,7 +5,7 @@ import { checkPaywall } from "@/lib/paywall";
 import { inngest } from "@/inngest/client";
 import { logAudit } from "@/lib/audit";
 import { withRateLimit } from "@/lib/with-rate-limit";
-import { writeLimit } from "@/lib/rate-limit";
+import { pipelineLimit } from "@/lib/rate-limit";
 import {
   SAMPLE_BORROWER,
   SAMPLE_DOCUMENTS,
@@ -18,7 +18,7 @@ import { Prisma } from "@/generated/prisma/client";
 // triggers the analysis pipeline via Inngest.
 
 export async function POST(request: NextRequest) {
-  const limited = await withRateLimit(request, writeLimit);
+  const limited = await withRateLimit(request, pipelineLimit);
   if (limited) return limited;
 
   try {
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     // Paywall check
     const paywall = await checkPaywall(org.id);
     if (!paywall.allowed) {
-      return NextResponse.json({ error: paywall.reason }, { status: 403 });
+      return NextResponse.json({ error: paywall.reason }, { status: 402 });
     }
 
     // Prevent duplicate sample deals

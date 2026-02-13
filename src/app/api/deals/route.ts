@@ -52,6 +52,9 @@ export async function POST(request: NextRequest) {
     if (loanAmount !== null && (!Number.isFinite(loanAmount) || loanAmount <= 0)) {
       return NextResponse.json({ error: "loanAmount must be a positive number" }, { status: 400 });
     }
+    if (loanAmount !== null && loanAmount > 1e15) {
+      return NextResponse.json({ error: "loanAmount exceeds maximum allowed value" }, { status: 400 });
+    }
     if (proposedRate !== null && (!Number.isFinite(proposedRate) || proposedRate < 0 || proposedRate > 100)) {
       return NextResponse.json({ error: "proposedRate must be between 0 and 100" }, { status: 400 });
     }

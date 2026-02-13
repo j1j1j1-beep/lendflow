@@ -33,7 +33,7 @@ function buildSystemPrompt(project: CapitalProjectFull): string {
 
   return `You are a securities attorney generating an ${entityType === "LLC" ? "LLC Operating Agreement" : "Limited Partnership Agreement"} for a private investment fund formed in ${stateOfFormation}.
 
-This is the governing document that defines rights, obligations, and economics between the GP and LPs. Reference Delaware RULPA (6 Del.C. Chapter 17) for LP agreements or Delaware LLC Act (6 Del.C. Chapter 18) for LLC agreements.
+This is the governing document that defines rights, obligations, and economics between the GP and LPs. Reference DRULPA (6 Del.C. Chapter 17) for LP agreements or Delaware LLC Act (6 Del.C. Chapter 18) for LLC agreements.
 
 MUST include these sections:
 1. Formation and purpose
@@ -46,7 +46,7 @@ MUST include these sections:
 8. Investment restrictions and limitations
 9. Advisory committee composition and authority
 10. Transfer restrictions (ROFR, consent requirements)
-11. No-fault removal/dissolution (75%+ LP vote by commitment)
+11. No-fault removal/dissolution (75%+ LP vote by commitment, excluding the GP's commitment as LP if any)
 12. Term and extensions
 13. Indemnification and exculpation
 14. Confidentiality
@@ -54,7 +54,7 @@ MUST include these sections:
 
 ABSOLUTE RULES:
 1. Use EXACT numbers from project data. Never invent financial terms.
-2. Cite specific statutes: Delaware RULPA (6 Del.C. Section 17-xxx), IRC Section 704(b) for allocations, Section 1061 for carried interest.
+2. Cite specific statutes: DRULPA (6 Del.C. Section 17-xxx), IRC Section 704(b) for allocations, Section 1061 for carried interest.
 3. Write complete, enforceable legal provisions.
 
 OUTPUT: Valid JSON only.
@@ -176,7 +176,7 @@ export async function buildOperatingAgreement(project: CapitalProjectFull): Prom
   children.push(bulletPoint(`Step 1 — Return of Capital: 100% to all partners, pro rata, until each partner has received distributions equal to its aggregate capital contributions.`));
   children.push(bulletPoint(`Step 2 — Preferred Return: 100% to all partners, pro rata, until each partner has received a cumulative compounded annual return of ${(preferredReturn * 100).toFixed(1)}% on unreturned capital contributions.`));
   if (carriedInterest > 0) {
-    children.push(bulletPoint(`Step 3 — GP Catch-Up: ${(carriedInterest * 100).toFixed(1)}% to the General Partner and ${(100 - carriedInterest * 100).toFixed(1)}% to Limited Partners until the General Partner has received ${(carriedInterest * 100).toFixed(1)}% of the aggregate amount distributed under Steps 2 and 3.`));
+    children.push(bulletPoint(`Step 3 — GP Catch-Up: 100% to the General Partner until the General Partner has received, cumulatively, an amount equal to ${(carriedInterest * 100).toFixed(1)}% of the aggregate amounts distributed under Steps 2 and 3.`));
     children.push(bulletPoint(`Step 4 — Carried Interest Split: ${(100 - carriedInterest * 100).toFixed(1)}% to Limited Partners (pro rata) and ${(carriedInterest * 100).toFixed(1)}% to the General Partner as carried interest.`));
   }
 
@@ -264,7 +264,7 @@ export async function buildOperatingAgreement(project: CapitalProjectFull): Prom
   children.push(spacer(4));
   children.push(
     bodyText(
-      "ERISA Monitoring: The General Partner shall monitor the aggregate commitment amounts of Benefit Plan Investors (as defined in ERISA Section 3(42)) and ensure that Benefit Plan Investors do not hold 25% or more of the value of any class of equity interests in the Fund. If Benefit Plan Investor ownership approaches 25%, the General Partner shall take reasonable steps to prevent the Fund from becoming subject to ERISA fiduciary obligations and prohibited transaction rules, including limiting future subscriptions from Benefit Plan Investors or offering them a separate class of interests.",
+      "ERISA Monitoring: The General Partner shall monitor the aggregate commitment amounts of Benefit Plan Investors (as defined in ERISA Section 3(42) and 29 CFR 2510.3-101(f)(1)) and ensure that Benefit Plan Investors do not hold, in the aggregate, 25% or more of the value of any class of equity interests in the Fund (the plan asset threshold under 29 CFR 2510.3-101(f)). If aggregate Benefit Plan Investor ownership approaches 25%, the General Partner shall take reasonable steps to prevent the Fund from becoming subject to ERISA fiduciary obligations and prohibited transaction rules, including limiting future subscriptions from Benefit Plan Investors or offering them a separate class of interests.",
       { italic: true },
     ),
   );
@@ -287,7 +287,7 @@ export async function buildOperatingAgreement(project: CapitalProjectFull): Prom
   children.push(spacer(4));
   children.push(
     bodyText(
-      "Limited Partners holding not less than 75% of the aggregate commitments (excluding the GP commitment) may, by written notice delivered to the General Partner, remove the General Partner without cause. Upon removal, the outgoing General Partner shall cooperate in the orderly transition of management to a successor General Partner elected by a majority of Limited Partners by commitment amount.",
+      "Limited Partners holding not less than 75% of the aggregate commitments (excluding the General Partner's commitment as a Limited Partner, if any) may, by written notice delivered to the General Partner, remove the General Partner without cause. Upon removal, the outgoing General Partner shall cooperate in the orderly transition of management to a successor General Partner elected by a majority of Limited Partners by commitment amount (again excluding the outgoing GP's commitment as LP).",
     ),
   );
   children.push(spacer(8));
@@ -365,8 +365,8 @@ export function runOperatingAgreementComplianceChecks(project: CapitalProjectFul
     name: "Clawback Provision",
     regulation: "Market Standard (LP Protection)",
     category: "investor_protection",
-    passed: project.clawbackProvision,
-    note: project.clawbackProvision
+    passed: project.clawbackProvision === true,
+    note: project.clawbackProvision === true
       ? "Clawback provision included — GP must return excess carried interest at fund wind-down."
       : "WARNING: No clawback provision. This is a significant LP protection that is market standard for institutional funds.",
   });
@@ -376,8 +376,8 @@ export function runOperatingAgreementComplianceChecks(project: CapitalProjectFul
     name: "Key Person Provision",
     regulation: "Market Standard (LP Protection)",
     category: "investor_protection",
-    passed: project.keyPersonProvision,
-    note: project.keyPersonProvision
+    passed: project.keyPersonProvision === true,
+    note: project.keyPersonProvision === true
       ? `Key person provision included. Key persons: ${(Array.isArray(project.keyPersonNames) ? (project.keyPersonNames as string[]).join(", ") : "Not specified")}.`
       : "WARNING: No key person provision. LPs typically require suspension of the investment period if key persons depart.",
   });

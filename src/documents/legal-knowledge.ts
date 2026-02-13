@@ -905,7 +905,7 @@ const PROGRAM_OVERLAYS: Record<string, Record<string, Partial<LegalChecklist>>> 
         "BSA/AML compliance per 31 CFR 1010 — Customer Identification Program, Suspicious Activity Reporting",
         "FinCEN virtual currency guidance (FIN-2019-G001) compliance",
         "State digital asset lending law compliance (varies by jurisdiction)",
-        "GENIUS Act (P.L. 119-XX, signed July 18, 2025) — if stablecoin collateral, verify issuer is licensed payment stablecoin issuer with 1:1 reserve backing; SAB 122 replaces SAB 121 for crypto custody accounting",
+        "GENIUS Act (P.L. 119-27, signed July 18, 2025) — if stablecoin collateral, verify issuer is licensed payment stablecoin issuer with 1:1 reserve backing; SAB 122 replaces SAB 121 for crypto custody accounting",
         "OCC/FDIC/Fed 2025 crypto guidance withdrawal — banks no longer need prior supervisory non-objection for crypto activities but must maintain appropriate risk management",
       ],
     },

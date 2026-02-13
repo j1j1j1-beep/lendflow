@@ -1,3 +1,4 @@
+// Named claude.ts for historical reasons; actually uses xAI Grok API via OpenAI-compatible SDK
 import OpenAI from "openai";
 
 const globalForGrok = globalThis as unknown as {
@@ -39,8 +40,11 @@ async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
     try {
       return await fn();
     } catch (error: unknown) {
-      const status = (error as any)?.status ?? (error as any)?.response?.status;
-      if (NON_RETRYABLE.includes(status)) {
+      const status =
+        error instanceof OpenAI.APIError
+          ? error.status
+          : (error as { response?: { status?: number } })?.response?.status;
+      if (status != null && NON_RETRYABLE.includes(status)) {
         throw error;
       }
 

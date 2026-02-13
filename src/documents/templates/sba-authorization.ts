@@ -30,6 +30,11 @@ export type { SbaAuthorizationProse };
 
 // SBA Guaranty Fee Calculation (per SOP 50 10)
 
+// Standard 7(a): <=150K=85%, >150K=75%. SBA Express: 50%. Veterans Advantage: 75%.
+// CAPLines: varies. Community Advantage: 85% up to $250K. Export Express: 90%.
+// This simplified calculation covers standard 7(a) only.
+// For other programs, the guaranty percentage should be passed in via DocumentInput
+// or determined by the rules engine based on the specific SBA program type.
 function computeSbaGuarantyPercent(loanAmount: number): number {
   if (loanAmount <= 150_000) return 0.85;
   return 0.75;

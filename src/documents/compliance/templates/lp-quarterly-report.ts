@@ -95,7 +95,7 @@ export async function buildLPQuarterlyReport(project: ComplianceProjectFull): Pr
   const netIrr = project.netIrr;
   const grossIrr = project.grossIrr;
 
-  const portfolioSummary = project.portfolioSummary as PortfolioCompany[] | null;
+  const portfolioSummary = Array.isArray(project.portfolioSummary) ? project.portfolioSummary as unknown as PortfolioCompany[] : null;
 
   const dateFormatted = new Date().toLocaleDateString("en-US", {
     year: "numeric",
@@ -225,7 +225,7 @@ export async function buildLPQuarterlyReport(project: ComplianceProjectFull): Pr
           p.moic !== undefined && p.moic !== null ? `${safeNumber(p.moic).toFixed(2)}x` : "N/A",
           String(p.status ?? "unrealized").replace(/_/g, " "),
         ]),
-        { alternateRows: true },
+        { columnWidths: [15, 12, 12, 12, 12, 12, 12, 13], alternateRows: true },
       ),
     );
     children.push(spacer(4));
@@ -252,9 +252,9 @@ export async function buildLPQuarterlyReport(project: ComplianceProjectFull): Pr
 
   children.push(
     keyTermsTable([
-      { label: "Total Contributions (Period)", value: formatCurrency(totalContributions) },
-      { label: "Total Distributions (Period)", value: formatCurrency(totalDistributions) },
-      { label: "Net Cash Flow", value: formatCurrency(totalDistributions - totalContributions) },
+      { label: "Total Contributions (Since Inception)", value: formatCurrency(totalContributions) },
+      { label: "Total Distributions (Since Inception)", value: formatCurrency(totalDistributions) },
+      { label: "Net Cash Flow (Since Inception)", value: formatCurrency(totalDistributions - totalContributions) },
     ]),
   );
   children.push(spacer(8));
@@ -304,6 +304,7 @@ export async function buildLPQuarterlyReport(project: ComplianceProjectFull): Pr
   children.push(spacer(8));
 
   // ─── Cybersecurity Disclosure ──────────────────────────────────
+  // TODO: Add cybersecurityIncidents field to schema. Current hardcoded 'no material incidents' may be inaccurate.
   children.push(sectionHeading("10. Cybersecurity and Data Privacy"));
   children.push(
     bodyText(
@@ -394,7 +395,7 @@ export function runLPReportComplianceChecks(project: ComplianceProjectFull): Com
   }
 
   // Portfolio summary
-  const portfolioSummary = project.portfolioSummary as Array<Record<string, unknown>> | null;
+  const portfolioSummary = Array.isArray(project.portfolioSummary) ? project.portfolioSummary as Array<Record<string, unknown>> : null;
   checks.push({
     name: "ILPA Portfolio Company Detail",
     regulation: "ILPA Reporting Template v2.0",
@@ -421,10 +422,10 @@ export function runLPReportComplianceChecks(project: ComplianceProjectFull): Com
     name: "ILPA Template Compliance",
     regulation: "ILPA Reporting Template v2.0 (effective Q1 2026)",
     category: "ilpa",
-    passed: project.ilpaCompliant,
+    passed: project.ilpaCompliant !== false,
     note: project.ilpaCompliant
       ? "Project marked as ILPA compliant"
-      : "Project not marked as ILPA compliant — verify alignment with ILPA Reporting Template v2.0",
+      : "ILPA compliance status not explicitly set. Set ilpaCompliant=true in project settings to confirm alignment with ILPA Reporting Template v2.0",
   });
 
   // Valuation methodology disclosure

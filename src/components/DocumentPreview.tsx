@@ -377,18 +377,23 @@ export function DocumentPreview({
     }
   }, [open, documentId, directUrl, fileName]);
 
-  // Render DOCX blob into container when both are ready
+  // Render DOCX blob into container when both are ready.
+  // #16: docx-preview is known to retain DOM nodes and internal state after
+  // rendering. There is no official destroy/cleanup API. We mitigate memory
+  // leaks by clearing innerHTML on unmount and when the blob changes, which
+  // removes the rendered DOM tree and allows GC to reclaim the nodes.
   useEffect(() => {
     if (!docxBlob || !containerRef.current) return;
 
     let cancelled = false;
+    const container = containerRef.current;
 
     async function render() {
       try {
         const { renderAsync } = await import("docx-preview");
-        if (cancelled || !containerRef.current) return;
-        containerRef.current.innerHTML = "";
-        await renderAsync(docxBlob!, containerRef.current, undefined, {
+        if (cancelled || !container) return;
+        container.innerHTML = "";
+        await renderAsync(docxBlob!, container, undefined, {
           className: "docx-preview",
           inWrapper: true,
           ignoreWidth: true,
@@ -410,6 +415,8 @@ export function DocumentPreview({
 
     return () => {
       cancelled = true;
+      // #16: Clear rendered DOM to help GC reclaim docx-preview nodes
+      if (container) container.innerHTML = "";
     };
   }, [docxBlob]);
 
@@ -644,7 +651,7 @@ export function DocumentPreview({
             {isDocx(fileName) && (
               <div
                 ref={containerRef}
-                className="docx-container bg-white"
+                className="docx-container bg-background"
                 style={{
                   display: loading || error || !docxBlob ? "none" : "block",
                 }}

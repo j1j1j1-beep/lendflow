@@ -3,11 +3,11 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { logAudit } from "@/lib/audit";
 import { withRateLimit } from "@/lib/with-rate-limit";
-import { writeLimit } from "@/lib/rate-limit";
+import { pipelineLimit } from "@/lib/rate-limit";
 import { inngest } from "@/inngest/client";
 
 // Statuses that allow triggering generation
-const GENERATABLE_STATUSES = new Set(["CREATED", "NEEDS_REVIEW"]);
+const GENERATABLE_STATUSES = new Set(["CREATED", "NEEDS_REVIEW", "ERROR"]);
 
 // POST /api/capital/[projectId]/generate - Trigger document generation
 
@@ -15,7 +15,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }
 ) {
-  const limited = await withRateLimit(request, writeLimit);
+  const limited = await withRateLimit(request, pipelineLimit);
   if (limited) return limited;
 
   try {
@@ -51,7 +51,7 @@ export async function POST(
     // Trigger Inngest pipeline
     await inngest.send({
       name: "capital/project.generate",
-      data: { projectId },
+      data: { projectId, triggeredAt: Date.now() },
     });
 
     void logAudit({

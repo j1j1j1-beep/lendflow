@@ -178,7 +178,7 @@ export async function getLendingResults(jobId: string): Promise<GetLendingAnalys
   let lastResponse: GetLendingAnalysisResponse | undefined;
 
   let pageCount = 0;
-  const maxPages = 200; // Safety limit to prevent infinite pagination
+  const maxPages = parseInt(process.env.TEXTRACT_MAX_PAGES ?? "500", 10); // Configurable via env, default 500
 
   do {
     const response = await textract.send(

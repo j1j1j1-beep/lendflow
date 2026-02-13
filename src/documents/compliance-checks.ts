@@ -32,13 +32,15 @@ const STATE_USURY_LIMITS: Record<
   AK: { rate: 0.105, statute: "Alaska Stat. §45.45.010", commercialExemptAbove: 25000 },
   AZ: { rate: 999, statute: "Ariz. Rev. Stat. §44-1201 (no usury cap for agreed-upon rates; 10% default)" },
   AR: { rate: 0.17, statute: "Ark. Const. Amend. 89 §3" },
+  // Note: Cal. Const. Art. XV exempts most commercial borrowers, but individual consumer borrowers
+  // below $300K may not qualify for commercial exemption. Entity type check recommended for full compliance.
   CA: { rate: 0.10, statute: "Cal. Const. Art. XV §1 ($300K exemption applies to real-property-secured loans only)", commercialExemptAbove: 300000 },
   CO: { rate: 0.12, statute: "Colo. Rev. Stat. §5-12-103", commercialExemptAbove: 75000 },
   CT: { rate: 0.12, statute: "Conn. Gen. Stat. §37-4" },
   DE: { rate: 0.105, statute: "Del. Code tit. 6, §2301 (5% over Fed discount rate)", commercialExemptAbove: 100000 },
   DC: { rate: 0.24, statute: "D.C. Code §28-3301" },
   FL: { rate: 0.18, statute: "Fla. Stat. §687.02 (>$500K: 25% cap per §687.071; 25% criminal usury threshold)", commercialExemptAbove: 500000, commercialCeiling: 0.25 },
-  GA: { rate: 999, statute: "Ga. Code §7-4-2 (no usury cap for loans >$3K by written agreement)", commercialExemptAbove: 3000 },
+  GA: { rate: 999, statute: "Ga. Code §7-4-2 (no usury cap for loans >$3K by written agreement)", commercialExemptAbove: 3000, criminalUsuryCap: 0.60 },
   HI: { rate: 0.12, statute: "Haw. Rev. Stat. §478-4 (12% max; non-consumer transactions exempt)", commercialExemptAbove: 750000 },
   ID: { rate: 0.12, statute: "Idaho Code §28-22-104" },
   IL: { rate: 0.09, statute: "815 ILCS 205/4", commercialExemptAbove: 5000 },
@@ -71,6 +73,8 @@ const STATE_USURY_LIMITS: Record<
   SC: { rate: 0.0875, statute: "S.C. Code §34-31-20", commercialExemptAbove: 50000 },
   SD: { rate: 999, statute: "S.D. Codified Laws §54-3-4 (no usury limit for written contracts)" },
   TN: { rate: 0.24, statute: "Tenn. Code §47-14-103 (max 24% or 4% above avg prime rate)", commercialExemptAbove: 250000 },
+  // TX base usury rate is 18% (Tex. Fin. Code §302.001). Commercial rate ceiling is 28% per §303.009.
+  // Using base rate here for consumer lending compliance. state-rules.ts uses commercial rate.
   TX: { rate: 0.18, statute: "Tex. Fin. Code §303.009 (28% commercial ceiling per Ch. 303; real-property-secured >$3M per Ch. 306)", commercialExemptAbove: 3000000, commercialCeiling: 0.28 },
   UT: { rate: 999, statute: "Utah Code §15-1-1 (no usury cap for agreed-upon rates; 10% default)" },
   VT: { rate: 0.12, statute: "Vt. Stat. tit. 9, §41a" },
@@ -172,6 +176,21 @@ function checkUsury(input: DocumentInput): ComplianceCheckResult {
     };
   }
 
+  // #164 — GA criminal usury check: even below the commercial exemption threshold,
+  // Georgia criminal usury at 5%/month (60% annualized) applies per O.C.G.A. §7-4-18
+  if (state === "GA" && limit.criminalUsuryCap != null && rate > limit.criminalUsuryCap) {
+    return {
+      name: "Usury Compliance",
+      passed: false,
+      regulation: "O.C.G.A. §7-4-18",
+      description:
+        `GA criminal usury threshold: 5%/month (60% annualized) for loans >$3,000 (O.C.G.A. §7-4-18). ` +
+        `Interest rate of ${(rate * 100).toFixed(3)}% EXCEEDS the Georgia criminal usury cap of 60%. ` +
+        `Criminal usury in Georgia is a felony carrying penalties of 1-10 years imprisonment and/or fines.`,
+      severity: "critical",
+    };
+  }
+
   const passed = rate <= limit.rate;
   return {
     name: "Usury Compliance",
@@ -203,17 +222,17 @@ function checkSbaSizeStandard(input: DocumentInput): ComplianceCheckResult {
     };
   }
 
-  // SBA 504 limit: $5,000,000 standard; $5,500,000 for manufacturing/energy
+  // SBA 504 debenture limits per 13 CFR 120.932. Standard max $5.5M, $5.5M for manufacturers/energy. Total project cost limits vary.
   if (programId === "sba_504") {
-    const maxAmount = 5_500_000; // Using higher manufacturing/energy cap
+    const maxAmount = 5_500_000; // Standard and manufacturing/energy debenture cap per 13 CFR §120.932
     const passed = amount <= maxAmount;
     return {
-      name: "SBA Size Standard — 504 Loan Limit",
+      name: "SBA Size Standard — 504 Debenture Limit",
       passed,
-      regulation: "13 CFR §120.931; SBA SOP 50 10 8",
+      regulation: "13 CFR §120.932; SBA SOP 50 10 8",
       description: passed
-        ? `Loan amount of $${amount.toLocaleString()} is within the SBA 504 maximum of $${maxAmount.toLocaleString()} (manufacturing/energy cap) per 13 CFR §120.931.`
-        : `Loan amount of $${amount.toLocaleString()} EXCEEDS the SBA 504 maximum of $${maxAmount.toLocaleString()} per 13 CFR §120.931.`,
+        ? `Debenture amount of $${amount.toLocaleString()} is within the SBA 504 maximum of $${maxAmount.toLocaleString()} per 13 CFR §120.932.`
+        : `Debenture amount of $${amount.toLocaleString()} EXCEEDS the SBA 504 maximum of $${maxAmount.toLocaleString()} per 13 CFR §120.932.`,
       severity: passed ? "info" : "critical",
     };
   }
@@ -291,6 +310,8 @@ function checkSba504Eligibility(input: DocumentInput): ComplianceCheckResult {
 }
 
 function checkJobCreation(_input: DocumentInput): ComplianceCheckResult {
+  // Job creation: 1 job per $90K CDC debenture ($140K for small manufacturers).
+  // Verify current thresholds at sba.gov. October 2025 adjustment cited but unconfirmed.
   return {
     name: "SBA 504 Job Creation/Retention",
     passed: true,
@@ -305,16 +326,21 @@ function checkJobCreation(_input: DocumentInput): ComplianceCheckResult {
 }
 
 function checkOfacScreening(_input: DocumentInput): ComplianceCheckResult {
-  // OFAC screening requires integration with the SDN list — this is a
+  // OFAC screening requires integration with the full OFAC sanctions program — this is a
   // placeholder noting the requirement. In production, integrate with
-  // Treasury OFAC SDN API or a sanctions screening vendor.
+  // Treasury OFAC API or a sanctions screening vendor.
   return {
     name: "OFAC Screening",
     passed: true,
-    regulation: "31 CFR Part 501; Executive Order 13224; OFAC SDN List",
+    regulation: "31 CFR Part 501; Executive Order 13224; OFAC Consolidated Sanctions List",
     description:
       "All parties (borrower, guarantor, principals) must be screened against the OFAC " +
-      "Specially Designated Nationals (SDN) list and other sanctions lists per 31 CFR Part 501. " +
+      "Consolidated Sanctions List including: SDN (Specially Designated Nationals), " +
+      "SSI (Sectoral Sanctions Identifications), FSE (Foreign Sanctions Evaders), " +
+      "NS-PLC (Non-SDN Palestinian Legislative Council), " +
+      "CAPTA (Correspondent Account or Payable-Through Account Sanctions), " +
+      "and the full Consolidated Sanctions List per 31 CFR Part 501. " +
+      "Screening against only the SDN list is insufficient. " +
       "Ensure screening is completed prior to closing and documented in the loan file.",
     severity: "warning",
   };
@@ -342,12 +368,13 @@ function checkHpml(input: DocumentInput): ComplianceCheckResult {
   const rate = input.terms.interestRate;
 
   // HPML triggers at APOR + 1.5% for first liens, APOR + 3.5% for subordinate liens.
-  // Current APOR ~6.1% (as of 2025) → first-lien threshold ~7.6%.
+  // Current APOR ~6.1% (as of 2025) -> first-lien threshold ~7.6%.
   // TODO: Replace with dynamic APOR lookup from FFIEC/CFPB weekly table for production use.
   // Using 7.6% as conservative threshold — should be recalculated as APOR + 1.5% for first-lien.
   // WARNING: The APOR-based threshold changes weekly. This hardcoded value is a
   // conservative estimate. In production, integrate with FFIEC APOR table API
   // at https://www.ffiec.gov/ratespread/aportables.htm for accurate checks.
+  // TODO: For production, implement dynamic APOR lookup from FFIEC (ffiec.gov/ratespread). Current 7.6% is based on 2025 rates.
   const conservativeHpmlThreshold = 0.076;
   const isLikelyHpml = rate > conservativeHpmlThreshold;
 
@@ -360,9 +387,9 @@ function checkHpml(input: DocumentInput): ComplianceCheckResult {
         `under 12 CFR §1026.35. If the rate exceeds APOR + 1.5% (first lien) or APOR + 3.5% (subordinate lien), ` +
         `additional requirements apply: (1) escrow account for taxes and insurance per §1026.35(b), ` +
         `(2) enhanced appraisal requirements per §1026.35(c), and (3) balloon payment restrictions. ` +
-        `Verify against current APOR table published weekly by the CFPB/FFIEC.`
+        `Verify against current APOR table published weekly by the CFPB/FFIEC at ffiec.gov/ratespread.`
       : `Interest rate of ${(rate * 100).toFixed(3)}% is unlikely to trigger HPML designation under 12 CFR §1026.35. ` +
-        `Verify against current APOR table published weekly by the CFPB/FFIEC.`,
+        `Verify against current APOR table published weekly by the CFPB/FFIEC at ffiec.gov/ratespread.`,
     severity: isLikelyHpml ? "warning" : "info",
   };
 }
@@ -581,7 +608,7 @@ function checkGeniusActCompliance(input: DocumentInput): ComplianceCheckResult {
     return {
       name: "GENIUS Act — Stablecoin Collateral Compliance",
       passed: true,
-      regulation: "GENIUS Act (P.L. 119-XX, signed July 18, 2025); 12 USC §5401 et seq.",
+      regulation: "GENIUS Act (P.L. 119-27, signed July 18, 2025); 12 USC §5401 et seq.",
       description:
         "No stablecoin collateral identified. GENIUS Act compliance check is not applicable to this transaction. " +
         "Note: Non-stablecoin crypto (BTC, ETH, etc.) is outside GENIUS Act scope but may be subject to " +
@@ -594,7 +621,7 @@ function checkGeniusActCompliance(input: DocumentInput): ComplianceCheckResult {
   return {
     name: "GENIUS Act — Stablecoin Collateral Compliance",
     passed: false,
-    regulation: "GENIUS Act (P.L. 119-XX, signed July 18, 2025); 12 USC §5401 et seq.",
+    regulation: "GENIUS Act (P.L. 119-27, signed July 18, 2025); 12 USC §5401 et seq.",
     description:
       "This loan involves stablecoin collateral subject to the GENIUS Act (signed July 18, 2025). " +
       "Required verification: (1) Confirm the issuer is a licensed payment stablecoin issuer " +
@@ -610,8 +637,6 @@ function checkGeniusActCompliance(input: DocumentInput): ComplianceCheckResult {
 }
 
 // States requiring TILA-like commercial financing disclosures
-// NOTE: Illinois and Maryland have pending commercial lending disclosure
-// legislation that may take effect in 2026. Monitor for updates.
 const COMMERCIAL_DISCLOSURE_STATES: Record<string, string> = {
   CA: "SB 1235 (Cal. Fin. Code §22800 et seq.)",
   NY: "S5470-B (N.Y. Fin. Serv. Law §801 et seq.)",
@@ -624,6 +649,11 @@ const COMMERCIAL_DISCLOSURE_STATES: Record<string, string> = {
   MO: "HB 990",
   TX: "HB 4182",
   LA: "SB 89",
+  // IL SB 2234 (effective 2024), Illinois commercial financing disclosure requirement
+  IL: "SB 2234 (815 ILCS 180/; effective 2024)",
+  // MD requires disclosure for certain commercial transactions
+  MD: "MD Commercial Financing Disclosure (Md. Code, Com. Law §14-4001 et seq.)",
+  WI: "WI Commercial Financing Disclosure (Wis. Stat. §138.14)",
 };
 
 function checkCommercialFinancingDisclosure(input: DocumentInput): ComplianceCheckResult {
@@ -636,7 +666,7 @@ function checkCommercialFinancingDisclosure(input: DocumentInput): ComplianceChe
       regulation: "State commercial financing disclosure laws",
       description:
         "No state specified on deal. Cannot determine if commercial financing disclosure is required. " +
-        "Eleven states (CA, NY, VA, UT, FL, GA, CT, KS, MO, TX, LA) require TILA-like disclosures for commercial financing. " +
+        "Fourteen states (CA, NY, VA, UT, FL, GA, CT, KS, MO, TX, LA, IL, MD, WI) require TILA-like disclosures for commercial financing. " +
         "Manual review recommended.",
       severity: "warning",
     };

@@ -29,9 +29,7 @@ export default async function Home() {
   if (userId) redirect("/dashboard");
 
   return (
-    <div className="dark flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
-      {/* Landing page forced to dark mode for consistent marketing appearance.
-          Dashboard uses system preference via ThemeProvider in layout.tsx. */}
+    <div className="flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
       {/* Gradient Orbs */}
       <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-primary/5 blur-3xl" />
       <div className="pointer-events-none absolute top-1/3 -left-40 h-[500px] w-[500px] rounded-full bg-primary/3 blur-3xl" />

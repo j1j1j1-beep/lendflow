@@ -5,20 +5,24 @@
 // This is MOSTLY DETERMINISTIC — presents data in K-1 format.
 // AI generates explanatory notes only.
 //
-// Maps all 19 K-1 fields to their IRS Form 1065 Schedule K-1 boxes:
-// k1OrdinaryIncome → Box 1, k1NetRentalIncome → Box 2,
-// k1GuaranteedPayments → Box 4c, k1InterestIncome → Box 5,
-// k1DividendIncome → Box 6a, k1ShortTermCapGain → Box 8,
+// Maps all 23 K-1 fields to their IRS Form 1065 Schedule K-1 boxes:
+// k1OrdinaryIncome → Box 1, k1NetRentalIncome → Box 2, k1OtherNetRentalIncome → Box 3,
+// k1GuaranteedPayments → Box 4c (total; Box 4a = services/subject to SE tax, Box 4b = capital/not subject to SE tax),
+// k1InterestIncome → Box 5,
+// k1DividendIncome → Box 6a, k1Royalties → Box 7, k1ShortTermCapGain → Box 8,
 // k1LongTermCapGain → Box 9a, k1Section1231Gain → Box 10,
-// k1Section179Deduction → Box 12, k1OtherDeductions → Box 13,
-// k1SelfEmploymentIncome → Box 14, k1ForeignTaxPaid → Box 16/21,
-// k1AMTItems → Box 17, k1TaxExemptIncome → Box 18,
+// k1OtherIncomeLoss → Box 11, k1Section179Deduction → Box 12 Code A, k1OtherDeductions → Box 13 (codes A-W),
+// k1SelfEmploymentIncome → Box 14, k1Credits → Box 15 (low-income housing, rehabilitation, other),
+// k1ForeignTaxPaid → Box 16 (with applicable country code under current form),
+// k1AMTItems → Box 17 (AMT items): Code A (post-1986 depreciation adjustment), Code B (adjusted gain or loss),
+//   Code C (depletion), Code D (oil/gas preference), Code E (other AMT items), Code F (AMT adjustment from passive activities),
+// k1TaxExemptIncome → Box 18,
 // k1Distributions → Box 19, k1EndingCapitalAccount → Part II Item L,
 // k1UnrecapturedSec1250 → Box 9c, k1QBIDeduction → Box 20 Code Z,
 // k1UBTI → Box 20 Code V
 //
 // Filing deadline: March 15 (or September 15 with extension)
-// Late filing penalty: $255/partner/month (2025 rate, 26 USC §6698)
+// Late filing penalty: $260/partner/month (2026 rate per IRS Rev Proc 2025-32, 26 USC §6698)
 
 import {
   Document,
@@ -51,7 +55,7 @@ RULES:
 1. All financial numbers will be provided separately in a table — do not invent or modify numbers.
 2. Explain what each major K-1 category means for the LP's tax return.
 3. Reference correct IRS form numbers and IRC sections.
-4. Filing deadline and penalty information must be accurate (March 15, or Sept 15 with extension; $255/partner/month late penalty under 26 USC §6698).
+4. Filing deadline and penalty information must be accurate (March 15, or Sept 15 with extension; $260/partner/month late penalty under 26 USC §6698, 2026 rate per IRS Rev Proc 2025-32).
 5. Output ONLY valid JSON matching the requested schema.`;
 
 async function generateK1Prose(project: ComplianceProjectFull): Promise<K1SummaryProse> {
@@ -104,15 +108,19 @@ export async function buildK1Summary(project: ComplianceProjectFull): Promise<Do
   const k1Data = {
     ordinaryIncome: d2n(project.k1OrdinaryIncome),
     netRentalIncome: d2n(project.k1NetRentalIncome),
+    otherNetRentalIncome: d2n((project as Record<string, unknown>).k1OtherNetRentalIncome),
     guaranteedPayments: d2n(project.k1GuaranteedPayments),
     interestIncome: d2n(project.k1InterestIncome),
     dividendIncome: d2n(project.k1DividendIncome),
+    royalties: d2n((project as Record<string, unknown>).k1Royalties),
     shortTermCapGain: d2n(project.k1ShortTermCapGain),
     longTermCapGain: d2n(project.k1LongTermCapGain),
     section1231Gain: d2n(project.k1Section1231Gain),
+    otherIncomeLoss: d2n((project as Record<string, unknown>).k1OtherIncomeLoss),
     section179Deduction: d2n(project.k1Section179Deduction),
     otherDeductions: d2n(project.k1OtherDeductions),
     selfEmploymentIncome: d2n(project.k1SelfEmploymentIncome),
+    credits: d2n((project as Record<string, unknown>).k1Credits),
     foreignTaxPaid: d2n(project.k1ForeignTaxPaid),
     amtItems: d2n(project.k1AMTItems),
     taxExemptIncome: d2n(project.k1TaxExemptIncome),
@@ -127,12 +135,15 @@ export async function buildK1Summary(project: ComplianceProjectFull): Promise<Do
   const totalIncome =
     k1Data.ordinaryIncome +
     k1Data.netRentalIncome +
+    k1Data.otherNetRentalIncome +
     k1Data.guaranteedPayments +
     k1Data.interestIncome +
     k1Data.dividendIncome +
+    k1Data.royalties +
     k1Data.shortTermCapGain +
     k1Data.longTermCapGain +
-    k1Data.section1231Gain;
+    k1Data.section1231Gain +
+    k1Data.otherIncomeLoss;
 
   const totalDeductions =
     k1Data.section179Deduction +
@@ -165,7 +176,7 @@ export async function buildK1Summary(project: ComplianceProjectFull): Promise<Do
       { label: "Partnership Return (Form 1065)", value: filingDeadline },
       { label: "K-1 Delivery Deadline", value: filingDeadline },
       { label: "Extension Deadline (Form 7004)", value: extensionDeadline },
-      { label: "Late Filing Penalty", value: "$255 per partner per month (max 12 months)" },
+      { label: "Late Filing Penalty", value: "$260 per partner per month (max 12 months, 2026 rate per IRS Rev Proc 2025-32)" },
       { label: "Penalty Authority", value: "26 U.S.C. § 6698" },
     ]),
   );
@@ -193,15 +204,20 @@ export async function buildK1Summary(project: ComplianceProjectFull): Promise<Do
       [
         ["Box 1", "Ordinary business income (loss)", "Ordinary", formatCurrencyDetailed(k1Data.ordinaryIncome)],
         ["Box 2", "Net rental real estate income (loss)", "Passive (unless REPS)", formatCurrencyDetailed(k1Data.netRentalIncome)],
-        ["Box 4c", "Total guaranteed payments", "Ordinary", formatCurrencyDetailed(k1Data.guaranteedPayments)],
+        ["Box 3", "Other net rental income (loss)", "Passive", formatCurrencyDetailed(k1Data.otherNetRentalIncome)],
+        ["Box 4a", "Guaranteed payments for services (subject to self-employment tax)", "Ordinary", "See Box 4c"],
+        ["Box 4b", "Guaranteed payments for capital use (not subject to SE tax)", "Ordinary", "See Box 4c"],
+        ["Box 4c", "Total guaranteed payments (sum of 4a + 4b)", "Ordinary", formatCurrencyDetailed(k1Data.guaranteedPayments)],
         ["Box 5", "Interest income", "Portfolio", formatCurrencyDetailed(k1Data.interestIncome)],
         ["Box 6a", "Ordinary dividends", "Portfolio", formatCurrencyDetailed(k1Data.dividendIncome)],
+        ["Box 7", "Royalties", "Portfolio", formatCurrencyDetailed(k1Data.royalties)],
         ["Box 8", "Net short-term capital gain (loss)", "Capital", formatCurrencyDetailed(k1Data.shortTermCapGain)],
         ["Box 9a", "Net long-term capital gain (loss)", "Capital", formatCurrencyDetailed(k1Data.longTermCapGain)],
         ["Box 9c", "Unrecaptured Section 1250 gain", "Capital (25% rate)", formatCurrencyDetailed(k1Data.unrecapturedSec1250)],
         ["Box 10", "Net Section 1231 gain (loss)", "Ordinary or capital", formatCurrencyDetailed(k1Data.section1231Gain)],
+        ["Box 11", "Other income (loss)", "Various", formatCurrencyDetailed(k1Data.otherIncomeLoss)],
       ],
-      { alternateRows: true },
+      { columnWidths: [12, 30, 28, 30], alternateRows: true },
     ),
   );
   children.push(spacer(4));
@@ -223,10 +239,10 @@ export async function buildK1Summary(project: ComplianceProjectFull): Promise<Do
     createTable(
       ["K-1 Box", "Description", "Tax Character", "Amount"],
       [
-        ["Box 12", "Section 179 deduction", "Ordinary", formatCurrencyDetailed(k1Data.section179Deduction)],
-        ["Box 13", "Other deductions", "Various", formatCurrencyDetailed(k1Data.otherDeductions)],
+        ["Box 12, Code A", "Section 179 deduction", "Ordinary", formatCurrencyDetailed(k1Data.section179Deduction)],
+        ["Box 13", "Other deductions (codes A-W: e.g., Code A = charitable contributions, Code W = other deductions)", "Various", formatCurrencyDetailed(k1Data.otherDeductions)],
       ],
-      { alternateRows: true },
+      { columnWidths: [12, 30, 28, 30], alternateRows: true },
     ),
   );
   children.push(spacer(4));
@@ -248,14 +264,15 @@ export async function buildK1Summary(project: ComplianceProjectFull): Promise<Do
       ["K-1 Box", "Description", "Tax Character", "Amount"],
       [
         ["Box 14", "Self-employment earnings (loss)", "SE tax", formatCurrencyDetailed(k1Data.selfEmploymentIncome)],
-        ["Box 16/21", "Foreign taxes paid or accrued", "Foreign tax credit", formatCurrencyDetailed(k1Data.foreignTaxPaid)],
-        ["Box 17", "Alternative minimum tax (AMT) items", "AMT adjustment", formatCurrencyDetailed(k1Data.amtItems)],
+        ["Box 15", "Credits (low-income housing credit, rehabilitation credit, other rental real estate credits, other rental credits, other credits)", "Various credits", formatCurrencyDetailed(k1Data.credits)],
+        ["Box 16", "Foreign taxes paid or accrued (with applicable country code under current form; codes A-P: A=name of country, B=gross income sourced at partner level, C=foreign gross income — general, D=foreign gross income — passive, E-H=deductions, I-L=foreign taxes paid/accrued, M-P=reduction in taxes)", "Foreign tax credit", formatCurrencyDetailed(k1Data.foreignTaxPaid)],
+        ["Box 17", "Alternative minimum tax (AMT) items: Code A (post-1986 depreciation adjustment), Code B (adjusted gain or loss), Code C (depletion), Code D (oil/gas preference), Code E (other AMT items), Code F (AMT adjustment from passive activities)", "AMT adjustment", formatCurrencyDetailed(k1Data.amtItems)],
         ["Box 18", "Tax-exempt income", "Various", formatCurrencyDetailed(k1Data.taxExemptIncome)],
         ["Box 19", "Distributions", "Non-taxable (reduce basis)", formatCurrencyDetailed(k1Data.distributions)],
         ["Box 20, Code Z", "Section 199A (QBI) deduction", "QBI", formatCurrencyDetailed(k1Data.qbiDeduction)],
         ["Box 20, Code V", "Unrelated business taxable income (UBTI)", "UBTI", formatCurrencyDetailed(k1Data.ubti)],
       ],
-      { alternateRows: true },
+      { columnWidths: [12, 30, 28, 30], alternateRows: true },
     ),
   );
   children.push(spacer(8));
@@ -344,7 +361,7 @@ export async function buildK1Summary(project: ComplianceProjectFull): Promise<Do
   children.push(bulletPoint("If you received an extension, the K-1 may be revised; please check with the fund administrator."));
   children.push(
     bulletPoint(
-      `Late filing penalty: $255 per partner per month, up to 12 months, under 26 U.S.C. § 6698 (2026 rate).`,
+      `Late filing penalty: $260 per partner per month, up to 12 months, under 26 U.S.C. § 6698 (2026 rate per IRS Rev Proc 2025-32).`,
     ),
   );
   children.push(spacer(8));
@@ -407,17 +424,21 @@ export function runK1ComplianceChecks(project: ComplianceProjectFull): Complianc
   const k1Fields = [
     { field: "k1OrdinaryIncome", box: "Box 1" },
     { field: "k1NetRentalIncome", box: "Box 2" },
-    { field: "k1GuaranteedPayments", box: "Box 4c" },
+    { field: "k1OtherNetRentalIncome", box: "Box 3 (other net rental income/loss)" },
+    { field: "k1GuaranteedPayments", box: "Box 4c (total; 4a=services/SE tax, 4b=capital/no SE tax)" },
     { field: "k1InterestIncome", box: "Box 5" },
     { field: "k1DividendIncome", box: "Box 6a" },
+    { field: "k1Royalties", box: "Box 7 (royalties)" },
     { field: "k1ShortTermCapGain", box: "Box 8" },
     { field: "k1LongTermCapGain", box: "Box 9a" },
     { field: "k1Section1231Gain", box: "Box 10" },
-    { field: "k1Section179Deduction", box: "Box 12" },
-    { field: "k1OtherDeductions", box: "Box 13" },
+    { field: "k1OtherIncomeLoss", box: "Box 11 (other income/loss)" },
+    { field: "k1Section179Deduction", box: "Box 12, Code A" },
+    { field: "k1OtherDeductions", box: "Box 13 (codes A-W)" },
     { field: "k1SelfEmploymentIncome", box: "Box 14" },
-    { field: "k1ForeignTaxPaid", box: "Box 16/21" },
-    { field: "k1AMTItems", box: "Box 17" },
+    { field: "k1Credits", box: "Box 15 (credits — low-income housing, rehabilitation, other)" },
+    { field: "k1ForeignTaxPaid", box: "Box 16 (with applicable country code under current form)" },
+    { field: "k1AMTItems", box: "Box 17 (AMT items: Code A post-1986 depreciation, Code B adjusted gain/loss, Code C depletion, Code D oil/gas preference, Code E other AMT, Code F AMT from passive)" },
     { field: "k1TaxExemptIncome", box: "Box 18" },
     { field: "k1Distributions", box: "Box 19" },
     { field: "k1EndingCapitalAccount", box: "Part II Item L" },
@@ -441,7 +462,7 @@ export function runK1ComplianceChecks(project: ComplianceProjectFull): Complianc
     regulation: "IRS Schedule K-1 (Form 1065)",
     category: "irs",
     passed: populatedFields.length > 0,
-    note: `${populatedFields.length}/19 K-1 fields populated, ${nonZeroFields.length} with non-zero values`,
+    note: `${populatedFields.length}/${k1Fields.length} K-1 fields populated, ${nonZeroFields.length} with non-zero values`,
   });
 
   // Ending capital account
@@ -487,7 +508,23 @@ export function runK1ComplianceChecks(project: ComplianceProjectFull): Complianc
     regulation: "26 U.S.C. § 6698",
     category: "irs",
     passed: true, // Always included in template
-    note: "Late filing penalty of $255/partner/month (2026 rate) disclosed per 26 U.S.C. § 6698",
+    note: "Late filing penalty of $260/partner/month (2026 rate per IRS Rev Proc 2025-32) disclosed per 26 U.S.C. § 6698",
+  });
+
+  // #213 — Allocation percentage sum validation
+  // In a multi-partner context, the sum of all partner allocation percentages must equal 100%.
+  // For single K-1 generation, we check if an allocation percentage is provided.
+  const allocationPct = safeNumber((project as Record<string, unknown>).allocationPercentage);
+  checks.push({
+    name: "Allocation Sum Check",
+    regulation: "IRC § 704(b) — Partnership Allocation Rules",
+    category: "irs",
+    passed: allocationPct === 0 || Math.abs(allocationPct - 100) < 0.01,
+    note: allocationPct > 0
+      ? Math.abs(allocationPct - 100) < 0.01
+        ? "Partner allocation percentages sum to 100%"
+        : `Partner allocation percentage is ${allocationPct.toFixed(2)}% — all partner allocations must sum to 100%. Verify with fund administrator.`
+      : "Allocation percentage not specified on this K-1. Partner allocation percentages must sum to 100% across all partners.",
   });
 
   return checks;

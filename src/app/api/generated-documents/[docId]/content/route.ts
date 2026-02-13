@@ -4,6 +4,8 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { getS3Buffer, uploadToS3 } from "@/lib/s3";
 import HTMLtoDOCX from "html-to-docx";
 import { logAudit } from "@/lib/audit";
+import { withRateLimit } from "@/lib/with-rate-limit";
+import { writeLimit } from "@/lib/rate-limit";
 
 // GET /api/generated-documents/[docId]/content — Proxy DOCX from S3
 // Avoids CORS issues when rendering DOCX in-browser with docx-preview.
@@ -55,6 +57,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ docId: string }> }
 ) {
+  const limited = await withRateLimit(request, writeLimit);
+  if (limited) return limited;
+
   try {
     const { user, org } = await requireAuth();
     const { docId } = await params;

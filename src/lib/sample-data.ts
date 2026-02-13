@@ -66,14 +66,21 @@ export const SAMPLE_EXTRACTIONS: Array<{
         socialSecurity_line6a: 0,
         taxableSocialSecurity_line6b: 0,
         capitalGain_line7: 0,
-        otherIncome_line8: 0,
-        totalIncome_line9: 248500,
+        // Line 8 = Other income from Schedule 1, line 10
+        // Schedule 1 Part I: Sched C (78,000) + Sched E (70,000) = 148,000
+        // Schedule 1 Part II adjustments: 1/2 SE tax (5,508) = 5,508
+        // Schedule 1 line 10 = 148,000 - 5,508 = 142,492
+        otherIncome_line8: 142492,
+        // Line 9 = 142,000 + 1,200 + 3,500 + 0 + 142,492 = 289,192
+        totalIncome_line9: 289192,
+        // Line 10 = Standard deduction for MFJ (reported below)
         adjustments_line10: 0,
-        agi_line11: 248500,
+        // Line 11 = AGI = total income - adjustments = 289,192
+        agi_line11: 289192,
         standardOrItemized_line12: 30000,
         qbi_line13a: 0,
         totalDeductions_line14: 30000,
-        taxableIncome_line15: 218500,
+        taxableIncome_line15: 259192,
       },
       // Schedule C — self-employment income from property management consulting
       scheduleC: [
@@ -199,11 +206,13 @@ export const SAMPLE_EXTRACTIONS: Array<{
         taxBeforeCredits_line16: 47200,
         totalCredits: 0,
         otherTaxes_line23: 11016,
-        totalTax_line24: 47200,
+        // totalTax = taxBeforeCredits (47,200) + otherTaxes/SE tax (11,016) = 58,216
+        totalTax_line24: 58216,
         federalWithholding_line25a: 28400,
         totalPayments_line33: 28400,
         overpaid_line34: 0,
-        amountOwed_line37: 18800,
+        // amountOwed = totalTax (58,216) - totalPayments (28,400) = 29,816
+        amountOwed_line37: 29816,
       },
       extractionNotes: [
         "Sample data — not extracted from a real document.",
@@ -214,17 +223,17 @@ export const SAMPLE_EXTRACTIONS: Array<{
       wagesSalariesTips: 142000,
       taxableInterest: 1200,
       ordinaryDividends: 3500,
-      totalIncome: 248500,
-      adjustedGrossIncome: 248500,
-      taxableIncome: 218500,
-      totalTax: 47200,
+      totalIncome: 289192,
+      adjustedGrossIncome: 289192,
+      taxableIncome: 259192,
+      totalTax: 58216,
       // Line-keyed aliases for the spec
       wagesLine1: 142000,
       businessIncomeLine12: 78000,
-      totalIncomeLine9: 248500,
-      adjustedGrossIncomeLine11: 248500,
-      taxableIncomeLine15: 218500,
-      totalTaxLine24: 47200,
+      totalIncomeLine9: 289192,
+      adjustedGrossIncomeLine11: 289192,
+      taxableIncomeLine15: 259192,
+      totalTaxLine24: 58216,
     },
   },
 

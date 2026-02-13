@@ -83,7 +83,7 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
   const dpi = totalContributions > 0 ? totalDistributions / totalContributions : 0;
   const rvpi = totalContributions > 0 ? nav / totalContributions : 0;
 
-  const portfolioSummary = project.portfolioSummary as PortfolioCompany[] | null;
+  const portfolioSummary = Array.isArray(project.portfolioSummary) ? project.portfolioSummary as unknown as PortfolioCompany[] : null;
 
   const periodEnd = project.periodEnd
     ? project.periodEnd.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
@@ -197,17 +197,19 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
         ["ASSETS", ""],
         ["Investments at fair value", formatCurrency(totalFairValue)],
         ["Cash and cash equivalents", formatCurrency(nav - totalFairValue > 0 ? nav - totalFairValue : 0)],
+        // TODO: These values should come from project data (otherAssets). Hardcoded $0 is not GAAP-compliant for operating funds. Display "See audited financial statements" if data unavailable.
         ["Other assets", "$0"],
         ["Total Assets", formatCurrency(nav)],
         ["", ""],
         ["LIABILITIES", ""],
+        // TODO: These values should come from project data (accruedExpenses, otherLiabilities, totalLiabilities). Hardcoded $0 is not GAAP-compliant for operating funds. Display "See audited financial statements" if data unavailable.
         ["Accrued expenses", "$0"],
         ["Other liabilities", "$0"],
         ["Total Liabilities", "$0"],
         ["", ""],
         ["NET ASSETS", formatCurrency(nav)],
       ],
-      { alternateRows: true },
+      { columnWidths: [60, 40], alternateRows: true },
     ),
   );
   children.push(spacer(8));
@@ -223,18 +225,33 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
       [
         ["INVESTMENT INCOME", ""],
         ["Unrealized appreciation (depreciation)", formatCurrencyDetailed(unrealizedGainLoss)],
-        ["Realized gains (losses) (estimated)", formatCurrencyDetailed(totalDistributions > 0 ? totalDistributions * 0.2 : 0)],
+        // Realized gains: use project field if available, otherwise note data not available — refer to audited schedule
+        ["Realized gains (losses)",
+          (project as Record<string, unknown>).realizedGains !== undefined && (project as Record<string, unknown>).realizedGains !== null
+            ? formatCurrencyDetailed(safeNumber((project as Record<string, unknown>).realizedGains))
+            : "$0 *"],
         ["Interest and dividend income", "$0"],
         ["Total Investment Income", formatCurrencyDetailed(unrealizedGainLoss)],
         ["", ""],
         ["EXPENSES", ""],
+        // TODO: These values should come from project data (managementFeesYTD, operatingExpenses). Hardcoded $0 is not GAAP-compliant for operating funds. Display "See audited financial statements" if data unavailable.
         ["Management fees", "$0"],
         ["Fund operating expenses", "$0"],
         ["Total Expenses", "$0"],
         ["", ""],
         ["NET INVESTMENT INCOME (LOSS)", formatCurrencyDetailed(unrealizedGainLoss)],
       ],
-      { alternateRows: true },
+      { columnWidths: [60, 40], alternateRows: true },
+    ),
+  );
+  children.push(spacer(2));
+  children.push(
+    bodyText(
+      "* Realized gains data not available from project data — refer to audited schedule of realized " +
+      "and unrealized gains and losses. Management fees, fund operating expenses, and other balance " +
+      "sheet items shown as $0 are placeholders — actual values should be sourced from the accounting " +
+      "system integration or audited financial statements.",
+      { italic: true, color: COLORS.textGray },
     ),
   );
   children.push(spacer(8));
@@ -247,13 +264,17 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
     createTable(
       ["", "Amount"],
       [
-        ["Net assets, beginning of period", formatCurrency(totalContributions - totalDistributions)],
+        // Beginning NAV: use project field if available, otherwise estimate from capital account activity
+        ["Net assets, beginning of period",
+          (project as Record<string, unknown>).beginningNav !== undefined && (project as Record<string, unknown>).beginningNav !== null
+            ? formatCurrency(safeNumber((project as Record<string, unknown>).beginningNav))
+            : formatCurrency(totalContributions - totalDistributions) + " (estimated from capital account activity; actual NAV per audited financials may differ)"],
         ["Capital contributions", formatCurrency(totalContributions)],
         ["Capital distributions", `(${formatCurrency(totalDistributions)})`],
         ["Net investment income (loss)", formatCurrencyDetailed(unrealizedGainLoss)],
         ["Net assets, end of period", formatCurrency(nav)],
       ],
-      { alternateRows: true },
+      { columnWidths: [60, 40], alternateRows: true },
     ),
   );
   children.push(spacer(8));
@@ -276,7 +297,7 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
         ["Distributions to partners", `(${formatCurrency(totalDistributions)})`],
         ["Net cash from financing activities", formatCurrency(totalContributions - totalDistributions)],
       ],
-      { alternateRows: true },
+      { columnWidths: [60, 40], alternateRows: true },
     ),
   );
   children.push(spacer(8));
@@ -300,7 +321,7 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
             : "N/A",
           String(p.status ?? "unrealized").replace(/_/g, " "),
         ]),
-        { alternateRows: true },
+        { columnWidths: [20, 15, 18, 18, 14, 15], alternateRows: true },
       ),
     );
     children.push(spacer(4));
@@ -336,7 +357,7 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
         ["Level 2", "Observable inputs other than Level 1 prices", "Comparable transactions, indices, broker quotes"],
         ["Level 3", "Unobservable inputs based on models and assumptions", "Private equity, real estate, venture capital (most fund investments)"],
       ],
-      { alternateRows: true },
+      { columnWidths: [15, 50, 35], alternateRows: true },
     ),
   );
   children.push(spacer(4));
@@ -524,7 +545,7 @@ export function runAnnualReportComplianceChecks(project: ComplianceProjectFull):
   });
 
   // Portfolio summary
-  const portfolioSummary = project.portfolioSummary as Array<Record<string, unknown>> | null;
+  const portfolioSummary = Array.isArray(project.portfolioSummary) ? project.portfolioSummary as Array<Record<string, unknown>> : null;
   checks.push({
     name: "Schedule of Investments",
     regulation: "GAAP — Investment Company Reporting",

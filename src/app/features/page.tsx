@@ -26,7 +26,7 @@ import {
 
 export default function FeaturesPage() {
   return (
-    <div className="dark flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
+    <div className="flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
       {/* Gradient orbs for visual flair */}
       <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-primary/5 blur-3xl" />
       <div className="pointer-events-none absolute top-1/3 -left-40 h-[500px] w-[500px] rounded-full bg-primary/3 blur-3xl" />

@@ -122,10 +122,14 @@ export const REPORT_TYPE_TO_DOC_TYPE: Record<string, string> = {
   K1_SUMMARY: "k1_summary",
   ANNUAL_REPORT: "annual_report",
   FORM_ADV_SUMMARY: "form_adv_summary",
-  // Additional report types that map to existing templates
+  // Intentional aliases — these report types map to existing templates as interim solution.
+  // TODO: Capital account statement requires its own template with per-partner detail (contributions, distributions, beginning/ending balances)
   CAPITAL_ACCOUNT_STATEMENT: "lp_quarterly_report",
+  // Valuation data (ASC 820 hierarchy, fair values, portfolio schedule) is included in the annual report format
   VALUATION_REPORT: "annual_report",
+  // TODO: Audited financials require CPA-prepared statements per GAAP/PCAOB standards, not auto-generated annual report
   AUDITED_FINANCIALS: "annual_report",
+  // TODO: Side letter summary requires its own template tracking LP-specific terms, MFN rights, and co-investment provisions
   SIDE_LETTER_SUMMARY: "lp_quarterly_report",
 };
 

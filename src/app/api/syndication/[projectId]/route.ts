@@ -6,6 +6,17 @@ import { logAudit } from "@/lib/audit";
 import { withRateLimit } from "@/lib/with-rate-limit";
 import { writeLimit } from "@/lib/rate-limit";
 
+/**
+ * Serialize Prisma Decimal fields to numbers for JSON response.
+ */
+function serializeDecimals<T extends Record<string, unknown>>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj, (_key, value) =>
+    typeof value === "object" && value !== null && "toNumber" in value && typeof value.toNumber === "function"
+      ? value.toNumber()
+      : value
+  )) as T;
+}
+
 // Valid SyndicationPropertyType values
 const VALID_PROPERTY_TYPES = new Set([
   "MULTIFAMILY", "OFFICE", "RETAIL", "INDUSTRIAL", "MIXED_USE",
@@ -20,12 +31,13 @@ const VALID_EXEMPTION_TYPES = new Set([
 ]);
 
 // Float fields that must be in 0-1 range
+// bonusDepreciationPct stored as decimal (0-1), e.g., 1.0 = 100% bonus depreciation
 const FEE_FIELDS = [
   "acquisitionFee", "assetMgmtFee", "dispositionFee",
   "constructionMgmtFee", "refinancingFee", "guaranteeFee", "propertyMgmtFee",
   "preferredReturn", "projectedIrr", "vacancyRate", "rentGrowthRate",
   "expenseGrowthRate", "exitCapRate", "interestRate",
-  "projectedEquityMultiple", "bonusDepreciationPct",
+  "bonusDepreciationPct",
 ] as const;
 
 function validateFeeRange(name: string, value: unknown): string | null {
@@ -87,10 +99,10 @@ export async function GET(
     );
 
     return NextResponse.json({
-      project: {
+      project: serializeDecimals({
         ...project,
         syndicationDocuments: documentsWithUrls,
-      },
+      }),
     });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
@@ -162,6 +174,18 @@ export async function PATCH(
       }
     }
 
+    // projectedEquityMultiple is NOT a 0-1 fee field — it's a multiplier (e.g. 1.5x, 2.0x)
+    // Validate separately: must be a non-negative finite number (no upper bound of 1)
+    if (body.projectedEquityMultiple != null) {
+      const eqm = Number(body.projectedEquityMultiple);
+      if (!Number.isFinite(eqm) || eqm < 0) {
+        return NextResponse.json(
+          { error: "projectedEquityMultiple must be a non-negative number" },
+          { status: 400 },
+        );
+      }
+    }
+
     // Build update data — only include fields present in body
     const updateData: Record<string, unknown> = {};
 
@@ -188,7 +212,18 @@ export async function PATCH(
     ] as const;
     for (const field of decimalFields) {
       if (body[field] !== undefined) {
-        updateData[field] = body[field] != null ? Number(body[field]) : null;
+        if (body[field] != null) {
+          const n = Number(body[field]);
+          if (!Number.isFinite(n)) {
+            return NextResponse.json({ error: `${field} must be a valid number` }, { status: 400 });
+          }
+          if (n > 1e15 || n < -1e15) {
+            return NextResponse.json({ error: `${field} exceeds maximum allowed value` }, { status: 400 });
+          }
+          updateData[field] = n;
+        } else {
+          updateData[field] = null;
+        }
       }
     }
 
@@ -207,6 +242,11 @@ export async function PATCH(
       }
     }
 
+    // projectedEquityMultiple — handled separately from FEE_FIELDS (not constrained to 0-1)
+    if (body.projectedEquityMultiple !== undefined) {
+      updateData.projectedEquityMultiple = body.projectedEquityMultiple != null ? Number(body.projectedEquityMultiple) : null;
+    }
+
     // Boolean fields
     const boolFields = [
       "interestOnly", "isQOZ", "is1031Exchange",
@@ -222,9 +262,21 @@ export async function PATCH(
     if (body.blueSkyFilings !== undefined) updateData.blueSkyFilings = body.blueSkyFilings;
     if (body.sponsorTrackRecord !== undefined) updateData.sponsorTrackRecord = body.sponsorTrackRecord;
 
-    // DateTime
+    // DateTime with range validation (1970-2100)
     if (body.formDFilingDate !== undefined) {
-      updateData.formDFilingDate = body.formDFilingDate ? new Date(body.formDFilingDate) : null;
+      if (body.formDFilingDate) {
+        const d = new Date(body.formDFilingDate);
+        if (isNaN(d.getTime())) {
+          return NextResponse.json({ error: "formDFilingDate must be a valid date" }, { status: 400 });
+        }
+        const year = d.getFullYear();
+        if (year < 1970 || year > 2100) {
+          return NextResponse.json({ error: "formDFilingDate year must be between 1970 and 2100" }, { status: 400 });
+        }
+        updateData.formDFilingDate = d;
+      } else {
+        updateData.formDFilingDate = null;
+      }
     }
 
     // Audit field
@@ -318,7 +370,7 @@ export async function PATCH(
       metadata: { updatedFields: Object.keys(updateData) },
     });
 
-    return NextResponse.json({ project });
+    return NextResponse.json({ project: project ? serializeDecimals(project) : project });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

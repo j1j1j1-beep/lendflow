@@ -102,6 +102,19 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   }
 
   // Prorated interest
+  // DAY-COUNT CONVENTION: Actual/360 (banking convention)
+  // Settlement statements in commercial lending traditionally use Actual/360,
+  // which is the standard banking day-count convention. This results in a
+  // slightly higher per-diem interest than Actual/365 because the daily rate
+  // is computed over a 360-day year.
+  //
+  // NOTE: The Closing Disclosure (closing-disclosure.ts) uses Actual/365, which
+  // is the TRID-required convention per 12 CFR 1026.38. These documents serve
+  // different purposes and intentionally use different day-count conventions:
+  //   - Settlement Statement: commercial banking convention (Actual/360)
+  //   - Closing Disclosure: TRID/Reg Z consumer compliance (Actual/365)
+  // If this loan is consumer-purpose (subject to TRID), the Closing Disclosure
+  // per-diem figure controls for regulatory purposes.
   const daysToFirstPayment = daysBetween(
     input.generatedAt,
     input.firstPaymentDate,
@@ -213,7 +226,7 @@ export function buildSettlementStatement(input: DocumentInput): Document {
   children.push(sectionHeading("Important Notes"));
   children.push(
     bodyText(
-      "Prorated interest calculated on an Actual/360 day count basis.",
+      "Prorated interest calculated on an Actual/360 day count basis (standard banking convention). Note: The Closing Disclosure uses Actual/365 per TRID requirements; any difference in per-diem figures is due to the different day-count conventions.",
     ),
   );
   children.push(spacer(4));

@@ -43,7 +43,7 @@ const STATUS_FILTERS = [
   { label: "Complete", value: "COMPLETE" },
 ] as const;
 
-const PROCESSING_STATUSES = ["GENERATING_DOCS", "COMPLIANCE_REVIEW"];
+const PROCESSING_STATUSES = new Set(["GENERATING_DOCS", "COMPLIANCE_REVIEW"]);
 
 const TRANSACTION_TYPE_LABELS: Record<string, string> = {
   STOCK_PURCHASE: "Stock Purchase",
@@ -112,7 +112,7 @@ export default function DealsPage() {
       const params = new URLSearchParams();
       if (filter !== "all") {
         if (filter === "processing") {
-          params.set("status", PROCESSING_STATUSES.join(","));
+          params.set("status", [...PROCESSING_STATUSES].join(","));
         } else {
           params.set("status", filter);
         }
@@ -242,7 +242,7 @@ export default function DealsPage() {
               label: project.status,
               variant: "outline" as const,
             };
-            const isProcessing = PROCESSING_STATUSES.includes(project.status);
+            const isProcessing = PROCESSING_STATUSES.has(project.status);
 
             return (
               <Link

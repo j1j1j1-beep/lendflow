@@ -2,7 +2,7 @@
 // Generates a DOCX Purchase Agreement for an M&A transaction.
 // Handles: stock purchase, asset purchase, and merger agreements.
 // Includes: reps & warranties, covenants, conditions, indemnification, termination.
-// References: HSR ($133.9M threshold), Section 338/368, R&W insurance, MAC carveouts.
+// References: HSR ($119.5M threshold), Section 338/368, R&W insurance, MAC carveouts.
 
 import {
   Document,
@@ -69,13 +69,15 @@ export function buildPurchaseAgreement(
   const isAsset = ["ASSET_PURCHASE", "SECTION_363_SALE"].includes(project.transactionType);
 
   const macCarveouts = (Array.isArray(project.macCarveouts) ? project.macCarveouts : null) as string[] | null ?? [
-    "Changes in general economic or market conditions",
-    "Changes affecting the industry generally",
-    "Changes in applicable law or accounting standards",
-    "Natural disasters, pandemics, acts of terrorism, or war",
-    "Effects of announcement of this transaction",
-    "Failure to meet projections (but underlying cause may be considered)",
-    "Changes in interest rates or exchange rates",
+    "Changes in general economic conditions",
+    "Changes in conditions generally affecting the industry in which the Target Company operates",
+    "Changes in financial markets, including interest rates, exchange rates, and equity or debt market conditions",
+    "Changes in applicable law, regulation, or governmental policy",
+    "Changes in GAAP or applicable accounting standards",
+    "Acts of God, natural disasters, weather events, or force majeure",
+    "Pandemics, epidemics, or public health emergencies (including government-imposed restrictions)",
+    "Cyberattacks, data breaches, or IT system disruptions (unless disproportionately affecting the Target Company)",
+    "Credit or capital markets disruptions, including changes in the availability of financing",
   ];
 
   const children: (Paragraph | Table)[] = [];
@@ -297,7 +299,7 @@ export function buildPurchaseAgreement(
     children.push(sectionSubheading("5.2", "HSR Act Compliance"));
     children.push(
       bodyText(
-        `(a) Each Party shall, as promptly as practicable and in any event within ten (10) Business Days following the Execution Date, file or cause to be filed with the Federal Trade Commission and the Antitrust Division of the United States Department of Justice all notifications and materials required to be filed pursuant to the Hart-Scott-Rodino Antitrust Improvements Act of 1976, as amended (15 U.S.C. Section 18a) (the "HSR Act"). Based on the 2026 HSR jurisdictional thresholds, this transaction requires premerger notification as the size-of-transaction exceeds $133.9 million.`,
+        `(a) Each Party shall, as promptly as practicable and in any event within ten (10) Business Days following the Execution Date, file or cause to be filed with the Federal Trade Commission and the Antitrust Division of the United States Department of Justice all notifications and materials required to be filed pursuant to the Hart-Scott-Rodino Antitrust Improvements Act of 1976, as amended (15 U.S.C. Section 18a) (the "HSR Act"). Based on the 2026 HSR jurisdictional thresholds, this transaction requires premerger notification as the size-of-transaction exceeds $119.5 million.`,
       ),
     );
     children.push(spacer(2));
@@ -309,7 +311,7 @@ export function buildPurchaseAgreement(
     children.push(spacer(2));
     children.push(
       bodyText(
-        `(c) The filing fee required under the HSR Act shall be borne by the Buyer. Failure to file the required HSR notification subjects the parties to civil penalties of up to $51,744 per day (as adjusted for 2026).`,
+        `(c) The filing fee required under the HSR Act shall be borne by the Buyer. Failure to file the required HSR notification subjects the parties to civil penalties of up to $54,540 per day (as adjusted for 2026).`,
       ),
     );
     children.push(spacer(4));
@@ -330,6 +332,13 @@ export function buildPurchaseAgreement(
     children.push(
       bodyText(
         `The non-competition period shall be ${project.nonCompeteYears} year${project.nonCompeteYears > 1 ? "s" : ""} from the Closing Date${project.nonCompeteRadius ? `, and the geographic scope shall be limited to ${project.nonCompeteRadius}` : ""}. The Parties acknowledge that the duration and scope of this restriction are reasonable in light of the purchase price paid and the goodwill acquired.`,
+      ),
+    );
+    children.push(spacer(2));
+    children.push(
+      bodyText(
+        `Sale-of-Business Exception. The Parties acknowledge that the non-competition restrictions set forth herein are entered into in connection with the sale of the goodwill of a business and are therefore subject to the "sale-of-business" exception to non-compete enforceability recognized in most jurisdictions. Notwithstanding the foregoing, the Parties acknowledge that certain states generally prohibit or significantly restrict non-compete agreements, including California (Cal. Bus. & Prof. Code Section 16601 — sale of business exception to Section 16600), Minnesota (Minn. Stat. Section 181.988), North Dakota (N.D. Cent. Code Section 9-08-06), and Oklahoma (Okla. Stat. tit. 15, Section 219A), and the enforceability of this provision may be limited in such jurisdictions. To the extent any provision of this Section is deemed unenforceable in any jurisdiction, it shall be reformed to the minimum extent necessary to make it enforceable in such jurisdiction.`,
+        { italic: true },
       ),
     );
     children.push(spacer(4));
@@ -383,6 +392,8 @@ export function buildPurchaseAgreement(
   children.push(spacer(4));
 
   // Indemnification cap/basket summary table (deterministic)
+  // These are default values. AI prompt instructs drafting 10-20% cap / 0.5-1.5% basket.
+  // Actual values should come from project data when available.
   if (purchasePrice) {
     const generalCap = purchasePrice * 0.15; // 15% typical midpoint
     const basket = purchasePrice * 0.01; // 1% typical midpoint

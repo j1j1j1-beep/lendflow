@@ -277,3 +277,48 @@
     max-height: 50%;
   }
 }
+
+/* L8: Print stylesheet — hide chrome, show content only */
+@media print {
+  /* Hide navigation, sidebar, and interactive elements */
+  nav,
+  aside,
+  header,
+  footer,
+  [data-sidebar],
+  [role="navigation"],
+  .no-print,
+  button:not(.print-visible),
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+
+  /* Reset layout for print */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  main,
+  [role="main"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Remove shadows, borders on cards for cleaner printing */
+  .card-hover {
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  /* Ensure page breaks work properly */
+  h1, h2, h3, h4 {
+    page-break-after: avoid;
+  }
+  table, figure {
+    page-break-inside: avoid;
+  }
+}

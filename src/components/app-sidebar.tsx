@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
@@ -46,8 +47,13 @@ const NAV_ITEMS = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const { state } = useSidebar();
+  const { state, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
+
+  // Close mobile nav on route change
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -68,9 +74,8 @@ export function AppSidebar() {
                 const isActive =
                   item.href === "/dashboard"
                     ? pathname === "/dashboard"
-                    : item.href.startsWith("/dashboard/settings")
-                      ? pathname.startsWith("/dashboard/settings")
-                      : pathname.startsWith(item.href);
+                    : pathname === item.href ||
+                      pathname.startsWith(item.href + "/");
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton

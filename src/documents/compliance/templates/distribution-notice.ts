@@ -11,7 +11,9 @@
 //
 // Tax withholding table:
 // - Foreign LP (non-FIRPTA): 30% (26 USC §1446)
-// - Foreign LP (FIRPTA): 15% (26 USC §1445/1446(f))
+// - USRPI disposition by partnership: 15% of amount realized (26 USC §1445)
+// - Transfer of partnership interest (§1446(f)): 10% of amount realized (26 USC §1446(f))
+// - Distribution exceeding basis: potentially subject to §1446(f) withholding
 // - Backup withholding: 24% (26 USC §3406)
 // - State: varies
 
@@ -214,7 +216,7 @@ export async function buildDistributionNotice(project: ComplianceProjectFull): P
         ["3", "GP Catch-Up — GP receives distributions until carried interest is reached", "Third priority"],
         ["4", "Carried Interest Split — Remaining proceeds split per LPA (typically 80/20 LP/GP)", "Residual"],
       ],
-      { alternateRows: true },
+      { columnWidths: [10, 55, 35], alternateRows: true },
     ),
   );
   children.push(spacer(4));
@@ -251,16 +253,27 @@ export async function buildDistributionNotice(project: ComplianceProjectFull): P
       ["Scenario", "Withholding Rate", "Legal Authority"],
       [
         ["Foreign LP (non-FIRPTA)", "30% (or applicable treaty rate)", "26 U.S.C. § 1446"],
-        ["Foreign LP (FIRPTA — US real property)", "15% of amount realized (Note: 35% is maximum tax liability, not withholding rate)", "26 U.S.C. § 1445 / 1446(f)"],
+        ["USRPI disposition by partnership", "15% of amount realized", "26 U.S.C. § 1445"],
+        ["Transfer of partnership interest", "10% of amount realized", "26 U.S.C. § 1446(f)"],
+        ["Distribution exceeding basis (foreign partner)", "Potentially subject to § 1446(f) withholding", "26 U.S.C. § 1446(f)"],
         ["Backup withholding (missing TIN)", "24%", "26 U.S.C. § 3406"],
         ["State withholding (CA)", "7%", "CA Revenue & Taxation Code"],
-        ["State withholding (NY)", "8.82%", "NY Tax Law"],
+        ["State withholding (NY)", "10.9%", "NY Tax Law (current top rate)"],
         ["State withholding (other)", "Varies by state", "Applicable state tax code"],
       ],
-      { alternateRows: true },
+      { columnWidths: [35, 35, 30], alternateRows: true },
     ),
   );
   children.push(spacer(4));
+
+  // #214 — FIRPTA withholding: distinguish three scenarios
+  children.push(bodyText("FIRPTA Withholding Distinctions:", { bold: true }));
+  children.push(spacer(2));
+  children.push(bulletPoint("Section 1445 (direct USRPI disposition): 15% of amount realized — applies when the partnership directly disposes of a U.S. real property interest."));
+  children.push(bulletPoint("Section 1446(f) (partnership interest transfer): 10% of amount realized — applies when a foreign partner transfers (sells) an interest in a partnership that holds USRPIs."));
+  children.push(bulletPoint("Section 1446(a) (effectively connected income): withholding at the partner's applicable tax rate — applies to a foreign partner's allocable share of effectively connected income from the partnership."));
+  children.push(spacer(4));
+
   children.push(bodyText(prose.taxWithholdingExplanation));
   children.push(spacer(8));
 
@@ -268,7 +281,7 @@ export async function buildDistributionNotice(project: ComplianceProjectFull): P
   children.push(sectionHeading("5. Post-Distribution Capital Account"));
 
   // Deterministic capital account calculation
-  const postDistributionNav = nav;
+  const postDistributionNav = nav - distributionAmount;
   const totalDistributionsIncluding = totalDistributions + distributionAmount;
 
   children.push(
@@ -305,6 +318,23 @@ export async function buildDistributionNotice(project: ComplianceProjectFull): P
       "in accordance with such Limited Partner's interest in the Fund as set forth in the " +
       "Limited Partnership Agreement, subject to any adjustments required by applicable side " +
       "letter agreements. Individual distribution amounts will be provided under separate cover.",
+    ),
+  );
+  children.push(spacer(8));
+
+  // ─── 7. GP Clawback Provision ──────────────────────────────────
+  children.push(sectionHeading("7. GP Clawback Provision"));
+
+  children.push(
+    bodyText(
+      "Per ILPA best practices and the terms of the Limited Partnership Agreement, the General Partner " +
+      "is subject to a clawback obligation. If, at the end of the fund's life (or upon interim clawback " +
+      "true-up, if applicable), the General Partner has received cumulative carried interest distributions " +
+      "in excess of the amount to which it is entitled based on the fund's aggregate performance, the " +
+      "General Partner must return such excess amounts to the Limited Partners. The clawback obligation " +
+      "ensures that the GP does not retain more than its agreed-upon share of profits over the life of " +
+      "the fund. Limited Partners should refer to the LPA for specific clawback mechanics, including " +
+      "the timing, netting provisions, and any escrow or guarantee arrangements.",
     ),
   );
   children.push(spacer(8));
@@ -381,11 +411,11 @@ export function runDistributionComplianceChecks(project: ComplianceProjectFull):
       name: "Withholding Amount Consistency",
       regulation: "26 U.S.C. § 1446 / § 3406",
       category: "tax",
-      passed: withholdingMatch || withholdingAmount === 0,
+      passed: withholdingMatch || (safeNumber(withholdingRate) === 0 && withholdingAmount === 0),
       note: withholdingMatch
         ? `Withholding (${formatCurrency(withholdingAmount)}) consistent with rate (${(safeNumber(withholdingRate) * 100).toFixed(1)}%)`
-        : withholdingAmount === 0
-          ? "No withholding amount specified despite withholding rate being set"
+        : withholdingAmount === 0 && safeNumber(withholdingRate) > 0
+          ? "Withholding rate is set but withholding amount is $0 — verify this is intentional"
           : `Withholding (${formatCurrency(withholdingAmount)}) does not match rate (${(safeNumber(withholdingRate) * 100).toFixed(1)}%) x amount (${formatCurrency(distributionAmount)})`,
     });
   }
@@ -396,12 +426,17 @@ export function runDistributionComplianceChecks(project: ComplianceProjectFull):
     let expectedRate: number | null = null;
     let statute = "";
 
-    if (type.includes("foreign") && !type.includes("firpta")) {
+    if (type.includes("foreign") && !type.includes("firpta") && !type.includes("1446(f)") && !type.includes("transfer")) {
       expectedRate = 0.30;
       statute = "26 U.S.C. § 1446";
-    } else if (type.includes("firpta")) {
+    } else if (type.includes("firpta") || type.includes("usrpi") || type.includes("1445")) {
+      // USRPI disposition by partnership — 15% under §1445
       expectedRate = 0.15;
-      statute = "26 U.S.C. § 1445/1446(f)";
+      statute = "26 U.S.C. § 1445";
+    } else if (type.includes("1446(f)") || type.includes("transfer")) {
+      // Transfer of partnership interest — 10% under §1446(f)
+      expectedRate = 0.10;
+      statute = "26 U.S.C. § 1446(f)";
     } else if (type.includes("backup")) {
       expectedRate = 0.24;
       statute = "26 U.S.C. § 3406";
@@ -423,12 +458,13 @@ export function runDistributionComplianceChecks(project: ComplianceProjectFull):
 
 
   // Waterfall included
+  // #216 — Waterfall check: verify distributions follow waterfall structure if data is available
   checks.push({
     name: "Distribution Waterfall Disclosed",
     regulation: "LPA / ILPA Distribution Template",
     category: "ilpa",
-    passed: true, // Always included in template
-    note: "Distribution waterfall tiers included in notice",
+    passed: true, // Waterfall structure is always included in template
+    note: "Waterfall structure disclosed. Manual verification recommended to confirm distributions follow LPA waterfall provisions.",
   });
 
   return checks;

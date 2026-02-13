@@ -11,7 +11,21 @@ import {
   TaxStructure,
 } from "@/generated/prisma/client";
 
-const HSR_THRESHOLD = 133_900_000;
+// 2025 HSR size-of-transaction threshold (adjusted annually per 16 CFR 801.1(h))
+const HSR_THRESHOLD = 119_500_000;
+
+/**
+ * Serialize Prisma Decimal fields to numbers for JSON response.
+ * Prisma Decimal objects don't serialize cleanly via JSON.stringify;
+ * this converts them to plain numbers for API consumers.
+ */
+function serializeDecimals<T extends Record<string, unknown>>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj, (_key, value) =>
+    typeof value === "object" && value !== null && "toNumber" in value && typeof value.toNumber === "function"
+      ? value.toNumber()
+      : value
+  )) as T;
+}
 
 const VALID_TRANSACTION_TYPES = new Set(Object.values(TransactionType));
 const VALID_HSR_STATUSES = new Set(Object.values(HSRStatus));
@@ -64,10 +78,10 @@ export async function GET(
     );
 
     return NextResponse.json({
-      project: {
+      project: serializeDecimals({
         ...project,
         maDocuments: documentsWithUrls,
-      },
+      }),
     });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
@@ -241,6 +255,12 @@ export async function PATCH(
               { status: 400 }
             );
           }
+          if (n > 1e15) {
+            return NextResponse.json(
+              { error: `${field} exceeds maximum allowed value` },
+              { status: 400 }
+            );
+          }
           updates[field] = n;
         }
       }
@@ -273,7 +293,10 @@ export async function PATCH(
       }
     }
 
-    // --- escrowPercent (0-1) ---
+    // --- escrowPercent (0-1) --- normalize escrowPercentage → escrowPercent
+    if ("escrowPercentage" in body && !("escrowPercent" in body)) {
+      body.escrowPercent = body.escrowPercentage;
+    }
     if ("escrowPercent" in body) {
       if (body.escrowPercent === null) {
         updates.escrowPercent = null;
@@ -345,6 +368,13 @@ export async function PATCH(
               { status: 400 }
             );
           }
+          const year = d.getFullYear();
+          if (year < 1970 || year > 2100) {
+            return NextResponse.json(
+              { error: `${field} year must be between 1970 and 2100` },
+              { status: 400 }
+            );
+          }
           updates[field] = d;
         }
       }
@@ -359,12 +389,13 @@ export async function PATCH(
     }
 
     // --- HSR auto-detection on purchasePrice update ---
+    // Explicit null checks: Number(null) returns 0 which would silently skip the threshold check
     const effectivePrice =
       updates.purchasePrice !== undefined
         ? (updates.purchasePrice as number | null)
-        : Number(project.purchasePrice);
+        : (project.purchasePrice != null ? Number(project.purchasePrice) : null);
 
-    if (effectivePrice != null && effectivePrice >= HSR_THRESHOLD) {
+    if (effectivePrice != null && Number.isFinite(effectivePrice) && effectivePrice >= HSR_THRESHOLD) {
       // Only auto-set if not explicitly being set in this request
       if (!("hsrRequired" in body)) {
         updates.hsrRequired = true;
@@ -395,7 +426,7 @@ export async function PATCH(
       metadata: { updatedFields: Object.keys(updates) },
     });
 
-    return NextResponse.json({ project: updated });
+    return NextResponse.json({ project: serializeDecimals(updated) });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

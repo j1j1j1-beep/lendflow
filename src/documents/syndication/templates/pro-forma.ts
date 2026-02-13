@@ -84,14 +84,17 @@ function calculateAnnualDebtService(
     return loanAmount * annualRate;
   }
 
-  // Amortizing payment (P&I)
-  const remainingMonths = (termYears * 12) - ((year - 1) * 12);
-  if (remainingMonths <= 0) return 0;
+  // Amortizing payment (P&I) — fixed payment based on full loan term
+  const totalAmortMonths = termYears * 12;
+  if (totalAmortMonths <= 0) return 0;
 
-  const n = Math.min(remainingMonths, termYears * 12);
+  // Check if loan has been fully amortized
+  const elapsedMonths = (year - 1) * 12;
+  if (elapsedMonths >= totalAmortMonths) return 0;
+
   const monthlyPayment =
-    loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, n)) /
-    (Math.pow(1 + monthlyRate, n) - 1);
+    loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, totalAmortMonths)) /
+    (Math.pow(1 + monthlyRate, totalAmortMonths) - 1);
 
   return monthlyPayment * 12;
 }
@@ -143,63 +146,111 @@ function calculateLoanBalance(
 }
 
 /**
- * Apply waterfall tiers to a distribution amount.
- * Simplified: applies splits proportionally (not a true IRR-based waterfall).
- * For pro forma projections, this is the standard approach.
+ * Cumulative tracking state for the waterfall across years.
+ * Tracks cumulative LP distributions to determine when preferred return
+ * thresholds are met before GP participates in higher tiers.
+ */
+interface WaterfallCumulativeState {
+  cumulativeLpDistributions: number;
+  cumulativeGpDistributions: number;
+}
+
+/**
+ * Apply waterfall tiers to a distribution amount with cumulative tracking.
+ * LP receives preferred return on unreturned capital before GP split advances to higher tiers.
  */
 function applyWaterfall(
   cashFlow: number,
   tiers: SyndicationProjectFull["waterfallTiers"],
   preferredReturn: number,
   totalEquity: number,
+  cumulativeState?: WaterfallCumulativeState,
 ): WaterfallDistribution[] {
   if (tiers.length === 0 || cashFlow <= 0) {
+    const lpAmt = cashFlow * 0.7;
+    const gpAmt = cashFlow * 0.3;
+    if (cumulativeState) {
+      cumulativeState.cumulativeLpDistributions += lpAmt;
+      cumulativeState.cumulativeGpDistributions += gpAmt;
+    }
     return [{
       tierOrder: 1,
       tierName: "Default Split",
-      lpAmount: cashFlow * 0.7,
-      gpAmount: cashFlow * 0.3,
+      lpAmount: lpAmt,
+      gpAmount: gpAmt,
     }];
   }
 
-  const sorted = [...tiers].sort((a, b) => a.tierOrder - b.tierOrder);
+  const sorted = [...tiers].sort((a, b) => (a.tierOrder ?? 0) - (b.tierOrder ?? 0));
   const distributions: WaterfallDistribution[] = [];
   let remaining = cashFlow;
+
+  // Track cumulative LP distributions to determine tier thresholds
+  const cumLpBefore = cumulativeState?.cumulativeLpDistributions ?? 0;
+  let cumLpRunning = cumLpBefore;
 
   for (const tier of sorted) {
     if (remaining <= 0) break;
 
     if (tier.hurdleRate != null && tier.hurdleRate > 0) {
-      // This tier covers distributions up to the hurdle rate
-      const hurdleAmount = totalEquity * tier.hurdleRate;
-      const tierAmount = Math.min(remaining, hurdleAmount);
-      distributions.push({
-        tierOrder: tier.tierOrder,
-        tierName: tier.tierName ?? `Tier ${tier.tierOrder}`,
-        lpAmount: tierAmount * tier.lpSplit,
-        gpAmount: tierAmount * tier.gpSplit,
-      });
-      remaining -= tierAmount;
+      // Cumulative hurdle: LP should have received totalEquity * hurdleRate cumulatively
+      // before distributions advance to the next tier
+      const cumulativeHurdleTarget = totalEquity * tier.hurdleRate;
+      const lpShortfall = Math.max(0, cumulativeHurdleTarget - cumLpRunning);
+
+      if (lpShortfall > 0) {
+        // LP needs to catch up to the hurdle before GP gets higher-tier splits
+        const tierAmount = Math.min(remaining, lpShortfall / (tier.lpSplit > 0 ? tier.lpSplit : 1));
+        const actualTierAmount = Math.min(remaining, Math.max(tierAmount, lpShortfall));
+        const lpAmount = Math.min(actualTierAmount, remaining) * tier.lpSplit;
+        const gpAmount = Math.min(actualTierAmount, remaining) * tier.gpSplit;
+
+        distributions.push({
+          tierOrder: tier.tierOrder,
+          tierName: tier.tierName ?? `Tier ${tier.tierOrder}`,
+          lpAmount,
+          gpAmount,
+        });
+        remaining -= (lpAmount + gpAmount);
+        cumLpRunning += lpAmount;
+      } else {
+        // Hurdle already met cumulatively, skip to next tier
+        continue;
+      }
     } else {
       // Residual tier — takes all remaining
+      const lpAmount = remaining * tier.lpSplit;
+      const gpAmount = remaining * tier.gpSplit;
       distributions.push({
         tierOrder: tier.tierOrder,
         tierName: tier.tierName ?? `Tier ${tier.tierOrder}`,
-        lpAmount: remaining * tier.lpSplit,
-        gpAmount: remaining * tier.gpSplit,
+        lpAmount,
+        gpAmount,
       });
+      cumLpRunning += lpAmount;
       remaining = 0;
     }
   }
 
   // If any remains (no residual tier), split 70/30 default
   if (remaining > 0) {
+    const lpAmount = remaining * 0.7;
+    const gpAmount = remaining * 0.3;
     distributions.push({
       tierOrder: sorted.length + 1,
       tierName: "Residual",
-      lpAmount: remaining * 0.7,
-      gpAmount: remaining * 0.3,
+      lpAmount,
+      gpAmount,
     });
+    cumLpRunning += lpAmount;
+  }
+
+  // Update cumulative state
+  if (cumulativeState) {
+    const totalLp = distributions.reduce((s, d) => s + d.lpAmount, 0);
+    const totalGp = distributions.reduce((s, d) => s + d.gpAmount, 0);
+    cumulativeState.cumulativeLpDistributions += totalLp;
+    cumulativeState.cumulativeGpDistributions += totalGp;
   }
 
   return distributions;
@@ -237,6 +288,39 @@ function calculateIRR(cashFlows: number[], maxIterations = 100, tolerance = 0.00
   }
 
   return rate;
+}
+
+/**
+ * Expense ratio by property type (operating expenses as % of gross revenue).
+ * Industry benchmarks — used for NOI decomposition and growth projections.
+ */
+function getExpenseRatio(propertyType: string): number {
+  switch (propertyType) {
+    case "HOTEL":
+      return 0.65; // Hotels/hospitality: 55-75%
+    case "INDUSTRIAL":
+      return 0.30; // Industrial/warehouse: 25-35%
+    case "NNN_RETAIL":
+      return 0.15; // NNN retail: 10-20% (tenant pays most expenses)
+    case "OFFICE":
+      return 0.45; // Office: 40-50%
+    case "RETAIL":
+      return 0.40; // Gross retail: 35-45%
+    case "SELF_STORAGE":
+      return 0.35; // Self-storage: 30-40%
+    case "MOBILE_HOME_PARK":
+      return 0.35; // MHP: 30-40%
+    case "SENIOR_HOUSING":
+      return 0.55; // Senior housing: 50-65% (staffing-intensive)
+    case "STUDENT_HOUSING":
+      return 0.45; // Student housing: 40-50%
+    case "MIXED_USE":
+      return 0.42; // Mixed-use: varies, ~40-45%
+    case "BUILD_TO_RENT":
+    case "MULTIFAMILY":
+    default:
+      return 0.40; // Multifamily/BTR: 35-45%
+  }
 }
 
 // ─── DOCX Builder (Deterministic) ───────────────────────────────────
@@ -282,15 +366,17 @@ export function buildProForma(project: SyndicationProjectFull): Document {
       const yearsAfterStab = year - stabilizationYear;
       // Revenue grows by rentGrowthRate, expenses grow by expenseGrowthRate
       // Simplified: NOI grows approximately by the net rate
-      const netGrowthRate = rentGrowthRate - (expenseGrowthRate * 0.4); // expenses are ~40% of revenue typically
+      const expRatio = getExpenseRatio(project.propertyType);
+      const netGrowthRate = rentGrowthRate - (expenseGrowthRate * expRatio);
       noi = proFormaNoi * Math.pow(1 + netGrowthRate, yearsAfterStab);
     }
 
     // Decompose for display
-    // Assume expense ratio of ~40% (common for multifamily)
-    const grossRevenue = noi / (1 - vacancyRate - 0.40);
+    // Property-type-specific expense ratio
+    const expenseRatio = getExpenseRatio(project.propertyType);
+    const grossRevenue = noi / Math.max(0.01, 1 - vacancyRate - expenseRatio);
     const vacancyLoss = grossRevenue * vacancyRate;
-    const operatingExpenses = grossRevenue * 0.40;
+    const operatingExpenses = grossRevenue * expenseRatio;
     const effectiveGrossIncome = grossRevenue - vacancyLoss;
     const calculatedNoi = effectiveGrossIncome - operatingExpenses;
 
@@ -351,13 +437,18 @@ export function buildProForma(project: SyndicationProjectFull): Document {
   ];
   const calculatedIrr = calculateIRR(irrCashFlows);
 
-  // Waterfall distributions per year
+  // Waterfall distributions per year with cumulative tracking
+  const waterfallCumulativeState: WaterfallCumulativeState = {
+    cumulativeLpDistributions: 0,
+    cumulativeGpDistributions: 0,
+  };
   const waterfallPerYear = projections.map((p) =>
     applyWaterfall(
       Math.max(0, p.cashFlowAfterDebt),
       project.waterfallTiers,
       preferredReturn,
       totalEquityRaise,
+      waterfallCumulativeState,
     ),
   );
 
@@ -584,7 +675,7 @@ export function buildProForma(project: SyndicationProjectFull): Document {
 
   children.push(sectionHeading("Notes and Assumptions"));
   children.push(bodyText("1. Revenue projections assume straight-line rent growth from current NOI to pro forma NOI over the stabilization period, then annual growth at the stated rent growth rate."));
-  children.push(bodyText("2. Operating expenses are estimated at approximately 40% of gross revenue, growing at the stated expense growth rate."));
+  children.push(bodyText(`2. Operating expenses are estimated at approximately ${(getExpenseRatio(project.propertyType) * 100).toFixed(0)}% of gross revenue (based on ${project.propertyType.replace(/_/g, " ").toLowerCase()} industry benchmarks), growing at the stated expense growth rate.`));
   children.push(bodyText("3. Debt service is calculated based on the stated loan terms. Interest-only periods are reflected where applicable."));
   children.push(bodyText("4. Exit value is calculated as the final year NOI divided by the exit cap rate (direct capitalization method)."));
   children.push(bodyText("5. IRR is calculated using the Newton-Raphson method on the projected cash flow stream."));
@@ -598,12 +689,16 @@ export function buildProForma(project: SyndicationProjectFull): Document {
 
   const isResidential = project.propertyType?.toLowerCase().includes("residential") ||
     project.propertyType?.toLowerCase().includes("multifamily") ||
-    project.propertyType?.toLowerCase().includes("apartment");
+    project.propertyType?.toLowerCase().includes("apartment") ||
+    project.propertyType?.toLowerCase().includes("student_housing") ||
+    project.propertyType?.toLowerCase().includes("build_to_rent") ||
+    project.propertyType?.toLowerCase().includes("senior_housing") ||
+    project.propertyType?.toLowerCase().includes("mobile_home_park");
   const depreciationYears = isResidential ? 27.5 : 39;
   const landValue = purchasePrice * 0.20; // Estimate land at 20% of purchase price
   const depreciableBasis = purchasePrice - landValue;
   const annualDepreciation = depreciationYears > 0 ? depreciableBasis / depreciationYears : 0;
-  const bonusDepreciationRate = 1.0; // 2026: 100% per The One Big Beautiful Bill Act (OBBBA) of July 2025 — permanently restored for property acquired after January 19, 2025
+  const bonusDepreciationRate = project.bonusDepreciationPct != null ? safeNumber(project.bonusDepreciationPct) : 1.0; // Default 100% per The One Big Beautiful Bill Act (OBBBA) of July 2025 — restored for property acquired after January 19, 2025
   const bonusDepreciationYear1 = depreciableBasis * bonusDepreciationRate;
 
   children.push(bodyText(
@@ -620,9 +715,9 @@ export function buildProForma(project: SyndicationProjectFull): Document {
 
   children.push(bodyText("Bonus Depreciation (2026):", { bold: true }));
   children.push(bodyText(
-    `Per 26 U.S.C. Section 168(k), as modified by The One Big Beautiful Bill Act (OBBBA) of July 2025, 100% bonus depreciation has been permanently restored for qualifying property placed in service after January 19, 2025. The previous TCJA phase-down schedule no longer applies.`,
+    `Per 26 U.S.C. Section 168(k), as modified by The One Big Beautiful Bill Act (OBBBA) of July 2025, 100% bonus depreciation has been restored for qualifying property placed in service after January 19, 2025. The previous TCJA phase-down schedule no longer applies.`,
   ));
-  children.push(bulletPoint(`Year 1 Bonus Depreciation (100%): ${formatCurrency(bonusDepreciationYear1)}`));
+  children.push(bulletPoint(`Year 1 Bonus Depreciation (${(bonusDepreciationRate * 100).toFixed(0)}%): ${formatCurrency(bonusDepreciationYear1)}`));
   children.push(bulletPoint(`Remaining Basis After Bonus: ${formatCurrency(depreciableBasis - bonusDepreciationYear1)}`));
   children.push(spacer(4));
 
@@ -712,8 +807,9 @@ export function runProFormaComplianceChecks(project: SyndicationProjectFull): Co
   });
 
   // Breakeven occupancy
-  const grossRevenue = currentNoi / (1 - (project.vacancyRate ?? 0.05) - 0.40);
-  const opEx = grossRevenue * 0.40;
+  const expRatioForChecks = getExpenseRatio(project.propertyType);
+  const grossRevenue = currentNoi / Math.max(0.01, 1 - (project.vacancyRate ?? 0.05) - expRatioForChecks);
+  const opEx = grossRevenue * expRatioForChecks;
   const breakEven = grossRevenue > 0 ? (opEx + annualDebt) / grossRevenue : 0;
 
   checks.push({
@@ -755,7 +851,7 @@ export function runProFormaComplianceChecks(project: SyndicationProjectFull): Co
 
   if (totalEquityRaise > 0 && proFormaNoi > 0) {
     // Build cash flow stream for IRR
-    const netGrowthRate = rentGrowthRate - (expenseGrowthRate * 0.4);
+    const netGrowthRate = rentGrowthRate - (expenseGrowthRate * expRatioForChecks);
     const irrFlows: number[] = [-totalEquityRaise];
 
     for (let y = 1; y <= holdYears; y++) {

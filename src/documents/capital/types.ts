@@ -26,7 +26,7 @@ export type CapitalProjectFull = CapitalProject & {
 export interface ComplianceCheck {
   name: string;
   regulation: string;
-  category: "securities" | "investor_protection" | "anti_fraud" | "ica" | "form_d" | "state_filing" | "erisa" | "tax";
+  category: "securities" | "investor_protection" | "anti_fraud" | "ica" | "form_d" | "state_filing" | "erisa" | "tax" | "boi" | "advisers_act" | "aml";
   passed: boolean;
   note: string;
 }

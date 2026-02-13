@@ -11,6 +11,7 @@ import {
   documentTitle,
   bodyText,
   formatCurrency,
+  safeNumber,
 } from "../doc-helpers";
 
 // Template builders
@@ -31,13 +32,13 @@ export function buildProjectContext(project: CapitalProjectFull): string {
   const managementFee = project.managementFee ?? 0;
   const carriedInterest = project.carriedInterest ?? 0;
   const preferredReturn = project.preferredReturn ?? 0;
-  const hurdles = project.hurdles as Array<{ rate: number; split: string }> | null;
-  const targetIndustries = project.targetIndustries as string[] | null;
-  const keyPersonNames = project.keyPersonNames as string[] | null;
-  const stateFilings = project.stateFilings as string[] | null;
+  const hurdles = Array.isArray(project.hurdles) ? project.hurdles as Array<{ rate: number; split: string }> : null;
+  const targetIndustries = Array.isArray(project.targetIndustries) ? project.targetIndustries as string[] : null;
+  const keyPersonNames = Array.isArray(project.keyPersonNames) ? project.keyPersonNames as string[] : null;
+  const stateFilings = Array.isArray(project.stateFilings) ? project.stateFilings as string[] : null;
 
   const hurdleBlock = hurdles
-    ? hurdles.map((h, i) => `  Tier ${i + 1}: ${(h.rate * 100).toFixed(1)}% — ${h.split}`).join("\n")
+    ? hurdles.filter(Boolean).map((h, i) => `  Tier ${i + 1}: ${(safeNumber(h.rate) * 100).toFixed(1)}% — ${h.split ?? ""}`).join("\n")
     : "  None specified";
 
   const investorSummary = project.capitalInvestors.length > 0
@@ -57,9 +58,9 @@ SECURITIES EXEMPTION:
 Exemption Type: ${project.exemptionType}
 ICA Exemption: ${project.icaExemption}
 General Solicitation: ${project.exemptionType === "REG_D_506C" ? "PERMITTED (506(c))" : "NOT PERMITTED (506(b))"}
-Accredited Only: ${project.accreditedOnly ? "Yes" : "No"}
+Accredited Only: ${project.accreditedOnly ? "Yes" : "No"}${project.exemptionType === "REG_D_506C" && !project.accreditedOnly ? " [WARNING: For 506(c) offerings, ALL purchasers MUST be verified accredited investors per 17 CFR 230.506(c). accreditedOnly should be true.]" : ""}
 Non-Accredited Limit: ${project.nonAccreditedLimit ?? 35}
-Max Investors: ${project.maxInvestors ?? (project.icaExemption === "SECTION_3C1" ? 100 : "Unlimited (qualified purchasers)")}
+Max Investors: ${project.maxInvestors ?? (project.icaExemption === "SECTION_3C1" ? 100 : "No statutory limit (all must be qualified purchasers per Section 2(a)(51) of Investment Company Act). Recommend operational maximum of 1,999 to avoid Exchange Act Section 12(g) registration.")}
 
 FUND ECONOMICS:
 Target Raise: ${formatCurrency(targetRaise)}

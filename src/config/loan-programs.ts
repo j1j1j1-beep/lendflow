@@ -95,8 +95,9 @@ const SBA_7A: LoanProgram = {
     // SBA 7(a) rate caps by loan size (4 tiers per SBA SOP 50 10 8):
     // ≤$50K: Prime+6.5%, $50K-$250K: Prime+6.0%, $250K-$350K: Prime+4.5%, >$350K: Prime+3.0%
     // As of March 1, 2026, SBA also allows SOFR, 5yr Treasury, and 10yr Treasury as
-    // alternative base rates in addition to Prime (see SBA Policy Notice 2025-xxx).
+    // alternative base rates in addition to Prime (see SBA Policy Notice number TBD — verify current Policy Notices at sba.gov before generating documents).
     spreadRange: [0.0, 0.03], // Prime + 0% to Prime + 3.0% (for loans >$350K)
+    // Note: SBA SOP 50 10 8 limits maxTerm by purpose: equipment/working capital 120mo, real estate 300mo
     maxTerm: 300, // 25 years for real estate
     maxAmortization: 300,
     maxLoanAmount: 5_000_000,
@@ -109,7 +110,8 @@ const SBA_7A: LoanProgram = {
   },
 
   applicableRegulations: [
-    "SBA SOP 50 10",
+    // Verify SOP 50 10 8 (effective June 2025) has not been superseded
+    "SBA SOP 50 10 8",
     "TILA/Reg Z",
     "ECOA/Reg B",
     "SBA Size Standards (13 CFR 121)",
@@ -137,6 +139,7 @@ const SBA_7A: LoanProgram = {
     "deed_of_trust", "environmental_indemnity", "assignment_of_leases", "ucc_financing_statement",
     "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate",
     "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
     // SBA regulatory forms
     // NOTE: SBA Form 1920 was retired August 2023 — removed from required docs.
     // NOTE: SBA Form 1919 was revised April 2025 per Executive Order 14168.
@@ -144,7 +147,7 @@ const SBA_7A: LoanProgram = {
     // Universal compliance forms
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
-  complianceChecks: ["sba_size_standard", "sba_credit_elsewhere", "sba_use_of_proceeds", "ofac_screening", "usury_check", "flood_zone"],
+  complianceChecks: ["sba_size_standard", "sba_credit_elsewhere", "sba_use_of_proceeds", "ofac_screening", "usury_check", "flood_zone", "bsa_aml", "commercial_financing_disclosure"],
 
   lateFeePercent: 0.05,
   lateFeeGraceDays: 15,
@@ -196,7 +199,8 @@ const SBA_504: LoanProgram = {
   },
 
   applicableRegulations: [
-    "SBA SOP 50 10",
+    // Verify SOP 50 10 8 (effective June 2025) has not been superseded
+    "SBA SOP 50 10 8",
     "13 CFR 120",
     "TILA/Reg Z",
     "ECOA/Reg B",
@@ -219,13 +223,14 @@ const SBA_504: LoanProgram = {
     "cdc_debenture", "deed_of_trust", "environmental_indemnity", "assignment_of_leases", "ucc_financing_statement",
     "commitment_letter", "corporate_resolution", "settlement_statement", "borrowers_certificate",
     "compliance_certificate", "amortization_schedule", "opinion_letter",
-    // SBA regulatory forms (1050 is 7(a) only; Form 1920 retired August 2023 — removed)
+    "commercial_financing_disclosure",
+    // SBA regulatory forms (Form 1050 is 7(a)-only — excluded from 504; Form 1920 retired August 2023 — removed)
     // NOTE: SBA Form 1919 was revised April 2025 per Executive Order 14168.
-    "sba_form_1919", "sba_form_159", "sba_form_148", "sba_form_1050",
+    "sba_form_1919", "sba_form_159", "sba_form_148",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
-  complianceChecks: ["sba_size_standard", "sba_504_eligibility", "job_creation", "ofac_screening", "usury_check", "flood_zone"],
+  complianceChecks: ["sba_size_standard", "sba_504_eligibility", "job_creation", "ofac_screening", "usury_check", "flood_zone", "bsa_aml", "commercial_financing_disclosure"],
 
   lateFeePercent: 0.05,
   lateFeeGraceDays: 15,
@@ -296,10 +301,11 @@ const COMMERCIAL_CRE: LoanProgram = {
     "assignment_of_leases", "ucc_financing_statement", "commitment_letter", "corporate_resolution",
     "environmental_indemnity", "snda", "estoppel_certificate", "settlement_statement",
     "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
-  complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "environmental_phase1"],
+  complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "environmental_phase1", "bsa_aml", "commercial_financing_disclosure"],
 
   lateFeePercent: 0.05,
   lateFeeGraceDays: 10,
@@ -367,13 +373,18 @@ const DSCR_LOAN: LoanProgram = {
   ],
 
   requiredOutputDocs: [
-    "promissory_note", "loan_agreement", "deed_of_trust", "closing_disclosure", "loan_estimate",
+    // TRID-exempt: DSCR investment property loans are business-purpose per 12 CFR 1026.3(a)(1);
+    // closing_disclosure and loan_estimate removed.
+    // Business-purpose loans exempt from Dodd-Frank prepayment penalty prohibition per 12 CFR 1026.3(a)(1)
+    "promissory_note", "loan_agreement", "deed_of_trust", "security_agreement", "ucc_financing_statement",
+    "environmental_indemnity",
     "commitment_letter", "corporate_resolution", "settlement_statement",
     "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
-  complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "hpml_check", "atr_check"],
+  complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "hpml_check", "atr_check", "bsa_aml", "commercial_financing_disclosure"],
 
   lateFeePercent: 0.05,
   lateFeeGraceDays: 15,
@@ -436,12 +447,14 @@ const BANK_STATEMENT: LoanProgram = {
 
   requiredOutputDocs: [
     "promissory_note", "loan_agreement", "deed_of_trust", "closing_disclosure", "loan_estimate",
+    "security_agreement", "ucc_financing_statement",
     "commitment_letter", "corporate_resolution", "settlement_statement",
     "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
-  complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "atr_check", "hpml_check"],
+  complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "atr_check", "hpml_check", "bsa_aml", "commercial_financing_disclosure"],
 
   lateFeePercent: 0.05,
   lateFeeGraceDays: 15,
@@ -508,10 +521,11 @@ const CONVENTIONAL_BUSINESS: LoanProgram = {
     "promissory_note", "loan_agreement", "guaranty", "security_agreement", "ucc_financing_statement",
     "commitment_letter", "corporate_resolution", "settlement_statement",
     "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
-  complianceChecks: ["ofac_screening", "usury_check", "flood_zone"],
+  complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "bsa_aml", "commercial_financing_disclosure"],
 
   lateFeePercent: 0.05,
   lateFeeGraceDays: 10,
@@ -574,10 +588,11 @@ const LINE_OF_CREDIT: LoanProgram = {
     "promissory_note", "loan_agreement", "guaranty", "security_agreement", "ucc_financing_statement",
     "borrowing_base_agreement", "commitment_letter", "corporate_resolution", "settlement_statement",
     "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
-  complianceChecks: ["ofac_screening", "usury_check"],
+  complianceChecks: ["ofac_screening", "usury_check", "bsa_aml", "commercial_financing_disclosure"],
 
   lateFeePercent: 0.05,
   lateFeeGraceDays: 10,
@@ -639,10 +654,11 @@ const EQUIPMENT_FINANCING: LoanProgram = {
     "promissory_note", "loan_agreement", "guaranty", "security_agreement", "ucc_financing_statement",
     "commitment_letter", "corporate_resolution", "settlement_statement",
     "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
-  complianceChecks: ["ofac_screening", "usury_check", "ucc_lien_search"],
+  complianceChecks: ["ofac_screening", "usury_check", "ucc_lien_search", "bsa_aml", "commercial_financing_disclosure"],
 
   lateFeePercent: 0.05,
   lateFeeGraceDays: 10,
@@ -704,10 +720,11 @@ const BRIDGE_LOAN: LoanProgram = {
     "promissory_note", "loan_agreement", "guaranty", "deed_of_trust", "security_agreement",
     "environmental_indemnity", "assignment_of_leases", "commitment_letter", "corporate_resolution",
     "settlement_statement", "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
-  complianceChecks: ["ofac_screening", "usury_check", "flood_zone"],
+  complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "bsa_aml", "commercial_financing_disclosure"],
 
   lateFeePercent: 0.06,
   lateFeeGraceDays: 5,
@@ -773,12 +790,15 @@ const CRYPTO_COLLATERALIZED: LoanProgram = {
 
   requiredOutputDocs: [
     "promissory_note", "loan_agreement", "digital_asset_pledge", "custody_agreement",
+    // UCC Article 12 governs perfection of security interests in digital assets (state-specific adoption required)
+    "security_agreement", "ucc_financing_statement",
     "commitment_letter", "corporate_resolution", "settlement_statement",
     "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
     // Universal compliance forms
     "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
   ],
-  complianceChecks: ["ofac_screening", "usury_check", "bsa_aml", "source_of_funds", "genius_act"],
+  complianceChecks: ["ofac_screening", "usury_check", "bsa_aml", "source_of_funds", "genius_act", "commercial_financing_disclosure"],
 
   lateFeePercent: 0.05,
   lateFeeGraceDays: 10,
@@ -786,6 +806,308 @@ const CRYPTO_COLLATERALIZED: LoanProgram = {
   standardFees: [
     { name: "Origination Fee", type: "percent", value: 0.015, description: "1.5% of loan amount" },
     { name: "Custody Fee", type: "percent", value: 0.005, description: "0.5% annual custody fee on collateral" },
+  ],
+};
+
+
+const MULTIFAMILY: LoanProgram = {
+  id: "multifamily",
+  name: "Multifamily",
+  description: "Conventional apartment financing for 5+ unit residential properties. Agency (Fannie/Freddie DUS) and balance sheet execution.",
+  category: "commercial",
+
+  requiredDocuments: [
+    { docType: "FORM_1040", label: "Personal Tax Returns (1040)", yearsNeeded: 2 },
+    { docType: "FORM_1120", label: "Entity Tax Returns", yearsNeeded: 2 },
+    { docType: "RENT_ROLL", label: "Current Rent Roll" },
+    { docType: "PROFIT_AND_LOSS", label: "Operating Statement (T-12)" },
+    { docType: "BALANCE_SHEET", label: "Personal Financial Statement" },
+    { docType: "BANK_STATEMENT_CHECKING", label: "Bank Statements (3 months)" },
+  ],
+  optionalDocuments: [
+    { docType: "SCHEDULE_K1", label: "Schedule K-1" },
+  ],
+
+  structuringRules: {
+    // Note: Fannie Mae DUS programs allow up to 80% LTV for standard deals;
+    // Freddie Mac Optigo has similar guidelines. Agency execution typically offers
+    // lower spreads and non-recourse structures.
+    maxLtv: 0.80,
+    minDscr: 1.25,
+    maxDti: 0.45,
+    baseRate: "sofr",
+    spreadRange: [0.015, 0.035],
+    maxTerm: 360, // 30 years (agency terms available)
+    maxAmortization: 360,
+    maxLoanAmount: 50_000_000,
+    minLoanAmount: 1_000_000,
+    prepaymentPenalty: true,
+    requiresAppraisal: true,
+    requiresPersonalGuaranty: false, // Non-recourse available for agency
+    collateralTypes: ["multifamily_residential"],
+    interestOnly: false,
+  },
+
+  applicableRegulations: [
+    "TILA/Reg Z",
+    "ECOA/Reg B",
+    "FIRREA (appraisal requirements)",
+    "CRA (Community Reinvestment Act)",
+    "Flood Disaster Protection Act",
+    "Fair Housing Act",
+    "BSA/AML",
+  ],
+  stateSpecificRules: true,
+
+  standardCovenants: [
+    { name: "Annual Operating Statements", description: "Provide annual property operating statements within 90 days of year end.", frequency: "annual" },
+    { name: "Annual Rent Roll", description: "Provide updated rent roll annually.", frequency: "annual" },
+    { name: "Minimum DSCR", description: "Maintain minimum DSCR on the property.", threshold: 1.20, frequency: "annual" },
+    { name: "Hazard Insurance", description: "Maintain property insurance with lender as loss payee.", frequency: "annual" },
+    { name: "Replacement Reserves", description: "Fund replacement reserve account per loan agreement.", frequency: "monthly" },
+  ],
+
+  requiredOutputDocs: [
+    "promissory_note", "loan_agreement", "guaranty", "security_agreement", "deed_of_trust",
+    "assignment_of_leases", "ucc_financing_statement", "commitment_letter", "corporate_resolution",
+    "environmental_indemnity", "snda", "estoppel_certificate", "settlement_statement",
+    "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
+  complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "environmental_phase1", "bsa_aml", "commercial_financing_disclosure"],
+
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 10,
+
+  standardFees: [
+    { name: "Origination Fee", type: "percent", value: 0.01, description: "1% of loan amount" },
+    { name: "Appraisal Fee", type: "flat", value: 5000, description: "Multifamily appraisal" },
+    { name: "Environmental Phase I", type: "flat", value: 3500, description: "Phase I ESA" },
+    { name: "Legal Fees", type: "flat", value: 7500, description: "Lender's counsel" },
+  ],
+};
+
+const CONSTRUCTION: LoanProgram = {
+  id: "construction",
+  name: "Construction Loan",
+  // Note: Interest reserve requirements — lender typically requires 12-18 months of interest
+  // to be escrowed from loan proceeds to cover debt service during construction period.
+  description: "Ground-up construction and major renovation financing. Draw-based disbursement with interest reserve.",
+  category: "commercial",
+
+  requiredDocuments: [
+    { docType: "FORM_1040", label: "Personal Tax Returns (1040)", yearsNeeded: 2 },
+    { docType: "FORM_1120", label: "Entity Tax Returns", yearsNeeded: 2 },
+    { docType: "BALANCE_SHEET", label: "Personal Financial Statement" },
+    { docType: "BANK_STATEMENT_CHECKING", label: "Bank Statements (proof of liquidity)" },
+  ],
+  optionalDocuments: [
+    { docType: "RENT_ROLL", label: "Pro-Forma Rent Roll (if income-producing)" },
+    { docType: "PROFIT_AND_LOSS", label: "Developer Track Record / Prior Project P&Ls" },
+  ],
+
+  structuringRules: {
+    maxLtv: 0.75, // Of completed/stabilized value
+    minDscr: 1.0, // Projected DSCR on stabilized NOI
+    maxDti: 0.50,
+    baseRate: "prime",
+    spreadRange: [0.02, 0.045],
+    maxTerm: 36, // 3 years (construction period + extension options)
+    maxAmortization: 0, // Interest-only during construction
+    maxLoanAmount: 25_000_000,
+    minLoanAmount: 500_000,
+    prepaymentPenalty: false,
+    requiresAppraisal: true,
+    requiresPersonalGuaranty: true,
+    collateralTypes: ["real_estate", "commercial_real_estate"],
+    interestOnly: true,
+  },
+
+  applicableRegulations: [
+    "TILA/Reg Z (if consumer purpose)",
+    "ECOA/Reg B",
+    "FIRREA (appraisal requirements)",
+    "UCC Article 9",
+    "Mechanic's Lien Laws (state-specific)",
+    "BSA/AML",
+  ],
+  stateSpecificRules: true,
+
+  standardCovenants: [
+    { name: "Construction Progress Reports", description: "Monthly draw inspections and progress reports required.", frequency: "monthly" },
+    { name: "Budget Compliance", description: "All expenditures must conform to approved construction budget.", frequency: "monthly" },
+    { name: "Completion Deadline", description: "Project must reach substantial completion by maturity date.", frequency: "quarterly" },
+    { name: "Property Insurance", description: "Maintain builder's risk insurance throughout construction.", frequency: "annual" },
+    { name: "Lien Waivers", description: "Provide lien waivers from all contractors/subs with each draw.", frequency: "monthly" },
+  ],
+
+  requiredOutputDocs: [
+    "promissory_note", "loan_agreement", "guaranty", "deed_of_trust", "security_agreement",
+    "ucc_financing_statement", "environmental_indemnity", "draw_schedule",
+    "commitment_letter", "corporate_resolution", "settlement_statement",
+    "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
+  complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "environmental_phase1", "bsa_aml", "commercial_financing_disclosure"],
+
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 10,
+
+  standardFees: [
+    { name: "Origination Fee", type: "percent", value: 0.015, description: "1.5% of loan amount" },
+    { name: "Inspection Fee", type: "flat", value: 500, description: "Per-draw inspection fee" },
+    { name: "Appraisal Fee", type: "flat", value: 5000, description: "As-is and as-completed appraisal" },
+    { name: "Environmental Phase I", type: "flat", value: 3000, description: "Phase I ESA" },
+    { name: "Legal Fees", type: "flat", value: 7500, description: "Lender's counsel" },
+  ],
+};
+
+const HARD_MONEY: LoanProgram = {
+  id: "hard_money",
+  name: "Hard Money Loan",
+  // Note: Origination fee typically 2-5 points (percentage of loan amount) for hard money.
+  // Higher points compensate for speed of execution and relaxed underwriting.
+  description: "Asset-based bridge financing with expedited closing. Underwritten primarily on collateral value, not borrower creditworthiness.",
+  category: "commercial",
+
+  requiredDocuments: [
+    { docType: "BANK_STATEMENT_CHECKING", label: "Bank Statements (proof of liquidity for reserves)" },
+    { docType: "BALANCE_SHEET", label: "Personal Financial Statement" },
+  ],
+  optionalDocuments: [
+    { docType: "FORM_1040", label: "Personal Tax Returns (not always required)" },
+    { docType: "RENT_ROLL", label: "Rent Roll (if income-producing)" },
+    { docType: "PROFIT_AND_LOSS", label: "Property Operating Statement" },
+  ],
+
+  structuringRules: {
+    maxLtv: 0.70, // Conservative LTV — asset-based underwriting
+    minDscr: 0, // No DSCR requirement — asset-based
+    maxDti: 1.0, // No personal DTI requirement
+    baseRate: "prime",
+    spreadRange: [0.05, 0.10],
+    maxTerm: 24, // 2 years max
+    maxAmortization: 0, // Interest-only
+    maxLoanAmount: 10_000_000,
+    minLoanAmount: 100_000,
+    prepaymentPenalty: false,
+    requiresAppraisal: true,
+    requiresPersonalGuaranty: true,
+    collateralTypes: ["real_estate", "commercial_real_estate"],
+    interestOnly: true,
+  },
+
+  applicableRegulations: [
+    "TILA/Reg Z (if consumer purpose)",
+    "ECOA/Reg B",
+    "FIRREA (appraisal requirements)",
+    "State licensing requirements",
+    "BSA/AML",
+  ],
+  stateSpecificRules: true,
+
+  standardCovenants: [
+    { name: "Exit Strategy", description: "Borrower must demonstrate viable exit strategy (refinance or sale).", frequency: "quarterly" },
+    { name: "Property Insurance", description: "Maintain hazard insurance with lender as loss payee.", frequency: "annual" },
+  ],
+
+  requiredOutputDocs: [
+    "promissory_note", "loan_agreement", "guaranty", "deed_of_trust", "security_agreement",
+    "ucc_financing_statement", "environmental_indemnity",
+    "commitment_letter", "corporate_resolution", "settlement_statement",
+    "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "flood_determination", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
+  complianceChecks: ["ofac_screening", "usury_check", "flood_zone", "bsa_aml", "commercial_financing_disclosure"],
+
+  lateFeePercent: 0.06,
+  lateFeeGraceDays: 5,
+
+  standardFees: [
+    // Origination fee typically 2-5 points for hard money loans
+    { name: "Origination Fee", type: "percent", value: 0.03, description: "3% of loan amount (2-5 points typical)" },
+    { name: "Appraisal Fee", type: "flat", value: 4500, description: "As-is appraisal" },
+    { name: "Legal Fees", type: "flat", value: 3000, description: "Lender's counsel" },
+  ],
+};
+
+const MEZZANINE: LoanProgram = {
+  id: "mezzanine",
+  name: "Mezzanine Debt",
+  // Note: Mezzanine debt is secured by a UCC pledge of equity interests in the
+  // borrowing entity (not by a mortgage on the property). Perfection requires
+  // UCC-1 filing and/or control agreement per UCC Article 9.
+  description: "Subordinated debt secured by pledge of equity interests. Fills the gap between senior debt and sponsor equity in the capital stack.",
+  category: "commercial",
+
+  requiredDocuments: [
+    { docType: "FORM_1040", label: "Personal Tax Returns (1040)", yearsNeeded: 2 },
+    { docType: "FORM_1120", label: "Entity Tax Returns", yearsNeeded: 2 },
+    { docType: "RENT_ROLL", label: "Current Rent Roll" },
+    { docType: "PROFIT_AND_LOSS", label: "Operating Statement (T-12)" },
+    { docType: "BALANCE_SHEET", label: "Entity and Personal Financial Statements" },
+    { docType: "BANK_STATEMENT_CHECKING", label: "Bank Statements (3 months)" },
+  ],
+  optionalDocuments: [
+    { docType: "SCHEDULE_K1", label: "Schedule K-1" },
+  ],
+
+  structuringRules: {
+    maxLtv: 0.90, // Combined LTV (senior + mezzanine)
+    minDscr: 1.10, // On combined debt service
+    maxDti: 0.50,
+    baseRate: "sofr",
+    spreadRange: [0.06, 0.12], // Higher spread reflects subordination risk
+    maxTerm: 120, // 10 years
+    maxAmortization: 120,
+    maxLoanAmount: 50_000_000,
+    minLoanAmount: 1_000_000,
+    prepaymentPenalty: true,
+    requiresAppraisal: true,
+    requiresPersonalGuaranty: true,
+    collateralTypes: ["equity_interests", "membership_interests"],
+    interestOnly: true, // Often interest-only with balloon
+  },
+
+  applicableRegulations: [
+    "UCC Article 9 (pledge of equity interests)",
+    "ECOA/Reg B",
+    "Securities law considerations (if equity kicker)",
+    "BSA/AML",
+  ],
+  stateSpecificRules: true,
+
+  standardCovenants: [
+    { name: "Annual Financial Statements", description: "Provide annual audited financial statements within 90 days of fiscal year end.", frequency: "annual" },
+    { name: "Annual Rent Roll", description: "Provide updated rent roll annually.", frequency: "annual" },
+    { name: "Minimum Combined DSCR", description: "Maintain minimum combined DSCR (senior + mezzanine).", threshold: 1.05, frequency: "annual" },
+    { name: "Senior Loan Compliance", description: "Maintain compliance with all senior loan covenants.", frequency: "quarterly" },
+    { name: "No Additional Debt", description: "No additional debt without mezzanine lender consent.", frequency: "annual" },
+  ],
+
+  requiredOutputDocs: [
+    "promissory_note", "loan_agreement", "guaranty", "intercreditor_agreement",
+    "security_agreement", "ucc_financing_statement",
+    "commitment_letter", "corporate_resolution", "settlement_statement",
+    "borrowers_certificate", "compliance_certificate", "amortization_schedule", "opinion_letter",
+    "commercial_financing_disclosure",
+    // Universal compliance forms
+    "irs_4506c", "irs_w9", "privacy_notice", "patriot_act_notice", "disbursement_authorization",
+  ],
+  complianceChecks: ["ofac_screening", "usury_check", "bsa_aml", "commercial_financing_disclosure"],
+
+  lateFeePercent: 0.05,
+  lateFeeGraceDays: 10,
+
+  standardFees: [
+    { name: "Origination Fee", type: "percent", value: 0.02, description: "2% of loan amount" },
+    { name: "Legal Fees", type: "flat", value: 10000, description: "Lender's counsel (complex intercreditor negotiation)" },
   ],
 };
 
@@ -802,6 +1124,10 @@ export const LOAN_PROGRAMS: Record<string, LoanProgram> = {
   equipment_financing: EQUIPMENT_FINANCING,
   bridge: BRIDGE_LOAN,
   crypto_collateral: CRYPTO_COLLATERALIZED,
+  multifamily: MULTIFAMILY,
+  construction: CONSTRUCTION,
+  hard_money: HARD_MONEY,
+  mezzanine: MEZZANINE,
 };
 
 /** Ordered list for UI dropdowns */
@@ -816,6 +1142,10 @@ export const LOAN_PROGRAM_LIST: LoanProgram[] = [
   EQUIPMENT_FINANCING,
   BRIDGE_LOAN,
   CRYPTO_COLLATERALIZED,
+  MULTIFAMILY,
+  CONSTRUCTION,
+  HARD_MONEY,
+  MEZZANINE,
 ];
 
 /** Get a loan program by ID, returns undefined if not found */

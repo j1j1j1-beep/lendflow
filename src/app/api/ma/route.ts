@@ -10,8 +10,8 @@ import {
   TaxStructure,
 } from "@/generated/prisma/client";
 
-// 2026 HSR size-of-transaction threshold
-const HSR_THRESHOLD = 133_900_000;
+// 2025 HSR size-of-transaction threshold (adjusted annually per 16 CFR 801.1(h))
+const HSR_THRESHOLD = 119_500_000;
 
 const VALID_TRANSACTION_TYPES = new Set(Object.values(TransactionType));
 const VALID_HSR_STATUSES = new Set(Object.values(HSRStatus));
@@ -38,6 +38,9 @@ function parsePositiveDecimal(
   const n = Number(raw);
   if (!Number.isFinite(n) || n < 0) {
     return { value: null, error: `${fieldName} must be a non-negative number` };
+  }
+  if (n > 1e15) {
+    return { value: null, error: `${fieldName} exceeds maximum allowed value` };
   }
   return { value: n };
 }
@@ -118,7 +121,10 @@ export async function POST(request: NextRequest) {
     const hsrFilingFee = parsePositiveDecimal(body.hsrFilingFee, "hsrFilingFee");
     if (hsrFilingFee.error) return NextResponse.json({ error: hsrFilingFee.error }, { status: 400 });
 
-    // escrowPercent must be 0-1
+    // escrowPercent must be 0-1 — normalize escrowPercentage → escrowPercent
+    if ("escrowPercentage" in body && !("escrowPercent" in body)) {
+      body.escrowPercent = body.escrowPercentage;
+    }
     let escrowPercent: number | null = null;
     if (body.escrowPercent != null && body.escrowPercent !== "") {
       escrowPercent = Number(body.escrowPercent);
@@ -168,22 +174,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // --- Date field parsing ---
+    // --- Date field parsing & range validation (1970-2100) ---
     const targetCloseDate = body.targetCloseDate ? new Date(body.targetCloseDate) : null;
     if (targetCloseDate && isNaN(targetCloseDate.getTime())) {
       return NextResponse.json({ error: "targetCloseDate must be a valid date" }, { status: 400 });
+    }
+    if (targetCloseDate && (targetCloseDate.getFullYear() < 1970 || targetCloseDate.getFullYear() > 2100)) {
+      return NextResponse.json({ error: "targetCloseDate year must be between 1970 and 2100" }, { status: 400 });
     }
     const outsideDate = body.outsideDate ? new Date(body.outsideDate) : null;
     if (outsideDate && isNaN(outsideDate.getTime())) {
       return NextResponse.json({ error: "outsideDate must be a valid date" }, { status: 400 });
     }
+    if (outsideDate && (outsideDate.getFullYear() < 1970 || outsideDate.getFullYear() > 2100)) {
+      return NextResponse.json({ error: "outsideDate year must be between 1970 and 2100" }, { status: 400 });
+    }
     const hsrFilingDate = body.hsrFilingDate ? new Date(body.hsrFilingDate) : null;
     if (hsrFilingDate && isNaN(hsrFilingDate.getTime())) {
       return NextResponse.json({ error: "hsrFilingDate must be a valid date" }, { status: 400 });
     }
+    if (hsrFilingDate && (hsrFilingDate.getFullYear() < 1970 || hsrFilingDate.getFullYear() > 2100)) {
+      return NextResponse.json({ error: "hsrFilingDate year must be between 1970 and 2100" }, { status: 400 });
+    }
     const hsrClearanceDate = body.hsrClearanceDate ? new Date(body.hsrClearanceDate) : null;
     if (hsrClearanceDate && isNaN(hsrClearanceDate.getTime())) {
       return NextResponse.json({ error: "hsrClearanceDate must be a valid date" }, { status: 400 });
+    }
+    if (hsrClearanceDate && (hsrClearanceDate.getFullYear() < 1970 || hsrClearanceDate.getFullYear() > 2100)) {
+      return NextResponse.json({ error: "hsrClearanceDate year must be between 1970 and 2100" }, { status: 400 });
     }
 
     // --- HSR auto-detection ---

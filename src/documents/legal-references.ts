@@ -66,8 +66,8 @@ CERCLA Section 9601(20)(E) — Secured Creditor Exemption (42 U.S.C. §9601(20)(
 RCRA Section 6903(5) — Definition of "Hazardous Waste":
 "Hazardous waste" means a solid waste, or combination of solid wastes, which because of its quantity, concentration, or physical, chemical, or infectious characteristics may: (A) cause or significantly contribute to an increase in mortality or an increase in serious irreversible or incapacitating reversible illness, or (B) pose a substantial present or potential hazard to human health or the environment when improperly treated, stored, transported, or disposed of, or otherwise managed.
 
-PFAS/PFOA/PFOS — CERCLA Hazardous Substance Designation (effective September 2025):
-Per final EPA rule under CERCLA Section 102, PFAS (per- and polyfluoroalkyl substances), including PFOA (perfluorooctanoic acid) and PFOS (perfluorooctane sulfonic acid), are designated as CERCLA hazardous substances effective September 2025. This designation triggers reporting requirements under CERCLA Section 103 and potential liability for contaminated sites under Section 107. Environmental indemnity agreements for properties with known or suspected PFAS contamination should specifically address PFAS remediation obligations and liability allocation.`;
+PFOA and PFOS — CERCLA Hazardous Substance Designation (effective June 18, 2024):
+Per final EPA rule under CERCLA Section 102 (published April 19, 2024, 89 FR 22390), PFOA (perfluorooctanoic acid) and PFOS (perfluorooctane sulfonic acid) are designated as CERCLA hazardous substances effective June 18, 2024. Note: only PFOA and PFOS were designated; other PFAS compounds are not currently CERCLA hazardous substances. This designation triggers reporting requirements under CERCLA Section 103 and potential liability for contaminated sites under Section 107. Environmental indemnity agreements for properties with known or suspected PFOA/PFOS contamination should specifically address remediation obligations and liability allocation.`;
 
 const UCC_FINANCING_STATEMENT_REFS = `APPLICABLE LEGAL STANDARDS — Reference these when drafting:
 
@@ -254,7 +254,7 @@ SEC Staff Guidance on Digital Assets:
 Framework for "Investment Contract" Analysis of Digital Assets — whether a particular digital asset is a security depends on facts and circumstances under the Howey test (SEC v. W.J. Howey Co., 328 U.S. 293 (1946)).
 
 State Digital Asset Lending Laws:
-Several states have enacted digital asset-specific lending regulations. Wyoming (W.S. 34-29-101 et seq.) — Digital Asset Act providing for custody and lending. New York BitLicense (23 NYCRR 200) — requires license for virtual currency business activity. California — Digital Financial Assets Law (licensure effective July 2026 per AB 1934). Lender must comply with all applicable state digital asset and money transmission laws in the borrower's state.
+Several states have enacted digital asset-specific lending regulations. Wyoming (W.S. 34-29-101 et seq.) — Digital Asset Act providing for custody and lending. New York BitLicense (23 NYCRR 200) — requires license for virtual currency business activity. California — Digital Financial Assets Law (licensure effective July 2026 per AB 2269). Lender must comply with all applicable state digital asset and money transmission laws in the borrower's state.
 
 SEC Staff Accounting Bulletin No. 122 (SAB 122):
 SAB 121 (which required entities to record crypto-asset custodial obligations as liabilities on the balance sheet) was rescinded in January 2025. SAB 122 replaced it, permitting banks and financial institutions to custody crypto assets without the onerous balance-sheet liability treatment. Lenders accepting digital assets as collateral should verify that custodial arrangements comply with SAB 122 accounting guidance.
@@ -262,7 +262,7 @@ SAB 121 (which required entities to record crypto-asset custodial obligations as
 Banking Regulator Crypto Guidance Withdrawal (2025):
 In 2025, the OCC, FDIC, and Federal Reserve withdrew their prior restrictive guidance that had required banks to obtain supervisory non-objection before engaging in crypto-related activities. Banks may now engage in legally permissible crypto custody, lending, and related activities subject to standard safety-and-soundness principles without prior regulatory approval, though they should maintain appropriate risk management frameworks.
 
-GENIUS Act — Federal Stablecoin Framework (P.L. 119-XX, signed July 18, 2025):
+GENIUS Act — Federal Stablecoin Framework (P.L. 119-27, signed July 18, 2025):
 The Guiding and Establishing National Innovation for U.S. Stablecoins (GENIUS) Act establishes a federal regulatory framework for payment stablecoins. Key provisions: (1) stablecoin issuers must maintain 1:1 reserves in U.S. Treasuries, insured deposits, or approved reserve assets; (2) issuers must register with a federal prudential regulator or approved state regulator; (3) monthly reserve attestation reports required and must be publicly available; (4) algorithmic stablecoins without qualifying reserves are prohibited from marketing as "stablecoins." Lenders accepting stablecoin collateral must verify the issuer is a licensed payment stablecoin issuer under the GENIUS Act.`;
 
 const BRIDGE_REFS = `Bridge Loan Specific Requirements:
@@ -328,7 +328,8 @@ UCC Section 9-324(a) — Purchase Money Security Interest (PMSI):
 A perfected purchase money security interest in goods other than inventory has priority over a conflicting security interest in the same goods if the PMSI is perfected when the debtor receives possession of the collateral or within 20 days thereafter. This super-priority is critical for equipment lenders who want priority over an existing blanket lien holder.
 
 IRS Section 179 and Bonus Depreciation:
-Equipment acquisitions may qualify for accelerated depreciation under IRC Section 179 (up to the annual limit) or bonus depreciation provisions. While these are tax provisions rather than lending regulations, they are relevant to the economic analysis of equipment financing transactions and may be referenced in the loan documentation.`;
+Equipment acquisitions may qualify for accelerated depreciation under IRC Section 179 (up to the annual limit) or bonus depreciation provisions. While these are tax provisions rather than lending regulations, they are relevant to the economic analysis of equipment financing transactions and may be referenced in the loan documentation.
+// OBBBA (July 2025) restored 100% bonus depreciation for qualified property acquired and placed in service after January 19, 2025`;
 
 const COMMERCIAL_FINANCING_DISCLOSURE_REFS = `Commercial Financing Disclosure Laws:
 
@@ -425,7 +426,7 @@ Bank Secrecy Act / AML Requirements (31 CFR 1010, 1020, 1022):
 Financial institutions must: (1) establish an AML compliance program; (2) file Currency Transaction Reports (CTRs) for cash transactions exceeding $10,000; (3) maintain records of funds transfers of $3,000 or more (travel rule); (4) conduct ongoing monitoring of customer relationships for suspicious activity.
 
 State Money Transmitter Laws:
-Most states require licensure for persons engaged in the business of money transmission, which may encompass digital asset custody and transfer activities. Notable frameworks include: New York BitLicense (23 NYCRR Part 200), Wyoming Digital Asset Act (W.S. 34-29-101 et seq.), California Digital Financial Assets Law (effective July 2026 per AB 1934). Lender must ensure that its digital asset collateral activities comply with applicable state money transmitter or digital asset laws in every state where borrowers are located.
+Most states require licensure for persons engaged in the business of money transmission, which may encompass digital asset custody and transfer activities. Notable frameworks include: New York BitLicense (23 NYCRR Part 200), Wyoming Digital Asset Act (W.S. 34-29-101 et seq.), California Digital Financial Assets Law (effective July 2026 per AB 2269). Lender must ensure that its digital asset collateral activities comply with applicable state money transmitter or digital asset laws in every state where borrowers are located.
 
 UCC Article 12 (Adopted in Select States) — Controllable Electronic Records:
 The 2022 UCC amendments add Article 12, providing a framework for taking a security interest in "controllable electronic records," including certain digital assets. Control is established when the secured party has the power to avail itself of substantially all the benefit of the electronic record and the exclusive power to prevent others from doing so. States that have enacted Article 12 provide a clear perfection-by-control mechanism for digital asset collateral.`;

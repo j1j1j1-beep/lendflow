@@ -281,6 +281,103 @@ function buildChecklist(project: MAProjectFull): DueDiligenceChecklistItem[] {
     items.push({ category: "Customers and Suppliers", item, status: "open", priority: "high", assignedTo: "" });
   }
 
+  // ─── AI / Technology ─────────────────────────────────────
+  const aiTechItems = [
+    "AI/ML model inventory (models in use, training data sources, performance metrics)",
+    "AI governance framework and ethical AI policies",
+    "Algorithmic bias audits and fairness assessments",
+    "AI-related intellectual property (model architectures, proprietary datasets, training pipelines)",
+    "Compliance with emerging AI regulations (EU AI Act, state-level AI transparency laws)",
+    "Automated decision-making systems and human oversight procedures",
+    "Third-party AI vendor contracts and data processing agreements",
+    "AI incident response procedures and model monitoring systems",
+  ];
+  for (const item of aiTechItems) {
+    items.push({ category: "AI / Technology", item, status: "open", priority: "high", assignedTo: "" });
+  }
+
+  // ─── ESG / Sustainability ──────────────────────────────
+  const esgItems = [
+    "ESG policy and sustainability framework documentation",
+    "Carbon emissions reporting and reduction targets (Scope 1, 2, and 3)",
+    "Environmental impact assessments and sustainability audits",
+    "Diversity, equity, and inclusion (DEI) metrics and programs",
+    "Sustainable supply chain policies and vendor ESG assessments",
+    "ESG-related regulatory filings and disclosures (SEC climate rules if applicable)",
+    "Stakeholder engagement reports on ESG matters",
+    "Social responsibility programs and community impact assessments",
+    "Governance structure for ESG oversight (board-level or committee)",
+  ];
+  for (const item of esgItems) {
+    items.push({ category: "ESG / Sustainability", item, status: "open", priority: "medium", assignedTo: "" });
+  }
+
+  // ─── Supply Chain ──────────────────────────────────────
+  const supplyChainItems = [
+    "Supply chain mapping and critical dependency analysis",
+    "Supplier risk assessments and contingency plans",
+    "Force majeure and business continuity provisions in supplier contracts",
+    "Inventory management strategy and safety stock policies",
+    "Logistics and distribution network overview",
+    "Supply chain disruption history and mitigation measures (last 3 years)",
+    "Single-source and sole-source supplier analysis with alternative sourcing plans",
+    "Compliance with supply chain transparency laws (CA Supply Chain Act, Uyghur Forced Labor Prevention Act)",
+  ];
+  for (const item of supplyChainItems) {
+    items.push({ category: "Supply Chain", item, status: "open", priority: "high", assignedTo: "" });
+  }
+
+  // ─── Sanctions / Export Controls ───────────────────────
+  const sanctionsItems = [
+    "OFAC sanctions compliance program and screening procedures",
+    "Export control classification of products/technology (EAR / ITAR)",
+    "Export licenses and license exceptions currently in use",
+    "Denied party screening procedures and results",
+    "Foreign national access controls for controlled technology",
+    "Compliance with EU sanctions and other international sanctions regimes",
+    "Voluntary self-disclosures or enforcement actions (BIS, OFAC, DDTC)",
+    "Anti-boycott compliance program and reportable requests",
+    "End-use and end-user certification procedures for exports",
+  ];
+  for (const item of sanctionsItems) {
+    items.push({ category: "Sanctions / Export Controls", item, status: "open", priority: "high", assignedTo: "" });
+  }
+
+
+  // ─── Data Privacy ──────────────────────────────────
+  const dataPrivacyItems = [
+    "Data privacy program documentation and privacy policy inventory",
+    "CCPA/CPRA compliance assessment (California Consumer Privacy Act) — notice, opt-out, deletion rights",
+    "GDPR compliance assessment (if EU/EEA personal data processed) — DPO, DPIA, cross-border transfer mechanisms",
+    "State privacy law compliance inventory (Virginia VCDPA, Colorado CPA, Connecticut CTDPA, etc.)",
+    "Data processing agreements with vendors and third parties",
+    "Privacy impact assessments and data protection impact assessments",
+    "Data breach history and notification records (last 5 years)",
+    "Cookie consent and tracking technology compliance",
+    "Children's privacy compliance (COPPA) if applicable",
+    "Cross-border data transfer mechanisms (Standard Contractual Clauses, adequacy decisions)",
+  ];
+  for (const item of dataPrivacyItems) {
+    items.push({ category: "Data Privacy", item, status: "open", priority: "high", assignedTo: "" });
+  }
+
+  // ─── Cybersecurity Posture ─────────────────────────
+  const cybersecurityItems = [
+    "Cybersecurity risk assessment and maturity model evaluation",
+    "Penetration testing and vulnerability assessment reports (last 12 months)",
+    "Security operations center (SOC) capabilities and monitoring coverage",
+    "Identity and access management (IAM) policies and procedures",
+    "Multi-factor authentication (MFA) deployment status across systems",
+    "Endpoint detection and response (EDR) / extended detection and response (XDR) deployment",
+    "Security awareness training program and phishing simulation results",
+    "Cyber insurance policy details (coverage limits, exclusions, claims history)",
+    "Third-party security assessment results (SOC 2 Type II, ISO 27001, NIST CSF)",
+    "Ransomware preparedness and business continuity / disaster recovery testing",
+  ];
+  for (const item of cybersecurityItems) {
+    items.push({ category: "Cybersecurity Posture", item, status: "open", priority: "high", assignedTo: "" });
+  }
+
   // ─── IT Systems ────────────────────────────────────────
   const itItems = [
     "IT infrastructure overview (servers, cloud, network architecture)",

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { uploadToS3 } from "@/lib/s3";
 import { logAudit } from "@/lib/audit";
+import { withRateLimit } from "@/lib/with-rate-limit";
+import { pipelineLimit } from "@/lib/rate-limit";
 
 // POST /api/deals/[dealId]/retry-docs — Retry all FAILED / FLAGGED documents
 
@@ -10,6 +12,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ dealId: string }> }
 ) {
+  const limited = await withRateLimit(request, pipelineLimit);
+  if (limited) return limited;
+
   try {
     const { user, org } = await requireAuth();
     const { dealId } = await params;
@@ -193,23 +198,25 @@ export async function POST(
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         );
 
-        // Update the document record
-        await prisma.generatedDocument.update({
-          where: { id: doc.id },
-          data: {
-            s3Key,
-            version: newVersion,
-            status: result.status,
-            legalReviewStatus: result.legalReview.passed
-              ? "APPROVED"
-              : "FLAGGED",
-            legalIssues: result.legalReview.issues as any,
-            verificationStatus: result.verification.passed
-              ? "PASSED"
-              : "FAILED",
-            verificationIssues: result.verification.issues as any,
-            complianceChecks: result.complianceChecks as any,
-          },
+        // Use $transaction for atomic multi-field update
+        await prisma.$transaction(async (tx) => {
+          await tx.generatedDocument.update({
+            where: { id: doc.id },
+            data: {
+              s3Key,
+              version: newVersion,
+              status: result.status,
+              legalReviewStatus: result.legalReview.passed
+                ? "APPROVED"
+                : "FLAGGED",
+              legalIssues: result.legalReview.issues as any,
+              verificationStatus: result.verification.passed
+                ? "PASSED"
+                : "FAILED",
+              verificationIssues: result.verification.issues as any,
+              complianceChecks: result.complianceChecks as any,
+            },
+          });
         });
 
         results.push({

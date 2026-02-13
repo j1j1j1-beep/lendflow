@@ -153,7 +153,7 @@ export async function buildSideLetter(project: CapitalProjectFull): Promise<Docu
   children.push(bodyText("In addition to the standard reporting provided to all Limited Partners, the General Partner shall provide the Investor with:"));
   children.push(bulletPoint("Quarterly portfolio company updates (within 45 days of quarter-end)"));
   children.push(bulletPoint("Annual audited financial statements (within 90 days of fiscal year-end)"));
-  children.push(bulletPoint("Capital call and distribution notices not less than 15 business days in advance"));
+  children.push(bulletPoint("Capital call and distribution notices not less than 15 business days in advance (enhanced from the standard 10 business days provided under the Agreement)"));
   children.push(bulletPoint("Ad-hoc reporting reasonably requested by the Investor for regulatory or compliance purposes"));
   children.push(bulletPoint("ESG/impact reporting (if applicable to the Fund's strategy)"));
   children.push(spacer(8));
@@ -185,7 +185,8 @@ export async function buildSideLetter(project: CapitalProjectFull): Promise<Docu
   children.push(spacer(4));
   children.push(bodyText("The following regulatory accommodations apply:", { bold: true }));
   children.push(bulletPoint("ERISA: If the Investor is a benefit plan investor subject to Title I of ERISA or Section 4975 of the Internal Revenue Code, the General Partner shall use commercially reasonable efforts to ensure that the Fund's assets do not constitute 'plan assets' under 29 CFR 2510.3-101."));
-  children.push(bulletPoint("Volcker Rule: If the Investor is a banking entity subject to Section 13 of the Bank Holding Company Act (the Volcker Rule, 12 CFR 248), the General Partner shall provide such information and cooperation as reasonably necessary for the Investor to comply with the Volcker Rule."));
+  children.push(bulletPoint("Volcker Rule: If the Investor is a banking entity subject to Section 13 of the Bank Holding Company Act (the Volcker Rule — Fed: 12 CFR 248, OCC: 12 CFR 44, FDIC: 12 CFR 351, SEC: 17 CFR 255, CFTC: 17 CFR 75), the General Partner shall provide such information and cooperation as reasonably necessary for the Investor to comply with the Volcker Rule."));
+  children.push(bulletPoint("FinCEN BOI: Note — domestic reporting companies are exempt from initial beneficial ownership information reporting per the March 2025 interim final rule (31 CFR 1010.380). Foreign-owned entities must still file. Verify current status at fincen.gov/boi."));
   children.push(bulletPoint("State Pension: If the Investor is a state or local government pension plan, the General Partner shall comply with applicable disclosure and reporting requirements under the Investor's governing statutes."));
   children.push(spacer(8));
 

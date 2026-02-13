@@ -63,7 +63,7 @@ export default function NewDealPage() {
       toast.success("Sample deal created! Watch the pipeline process it.");
       router.push(`/dashboard/lending/${deal.id}`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Something went wrong", { duration: 8000 });
       setSubmitting(false);
     }
   };
@@ -83,12 +83,12 @@ export default function NewDealPage() {
     e.preventDefault();
 
     if (!borrowerName.trim()) {
-      toast.error("Borrower name is required");
+      toast.error("Borrower name is required", { duration: 8000 });
       return;
     }
 
     if (files.length === 0) {
-      toast.error("Please upload at least one document");
+      toast.error("Please upload at least one document", { duration: 8000 });
       return;
     }
 
@@ -143,7 +143,8 @@ export default function NewDealPage() {
 
       if (!analyzeRes.ok) {
         toast.error(
-          "Documents uploaded but analysis failed to start. You can retry from the deal page."
+          "Documents uploaded but analysis failed to start. You can retry from the deal page.",
+          { duration: 8000 }
         );
       } else {
         toast.success("Deal created! Analysis pipeline started.");
@@ -151,7 +152,7 @@ export default function NewDealPage() {
 
       router.push(`/dashboard/lending/${dealId}`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Something went wrong", { duration: 8000 });
       setSubmitting(false);
     }
   };

@@ -12,6 +12,7 @@ import {
   documentTitle,
   bodyText,
   formatCurrency,
+  safeNumber,
 } from "../doc-helpers";
 
 // Template builders
@@ -39,7 +40,7 @@ export function buildProjectContext(project: ComplianceProjectFull): string {
   const dpi = totalContributions > 0 ? totalDistributions / totalContributions : 0;
   const rvpi = totalContributions > 0 ? nav / totalContributions : 0;
 
-  const portfolioSummary = project.portfolioSummary as Array<Record<string, unknown>> | null;
+  const portfolioSummary = Array.isArray(project.portfolioSummary) ? project.portfolioSummary as Array<Record<string, unknown>> : null;
   const portfolioBlock = portfolioSummary
     ? portfolioSummary.map((p) =>
         `  - ${p.company}: Cost ${formatCurrency(Number(p.cost ?? 0))}, FV ${formatCurrency(Number(p.fairValue ?? 0))}, Status: ${p.status ?? "unrealized"}`
@@ -61,12 +62,12 @@ FUND METRICS:
 NAV: ${formatCurrency(nav)}
 Total Contributions: ${formatCurrency(totalContributions)}
 Total Distributions: ${formatCurrency(totalDistributions)}
-Net IRR: ${project.netIrr !== null ? (project.netIrr * 100).toFixed(2) + "%" : "Not calculated"}
-Gross IRR: ${project.grossIrr !== null ? (project.grossIrr * 100).toFixed(2) + "%" : "Not calculated"}
+Net IRR: ${project.netIrr !== null ? (safeNumber(project.netIrr) * 100).toFixed(2) + "%" : "Not calculated"}
+Gross IRR: ${project.grossIrr !== null ? (safeNumber(project.grossIrr) * 100).toFixed(2) + "%" : "Not calculated"}
 TVPI (computed): ${tvpi.toFixed(3)}x
 DPI (computed): ${dpi.toFixed(3)}x
 RVPI (computed): ${rvpi.toFixed(3)}x
-MOIC: ${project.moic !== null ? project.moic.toFixed(3) + "x" : "N/A"}
+MOIC: ${project.moic !== null ? safeNumber(project.moic).toFixed(3) + "x" : "N/A"}
 
 CAPITAL CALL DATA:
 Call Amount: ${formatCurrency(callAmount)}
@@ -74,13 +75,13 @@ Call Due Date: ${project.callDueDate ? project.callDueDate.toISOString().split("
 Call Purpose: ${project.callPurpose ?? "Not specified"}
 Unfunded Commitments: ${formatCurrency(unfundedCommitments)}
 Notice Required Days: ${project.callNoticeRequiredDays ?? "10"}
-Default Penalty: ${project.callDefaultPenalty !== null ? (project.callDefaultPenalty * 100).toFixed(1) + "%" : "Not specified"}
+Default Penalty: ${project.callDefaultPenalty !== null ? (safeNumber(project.callDefaultPenalty) * 100).toFixed(1) + "%" : "Not specified"}
 Default Remedy: ${project.callDefaultRemedy ?? "Per LPA terms"}
 
 DISTRIBUTION DATA:
 Distribution Amount: ${formatCurrency(distributionAmount)}
 Distribution Type: ${project.distributionType ?? "Not specified"}
-Withholding Rate: ${project.withholdingRate !== null ? (project.withholdingRate * 100).toFixed(1) + "%" : "N/A"}
+Withholding Rate: ${project.withholdingRate !== null ? (safeNumber(project.withholdingRate) * 100).toFixed(1) + "%" : "N/A"}
 Withholding Amount: ${project.withholdingAmount ? formatCurrency(Number(project.withholdingAmount)) : "N/A"}
 Withholding Type: ${project.withholdingType ?? "N/A"}
 

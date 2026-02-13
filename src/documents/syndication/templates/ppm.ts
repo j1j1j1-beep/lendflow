@@ -60,7 +60,7 @@ ${context}
 
 ADDITIONAL CONTEXT:
 - Depreciation schedule: ${depreciationYears}-year straight-line (${isResidential ? "residential" : "commercial"})
-- Bonus depreciation: ${project.bonusDepreciationPct != null ? (safeNumber(project.bonusDepreciationPct) * 100).toFixed(0) : "100"}% (The One Big Beautiful Bill Act of July 2025 permanently restored 100% bonus depreciation for property acquired after January 19, 2025)
+- Bonus depreciation: ${project.bonusDepreciationPct != null ? (safeNumber(project.bonusDepreciationPct) * 100).toFixed(0) : "100"}% (The One Big Beautiful Bill Act of July 2025 restored 100% bonus depreciation for property acquired after January 19, 2025)
 - Property classification: ${isResidential ? "Residential rental" : "Commercial"}
 
 Return a JSON object with these keys:
@@ -101,7 +101,7 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
   const totalCost = purchasePrice + renovationBudget + closingCosts;
   const capRate = purchasePrice > 0 ? currentNoi / purchasePrice : 0;
   const ltv = purchasePrice > 0 ? loanAmount / purchasePrice : 0;
-  const sortedTiers = [...project.waterfallTiers].sort((a, b) => a.tierOrder - b.tierOrder);
+  const sortedTiers = [...project.waterfallTiers].sort((a, b) => (a.tierOrder ?? 0) - (b.tierOrder ?? 0));
 
   const children: (Paragraph | Table)[] = [];
 
@@ -325,7 +325,7 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
     ["Senior Debt", formatCurrency(loanAmount), `${(ltv * 100).toFixed(1)}%`],
     ["Sponsor Equity", formatCurrency(sponsorEquity), totalCost > 0 ? `${((sponsorEquity / totalCost) * 100).toFixed(1)}%` : "N/A"],
     ["Investor Equity", formatCurrency(totalEquityRaise - sponsorEquity), totalCost > 0 ? `${(((totalEquityRaise - sponsorEquity) / totalCost) * 100).toFixed(1)}%` : "N/A"],
-    ["Total", formatCurrency(loanAmount + totalEquityRaise), "100.0%"],
+    ["Total", formatCurrency(loanAmount + totalEquityRaise), totalCost > 0 ? `${(((loanAmount + totalEquityRaise) / totalCost) * 100).toFixed(1)}%` : "N/A"],
   ];
   children.push(
     createTable(
@@ -425,7 +425,7 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
       createTable(
         ["Fee", "Rate", "Basis", "When Paid", "Estimated Amount"],
         feeRows,
-        { columnWidths: [22, 10, 22, 18, 18], alternateRows: true },
+        { columnWidths: [22, 14, 22, 22, 20], alternateRows: true },
       ),
     );
   } else {
@@ -508,6 +508,21 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
       "This offering is made in compliance with applicable state securities laws. While offerings under Rule 506 of Regulation D are federally covered securities and preempted from state registration requirements under the National Securities Markets Improvement Act (NSMIA), states retain authority to require notice filings, collect fees, and enforce anti-fraud provisions. The Company will file required notices and consent to service of process in states where investors reside. Investors may have rights under state securities laws in addition to federal securities laws. For questions regarding state law compliance, investors should consult their legal advisors.",
     ),
   );
+  children.push(spacer(4));
+
+  // State-specific blue sky filing information (if available)
+  if (project.blueSkyFilings && typeof project.blueSkyFilings === "object") {
+    const filings = project.blueSkyFilings as Record<string, unknown>;
+    const stateList = Object.keys(filings);
+    if (stateList.length > 0) {
+      children.push(bodyText("State Notice Filings:", { bold: true }));
+      children.push(
+        bodyText(
+          `The Company has filed or intends to file notice filings in the following states: ${stateList.join(", ")}. Specific filing requirements, fees, and investor notice obligations vary by state.`,
+        ),
+      );
+    }
+  }
   children.push(spacer(8));
 
   // Environmental Disclosure
@@ -554,7 +569,7 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
     ),
   );
   children.push(spacer(4));
-  children.push(bulletPoint("Active Participation Exception (26 U.S.C. § 469(i)): Individuals who actively participate in rental real estate activities may deduct up to $25,000 of rental real estate losses against non-passive income. This exception phases out ratably for taxpayers with adjusted gross income (AGI) between $100,000 and $150,000. No deduction is available for AGI above $150,000."));
+  children.push(bulletPoint("Active Participation Exception (26 U.S.C. § 469(i)): Individuals who actively participate in rental real estate activities may deduct up to $25,000 of rental real estate losses against non-passive income. This exception phases out ratably for taxpayers with adjusted gross income (AGI) between $100,000 and $150,000 (note: these thresholds have not been adjusted for inflation since enacted in 1986 and exclude many moderate-income investors). No deduction is available for AGI above $150,000."));
   children.push(bulletPoint("Real Estate Professional Status (REPS) (26 U.S.C. § 469(c)(7)): Taxpayers who qualify as real estate professionals may treat rental real estate losses as non-passive. To qualify, the taxpayer must: (1) spend more than 50% of personal service time in real property trades or businesses; and (2) perform more than 750 hours of services in real property trades or businesses during the tax year. Material participation (generally 500+ hours per property or activity) is also required."));
   children.push(bulletPoint("Suspended Losses: Passive losses that cannot be deducted in the current year are carried forward indefinitely and may be deducted in future years when the taxpayer has sufficient passive income or upon full disposition of the activity."));
   children.push(spacer(4));
@@ -574,13 +589,22 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
   );
   children.push(spacer(8));
 
+  // Investment Company Act Exclusion
+  children.push(sectionHeading("Investment Company Act Exclusions"));
+  children.push(
+    bodyText(
+      "The Company is not registered as an investment company under the Investment Company Act of 1940 (the \"1940 Act\") and relies on one or more exclusions from the definition of \"investment company.\" The Company relies primarily on Section 3(c)(5)(C) of the 1940 Act, which excludes entities primarily engaged in the business of purchasing or otherwise acquiring mortgages and other liens on and interests in real estate. To maintain this exclusion, the Company intends to invest at least 55% of its assets in qualifying real estate interests and at least 80% of its assets in qualifying real estate interests plus real estate-related assets. Additionally, the Company may rely on Section 3(c)(1) of the 1940 Act, which excludes issuers whose outstanding securities are beneficially owned by not more than 100 persons and that are not making a public offering. Investors should be aware that the Company's reliance on these exclusions requires ongoing compliance and that changes in the Company's investment strategy or investor base could affect the availability of these exclusions.",
+    ),
+  );
+  children.push(spacer(8));
+
   // Interest Rate Validation (Compliance Check)
   const interestRate = project.interestRate ?? 0;
-  if (interestRate < 0.045 || interestRate > 0.12) {
+  if (interestRate < 0.02 || interestRate > 0.18) {
     children.push(sectionHeading("Interest Rate Risk Disclosure"));
     children.push(
       bodyText(
-        `The senior debt for this acquisition carries an interest rate of ${(interestRate * 100).toFixed(2)}%, which is ${interestRate < 0.045 ? "below" : "above"} the typical market range of 4.5% to 12.0% for commercial real estate financing as of 2026. ${interestRate < 0.045 ? "While this favorable rate reduces debt service costs and improves cash flow, investors should verify the terms of the financing commitment and ensure there are no unusual conditions, prepayment penalties, or yield maintenance provisions that could impact the economics." : "This elevated interest rate increases debt service costs and may constrain cash flow available for distribution. Investors should carefully review the debt service coverage ratio (DSCR) projections and assess refinancing risk if interest rates remain elevated at the anticipated refinance or sale date. The high interest rate may reflect higher leverage, shorter loan term, construction/renovation risk, or borrower credit profile."}`,
+        `The senior debt for this acquisition carries an interest rate of ${(interestRate * 100).toFixed(2)}%, which is ${interestRate < 0.02 ? "below" : "above"} the typical market range of 2.0% to 18.0% for commercial real estate financing (including bridge and construction loans) as of 2026. ${interestRate < 0.02 ? "While this favorable rate reduces debt service costs and improves cash flow, investors should verify the terms of the financing commitment and ensure there are no unusual conditions, prepayment penalties, or yield maintenance provisions that could impact the economics." : "This elevated interest rate increases debt service costs and may constrain cash flow available for distribution. Investors should carefully review the debt service coverage ratio (DSCR) projections and assess refinancing risk if interest rates remain elevated at the anticipated refinance or sale date. The high interest rate may reflect higher leverage, shorter loan term, construction/renovation risk, or borrower credit profile."}`,
       ),
     );
     children.push(spacer(8));
@@ -707,6 +731,39 @@ export function runPPMComplianceChecks(project: SyndicationProjectFull): Complia
       : "Insufficient fee disclosure — at minimum, acquisition and asset management fees must be disclosed",
   });
 
+  // Fee market norm validation
+  const acquisitionFeePct = project.acquisitionFee ? safeNumber(project.acquisitionFee) * 100 : null;
+  const assetMgmtFeePct = project.assetMgmtFee ? safeNumber(project.assetMgmtFee) * 100 : null;
+  const dispositionFeePct = project.dispositionFee ? safeNumber(project.dispositionFee) * 100 : null;
+
+  if (acquisitionFeePct != null && (acquisitionFeePct < 1 || acquisitionFeePct > 3)) {
+    checks.push({
+      name: "Acquisition Fee Market Norm",
+      regulation: "Industry Standards (1-3% of purchase price)",
+      category: "fee_disclosure",
+      passed: false,
+      note: `Acquisition fee ${acquisitionFeePct.toFixed(1)}% is outside the market norm of 1-3%. Verify fee is reasonable and adequately disclosed.`,
+    });
+  }
+  if (assetMgmtFeePct != null && (assetMgmtFeePct < 1 || assetMgmtFeePct > 2)) {
+    checks.push({
+      name: "Asset Management Fee Market Norm",
+      regulation: "Industry Standards (1-2% of effective gross income)",
+      category: "fee_disclosure",
+      passed: false,
+      note: `Asset management fee ${assetMgmtFeePct.toFixed(1)}% is outside the market norm of 1-2%. Verify fee is reasonable and adequately disclosed.`,
+    });
+  }
+  if (dispositionFeePct != null && (dispositionFeePct < 1 || dispositionFeePct > 2)) {
+    checks.push({
+      name: "Disposition Fee Market Norm",
+      regulation: "Industry Standards (1-2% of sale price)",
+      category: "fee_disclosure",
+      passed: false,
+      note: `Disposition fee ${dispositionFeePct.toFixed(1)}% is outside the market norm of 1-2%. Verify fee is reasonable and adequately disclosed.`,
+    });
+  }
+
   // Form D filing
   checks.push({
     name: "Form D Filing Status",
@@ -715,7 +772,7 @@ export function runPPMComplianceChecks(project: SyndicationProjectFull): Complia
     passed: !!project.formDFilingDate,
     note: project.formDFilingDate
       ? `Form D filed: ${project.formDFilingDate.toISOString().split("T")[0]}`
-      : "Form D not yet filed — must be filed within 15 days of first investor subscription per 17 CFR 230.503",
+      : "Form D not yet filed — must be filed within 15 days of first sale of securities per 17 CFR 230.503",
   });
 
   // 506(c) accreditation verification
@@ -726,6 +783,17 @@ export function runPPMComplianceChecks(project: SyndicationProjectFull): Complia
       category: "securities",
       passed: true, // Reminder check
       note: "506(c) offering — must take reasonable steps to verify accredited status of all investors (income, net worth, professional cert, or third-party letter)",
+    });
+  }
+
+  // 506(b) non-accredited investor limitation
+  if (project.exemptionType === "REG_D_506B") {
+    checks.push({
+      name: "506(b) Non-Accredited Investor Limitation",
+      regulation: "SEC Rule 506(b)(2)(i) — max 35 non-accredited purchasers",
+      category: "securities",
+      passed: true, // Reminder check — actual count verified at subscription
+      note: "506(b) offering permits up to 35 non-accredited but sophisticated investors per 17 CFR 230.506(b)(2)(i). Non-accredited investors must receive disclosure documents per Rule 502(b). Verify investor count at each closing.",
     });
   }
 

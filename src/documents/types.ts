@@ -364,7 +364,7 @@ export const DOC_TYPE_LABELS: Record<string, string> = {
   amortization_schedule: "Amortization Schedule",
   opinion_letter: "Legal Opinion Letter",
   sba_form_1919: "SBA Form 1919 — Borrower Information Form",
-  sba_form_1920: "SBA Form 1920 — Lender's Application for Guaranty",
+  // SBA Form 1920 was retired in August 2023 and is no longer generated.
   sba_form_159: "SBA Form 159 — Fee Disclosure and Compensation Agreement",
   sba_form_148: "SBA Form 148 — Unconditional Guarantee",
   sba_form_1050: "SBA Form 1050 — Settlement Sheet",

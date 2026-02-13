@@ -10,7 +10,7 @@ export async function requireAuth(): Promise<{
   user: User;
   org: Organization;
 }> {
-  const { userId } = await auth();
+  const { userId, orgId: activeOrgId } = await auth();
 
   if (!userId) {
     throw new Error("Unauthorized");
@@ -22,13 +22,15 @@ export async function requireAuth(): Promise<{
   }
 
   // Get or create the organization
-  // For users without an org, we create a personal org
-  const { orgId: activeOrgId } = await auth();
-  const clerkOrgId = activeOrgId || `personal_${userId}`;
+  // For users without an active Clerk org, we use their Clerk user ID prefixed
+  // with "user_" as a stable personal workspace identifier. Note: Clerk org IDs
+  // start with "org_", so we use "user_" to distinguish personal workspaces.
+  // This is stored in our own DB only -- not passed back to Clerk as an org ID.
+  const clerkOrgId = activeOrgId || `user_${userId}`;
   const orgName =
     clerkUser.firstName
-      ? `${clerkUser.firstName}'s Organization`
-      : "My Organization";
+      ? `${clerkUser.firstName}'s Workspace`
+      : "Personal Workspace";
 
   const org = await getOrCreateOrg(clerkOrgId, orgName);
   const user = await getOrCreateUser(userId, clerkUser, org.id);

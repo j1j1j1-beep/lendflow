@@ -221,7 +221,8 @@ function StatCard({
 
 export default function ComplianceDetailPage() {
   const params = useParams();
-  const projectId = params.projectId as string;
+  const rawProjectId = params.projectId;
+  const projectId = Array.isArray(rawProjectId) ? rawProjectId[0] : rawProjectId ?? "";
 
   const [project, setProject] = useState<ComplianceProject | null>(null);
   const [loading, setLoading] = useState(true);

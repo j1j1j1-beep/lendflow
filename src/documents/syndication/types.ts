@@ -107,6 +107,7 @@ export const SYNDICATION_DOC_TYPE_LABELS: Record<string, string> = {
   subscription_agreement: "Subscription Agreement",
   investor_questionnaire: "Investor Questionnaire",
   pro_forma: "Pro Forma Financial Projections",
+  // TODO: Add due_diligence_checklist template (property inspection, title, environmental, zoning, financial)
 };
 
 // ─── Doc Type List ───────────────────────────────────────────────────

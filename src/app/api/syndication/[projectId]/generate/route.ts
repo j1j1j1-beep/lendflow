@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { inngest } from "@/inngest/client";
 import { logAudit } from "@/lib/audit";
 import { withRateLimit } from "@/lib/with-rate-limit";
-import { heavyLimit } from "@/lib/rate-limit";
+import { pipelineLimit } from "@/lib/rate-limit";
 
 // POST /api/syndication/[projectId]/generate - Trigger document generation
 
@@ -12,7 +12,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }
 ) {
-  const limited = await withRateLimit(request, heavyLimit);
+  const limited = await withRateLimit(request, pipelineLimit);
   if (limited) return limited;
 
   try {
@@ -28,8 +28,8 @@ export async function POST(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    // Only allow generation from CREATED or ERROR status (retry)
-    if (project.status !== "CREATED" && project.status !== "ERROR") {
+    // Only allow generation from CREATED, ERROR, or NEEDS_REVIEW status (retry)
+    if (project.status !== "CREATED" && project.status !== "ERROR" && project.status !== "NEEDS_REVIEW") {
       return NextResponse.json(
         { error: `Cannot generate documents for project in ${project.status} status` },
         { status: 409 },
@@ -50,7 +50,7 @@ export async function POST(
     // Send Inngest event to start the pipeline
     await inngest.send({
       name: "syndication/project.generate",
-      data: { projectId },
+      data: { projectId, triggeredAt: Date.now() },
     });
 
     void logAudit({

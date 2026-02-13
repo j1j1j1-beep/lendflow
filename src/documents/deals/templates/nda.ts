@@ -174,8 +174,17 @@ export function buildNDA(
   children.push(bodyText(prose.remedies));
   children.push(spacer(4));
 
+  // 16b. Securities Law / MNPI Acknowledgment (deterministic)
+  children.push(sectionHeading("Section 13. Securities Law Compliance"));
+  children.push(
+    bodyText(
+      `The Receiving Party acknowledges that the Confidential Information may contain material non-public information ("MNPI") concerning the Disclosing Party, the Target Company, or their respective securities. The Receiving Party hereby agrees that it is aware of, and will advise its Representatives who receive Confidential Information of, the restrictions imposed by applicable securities laws, including without limitation Section 10(b) of the Securities Exchange Act of 1934 and Rule 10b-5 promulgated thereunder, on any person who is in possession of MNPI. The Receiving Party agrees that neither it nor any of its Representatives will purchase, sell, or otherwise trade in the securities of the Disclosing Party, the Target Company, or any of their respective affiliates while in possession of MNPI received pursuant to this Agreement, and will not communicate such MNPI to any person under circumstances in which it is reasonably foreseeable that such person may trade in such securities in violation of applicable securities laws.`,
+    ),
+  );
+  children.push(spacer(4));
+
   // 17. No Public Disclosure (deterministic)
-  children.push(sectionHeading("Section 13. Public Disclosure"));
+  children.push(sectionHeading("Section 14. Public Disclosure"));
   children.push(
     bodyText(
       `Neither party shall, without the prior written consent of the other party, disclose to any person (other than as permitted by Section 3) the fact that Confidential Information has been made available, that discussions or negotiations are taking place concerning the Potential Transaction, or any of the terms, conditions, or other facts with respect to any such Potential Transaction, including the status thereof.`,
@@ -184,12 +193,12 @@ export function buildNDA(
   children.push(spacer(4));
 
   // 18. Governing Law (AI prose)
-  children.push(sectionHeading("Section 14. Governing Law and Dispute Resolution"));
+  children.push(sectionHeading("Section 15. Governing Law and Dispute Resolution"));
   children.push(bodyText(prose.governingLaw));
   children.push(spacer(4));
 
   // 19. Miscellaneous (deterministic)
-  children.push(sectionHeading("Section 15. Miscellaneous"));
+  children.push(sectionHeading("Section 16. Miscellaneous"));
   children.push(
     bodyText(
       `(a) Entire Agreement. This Agreement constitutes the entire agreement between the parties with respect to the subject matter hereof and supersedes all prior negotiations, representations, warranties, commitments, offers, and agreements, whether written or oral, relating to such subject matter.`,

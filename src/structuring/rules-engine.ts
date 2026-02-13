@@ -228,11 +228,62 @@ function calculateApprovedAmount(input: RulesEngineInput): { amount: number; ltv
 // Rate calculation
 
 function calculateRate(input: RulesEngineInput): RateCalculation {
-  const { analysis, program } = input;
+  const { analysis, program, requestedAmount } = input;
   const rules = program.structuringRules;
 
   const baseRateValue = getBaseRate(rules.baseRate);
   const [minSpread, maxSpread] = rules.spreadRange;
+
+  // SBA 7(a) special case: enforce per-tier rate caps per SBA SOP 50 10 8
+  // Tier caps are absolute maximums — the spread is capped at the tier limit regardless of risk rating.
+  if (program.id === "sba_7a") {
+    let tierMaxSpread: number;
+    if (requestedAmount <= 50_000) {
+      tierMaxSpread = 0.065; // Prime + 6.5%
+    } else if (requestedAmount <= 250_000) {
+      tierMaxSpread = 0.060; // Prime + 6.0%
+    } else if (requestedAmount <= 350_000) {
+      tierMaxSpread = 0.045; // Prime + 4.5%
+    } else {
+      tierMaxSpread = 0.030; // Prime + 3.0%
+    }
+
+    // Determine spread based on risk within the tier cap
+    const riskRating = analysis.summary.riskRating;
+    let spread: number;
+    const spreadRange = tierMaxSpread - minSpread;
+
+    switch (riskRating) {
+      case "low":
+        spread = minSpread;
+        break;
+      case "moderate":
+        spread = minSpread + spreadRange * 0.33;
+        break;
+      case "elevated":
+        spread = minSpread + spreadRange * 0.67;
+        break;
+      case "high":
+        spread = tierMaxSpread;
+        break;
+      default:
+        spread = minSpread + spreadRange * 0.5;
+    }
+
+    // Round spread to nearest 0.125% (standard pricing grid)
+    spread = Math.round(spread * 800) / 800;
+    // Enforce tier cap after rounding
+    spread = Math.min(spread, tierMaxSpread);
+
+    const totalRate = baseRateValue + spread;
+
+    return {
+      baseRateType: rules.baseRate,
+      baseRateValue,
+      spread,
+      totalRate,
+    };
+  }
 
   // Determine spread based on risk tier
   // Lower risk = lower spread (closer to min), higher risk = higher spread (closer to max)

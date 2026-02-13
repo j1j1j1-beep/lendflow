@@ -33,6 +33,9 @@ function parseDecimal(
   if (!Number.isFinite(n)) {
     return { value: null, error: `${fieldName} must be a valid number` };
   }
+  if (n > 1e15 || n < -1e15) {
+    return { value: null, error: `${fieldName} exceeds maximum allowed value` };
+  }
   return { value: n };
 }
 
@@ -184,30 +187,53 @@ export async function POST(request: NextRequest) {
     const callNoticeRequiredDays = parsePositiveInt(body.callNoticeRequiredDays, "callNoticeRequiredDays");
     if (callNoticeRequiredDays.error) return NextResponse.json({ error: callNoticeRequiredDays.error }, { status: 400 });
 
-    // --- Date field parsing ---
+    // --- Date field parsing & range validation (1970-2100) ---
+    const parsedDates: Array<{ name: string; value: Date | null }> = [];
+
     const periodStart = body.periodStart ? new Date(body.periodStart) : null;
     if (periodStart && isNaN(periodStart.getTime())) {
       return NextResponse.json({ error: "periodStart must be a valid date" }, { status: 400 });
     }
+    parsedDates.push({ name: "periodStart", value: periodStart });
+
     const periodEnd = body.periodEnd ? new Date(body.periodEnd) : null;
     if (periodEnd && isNaN(periodEnd.getTime())) {
       return NextResponse.json({ error: "periodEnd must be a valid date" }, { status: 400 });
     }
+    parsedDates.push({ name: "periodEnd", value: periodEnd });
+
     const callDueDate = body.callDueDate ? new Date(body.callDueDate) : null;
     if (callDueDate && isNaN(callDueDate.getTime())) {
       return NextResponse.json({ error: "callDueDate must be a valid date" }, { status: 400 });
     }
+    parsedDates.push({ name: "callDueDate", value: callDueDate });
+
     const filingDeadline = body.filingDeadline ? new Date(body.filingDeadline) : null;
     if (filingDeadline && isNaN(filingDeadline.getTime())) {
       return NextResponse.json({ error: "filingDeadline must be a valid date" }, { status: 400 });
     }
+    parsedDates.push({ name: "filingDeadline", value: filingDeadline });
+
     const valuationDate = body.valuationDate ? new Date(body.valuationDate) : null;
     if (valuationDate && isNaN(valuationDate.getTime())) {
       return NextResponse.json({ error: "valuationDate must be a valid date" }, { status: 400 });
     }
+    parsedDates.push({ name: "valuationDate", value: valuationDate });
+
     const auditDate = body.auditDate ? new Date(body.auditDate) : null;
     if (auditDate && isNaN(auditDate.getTime())) {
       return NextResponse.json({ error: "auditDate must be a valid date" }, { status: 400 });
+    }
+    parsedDates.push({ name: "auditDate", value: auditDate });
+
+    // Validate all date ranges
+    for (const { name, value } of parsedDates) {
+      if (value) {
+        const year = value.getFullYear();
+        if (year < 1970 || year > 2100) {
+          return NextResponse.json({ error: `${name} year must be between 1970 and 2100` }, { status: 400 });
+        }
+      }
     }
 
     const project = await prisma.complianceProject.create({
@@ -282,7 +308,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ project }, { status: 201 });
+    // Serialize Prisma Decimal fields — JSON.stringify converts Decimal objects to their
+    // string representation, then JSON.parse gives us plain values safe for API response.
+    // This approach works because Prisma Decimal has a custom toJSON() that returns a string.
+    const serialized = JSON.parse(JSON.stringify(project));
+    return NextResponse.json({ project: serialized }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

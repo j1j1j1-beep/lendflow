@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { logAudit } from "@/lib/audit";
 import { withRateLimit } from "@/lib/with-rate-limit";
-import { heavyLimit } from "@/lib/rate-limit";
+import { pipelineLimit } from "@/lib/rate-limit";
 import { inngest } from "@/inngest/client";
 
 // POST /api/ma/[projectId]/generate - Trigger M&A document generation pipeline
@@ -12,7 +12,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }
 ) {
-  const limited = await withRateLimit(request, heavyLimit);
+  const limited = await withRateLimit(request, pipelineLimit);
   if (limited) return limited;
 
   try {

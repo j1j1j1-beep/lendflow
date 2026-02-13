@@ -134,7 +134,7 @@ const STATUS_CONFIG: Record<
   ERROR: { label: "Error", variant: "destructive" },
 };
 
-const PROCESSING_STATUSES = ["GENERATING_DOCS", "COMPLIANCE_REVIEW"];
+const PROCESSING_STATUSES = new Set(["GENERATING_DOCS", "COMPLIANCE_REVIEW"]);
 
 /* ---------- Helpers ---------- */
 
@@ -294,7 +294,8 @@ function DocumentCard({ doc }: { doc: MADocument }) {
 
 export default function DealDetailPage() {
   const params = useParams();
-  const projectId = params.projectId as string;
+  const rawProjectId = params.projectId;
+  const projectId = Array.isArray(rawProjectId) ? rawProjectId[0] : rawProjectId ?? "";
   const [project, setProject] = useState<MAProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -324,7 +325,7 @@ export default function DealDetailPage() {
 
   /* Polling when processing */
   useEffect(() => {
-    if (!project || !PROCESSING_STATUSES.includes(project.status)) return;
+    if (!project || !PROCESSING_STATUSES.has(project.status)) return;
     if (pollErrorCount >= 3) return; // Stop polling after 3 consecutive errors
     const interval = setInterval(fetchProject, 5000);
     return () => clearInterval(interval);
@@ -395,10 +396,10 @@ export default function DealDetailPage() {
     );
   }
 
-  const isProcessing = PROCESSING_STATUSES.includes(project.status);
+  const isProcessing = PROCESSING_STATUSES.has(project.status);
   const isComplete = project.status === "COMPLETE";
   const canGenerate =
-    project.status === "CREATED" || project.status === "ERROR";
+    project.status === "CREATED" || project.status === "ERROR" || project.status === "NEEDS_REVIEW";
   const statusConf = STATUS_CONFIG[project.status] ?? {
     label: project.status,
     variant: "outline" as const,

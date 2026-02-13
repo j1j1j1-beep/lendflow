@@ -62,10 +62,12 @@ function formatCurrency(value: string | null): string {
   }).format(num);
 }
 
+// M12: Standardized short date format (e.g., "Feb 12, 2026")
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
+    year: "numeric",
   });
 }
 
@@ -95,11 +97,12 @@ export function DealCard({ deal }: DealCardProps) {
         <CardContent className="pt-0">
           <div className="flex items-start justify-between mb-3">
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors duration-150">
+              {/* L3: Title attribute for truncated borrower name */}
+              <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors duration-150" title={deal.borrowerName}>
                 {deal.borrowerName}
               </h3>
               {deal.loanType && (
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5" title={formatLoanType(deal.loanType)}>
                   {formatLoanType(deal.loanType)}
                 </p>
               )}

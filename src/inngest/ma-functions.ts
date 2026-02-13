@@ -11,6 +11,9 @@ import { generateMADoc } from "@/documents/deals/generate-doc";
 import { MA_DOC_TYPES, MA_DOC_TYPE_LABELS } from "@/documents/deals/types";
 import type { MAProjectFull } from "@/documents/deals/types";
 
+const DOCX_CONTENT_TYPE =
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
 /** Wrap a promise with a timeout. Throws a descriptive error on timeout. */
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -83,9 +86,10 @@ export const maGenerateDocs = inngest.createFunction(
         }
       });
 
-      // Generate each document type in its own step
+      // Generate each document type in its own step (with per-doc error handling)
       for (const docType of MA_DOC_TYPES) {
         lastStep = docType;
+        const label = MA_DOC_TYPE_LABELS[docType] ?? docType;
 
         await step.run(`generate-${docType}`, async () => {
           // Reload project for each step to get latest data
@@ -94,51 +98,91 @@ export const maGenerateDocs = inngest.createFunction(
             include: { maDocuments: true },
           }) as unknown as MAProjectFull;
 
-          // AI docs get a longer timeout; deterministic docs are fast
-          const isAIDoc = !["due_diligence_checklist", "closing_checklist"].includes(docType);
-          const timeoutMs = isAIDoc ? 180_000 : 30_000; // 3 min for AI, 30s for deterministic
-
-          const { buffer, complianceChecks, resolvedDocType } = await withTimeout(
-            generateMADoc(currentProject, docType),
-            timeoutMs,
-            `generate-${docType}`,
-          );
-
-          // Determine version (increment if doc already exists)
-          const existing = currentProject.maDocuments.filter(
-            (d) => d.docType === resolvedDocType,
-          );
-          const version = existing.length > 0
-            ? Math.max(...existing.map((d) => d.version)) + 1
-            : 1;
-
-          // Upload to S3
-          const s3Key = `ma/${projectId}/${resolvedDocType}-v${version}.docx`;
-          await uploadToS3(s3Key, buffer, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-
-          // Determine compliance status
-          const hasFailedChecks = complianceChecks.some((c) => !c.passed);
-          const complianceStatus = complianceChecks.length === 0
-            ? "PENDING"
-            : hasFailedChecks
-              ? "FLAGGED"
-              : "PASSED";
-
-          // Save document record (version is always max+1, so always a new record)
-          await prisma.mADocument.create({
-            data: {
-              projectId,
-              docType: resolvedDocType,
-              s3Key,
-              version,
-              status: "REVIEWED",
-              complianceStatus,
-              complianceIssues: complianceChecks.length > 0 ? JSON.parse(JSON.stringify(complianceChecks)) : undefined,
-              verificationStatus: "PASSED",
-            },
+          // Determine version (increment if doc already exists for this type)
+          const existingDoc = await prisma.mADocument.findFirst({
+            where: { projectId, docType },
+            orderBy: { version: "desc" },
           });
+          const version = existingDoc ? existingDoc.version + 1 : 1;
 
-          generatedDocs.push(resolvedDocType);
+          try {
+            // AI docs get a longer timeout; deterministic docs are fast
+            const isAIDoc = !["due_diligence_checklist", "closing_checklist"].includes(docType);
+            const timeoutMs = isAIDoc ? 180_000 : 30_000; // 3 min for AI, 30s for deterministic
+
+            const { buffer, complianceChecks, resolvedDocType } = await withTimeout(
+              generateMADoc(currentProject, docType),
+              timeoutMs,
+              `generate-${docType}`,
+            );
+
+            // Upload to S3
+            const s3Key = `ma/${projectId}/${resolvedDocType}-v${version}.docx`;
+            await uploadToS3(s3Key, buffer, DOCX_CONTENT_TYPE);
+
+            // Determine compliance status
+            const hasFailedChecks = complianceChecks.some((c) => !c.passed);
+            const complianceStatus = complianceChecks.length === 0
+              ? "PENDING"
+              : hasFailedChecks
+                ? "FLAGGED"
+                : "PASSED";
+
+            // Save document record
+            await prisma.mADocument.create({
+              data: {
+                projectId,
+                docType: resolvedDocType,
+                s3Key,
+                version,
+                status: "DRAFT",
+                complianceStatus,
+                complianceIssues: complianceChecks.length > 0 ? JSON.parse(JSON.stringify(complianceChecks)) : undefined,
+                verificationStatus: "PASSED",
+              },
+            });
+
+            generatedDocs.push(resolvedDocType);
+            console.log(
+              `[M&A] ${label} v${version} generated — ${complianceChecks.filter((c) => c.passed).length}/${complianceChecks.length} checks passed`,
+            );
+          } catch (error) {
+            console.error(`[M&A] Failed to generate ${label}:`, error);
+
+            // Create error placeholder so the pipeline continues
+            const { Packer } = await import("docx");
+            const { buildLegalDocument, documentTitle, bodyText } = await import("@/documents/doc-helpers");
+            const errorDoc = buildLegalDocument({
+              title: "Generation Error",
+              children: [
+                documentTitle("Document Generation Error"),
+                bodyText(`The ${label} could not be generated.`),
+                bodyText(`Error: ${error instanceof Error ? error.message.slice(0, 200) : "Unknown error"}`),
+                bodyText("Please retry generation or create this document manually."),
+              ],
+            });
+            const errorBuffer = await Packer.toBuffer(errorDoc) as Buffer;
+            const s3Key = `ma/${projectId}/${docType}-v${version}.docx`;
+            await uploadToS3(s3Key, errorBuffer, DOCX_CONTENT_TYPE);
+
+            await prisma.mADocument.create({
+              data: {
+                projectId,
+                docType,
+                s3Key,
+                version,
+                status: "DRAFT",
+                complianceStatus: "FLAGGED",
+                complianceIssues: [{
+                  severity: "critical",
+                  section: "generation",
+                  description: `Document generation failed: ${error instanceof Error ? error.message.slice(0, 200) : "Unknown error"}`,
+                  recommendation: "Retry generation or create document manually",
+                }] as any,
+                verificationStatus: "FAILED",
+              },
+            });
+          }
         });
       }
 

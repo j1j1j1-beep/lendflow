@@ -109,13 +109,6 @@ export const complianceGenerateDocs = inngest.createFunction(
           },
         }) as unknown as ComplianceProjectFull;
 
-        // Generate the document (all compliance docs use AI — 180s timeout)
-        const { buffer, complianceChecks } = await withTimeout(
-          generateComplianceDoc(freshProject, docType),
-          180_000,
-          `generate-${docType}`,
-        );
-
         // Determine version (increment if doc already exists)
         const existing = await prisma.complianceDocument.findFirst({
           where: { projectId, docType },
@@ -123,39 +116,93 @@ export const complianceGenerateDocs = inngest.createFunction(
         });
         const version = existing ? existing.version + 1 : 1;
 
-        // Upload to S3
-        const s3Key = `compliance/${projectId}/${docType}-v${version}.docx`;
-        await uploadToS3(s3Key, buffer, DOCX_CONTENT_TYPE);
+        try {
+          // Generate the document (all compliance docs use AI — 180s timeout)
+          const { buffer, complianceChecks } = await withTimeout(
+            generateComplianceDoc(freshProject, docType),
+            180_000,
+            `generate-${docType}`,
+          );
 
-        // Determine compliance status
-        const allPassed = complianceChecks.every((c) => c.passed);
-        const hasCriticalFailure = complianceChecks.some(
-          (c) => !c.passed && (c.category === "irs" || c.category === "sec" || c.category === "regulatory"),
-        );
+          // Upload to S3
+          const s3Key = `compliance/${projectId}/${docType}-v${version}.docx`;
+          await uploadToS3(s3Key, buffer, DOCX_CONTENT_TYPE);
 
-        // Save document record
-        await prisma.complianceDocument.create({
-          data: {
-            projectId,
-            docType,
-            s3Key,
-            version,
-            status: "DRAFT",
-            complianceStatus: hasCriticalFailure
-              ? "FLAGGED"
-              : allPassed
-                ? "PASSED"
-                : "PENDING",
-            complianceIssues: complianceChecks.length > 0 ? complianceChecks as any : undefined,
-          },
-        });
+          // Determine compliance status
+          const allPassed = complianceChecks.every((c) => c.passed);
+          const hasCriticalFailure = complianceChecks.some(
+            (c) => !c.passed && (c.category === "irs" || c.category === "sec" || c.category === "regulatory"),
+          );
 
-        console.log(
-          `[Compliance] ${label} v${version} generated — ${complianceChecks.filter((c) => c.passed).length}/${complianceChecks.length} checks passed`,
-        );
+          // Save document record
+          await prisma.complianceDocument.create({
+            data: {
+              projectId,
+              docType,
+              s3Key,
+              version,
+              status: "DRAFT",
+              complianceStatus: hasCriticalFailure
+                ? "FLAGGED"
+                : allPassed
+                  ? "PASSED"
+                  : "PENDING",
+              complianceIssues: complianceChecks.length > 0 ? complianceChecks as any : undefined,
+            },
+          });
+
+          console.log(
+            `[Compliance] ${label} v${version} generated — ${complianceChecks.filter((c) => c.passed).length}/${complianceChecks.length} checks passed`,
+          );
+        } catch (error) {
+          console.error(`[Compliance] Failed to generate ${label}:`, error);
+
+          // Create error placeholder so the pipeline continues
+          const { Packer } = await import("docx");
+          const { buildLegalDocument, documentTitle, bodyText } = await import("@/documents/doc-helpers");
+          const errorDoc = buildLegalDocument({
+            title: "Generation Error",
+            children: [
+              documentTitle("Document Generation Error"),
+              bodyText(`The ${label} could not be generated.`),
+              bodyText(`Error: ${error instanceof Error ? error.message.slice(0, 200) : "Unknown error"}`),
+              bodyText("Please retry generation or create this document manually."),
+            ],
+          });
+          const errorBuffer = await Packer.toBuffer(errorDoc) as Buffer;
+          const s3Key = `compliance/${projectId}/${docType}-v${version}.docx`;
+          await uploadToS3(s3Key, errorBuffer, DOCX_CONTENT_TYPE);
+
+          await prisma.complianceDocument.create({
+            data: {
+              projectId,
+              docType,
+              s3Key,
+              version,
+              status: "DRAFT",
+              complianceStatus: "FLAGGED",
+              complianceIssues: [{
+                severity: "critical",
+                section: "generation",
+                description: `Document generation failed: ${error instanceof Error ? error.message.slice(0, 200) : "Unknown error"}`,
+                recommendation: "Retry generation or create document manually",
+              }] as any,
+              verificationStatus: "FAILED",
+            },
+          });
+        }
       });
 
-      // Step 5: Update project status to COMPLETE
+      // Step 5: Update status to COMPLIANCE_REVIEW before running checks
+      lastStep = "compliance-review";
+      await step.run("update-status-compliance-review", async () => {
+        await prisma.complianceProject.update({
+          where: { id: projectId },
+          data: { status: "COMPLIANCE_REVIEW" },
+        });
+      });
+
+      // Step 6: Update project status to COMPLETE
       lastStep = "complete";
       await step.run("update-status-complete", async () => {
         // Check if the generated doc has compliance issues

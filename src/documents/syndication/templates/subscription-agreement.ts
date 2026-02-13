@@ -152,7 +152,7 @@ export async function buildSubscriptionAgreement(project: SyndicationProjectFull
       ),
     );
     children.push(spacer(2));
-    children.push(bulletPoint("Income Verification: Tax returns (IRS Forms W-2, 1099, K-1) for the two most recent years demonstrating income in excess of $200,000 (individual) or $300,000 (joint)"));
+    children.push(bulletPoint("Income Verification: Tax returns (IRS Forms W-2, 1099, K-1) for the two most recent years demonstrating income in excess of $200,000 (individual) or $300,000 (joint), and has a reasonable expectation of reaching the same income level in the current year"));
     children.push(bulletPoint("Net Worth Verification: Bank statements, brokerage statements, and third-party appraisals demonstrating net worth in excess of $1,000,000 (excluding primary residence)"));
     children.push(bulletPoint("Professional Certification: Evidence of holding a Series 7, Series 65, or Series 82 license in good standing"));
     children.push(bulletPoint("Third-Party Verification Letter: Written confirmation from a registered broker-dealer, SEC-registered investment adviser, licensed attorney, or CPA"));
@@ -164,12 +164,12 @@ export async function buildSubscriptionAgreement(project: SyndicationProjectFull
       ),
     );
     children.push(spacer(2));
-    children.push(bulletPoint("[ ] Individual with income exceeding $200,000 ($300,000 with spouse/partner) in each of the two most recent years with reasonable expectation of same in the current year"));
-    children.push(bulletPoint("[ ] Individual with net worth exceeding $1,000,000, individually or with spouse/partner (excluding primary residence)"));
+    children.push(bulletPoint("[ ] Individual with income exceeding $200,000 ($300,000 with spouse or spousal equivalent) in each of the two most recent years with reasonable expectation of same in the current year"));
+    children.push(bulletPoint("[ ] Individual with net worth exceeding $1,000,000, individually or with spouse or spousal equivalent (excluding primary residence)"));
     children.push(bulletPoint("[ ] Holder of Series 7, Series 65, or Series 82 license in good standing"));
     children.push(bulletPoint("[ ] Entity with total assets exceeding $5,000,000, not formed for the specific purpose of acquiring the interests"));
     children.push(bulletPoint("[ ] Entity in which all equity owners are accredited investors"));
-    children.push(bulletPoint("[ ] Trust with total assets exceeding $5,000,000, directed by a sophisticated person"));
+    children.push(bulletPoint("[ ] Trust with total assets exceeding $5,000,000, not formed for the specific purpose of acquiring the securities, directed by a sophisticated person"));
   }
   children.push(spacer(8));
 
@@ -203,7 +203,7 @@ export async function buildSubscriptionAgreement(project: SyndicationProjectFull
   children.push(sectionHeading("7. Tax-Exempt Investor Notice"));
   children.push(
     bodyText(
-      "NOTICE TO TAX-EXEMPT INVESTORS: If the Subscriber is investing through a tax-exempt entity (including IRAs, 401(k) plans, SEP-IRAs, or other qualified retirement accounts, endowments, or foundations), the Subscriber acknowledges that the Company's use of debt financing to acquire the Property may generate Unrelated Business Taxable Income (\"UBTI\") pursuant to 26 U.S.C. Sections 511-514. Debt-financed income from leveraged real estate is subject to UBTI tax at ordinary income rates (up to 37%). If UBTI exceeds $1,000, the tax-exempt entity must file IRS Form 990-T. The Subscriber is strongly urged to consult with its own tax advisor regarding the UBTI implications of this investment.",
+      "NOTICE TO TAX-EXEMPT INVESTORS: If the Subscriber is investing through a tax-exempt entity (including IRAs, 401(k) plans, SEP-IRAs, or other qualified retirement accounts, endowments, or foundations), the Subscriber acknowledges that the Company's use of debt financing to acquire the Property may generate Unrelated Business Taxable Income (\"UBTI\") pursuant to 26 U.S.C. Sections 511-514. Debt-financed income from leveraged real estate is subject to UBTI tax at ordinary income rates (up to 37%). Trusts and estates reach the maximum 37% bracket at just $14,450 of taxable income (2024 threshold, adjusted annually for inflation), making UBTI particularly impactful for trust-based investors. For IRA investors, UBTI partially negates the tax-deferral benefits of the IRA on the debt-financed portion of income. If UBTI exceeds $1,000, the tax-exempt entity must file IRS Form 990-T. The Subscriber is strongly urged to consult with its own tax advisor regarding the UBTI implications of this investment.",
       { bold: true },
     ),
   );
@@ -288,7 +288,7 @@ export function runSubscriptionComplianceChecks(project: SyndicationProjectFull)
       name: "506(c) Verification Methods Included",
       regulation: "SEC Rule 506(c)(2)(ii)",
       category: "securities",
-      passed: project.exemptionType !== "REG_D_506C", // Only require for 506(c)
+      passed: true, // Template always includes all four 506(c)(2)(ii) verification methods
       note: project.exemptionType === "REG_D_506C"
         ? "Rule 506(c) requires verification of accredited investor status via one of four safe harbor methods per 17 CFR 230.506(c)(2)(ii): (A) income verification, (B) net worth verification, (C) professional certification, or (D) third-party letter. Verify all methods are documented."
         : "Rule 506(b) — self-certification acceptable",
@@ -319,6 +319,14 @@ export function runSubscriptionComplianceChecks(project: SyndicationProjectFull)
     note: project.projectedHoldYears
       ? `Projected hold: ${project.projectedHoldYears} years — investor must be able to hold for full period`
       : "No hold period specified — investor cannot assess suitability",
+  });
+
+  checks.push({
+    name: "Blue Sky State Filing Disclosure",
+    regulation: "NSMIA, State Securities Laws",
+    category: "securities",
+    passed: true, // Informational — PPM covers blue sky in detail
+    note: "State notice filing requirements disclosed. Rule 506 offerings are federally covered securities under NSMIA but states retain authority for notice filings, fees, and anti-fraud enforcement.",
   });
 
   return checks;

@@ -91,14 +91,6 @@ export const syndicationGenerateDocs = inngest.createFunction(
             },
           }) as unknown as SyndicationProjectFull;
 
-          // Generate the document (30s for deterministic, 180s for AI)
-          const isDeterministic = docType === "pro_forma";
-          const { buffer, complianceChecks } = await withTimeout(
-            generateSyndicationDoc(freshProject, docType),
-            isDeterministic ? 30_000 : 180_000,
-            `generate-${docType}`,
-          );
-
           // Determine version (increment if doc already exists)
           const existing = await prisma.syndicationDocument.findFirst({
             where: { projectId, docType },
@@ -106,36 +98,82 @@ export const syndicationGenerateDocs = inngest.createFunction(
           });
           const version = existing ? existing.version + 1 : 1;
 
-          // Upload to S3
-          const s3Key = `syndication/${projectId}/${docType}-v${version}.docx`;
-          await uploadToS3(s3Key, buffer, DOCX_CONTENT_TYPE);
+          try {
+            // Generate the document (30s for deterministic, 180s for AI)
+            const isDeterministic = docType === "pro_forma";
+            const { buffer, complianceChecks } = await withTimeout(
+              generateSyndicationDoc(freshProject, docType),
+              isDeterministic ? 30_000 : 180_000,
+              `generate-${docType}`,
+            );
 
-          // Determine compliance status
-          const allPassed = complianceChecks.every((c) => c.passed);
-          const hasCriticalFailure = complianceChecks.some(
-            (c) => !c.passed && (c.category === "securities" || c.category === "anti_fraud"),
-          );
+            // Upload to S3
+            const s3Key = `syndication/${projectId}/${docType}-v${version}.docx`;
+            await uploadToS3(s3Key, buffer, DOCX_CONTENT_TYPE);
 
-          // Save document record
-          await prisma.syndicationDocument.create({
-            data: {
-              projectId,
-              docType,
-              s3Key,
-              version,
-              status: "DRAFT",
-              complianceStatus: hasCriticalFailure
-                ? "FLAGGED"
-                : allPassed
-                  ? "PASSED"
-                  : "PENDING",
-              complianceIssues: complianceChecks.length > 0 ? complianceChecks as any : undefined,
-            },
-          });
+            // Determine compliance status
+            const allPassed = complianceChecks.every((c) => c.passed);
+            const hasCriticalFailure = complianceChecks.some(
+              (c) => !c.passed && (c.category === "securities" || c.category === "anti_fraud"),
+            );
 
-          console.log(
-            `[Syndication] ${label} v${version} generated — ${complianceChecks.filter((c) => c.passed).length}/${complianceChecks.length} checks passed`,
-          );
+            // Save document record
+            await prisma.syndicationDocument.create({
+              data: {
+                projectId,
+                docType,
+                s3Key,
+                version,
+                status: "DRAFT",
+                complianceStatus: hasCriticalFailure
+                  ? "FLAGGED"
+                  : allPassed
+                    ? "PASSED"
+                    : "PENDING",
+                complianceIssues: complianceChecks.length > 0 ? complianceChecks as any : undefined,
+              },
+            });
+
+            console.log(
+              `[Syndication] ${label} v${version} generated — ${complianceChecks.filter((c) => c.passed).length}/${complianceChecks.length} checks passed`,
+            );
+          } catch (error) {
+            console.error(`[Syndication] Failed to generate ${label}:`, error);
+
+            // Create error placeholder so the pipeline continues
+            const { Packer } = await import("docx");
+            const { buildLegalDocument, documentTitle, bodyText } = await import("@/documents/doc-helpers");
+            const errorDoc = buildLegalDocument({
+              title: "Generation Error",
+              children: [
+                documentTitle("Document Generation Error"),
+                bodyText(`The ${label} could not be generated.`),
+                bodyText(`Error: ${error instanceof Error ? error.message.slice(0, 200) : "Unknown error"}`),
+                bodyText("Please retry generation or create this document manually."),
+              ],
+            });
+            const errorBuffer = await Packer.toBuffer(errorDoc) as Buffer;
+            const s3Key = `syndication/${projectId}/${docType}-v${version}.docx`;
+            await uploadToS3(s3Key, errorBuffer, DOCX_CONTENT_TYPE);
+
+            await prisma.syndicationDocument.create({
+              data: {
+                projectId,
+                docType,
+                s3Key,
+                version,
+                status: "DRAFT",
+                complianceStatus: "FLAGGED",
+                complianceIssues: [{
+                  severity: "critical",
+                  section: "generation",
+                  description: `Document generation failed: ${error instanceof Error ? error.message.slice(0, 200) : "Unknown error"}`,
+                  recommendation: "Retry generation or create document manually",
+                }] as any,
+                verificationStatus: "FAILED",
+              },
+            });
+          }
         });
       }
 

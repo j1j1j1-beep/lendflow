@@ -99,6 +99,18 @@ export type AuditAction =
   | "compliance.doc.downloaded"
   | "compliance.doc.package_downloaded";
 
+/**
+ * Extract client IP address from request headers.
+ * Checks x-forwarded-for (set by load balancers/proxies) first,
+ * then x-real-ip, falling back to 'unknown'.
+ */
+export function extractIpAddress(request?: Request | null): string {
+  if (!request) return "unknown";
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0].trim();
+  return request.headers.get("x-real-ip") ?? "unknown";
+}
+
 export async function logAudit(params: {
   orgId: string;
   userId?: string;
@@ -110,11 +122,19 @@ export async function logAudit(params: {
   action: AuditAction;
   target?: string;
   metadata?: Record<string, unknown>;
+  request?: Request | null; // Optional request for IP extraction
 }) {
   try {
     // Map programId to entityType/entityId for bio module audit logs
     const entityType = params.entityType ?? (params.programId ? "bio" : null);
     const entityId = params.entityId ?? params.programId ?? null;
+    const ipAddress = extractIpAddress(params.request);
+
+    // Merge IP into metadata
+    const metadataWithIp: Record<string, unknown> = {
+      ...(params.metadata ?? {}),
+      ipAddress,
+    };
 
     await prisma.auditLog.create({
       data: {
@@ -126,9 +146,7 @@ export async function logAudit(params: {
         entityId,
         action: params.action,
         target: params.target ?? null,
-        metadata: params.metadata
-          ? (params.metadata as Prisma.InputJsonValue)
-          : Prisma.JsonNull,
+        metadata: metadataWithIp as Prisma.InputJsonValue,
       },
     });
   } catch (error) {

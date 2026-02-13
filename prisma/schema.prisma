@@ -175,6 +175,8 @@ model Document {
   ocrText        String?        @db.Text
   extractions    Extraction[]
   createdAt      DateTime       @default(now())
+
+  @@index([dealId])
 }
 
 enum DocType {
@@ -220,6 +222,8 @@ model Extraction {
   tokensUsed       Int      @default(0)
   costUsd          Float    @default(0)
   createdAt        DateTime @default(now())
+
+  @@index([documentId])
 }
 
 // Verification
@@ -266,6 +270,9 @@ model ReviewItem {
   resolvedBy     String?
   resolvedAt     DateTime?
   createdAt      DateTime     @default(now())
+
+  @@index([dealId])
+  @@index([documentId])
 }
 
 enum ReviewStatus {
@@ -434,6 +441,8 @@ model GeneratedDocument {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([dealId])
 }
 
 // Conditions (Pre-closing checklist)
@@ -571,6 +580,10 @@ model CapitalProject {
   exemptionType   ExemptionType        @default(REG_D_506B)
   icaExemption    ICAExemption         @default(SECTION_3C1)
 
+  // ERISA — VCOC/REOC elections (avoid "plan asset" status)
+  vcocElection    Boolean              @default(false)
+  reocElection    Boolean              @default(false)
+
   // Economics
   targetRaise     Decimal?             @db.Decimal(18, 2)
   minInvestment   Decimal?             @db.Decimal(18, 2)
@@ -611,6 +624,11 @@ model CapitalProject {
 
   // Clawback
   clawbackProvision   Boolean         @default(false)
+
+  // Beneficial Ownership Information (BOI) — Corporate Transparency Act
+  boiFilingDate           DateTime?
+  boiExemptionClaimed     Boolean         @default(false)
+  boiExemptionType        String?
 
   // Audit fields
   updatedBy          String?
@@ -685,6 +703,7 @@ model CapitalInvestor {
 
   @@index([projectId])
   @@index([projectId, accreditationStatus])
+  @@unique([projectId, investorName])
 }
 
 // ──────────────────────────────────────────────
@@ -780,6 +799,16 @@ model MAProject {
 
   // Regulatory approvals
   requiredApprovals   Json?
+
+  // CFIUS — Committee on Foreign Investment in the United States
+  cfiusFiling           Boolean         @default(false)
+  cfiusFilingDate       DateTime?
+  cfiusApprovalDate     DateTime?
+  isTIDUSBusiness       Boolean         @default(false) // TID (Technology, Infrastructure, Data) US Business
+
+  // Breakup / termination fee
+  breakupFeeAmount      Decimal?        @db.Decimal(18, 2)
+  breakupFeePercent     Float?
 
   // Employee matters
   keyEmployeeRetention   Boolean      @default(false)
@@ -928,6 +957,18 @@ model SyndicationProject {
   passiveLossEligible  Boolean         @default(true)
   repsQualified        Boolean         @default(false)
 
+  // QOZ detail fields (Opportunity Zones — 26 U.S.C. § 1400Z-2)
+  qozCertificationDate             DateTime?
+  qozNinetyPercentTestDate         DateTime?
+  qozSubstantialImprovementDeadline DateTime?
+  qozTenYearHoldDate               DateTime?
+
+  // 1031 Exchange detail fields (26 U.S.C. § 1031)
+  exchange1031IdentificationDeadline DateTime?
+  exchange1031ExchangeDeadline       DateTime?
+  exchange1031QualifiedIntermediary  String?
+  exchange1031RelinquishedPropertyId String?
+
   // Form D / Blue Sky
   formDFilingDate      DateTime?
   blueSkyFilings       Json?
@@ -1038,6 +1079,7 @@ model SyndicationInvestor {
 
   @@index([projectId])
   @@index([projectId, accreditationStatus])
+  @@unique([projectId, investorName])
 }
 
 model SyndicationDistribution {
@@ -1287,7 +1329,7 @@ model BioProgram {
   target      String?          // e.g. "Nectin-4"
   mechanism   String?          // e.g. "ADC targeting Nectin-4 expressing solid tumors"
   indication  String?          // e.g. "Urothelial carcinoma, solid tumors"
-  phase       DrugPhase?       // PRECLINICAL → APPROVED
+  phase       DrugPhase        @default(PHASE_1) // PRECLINICAL → APPROVED
 
   // ADC-specific (nullable — only populated for ADC drugClass)
   antibodyType String?         // e.g. "Humanized IgG1"
@@ -1550,6 +1592,9 @@ model BioGeneratedDocument {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([programId])
+  @@unique([programId, docType, version])
 }
 
 model BioCondition {

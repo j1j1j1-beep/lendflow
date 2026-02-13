@@ -294,7 +294,13 @@ export async function buildFormADVSummary(project: ComplianceProjectFull): Promi
   children.push(
     bodyText(
       "Form PF filing: Private fund advisers with assets under management of $150 million or more " +
-      "in private equity are required to file Form PF with the SEC (17 CFR 279.9).",
+      "in private equity are required to file Form PF annually with the SEC (17 CFR 279.9). " +
+      "Large private fund advisers ($1.5B+ in AUM) must file Form PF quarterly (within 60 days " +
+      "of quarter-end). Advisers with $1.5B+ in any qualifying hedge fund must file within 15 days " +
+      "of quarter-end. Current reporting events require filing within 72 hours (SEC Rule 204(b)-1, " +
+      "as amended 2024) for significant events such as extraordinary investment losses, large " +
+      "redemptions, margin events, significant counterparty defaults, or material changes in " +
+      "prime broker relationships.",
     ),
   );
   children.push(spacer(4));
@@ -304,6 +310,28 @@ export async function buildFormADVSummary(project: ComplianceProjectFull): Promi
       "SEC Marketing Rule (Rule 206(4)-1): The adviser's advertising and marketing materials " +
       "comply with the SEC's marketing rule, which governs the use of testimonials, endorsements, " +
       "and performance presentation.",
+    ),
+  );
+  children.push(spacer(4));
+
+  children.push(
+    bodyText(
+      "Form ADV Part 2B (Brochure Supplement): In addition to Part 2A, investment advisers are required " +
+      "to prepare and deliver a Brochure Supplement (Part 2B) for each supervised person who provides " +
+      "investment advice to clients and has direct client contact. Part 2B must include the supervised " +
+      "person's education, business background, disciplinary history, other business activities, " +
+      "additional compensation, and supervision details. Delivery is required before or at the time " +
+      "the supervised person begins providing advisory services to the client (17 CFR 275.204-3).",
+    ),
+  );
+
+  children.push(spacer(4));
+  children.push(
+    bodyText(
+      "Form ADV Part 1: Registered investment advisers must file an annual amendment to Form ADV Part 1 " +
+      "within 90 days of fiscal year-end. Other-than-annual amendments are required promptly for any " +
+      "material changes (e.g., changes to disciplinary information, advisory activities, or financial " +
+      "condition). Part 1 is filed electronically through the IARD system.",
     ),
   );
   children.push(spacer(8));
@@ -336,7 +364,7 @@ export async function buildFormADVSummary(project: ComplianceProjectFull): Promi
           "17 CFR 275.204-3",
         ],
       ],
-      { alternateRows: true },
+      { columnWidths: [30, 40, 30], alternateRows: true },
     ),
   );
   children.push(spacer(8));
@@ -364,6 +392,8 @@ export async function buildFormADVSummary(project: ComplianceProjectFull): Promi
 export function runFormADVComplianceChecks(project: ComplianceProjectFull): ComplianceCheck[] {
   const checks: ComplianceCheck[] = [];
 
+  // Note: Form PF thresholds are based on firm-wide regulatory AUM, not individual fund size.
+  // Multi-fund advisers should aggregate all fund AUM for threshold determination.
   const fundSize = safeNumber(project.fundSize);
 
   // SEC registration threshold
@@ -382,12 +412,14 @@ export function runFormADVComplianceChecks(project: ComplianceProjectFull): Comp
   // Form PF requirement
   checks.push({
     name: "Form PF Filing Requirement",
-    regulation: "17 CFR 279.9 — Private Fund Advisers with AUM >= $150M in PE",
+    regulation: "17 CFR 279.9 — Private Fund Advisers with AUM >= $150M in PE (annual), >= $1.5B (quarterly)",
     category: "sec",
     passed: true, // Informational check
-    note: fundSize >= 150_000_000
-      ? `AUM (${formatCurrency(fundSize)}) exceeds $150M — Form PF filing likely required`
-      : "Form PF filing may not be required based on current AUM",
+    note: fundSize >= 1_500_000_000
+      ? `AUM (${formatCurrency(fundSize)}) exceeds $1.5B — quarterly Form PF filing required, plus 72-hour current event reporting`
+      : fundSize >= 150_000_000
+        ? `AUM (${formatCurrency(fundSize)}) exceeds $150M — annual Form PF filing likely required`
+        : "Form PF filing may not be required based on current AUM",
   });
 
   // Plain English requirement

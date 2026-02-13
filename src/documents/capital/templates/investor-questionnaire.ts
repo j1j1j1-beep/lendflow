@@ -37,10 +37,10 @@ This questionnaire must verify investor eligibility. Include:
 
 FOR ALL OFFERINGS:
 1. All accredited investor criteria from 17 CFR 230.501(a) (thresholds current as of 2020 amendments):
-   - Individual: $200K/$300K income, $1M net worth (excl. primary residence), Series 7/65/82/CFA, knowledgeable employee
+   - Individual: $200K/$300K income, $1M net worth (excl. primary residence), Series 7/65/82 (per Rule 501(a)(10)), knowledgeable employee
    - Entity: $5M assets (not formed to acquire these securities), all equity owners accredited, bank/insurance/RIA/BDC/SBIC, ERISA plan with $5M+ or directed by bank/adviser
    - Family office with $5M+ AUM
-   NOTE: Thresholds reviewed and confirmed accurate as of 2020 SEC amendments to Regulation D Rule 501(a). Monitor for future updates.
+   NOTE: Thresholds reviewed and confirmed accurate as of 2026. Criteria reflect the 2020 SEC amendments to Regulation D Rule 501(a) and subsequent guidance. Monitor for future updates.
 
 ${is506c ? `FOR 506(c) OFFERINGS:
 2. Verification mechanism per 17 CFR 230.506(c)(2)(ii):
@@ -149,9 +149,9 @@ export async function buildInvestorQuestionnaire(project: CapitalProjectFull): P
   children.push(spacer(2));
   children.push(bulletPoint("[ ] NET WORTH TEST: My individual net worth (or joint net worth with my spouse/spousal equivalent) exceeds $1,000,000, excluding the value of my primary residence."));
   children.push(spacer(2));
-  children.push(bulletPoint("[ ] PROFESSIONAL CERTIFICATION: I am a natural person holding one or more of the following licenses in good standing: Series 7, Series 65, Series 82, or I hold a current Chartered Financial Analyst (CFA) designation."));
+  children.push(bulletPoint("[ ] PROFESSIONAL CERTIFICATION: I am a natural person holding one or more of the following SEC-designated licenses in good standing: Series 7 (General Securities Representative), Series 65 (Uniform Investment Adviser Law), or Series 82 (Private Securities Offerings Representative), as specified in Rule 501(a)(10)."));
   children.push(spacer(2));
-  children.push(bulletPoint("[ ] KNOWLEDGEABLE EMPLOYEE: I am a director, executive officer, or a person who serves on the advisory committee of the Fund, or I am an employee of the General Partner who has participated in the investment activities of the Fund or similar funds for at least 12 months (17 CFR 270.3c-5(a)(4))."));
+  children.push(bulletPoint("[ ] KNOWLEDGEABLE EMPLOYEE: I am a director, executive officer, or general partner of the Fund or the Fund's investment manager, or I am an employee of the Fund's investment manager who has participated in the investment activities of the Fund or substantially similar funds for at least 12 months (17 CFR 270.3c-5(a)(4))."));
   children.push(spacer(2));
   children.push(bulletPoint("[ ] FAMILY OFFICE: I am a natural person whose investment in the Fund is directed by a family office (as defined in Rule 202(a)(11)(G)-1 under the Investment Advisers Act) with at least $5,000,000 in assets under management."));
   children.push(spacer(8));
@@ -228,7 +228,6 @@ export async function buildInvestorQuestionnaire(project: CapitalProjectFull): P
     children.push(bulletPoint("Series 7 — FINRA General Securities Representative License"));
     children.push(bulletPoint("Series 65 — NASAA Uniform Investment Adviser Law License"));
     children.push(bulletPoint("Series 82 — FINRA Private Securities Offerings Representative License"));
-    children.push(bulletPoint("CFA — Chartered Financial Analyst designation (CFA Institute)"));
     children.push(bodyText("License/Certification Number: _________________________________"));
     children.push(bodyText(prose.professionalVerification, { indent: 0.25 }));
     children.push(spacer(4));
@@ -309,7 +308,7 @@ export function runQuestionnaireComplianceChecks(project: CapitalProjectFull): C
     regulation: "17 CFR 230.501(a)",
     category: "investor_protection",
     passed: true,
-    note: "All individual accredited investor criteria included: income ($200K/$300K), net worth ($1M excl. primary residence), professional certifications (Series 7/65/82, CFA), knowledgeable employee, family office.",
+    note: "All individual accredited investor criteria included: income ($200K/$300K), net worth ($1M excl. primary residence), professional certifications (Series 7/65/82 per Rule 501(a)(10)), knowledgeable employee, family office.",
   });
 
   checks.push({

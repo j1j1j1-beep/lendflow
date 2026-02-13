@@ -35,6 +35,8 @@ export function buildProjectContext(project: SyndicationProjectFull): string {
   const currentNoi = project.currentNoi ? Number(project.currentNoi) : 0;
   const proFormaNoi = project.proFormaNoi ? Number(project.proFormaNoi) : 0;
   const totalCost = purchasePrice + renovationBudget + closingCosts;
+  // NOTE: LTV is calculated against purchase price (standard for stabilized acquisitions).
+  // For value-add deals, consider LTC (Loan-to-Cost) = loanAmount / totalCost as a complementary metric.
   const ltv = purchasePrice > 0 ? loanAmount / purchasePrice : 0;
   const capRate = purchasePrice > 0 ? currentNoi / purchasePrice : 0;
   const proFormaCapRate = purchasePrice > 0 ? proFormaNoi / purchasePrice : 0;
@@ -42,7 +44,7 @@ export function buildProjectContext(project: SyndicationProjectFull): string {
   // Waterfall tiers
   const waterfallBlock = project.waterfallTiers.length > 0
     ? project.waterfallTiers
-        .sort((a, b) => a.tierOrder - b.tierOrder)
+        .sort((a, b) => (a.tierOrder ?? 0) - (b.tierOrder ?? 0))
         .map((t) =>
           `  Tier ${t.tierOrder}: ${t.tierName ?? "Unnamed"} — Hurdle: ${t.hurdleRate != null ? (t.hurdleRate * 100).toFixed(1) + "%" : "N/A"}, LP: ${(t.lpSplit * 100).toFixed(0)}%, GP: ${(t.gpSplit * 100).toFixed(0)}%${t.description ? ` (${t.description})` : ""}`,
         )
@@ -59,13 +61,13 @@ export function buildProjectContext(project: SyndicationProjectFull): string {
     : "  No investors committed yet";
 
   // Track record
-  const trackRecord = project.sponsorTrackRecord as Array<{ dealName: string; returns: string }> | null;
+  const trackRecord = Array.isArray(project.sponsorTrackRecord) ? project.sponsorTrackRecord as Array<{ dealName: string; returns: string }> : null;
   const trackRecordBlock = trackRecord
-    ? trackRecord.map((t) => `  - ${t.dealName}: ${t.returns}`).join("\n")
+    ? trackRecord.filter(Boolean).map((t) => `  - ${t.dealName ?? "Unknown"}: ${t.returns ?? "N/A"}`).join("\n")
     : "  Not provided";
 
   // Blue sky filings
-  const blueSkyFilings = project.blueSkyFilings as string[] | null;
+  const blueSkyFilings = Array.isArray(project.blueSkyFilings) ? project.blueSkyFilings as string[] : null;
 
   return `SYNDICATION PROJECT DETAILS (source of truth — use these exact terms):
 Project Name: ${project.name}
@@ -137,7 +139,7 @@ ${waterfallBlock}
 TAX CONSIDERATIONS:
 QOZ Investment: ${project.isQOZ ? "Yes" : "No"}
 1031 Exchange: ${project.is1031Exchange ? "Yes" : "No"}
-Bonus Depreciation: ${project.bonusDepreciationPct != null ? (project.bonusDepreciationPct * 100).toFixed(0) + "%" : "20% (2026 default)"}
+Bonus Depreciation: ${project.bonusDepreciationPct != null ? (project.bonusDepreciationPct * 100).toFixed(0) + "%" : "100% (2026 default — post-OBBBA July 2025, restored for property acquired after Jan 19, 2025)"}
 UBTI Risk: ${project.ubtiRisk ? "Yes — leveraged real estate" : "Low"}
 Passive Loss Eligible: ${project.passiveLossEligible ? "Yes" : "No"}
 REPS Qualified: ${project.repsQualified ? "Yes" : "No"}

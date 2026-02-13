@@ -68,6 +68,24 @@ Return JSON with these keys:
   });
 }
 
+// ─── Federal Holidays (simplified — production should use a holiday calendar library) ──
+// #218 — Business day calculation now excludes federal holidays
+const FEDERAL_HOLIDAYS_2026 = [
+  '2026-01-01', // New Year's Day
+  '2026-01-19', // Martin Luther King Jr. Day
+  '2026-02-16', // Presidents' Day
+  '2026-05-25', // Memorial Day
+  '2026-07-03', // Independence Day (observed)
+  '2026-09-07', // Labor Day
+  '2026-11-26', // Thanksgiving Day
+  '2026-12-25', // Christmas Day
+];
+
+function isHoliday(date: Date): boolean {
+  const dateStr = date.toISOString().split("T")[0];
+  return FEDERAL_HOLIDAYS_2026.includes(dateStr);
+}
+
 // ─── Business Day Calculator ─────────────────────────────────────────
 
 function businessDaysBetween(start: Date, end: Date): number {
@@ -78,7 +96,7 @@ function businessDaysBetween(start: Date, end: Date): number {
   while (current < end && iterations < 10000) {
     current.setDate(current.getDate() + 1);
     const day = current.getDay();
-    if (day !== 0 && day !== 6) count++;
+    if (day !== 0 && day !== 6 && !isHoliday(current)) count++;
     iterations++;
   }
   return count;
@@ -112,6 +130,7 @@ export async function buildCapitalCallNotice(project: ComplianceProjectFull): Pr
     : 0;
 
   // After-call unfunded commitment
+  // #230 — If postCallUnfunded < 0, this indicates an overcall. Display warning instead of clamping to $0.
   const postCallUnfunded = unfundedCommitments - callAmount;
 
   const children: (Paragraph | Table)[] = [];
@@ -145,7 +164,7 @@ export async function buildCapitalCallNotice(project: ComplianceProjectFull): Pr
       },
       { label: "Fund Size", value: formatCurrency(fundSize) },
       { label: "Unfunded Commitments (Pre-Call)", value: formatCurrency(unfundedCommitments) },
-      { label: "Unfunded Commitments (Post-Call)", value: formatCurrency(postCallUnfunded > 0 ? postCallUnfunded : 0) },
+      { label: "Unfunded Commitments (Post-Call)", value: postCallUnfunded < 0 ? `WARNING: Overcall by ${formatCurrency(Math.abs(postCallUnfunded))}` : formatCurrency(postCallUnfunded) },
       {
         label: "% of Commitments Called",
         value: fundSize > 0
@@ -241,7 +260,7 @@ export async function buildCapitalCallNotice(project: ComplianceProjectFull): Pr
 
   // Deterministic default terms
   children.push(bodyText("Grace Period and Default Interest:", { bold: true, color: COLORS.primary }));
-  children.push(bulletPoint("Grace Period: 5-10 business days after the due date (per LPA terms)"));
+  children.push(bulletPoint("Grace Period: per the terms of the LPA (typically 5-10 business days after the due date)"));
   children.push(
     bulletPoint(
       `Default Interest: default interest at the prime rate plus ${defaultPenalty !== null && defaultPenalty !== undefined ? `${(safeNumber(defaultPenalty) * 100).toFixed(1)}%` : "[2-5]%"} per annum on the unpaid amount, accruing from the due date until the defaulted contribution is received in full`,
@@ -350,16 +369,17 @@ export function runCapitalCallComplianceChecks(project: ComplianceProjectFull): 
   });
 
   // Call does not exceed unfunded commitments
+  // #219 — When unfunded is 0, the call SHOULD fail (can't call capital with no unfunded commitment)
   checks.push({
     name: "Call Within Unfunded Commitments",
     regulation: "LPA — No Overcalling",
     category: "regulatory",
-    passed: callAmount <= unfundedCommitments || unfundedCommitments === 0,
+    passed: callAmount <= unfundedCommitments && unfundedCommitments > 0,
     note: unfundedCommitments > 0
       ? callAmount <= unfundedCommitments
         ? `Call (${formatCurrency(callAmount)}) within unfunded (${formatCurrency(unfundedCommitments)})`
         : `WARNING: Call (${formatCurrency(callAmount)}) exceeds unfunded commitments (${formatCurrency(unfundedCommitments)})`
-      : "Unfunded commitments not specified — cannot validate",
+      : "Unfunded commitments are zero — cannot call capital with no unfunded commitment",
   });
 
   // Due date provided

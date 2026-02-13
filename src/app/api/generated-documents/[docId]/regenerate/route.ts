@@ -13,6 +13,9 @@ export async function POST(
   const limited = await withRateLimit(request, heavyLimit);
   if (limited) return limited;
 
+  // Track the original document status so we can restore it on failure
+  let originalStatus: string = "FLAGGED";
+
   try {
     const { user, org } = await requireAuth();
     const { docId } = await params;
@@ -35,16 +38,17 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Double-click protection: reject if already regenerating
-    if (doc.status === "REGENERATING") {
-      return NextResponse.json({ error: "Document is already being regenerated" }, { status: 409 });
-    }
+    // Save the original status before attempting regeneration so we can restore on failure
+    originalStatus = doc.status;
 
-    // Mark as regenerating to prevent concurrent requests
-    await prisma.generatedDocument.update({
-      where: { id: docId },
+    // Atomic check-and-update: reject if already generating
+    const lockResult = await prisma.generatedDocument.updateMany({
+      where: { id: docId, status: { not: "REGENERATING" } },
       data: { status: "REGENERATING" },
     });
+    if (lockResult.count === 0) {
+      return NextResponse.json({ error: "Document is already being regenerated" }, { status: 409 });
+    }
 
     // Build the feedback string from existing issues + officer notes
     const feedbackParts: string[] = [];
@@ -210,12 +214,12 @@ export async function POST(
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    // Reset status from REGENERATING back to previous state on failure
+    // Reset status from REGENERATING back to the original status on failure
     const { docId: failedDocId } = await params;
     try {
       await prisma.generatedDocument.update({
         where: { id: failedDocId },
-        data: { status: "FLAGGED" },
+        data: { status: originalStatus },
       });
     } catch { /* best-effort reset */ }
     console.error("POST /api/generated-documents/[docId]/regenerate error:", error);

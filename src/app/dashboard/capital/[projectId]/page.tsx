@@ -115,7 +115,7 @@ const STATUS_CONFIG: Record<
   ERROR: { label: "Error", variant: "destructive" },
 };
 
-const PROCESSING_STATUSES = ["GENERATING_DOCS", "COMPLIANCE_REVIEW"];
+const PROCESSING_STATUSES = new Set(["GENERATING_DOCS", "COMPLIANCE_REVIEW"]);
 
 const EXPECTED_DOCS = [
   { type: "ppm", label: "Private Placement Memorandum" },
@@ -328,7 +328,7 @@ export default function CapitalDetailPage() {
   // Poll when processing
   useEffect(() => {
     if (!project) return;
-    if (!PROCESSING_STATUSES.includes(project.status)) return;
+    if (!PROCESSING_STATUSES.has(project.status)) return;
     if (pollErrorCount >= 3) return; // Stop polling after 3 consecutive errors
     const interval = setInterval(fetchProject, 5000);
     return () => clearInterval(interval);
@@ -423,7 +423,7 @@ export default function CapitalDetailPage() {
     );
   }
 
-  const isProcessing = PROCESSING_STATUSES.includes(project.status);
+  const isProcessing = PROCESSING_STATUSES.has(project.status);
   const hasDocs = project.capitalDocuments.length > 0;
   const statusConfig = STATUS_CONFIG[project.status] ?? {
     label: project.status,

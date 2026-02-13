@@ -236,10 +236,10 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
   if (project.hsrRequired) {
     items.push({
       category: "Regulatory Approvals",
-      item: "HSR Act early termination letter or expiration of waiting period (30 days from filing)",
+      item: "HSR Act early termination letter or expiration of waiting period (30 days from filing; 15 days for cash tender offers)",
       responsible: "both",
       status: "open",
-      notes: `HSR filing required under 15 U.S.C. Section 18a. 2026 size-of-transaction threshold: $133.9 million. Filing fee: ${project.hsrFilingFee ? formatCurrency(safeNumber(project.hsrFilingFee)) : "Per 2026 fee schedule"}.`,
+      notes: `HSR filing required under 15 U.S.C. Section 18a. 2026 size-of-transaction threshold: $119.5 million. Filing fee: ${project.hsrFilingFee ? formatCurrency(safeNumber(project.hsrFilingFee)) : "Per 2026 fee schedule"}.`,
     });
 
     items.push({
@@ -247,7 +247,7 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
       item: "Confirmation that no Second Request has been issued (or compliance with Second Request if issued)",
       responsible: "both",
       status: "open",
-      notes: "Second Request extends waiting period by 30 additional days",
+      notes: "Second Request extends waiting period — 30 days after substantial compliance with the Second Request (10 days for cash tender offers per 16 CFR 803.10(b)). Substantial compliance required; 30-day waiting period restarts upon certification of compliance.",
     });
   }
 
@@ -274,10 +274,10 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
 
   items.push({
     category: "Regulatory Approvals",
-    item: "CFIUS clearance (if applicable for foreign buyer) — 31 CFR Part 800",
+    item: "CFIUS clearance (if applicable for foreign buyer) — 31 CFR Part 800; 31 CFR Part 802",
     responsible: "buyer",
     status: "open",
-    notes: "Required for foreign person acquisitions involving U.S. businesses in critical infrastructure, technology, or sensitive data. Voluntary notice recommended if transaction involves critical technologies, proximity to government facilities, or foreign government control.",
+    notes: "Mandatory declaration required for covered transactions involving TID (critical technology, critical infrastructure, sensitive personal data) U.S. businesses per FIRRMA (31 CFR Part 802, effective Feb 13, 2020). Voluntary notice available for non-TID transactions. Penalties for failure to file mandatory declarations.",
   });
 
   items.push({
@@ -328,7 +328,7 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
       item: "FIRPTA Certificate (Section 1445 of the Internal Revenue Code) — certification that Seller is not a foreign person",
       responsible: "seller",
       status: "open",
-      notes: "Required for stock purchases to avoid withholding. If Seller cannot provide, Buyer must withhold 15% of purchase price.",
+      notes: "Distinguish: (1) Section 1445 withholding (15% of amount realized for direct USRPI dispositions), (2) Section 1446(f) withholding (10% for partnership interest transfers). Note USRPHC exemption path requires certification under Treas. Reg. 1.1445-2(b). If Seller cannot provide certificate, Buyer must withhold applicable percentage.",
     });
   }
 
@@ -338,7 +338,7 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
       item: "Executed IRS Form 8023 (Elections Under Section 338 for Corporations Making Qualified Stock Purchases)",
       responsible: "both",
       status: "open",
-      notes: "Must be filed by 15th day of 9th month after acquisition month",
+      notes: "Must be filed by the 15th day of the 9th month following the month of acquisition (IRC Section 338(g)(2))",
     });
   }
 
@@ -437,7 +437,7 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
     item: "WARN Act compliance analysis — 60-day notice for plant closings or mass layoffs (29 U.S.C. § 2101)",
     responsible: "both",
     status: "open",
-    notes: "Required if 100+ employees and closing/layoff affects 50+ workers. Penalties: back pay up to 60 days + $500/day civil penalty.",
+    notes: "Required if 100+ employees and closing/layoff affects 50+ workers. Penalties: back pay up to 60 days + $500/day civil penalty. State mini-WARN acts may apply at lower thresholds: CA (75 employees, Cal. Lab. Code Section 1400), NY (50 employees, 90-day notice, NY Labor Law Art. 25-A), NJ (100 employees, 90-day notice, NJ WARN Act P.L. 2007, c.212), IL (75 employees, 60-day notice, IL WARN Act 820 ILCS 65).",
   });
 
   if (project.changeOfControlProvisions) {
@@ -466,7 +466,7 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
     item: "Tail / run-off D&O insurance policy for pre-Closing acts of directors and officers",
     responsible: "seller",
     status: "open",
-    notes: "Typically 6-year tail coverage",
+    notes: "Typically 6-year tail coverage. Align D&O tail period with applicable statute of limitations (Delaware: 3 years for fiduciary duty claims under 10 Del. C. Section 8106; fraud: 6 years).",
   });
 
   // ─── Post-Closing Deliverables ─────────────────────────

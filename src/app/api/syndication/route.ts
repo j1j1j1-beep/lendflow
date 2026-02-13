@@ -161,6 +161,9 @@ export async function POST(request: NextRequest) {
         if (!Number.isFinite(n)) {
           return NextResponse.json({ error: `${field} must be a valid number` }, { status: 400 });
         }
+        if (n > 1e15 || n < -1e15) {
+          return NextResponse.json({ error: `${field} exceeds maximum allowed value` }, { status: 400 });
+        }
         numericData[field] = n;
       } else {
         numericData[field] = null;
@@ -184,6 +187,18 @@ export async function POST(request: NextRequest) {
     const floatData: Record<string, number | null> = {};
     for (const field of FEE_FIELDS) {
       floatData[field] = body[field] != null ? Number(body[field]) : null;
+    }
+
+    // Date range validation (1970-2100)
+    if (body.formDFilingDate) {
+      const d = new Date(body.formDFilingDate);
+      if (isNaN(d.getTime())) {
+        return NextResponse.json({ error: "formDFilingDate must be a valid date" }, { status: 400 });
+      }
+      const year = d.getFullYear();
+      if (year < 1970 || year > 2100) {
+        return NextResponse.json({ error: "formDFilingDate year must be between 1970 and 2100" }, { status: 400 });
+      }
     }
 
     const project = await prisma.syndicationProject.create({

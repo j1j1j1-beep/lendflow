@@ -218,7 +218,7 @@ type Deal = {
   generatedDocuments: GeneratedDocument[];
 };
 
-const PROCESSING_STATUSES = [
+const PROCESSING_STATUSES = new Set([
   "UPLOADED",
   "PROCESSING_OCR",
   "CLASSIFYING",
@@ -229,7 +229,7 @@ const PROCESSING_STATUSES = [
   "STRUCTURING",
   "GENERATING_DOCS",
   "GENERATING_MEMO",
-];
+]);
 
 const DOC_TYPE_LABELS: Record<string, string> = {
   FORM_1040: "1040",
@@ -335,9 +335,9 @@ function DocumentComplianceCard({ doc, onRefresh }: {
     async function render() {
       try {
         const { renderAsync } = await import("docx-preview");
-        if (cancelled || !containerRef.current) return;
+        if (cancelled || !containerRef.current || !docxBlob) return;
         containerRef.current.innerHTML = "";
-        await renderAsync(docxBlob!, containerRef.current, undefined, {
+        await renderAsync(docxBlob, containerRef.current, undefined, {
           className: "docx-preview",
           inWrapper: true,
           ignoreWidth: true,
@@ -402,7 +402,7 @@ function DocumentComplianceCard({ doc, onRefresh }: {
       toast.success("Document saved");
       onRefresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Save failed");
+      toast.error(err instanceof Error ? err.message : "Save failed", { duration: 8000 });
     } finally {
       setSaving(false);
     }
@@ -427,7 +427,7 @@ function DocumentComplianceCard({ doc, onRefresh }: {
       setExpanded(false);
       onRefresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Regeneration failed");
+      toast.error(err instanceof Error ? err.message : "Regeneration failed", { duration: 8000 });
     } finally {
       setRegenerating(false);
     }
@@ -442,7 +442,7 @@ function DocumentComplianceCard({ doc, onRefresh }: {
           <div className="flex items-center gap-3">
             <FileText className="h-5 w-5 text-muted-foreground" />
             <div>
-              <p className="font-medium">{GEN_DOC_TYPE_LABELS[doc.docType] ?? doc.docType}</p>
+              <p className="font-medium truncate" title={GEN_DOC_TYPE_LABELS[doc.docType] ?? doc.docType}>{GEN_DOC_TYPE_LABELS[doc.docType] ?? doc.docType}</p>
               <div className="flex items-center gap-2 mt-0.5">
                 <Badge
                   variant={doc.status === "REVIEWED" ? "default" : doc.status === "FLAGGED" ? "destructive" : "secondary"}
@@ -705,7 +705,8 @@ function DocumentComplianceCard({ doc, onRefresh }: {
 export default function DealDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const dealId = params.dealId as string;
+  const rawDealId = params.dealId;
+  const dealId = Array.isArray(rawDealId) ? rawDealId[0] : rawDealId ?? "";
   const [deal, setDeal] = useState<Deal | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -725,6 +726,22 @@ export default function DealDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [retryingDocs, setRetryingDocs] = useState(false);
   const [showAllDeposits, setShowAllDeposits] = useState(false);
+  // M13: Tab transition skeleton
+  const [tabLoading, setTabLoading] = useState(false);
+  const tabLoadingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const handleTabChange = useCallback((value: string) => {
+    setTabLoading(true);
+    if (tabLoadingTimer.current) clearTimeout(tabLoadingTimer.current);
+    tabLoadingTimer.current = setTimeout(() => setTabLoading(false), 150);
+  }, []);
+
+  // Cleanup tab loading timer on unmount
+  useEffect(() => {
+    return () => {
+      if (tabLoadingTimer.current) clearTimeout(tabLoadingTimer.current);
+    };
+  }, []);
 
   const fetchDeal = useCallback(async () => {
     try {
@@ -758,7 +775,7 @@ export default function DealDetailPage() {
       toast.success("Deal permanently deleted.");
       router.push("/dashboard/lending");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete deal");
+      toast.error(err instanceof Error ? err.message : "Failed to delete deal", { duration: 8000 });
       setDeleting(false);
     }
   };
@@ -788,7 +805,7 @@ export default function DealDetailPage() {
     );
   }
 
-  const isProcessing = PROCESSING_STATUSES.includes(deal.status);
+  const isProcessing = PROCESSING_STATUSES.has(deal.status);
   const isComplete = deal.status === "COMPLETE";
   const needsReview = deal.status === "NEEDS_REVIEW";
   const hasAnalysis = deal.analysis !== null;
@@ -937,40 +954,60 @@ export default function DealDetailPage() {
                 <span className="ml-1 text-xs opacity-75">(Step: {deal.errorStep})</span>
               )}
             </span>
-            <Button
-              variant="default"
-              size="sm"
-              disabled={retrying}
-              className="shrink-0 gap-1.5"
-              onClick={async () => {
-                setRetrying(true);
-                setRetryError(null);
-                try {
-                  const res = await fetch(`/api/deals/${dealId}/retry`, { method: "POST" });
-                  if (!res.ok) {
-                    const body = await res.json().catch(() => ({}));
-                    throw new Error(body.error || "Failed to retry");
-                  }
-                  fetchDeal();
-                } catch (err) {
-                  setRetryError(err instanceof Error ? err.message : "Failed to retry. Please try again.");
-                } finally {
-                  setRetrying(false);
-                }
-              }}
-            >
-              {retrying ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Retrying...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="h-3.5 w-3.5" />
-                  Retry Analysis
-                </>
-              )}
-            </Button>
+            {/* M14: Confirmation dialog for Retry Analysis */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="default"
+                  size="sm"
+                  disabled={retrying}
+                  className="shrink-0 gap-1.5"
+                >
+                  {retrying ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Retrying...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Retry Analysis
+                    </>
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Retry analysis pipeline?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will restart the entire analysis pipeline from the beginning. Any partial results from the previous run will be overwritten.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={async () => {
+                      setRetrying(true);
+                      setRetryError(null);
+                      try {
+                        const res = await fetch(`/api/deals/${dealId}/retry`, { method: "POST" });
+                        if (!res.ok) {
+                          const body = await res.json().catch(() => ({}));
+                          throw new Error(body.error || "Failed to retry");
+                        }
+                        fetchDeal();
+                      } catch (err) {
+                        setRetryError(err instanceof Error ? err.message : "Failed to retry. Please try again.");
+                      } finally {
+                        setRetrying(false);
+                      }
+                    }}
+                  >
+                    Retry Analysis
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </AlertDescription>
           {retryError && (
             <p className="text-sm mt-2 text-destructive-foreground/80">{retryError}</p>
@@ -980,7 +1017,7 @@ export default function DealDetailPage() {
 
       {/* Analysis Content */}
       {(isComplete || hasAnalysis) && deal.analysis && (
-        <Tabs defaultValue={deal.status === "NEEDS_TERM_REVIEW" && deal.dealTerms ? "terms" : "overview"} className="space-y-4">
+        <Tabs defaultValue={deal.status === "NEEDS_TERM_REVIEW" && deal.dealTerms ? "terms" : "overview"} className="space-y-4" onValueChange={handleTabChange}>
           <TabsList className="w-full justify-start overflow-x-auto">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="income">Income</TabsTrigger>
@@ -992,6 +1029,14 @@ export default function DealDetailPage() {
             )}
             <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
+
+          {/* M13: Tab transition skeleton */}
+          {tabLoading && (
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+          )}
 
           {/* OVERVIEW TAB */}
           <TabsContent value="overview">
@@ -1104,7 +1149,7 @@ export default function DealDetailPage() {
                         <div key={d.label} className="group/bar flex-1 flex flex-col items-center gap-1">
                           <span className="text-[10px] text-muted-foreground font-medium tabular-nums opacity-70 transition-opacity duration-150 group-hover/bar:opacity-100">{formatCurrency(d.value)}</span>
                           <div
-                            className="w-full bg-primary rounded-t-sm min-h-[4px] transition-all duration-500 ease-out group-hover/bar:bg-primary/80 group-hover/bar:shadow-sm group-hover/bar:shadow-primary/20"
+                            className="w-full bg-chart-1 rounded-t-sm min-h-[4px] transition-all duration-500 ease-out group-hover/bar:bg-chart-1/80 group-hover/bar:shadow-sm group-hover/bar:shadow-chart-1/20"
                             style={{ height: `${maxDeposit > 0 ? (d.value / maxDeposit) * 160 : 4}px` }}
                           />
                           <span className="text-[10px] text-muted-foreground">{d.label}</span>
@@ -1208,8 +1253,8 @@ export default function DealDetailPage() {
                         <p className="text-xs text-muted-foreground font-medium">Spread</p>
                         <p className="text-lg font-semibold tracking-tight mt-0.5 tabular-nums">{deal.dealTerms?.spread != null ? `+${(Number(deal.dealTerms.spread) * 100).toFixed(3)}%` : "N/A"}</p>
                       </div>
-                      <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 transition-all duration-200 hover:-translate-y-px hover:shadow-md hover:shadow-primary/10">
-                        <p className="text-xs text-primary font-medium">Total Rate</p>
+                      <div className="rounded-lg border border-chart-1/30 bg-chart-1/5 p-3 transition-all duration-200 hover:-translate-y-px hover:shadow-md hover:shadow-chart-1/10">
+                        <p className="text-xs text-chart-1 font-medium">Total Rate</p>
                         <p className="text-lg font-semibold tracking-tight mt-0.5 tabular-nums">{deal.dealTerms?.interestRate != null ? `${(Number(deal.dealTerms.interestRate) * 100).toFixed(3)}%` : "N/A"}</p>
                       </div>
                     </div>
@@ -1428,7 +1473,7 @@ export default function DealDetailPage() {
                                 );
                                 fetchDeal();
                               } catch (err) {
-                                toast.error(err instanceof Error ? err.message : "Failed to retry documents");
+                                toast.error(err instanceof Error ? err.message : "Failed to retry documents", { duration: 8000 });
                               } finally {
                                 setRetryingDocs(false);
                               }
@@ -1465,7 +1510,7 @@ export default function DealDetailPage() {
                               URL.revokeObjectURL(url);
                               toast.success("Download started");
                             } catch {
-                              toast.error("Failed to download package");
+                              toast.error("Failed to download package", { duration: 8000 });
                             }
                           }}
                         >
@@ -1508,7 +1553,7 @@ export default function DealDetailPage() {
                   <TableBody>
                     {deal.documents.map((doc) => (
                       <TableRow key={doc.id}>
-                        <TableCell className="font-medium">{doc.fileName}</TableCell>
+                        <TableCell className="font-medium max-w-[200px] truncate" title={doc.fileName}>{doc.fileName}</TableCell>
                         <TableCell>
                           {doc.docType ? (
                             <Badge variant="secondary" className="text-xs">{DOC_TYPE_LABELS[doc.docType] ?? doc.docType}</Badge>

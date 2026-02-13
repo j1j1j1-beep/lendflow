@@ -60,10 +60,11 @@ export default function ReviewPage() {
       const res = await fetch(`/api/deals/${dealId}`);
       if (!res.ok) throw new Error("Failed to load deal");
       const data = await res.json();
-      setDeal(data.deal ?? data);
+      const dealData = data.deal ?? data;
+      setDeal(dealData);
 
       const existing = new Map<string, Resolution>();
-      for (const item of data.reviewItems ?? []) {
+      for (const item of dealData.reviewItems ?? []) {
         if (item.status !== "PENDING") {
           existing.set(item.id, {
             itemId: item.id,
@@ -114,7 +115,8 @@ export default function ReviewPage() {
         NOTED: "note",
       };
 
-      for (const resolution of resolutions.values()) {
+      // M3: Submit all review items in parallel using Promise.all
+      const submissions = [...resolutions.values()].map(async (resolution) => {
         const res = await fetch(`/api/deals/${dealId}/review`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -129,15 +131,17 @@ export default function ReviewPage() {
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
           // Skip items already resolved (from a previous partial submit)
-          if (err.error === "Review item has already been resolved") continue;
+          if (err.error === "Review item has already been resolved") return;
           throw new Error(err.error || "Failed to submit review");
         }
-      }
+      });
+
+      await Promise.all(submissions);
 
       toast.success("Review submitted! Resuming analysis pipeline.");
       router.push(`/dashboard/lending/${dealId}`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to submit review");
+      toast.error(err instanceof Error ? err.message : "Failed to submit review", { duration: 8000 });
       setSubmitting(false);
     }
   };

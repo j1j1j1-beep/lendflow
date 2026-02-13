@@ -10,6 +10,7 @@ import {
   documentTitle,
   bodyText,
   formatCurrency,
+  safeNumber,
 } from "@/documents/doc-helpers";
 
 import type { MAProjectFull, ComplianceCheck } from "./types";
@@ -45,8 +46,10 @@ ABSOLUTE RULES — VIOLATION OF ANY RULE MAKES THE DOCUMENT UNENFORCEABLE:
 5. TRANSACTION-SPECIFIC COMPLIANCE: Your prose must comply with:
    - HSR Act requirements (15 U.S.C. Section 18a) if applicable
    - DGCL requirements for mergers (Section 251) and asset sales (Section 271)
-   - Tax code provisions (Section 338, 368, 382, 1060) as applicable
+   - Tax code provisions (Sections 338, 368, 382, 453, 1060) as applicable
+   - Section 197 (amortization of intangibles/goodwill, 15-year period) and Section 280G (golden parachute payments, 3x base amount safe harbor)
    - Securities law requirements for stock consideration
+   - Note that Section 1031 exchanges apply ONLY to real property since TCJA 2017.
 6. STANDARD OF CARE: Write as if this document will be:
    - Reviewed by opposing counsel before execution
    - Examined by regulators during review
@@ -61,15 +64,15 @@ This AI-generated content is for document drafting assistance only and does not 
  * Injects ALL numbers into the prompt so AI writes around them.
  */
 function buildMAContext(project: MAProjectFull): string {
-  const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
-  const cashComponent = project.cashComponent ? Number(project.cashComponent) : 0;
-  const stockComponent = project.stockComponent ? Number(project.stockComponent) : 0;
-  const sellerNote = project.sellerNote ? Number(project.sellerNote) : 0;
-  const earnoutAmount = project.earnoutAmount ? Number(project.earnoutAmount) : 0;
-  const targetRevenue = project.targetRevenue ? Number(project.targetRevenue) : 0;
-  const targetEbitda = project.targetEbitda ? Number(project.targetEbitda) : 0;
-  const workingCapitalTarget = project.workingCapitalTarget ? Number(project.workingCapitalTarget) : 0;
-  const hsrFilingFee = project.hsrFilingFee ? Number(project.hsrFilingFee) : 0;
+  const purchasePrice = safeNumber(project.purchasePrice);
+  const cashComponent = safeNumber(project.cashComponent);
+  const stockComponent = safeNumber(project.stockComponent);
+  const sellerNote = safeNumber(project.sellerNote);
+  const earnoutAmount = safeNumber(project.earnoutAmount);
+  const targetRevenue = safeNumber(project.targetRevenue);
+  const targetEbitda = safeNumber(project.targetEbitda);
+  const workingCapitalTarget = safeNumber(project.workingCapitalTarget);
+  const hsrFilingFee = safeNumber(project.hsrFilingFee);
 
   const transactionTypeLabel: Record<string, string> = {
     STOCK_PURCHASE: "Stock Purchase",
@@ -85,7 +88,8 @@ function buildMAContext(project: MAProjectFull): string {
   const taxStructureLabel: Record<string, string> = {
     SECTION_338H10: "Section 338(h)(10) Election (deemed asset purchase for tax)",
     SECTION_338G: "Section 338(g) Election (unilateral buyer election)",
-    SECTION_1031: "Section 1031 Like-Kind Exchange",
+    // Note: Section 1031 limited to real property since TCJA 2017. Only appropriate for real estate M&A transactions.
+    SECTION_1031: "Section 1031 Like-Kind Exchange (real property only — TCJA 2017)",
     SECTION_368_A: "Section 368(a)(1)(A) Tax-Free Reorganization (Type A)",
     SECTION_368_B: "Section 368(a)(1)(B) Stock-for-Stock (Type B)",
     SECTION_368_C: "Section 368(a)(1)(C) Stock-for-Assets (Type C)",
@@ -93,8 +97,11 @@ function buildMAContext(project: MAProjectFull): string {
     STANDARD: "Standard Taxable Transaction",
   };
 
-  const macCarveouts = project.macCarveouts as string[] | null;
-  const requiredApprovals = project.requiredApprovals as string[] | null;
+  const macCarveouts = Array.isArray(project.macCarveouts) ? project.macCarveouts as string[] : null;
+  const requiredApprovals = Array.isArray(project.requiredApprovals) ? project.requiredApprovals as string[] : null;
+
+  // Escrow percentage: handle 0-1 (decimal) vs 0-100 (whole number) ambiguity
+  // If escrowPercent > 1, user likely entered a whole percentage (e.g. 10 instead of 0.10)
 
   return `M&A DEAL TERMS (source of truth — use these exact numbers):
 
@@ -120,7 +127,7 @@ Purchase Price: ${purchasePrice ? formatCurrency(purchasePrice) : "Not specified
   Seller Note: ${sellerNote ? formatCurrency(sellerNote) : "N/A"}
   Earnout: ${earnoutAmount ? `${formatCurrency(earnoutAmount)} over ${project.earnoutTermMonths ?? "N/A"} months` : "N/A"}
 Working Capital Target: ${workingCapitalTarget ? formatCurrency(workingCapitalTarget) : "Not specified"}
-Escrow: ${project.escrowPercent ? `${(project.escrowPercent * 100).toFixed(1)}% for ${project.escrowTermMonths ?? "N/A"} months` : "N/A"}
+Escrow: ${project.escrowPercent ? `${(((safeNumber(project.escrowPercent) > 1 ? safeNumber(project.escrowPercent) / 100 : safeNumber(project.escrowPercent))) * 100).toFixed(1)}% for ${project.escrowTermMonths ?? "N/A"} months` : "N/A"}
 
 TIMELINE:
 Exclusivity Period: ${project.exclusivityDays ? `${project.exclusivityDays} days` : "Not specified"}
@@ -149,7 +156,7 @@ ${project.rwiInsurance && project.rwiPremiumPercent ? `R&W Premium: ${(project.r
 
 MAC CLAUSE:
 ${project.macDefinition ?? "Standard MAC definition"}
-Carveouts: ${macCarveouts && macCarveouts.length > 0 ? macCarveouts.join("; ") : "Standard carveouts (general economic, industry, law changes, natural disasters, announcement effects)"}
+Carveouts: ${macCarveouts && macCarveouts.length > 0 ? macCarveouts.join("; ") : "Standard carveouts (general economic conditions, industry conditions, financial markets, changes in law/regulation, GAAP changes, acts of God/natural disasters, pandemics/epidemics, cyberattacks/data breaches, credit/capital markets disruptions)"}
 
 REQUIRED APPROVALS:
 ${requiredApprovals && requiredApprovals.length > 0 ? requiredApprovals.join(", ") : "Standard board/stockholder approvals"}
@@ -158,11 +165,17 @@ EMPLOYEE MATTERS:
 Key Employee Retention: ${project.keyEmployeeRetention ? "Required" : "Not applicable"}
 Change of Control Provisions: ${project.changeOfControlProvisions ? "Yes" : "No"}
 
-2026 HSR THRESHOLDS (for reference if HSR applies):
-- Size-of-transaction minimum: $133.9 million
-- Filing fees: $35K (<$189.6M), $110K ($189.6M-$586.9M), $275K ($586.9M-$1.174B)
-- 30-day waiting period (15 for cash tender); Second request: additional 30 days
-- Penalty for failure to file: up to $51,744 per day`;
+2025 HSR THRESHOLDS (for reference if HSR applies):
+- Size-of-transaction minimum: $119.5 million
+- Filing fees (6 tiers):
+  >$119.5M-$173.3M: $30,000
+  >$173.3M-$536.1M: $105,000
+  >$536.1M-$1.0932B: $260,000
+  >$1.0932B-$2.186B: $415,000
+  >$2.186B-$5.466B: $830,000
+  >$5.466B: $2,335,000
+- 30-day waiting period (15 for cash tender); Second Request: 30 days after substantial compliance with the Second Request (10 days for cash tender offers per 16 CFR 803.10(b)). Substantial compliance required; 30-day waiting period restarts upon certification of compliance.
+- Penalty for failure to file: up to $54,540 per day`;
 }
 
 /**
@@ -301,6 +314,8 @@ Generate the prose sections for a NON-DISCLOSURE AGREEMENT for this M&A transact
 
 This NDA is specifically for evaluating a potential acquisition — all provisions should be tailored to the M&A context.
 
+Include securities law reminder: receiving party acknowledges that Confidential Information may constitute material non-public information under Section 10(b) of the Securities Exchange Act of 1934 and Rule 10b-5. Receiving party agrees not to trade in securities of Disclosing Party while in possession of MNPI.
+
 Return JSON matching this exact schema:
 {
   "confidentialInfoDefinition": "string — broad definition of Confidential Information including all financial, business, technical, operational, and legal information about the target company, with standard carveouts (public information, independently developed, received from third party without restriction, already known)",
@@ -330,7 +345,7 @@ Key considerations:
 - Buyer gets carryover basis in assets (no step-up unless Section 338 election)
 - Section 382 NOL limitations apply if ownership change >50% in 3-year period
 - Assignment provisions in contracts may require consent
-${project.section338Election ? "- Section 338(h)(10) election applies — treated as deemed asset purchase for tax purposes. IRS Form 8023 required within 8.5 months." : ""}`;
+${project.section338Election ? "- Section 338(h)(10) election applies — treated as deemed asset purchase for tax purposes. IRS Form 8023 required by the 15th day of the 9th month following the month of acquisition (IRC Section 338(g)(2))." : ""}`;
   } else if (resolvedType === "asset_purchase_agreement") {
     structureGuidance = `This is an ASSET PURCHASE AGREEMENT. Buyer acquires specific assets and assumes specified liabilities.
 Key considerations:
@@ -342,7 +357,7 @@ Key considerations:
   } else {
     structureGuidance = `This is a MERGER AGREEMENT (Section 368 Reorganization).
 Key considerations:
-- Continuity of interest requirement (40%+ stock consideration for Type A)
+- Continuity of interest requirement: 40% historic target (per Rev. Rul. 66-224), but Treas. Reg. 1.368-1(e)(2)(v) reduced to approximately 40%
 - Continuity of business enterprise requirement
 - DGCL Section 251 requires board approval + majority stockholder vote
 - DGCL Section 262 appraisal rights for dissenting stockholders
@@ -357,7 +372,9 @@ ${structureGuidance}
 
 Generate the prose sections for a ${MA_DOC_TYPE_LABELS[resolvedType] ?? "Purchase Agreement"}. The deterministic sections (definitions table, party identification, key terms, consideration table, signature blocks) are handled by the template. You provide the legal clauses.
 
-${project.hsrRequired ? "Include HSR filing covenant with 2026 thresholds ($133.9M size-of-transaction minimum). 30-day waiting period (15 for cash tender). HSR filing fees (2026): <$189.6M = $35K; $189.6M-$586.9M = $110K; $586.9M-$1.174B = $275K; $1.174B-$2.33B = $550K; $2.33B-$4.66B = $1.1M; >$4.66B = $2.46M. Penalty for failure to file: up to $51,744 per day." : ""}
+Consider Section 453 (installment sales), Section 197 (amortization of intangibles/goodwill, 15-year), and Section 280G (golden parachute payments, 3x base amount safe harbor).
+
+\${project.hsrRequired ? "Include HSR filing covenant with 2025 thresholds ($119.5M size-of-transaction minimum). 30-day waiting period (15 for cash tender). Second Request: 30 days after substantial compliance with the Second Request (10 days for cash tender offers per 16 CFR 803.10(b)). HSR filing fees (2025, 6 tiers): >$119.5M-$173.3M = $30,000; >$173.3M-$536.1M = $105,000; >$536.1M-$1.0932B = $260,000; >$1.0932B-$2.186B = $415,000; >$2.186B-$5.466B = $830,000; >$5.466B = $2,335,000. Penalty for failure to file: up to $54,540 per day." : ""}
 ${project.rwiInsurance ? `Include R&W insurance provisions. Premium: ${project.rwiPremiumPercent ? (project.rwiPremiumPercent * 100).toFixed(1) + "% of policy limit" : "1.0-2.5% of policy limit"}. Buyer-side policy. Standard exclusions for known issues and purchase price adjustments.` : ""}
 
 EARNOUT PROVISIONS (if earnout applies): Include detailed earnout mechanics: (1) measurement period and milestones; (2) specific financial metrics (revenue, EBITDA, gross profit) calculated per GAAP consistently applied; (3) independent accounting firm dispute resolution (each party appoints one firm, two firms appoint third if needed); (4) operating covenants restricting extraordinary transactions that could reduce earnout; (5) confidential access to books/records for earnout calculation.
@@ -417,14 +434,14 @@ Return JSON matching this exact schema:
 
 function addDeterministicComplianceChecks(project: MAProjectFull, checks: ComplianceCheck[]) {
   // HSR compliance
-  const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
-  if (purchasePrice >= 133_900_000 && !project.hsrRequired) {
+  const purchasePrice = safeNumber(project.purchasePrice);
+  if (purchasePrice >= 119_500_000 && !project.hsrRequired) {
     checks.push({
       name: "HSR Filing Requirement",
       regulation: "Hart-Scott-Rodino Act, 15 U.S.C. Section 18a",
       category: "hsr",
       passed: false,
-      note: `Purchase price of ${formatCurrency(purchasePrice)} exceeds the 2026 HSR size-of-transaction threshold of $133.9 million. HSR filing may be required.`,
+      note: `Purchase price of ${formatCurrency(purchasePrice)} exceeds the 2026 HSR size-of-transaction threshold of $119.5 million. HSR filing may be required.`,
     });
   } else if (project.hsrRequired) {
     checks.push({
@@ -465,7 +482,7 @@ function addDeterministicComplianceChecks(project: MAProjectFull, checks: Compli
       regulation: "26 U.S.C. Section 338",
       category: "tax",
       passed: true,
-      note: "Section 338 election applies. IRS Form 8023 must be filed within 8.5 months of acquisition date. Both parties must jointly elect for 338(h)(10).",
+      note: "Section 338 election applies. IRS Form 8023 must be filed by the 15th day of the 9th month following the month of acquisition (IRC Section 338(g)(2)). Both parties must jointly elect for 338(h)(10).",
     });
   }
 
@@ -566,7 +583,7 @@ function addPurchaseAgreementComplianceChecks(project: MAProjectFull, checks: Co
     regulation: "Contract Law — Material Adverse Change",
     category: "general",
     passed: true,
-    note: "MAC definition includes standard carveouts: general economic conditions, industry changes, law changes, natural disasters, announcement effects.",
+    note: "MAC definition includes standard carveouts: general economic conditions, industry conditions, financial markets, changes in law/regulation, GAAP changes, acts of God/natural disasters, pandemics/epidemics, cyberattacks, credit market disruptions.",
   });
 }
 

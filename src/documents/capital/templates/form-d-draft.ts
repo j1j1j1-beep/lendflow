@@ -124,6 +124,7 @@ export async function buildFormDDraft(project: CapitalProjectFull): Promise<Docu
   const issuerRows: Array<{ label: string; value: string }> = [
     { label: "Exact Name of Issuer", value: project.fundName },
     { label: "Jurisdiction of Incorporation/Organization", value: project.gpStateOfFormation ?? "Delaware" },
+    // Uses current year as default; override with actual formation year from schema if available
     { label: "Year of Incorporation/Organization", value: new Date().getFullYear().toString() },
     { label: "Entity Type", value: project.fundType === "HEDGE_FUND" ? "Limited Liability Company" : "Limited Partnership" },
     { label: "CIK Number", value: "[TO BE OBTAINED FROM EDGAR]" },
@@ -329,7 +330,7 @@ export async function buildFormDDraft(project: CapitalProjectFull): Promise<Docu
     children.push(bodyText("State filings will be determined based on investor residency at the time of the first closing."));
   }
   children.push(spacer(4));
-  children.push(bodyText("Common states requiring notice filings: CA, NY, TX, FL, IL, MA, CT, NJ, PA", { italic: true }));
+  children.push(bodyText("Common states requiring notice filings: CA, NY, TX, FL, IL, MA, CT, NJ, PA. Filing deadlines vary by state (e.g., 15 days after first sale in most states, pre-sale notice in some). Consult Blue Sky counsel for state-specific requirements.", { italic: true }));
   children.push(spacer(8));
 
   // Additional Notes
@@ -338,7 +339,7 @@ export async function buildFormDDraft(project: CapitalProjectFull): Promise<Docu
   children.push(spacer(4));
   children.push(
     bodyText(
-      "FILING DEADLINE: Form D must be filed electronically through EDGAR within 15 calendar days after the first sale of securities. An amendment is required annually if the offering continues beyond 12 months, or upon any material change in the information provided.",
+      "FILING DEADLINE: Form D must be filed electronically through EDGAR within 15 calendar days after the first sale of securities (note: 'first sale' includes the date of any irrevocable contractual commitment to invest per SEC Release 33-8891). An amendment is required annually if the offering continues beyond 12 months, or upon any material change in the information provided.",
       { bold: true },
     ),
   );
@@ -352,7 +353,7 @@ export async function buildFormDDraft(project: CapitalProjectFull): Promise<Docu
   children.push(spacer(4));
   children.push(
     bodyText(
-      "NOTE: Failure to file Form D does not void the Regulation D exemption, but may result in SEC enforcement action and may be considered by courts in evaluating whether the offering conditions were met.",
+      "NOTE: Failure to file Form D does not void the Regulation D exemption, but may result in SEC enforcement action and may be considered by courts in evaluating whether the offering conditions were met. State Blue Sky enforcement varies and may carry additional consequences (e.g., NY Martin Act provides broad anti-fraud authority without requiring proof of scienter).",
       { italic: true },
     ),
   );
@@ -394,6 +395,18 @@ export function runFormDComplianceChecks(project: CapitalProjectFull): Complianc
       : "Form D not yet filed. Must be filed within 15 calendar days after the first sale of securities.",
   });
 
+  // Reg A/CF incompatibility check
+  const isRegAOrCF = project.exemptionType === "REG_A_TIER1" || project.exemptionType === "REG_A_TIER2" || project.exemptionType === "REG_CF";
+  if (isRegAOrCF) {
+    checks.push({
+      name: "Reg A/CF Document Incompatibility",
+      regulation: "17 CFR 230.251 (Reg A) / 17 CFR 227 (Reg CF)",
+      category: "securities",
+      passed: false,
+      note: `Reg A and Reg CF offerings use different disclosure documents (Offering Circular / Form C), not Reg D PPM. Document generation templates for ${project.exemptionType} are not currently supported.`,
+    });
+  }
+
   // Exemption correctly claimed
   checks.push({
     name: "Exemption Claimed",
@@ -409,7 +422,7 @@ export function runFormDComplianceChecks(project: CapitalProjectFull): Complianc
     regulation: "17 CFR 230.506(d)",
     category: "securities",
     passed: true, // Informational — actual check requires manual verification
-    note: "Rule 506(d) bad actor disqualification applies. Verify that no covered person (issuer, directors, officers, 20%+ holders, promoters, placement agents) is subject to disqualification events.",
+    note: "Rule 506(d) bad actor disqualification applies. Verify that no covered person (issuer, directors, officers, 20%+ holders, promoters, placement agents) is subject to disqualification events. Note: Rule 506(d)(2) provides an exception for disqualification events that occurred before September 23, 2013 (pre-existing events). Rule 506(e) requires mandatory written disclosure to investors of any disqualification events that would have been disqualifying but for the pre-existing event exception or a waiver.",
   });
 
   // State filings

@@ -46,7 +46,7 @@ AI-GENERATED CONTENT DISCLAIMER: This AI-generated content is for document draft
 
 async function generateOAProse(project: SyndicationProjectFull): Promise<OperatingAgreementProse> {
   const context = buildProjectContext(project);
-  const sortedTiers = [...project.waterfallTiers].sort((a, b) => a.tierOrder - b.tierOrder);
+  const sortedTiers = [...project.waterfallTiers].sort((a, b) => (a.tierOrder ?? 0) - (b.tierOrder ?? 0));
   const waterfallDesc = sortedTiers.length > 0
     ? sortedTiers.map((t) =>
         `Tier ${t.tierOrder} (${t.tierName ?? "Unnamed"}): Hurdle ${t.hurdleRate != null ? (t.hurdleRate * 100).toFixed(1) + "%" : "N/A"}, LP ${(t.lpSplit * 100).toFixed(0)}% / GP ${(t.gpSplit * 100).toFixed(0)}%`,
@@ -71,7 +71,7 @@ Return a JSON object with these keys:
   "transferRestrictions": "Transfer restrictions: no transfers without Manager consent (not to be unreasonably withheld). Permitted transfers to affiliates, trusts, and family members. Right of first refusal. Must comply with securities laws (interests are restricted securities). Tag-along/drag-along provisions.",
   "dissolutionProvisions": "Dissolution and winding up provisions: dissolution upon (a) sale of property, (b) vote of Members holding 66.7% of interests, (c) court order. Manager shall wind up affairs, pay debts, distribute remaining assets per waterfall.",
   "indemnification": "Indemnification of Manager: Company shall indemnify Manager and its affiliates against losses arising from good faith actions. Standard of care: gross negligence or willful misconduct. Manager is not liable for business judgments made in good faith. Reference 6 Del.C. Section 18-108.",
-  "taxElections": "Tax elections and allocations: Company taxed as partnership for federal income tax purposes. Manager authorized to make Section 754 election, cost segregation elections, and other tax elections. Allocations per IRC Section 704(b). Tax Matters Partner designation. Annual K-1 delivery.",
+  "taxElections": "Tax elections and allocations: Company taxed as partnership for federal income tax purposes. Manager authorized to make Section 754 election, cost segregation elections, and other tax elections. Allocations per IRC Section 704(b). Partnership Representative designation per IRC Section 6223 (BBA 2015). Annual K-1 delivery.",
   "governingLaw": "Governing law: governed by laws of ${project.stateOfFormation ?? "Delaware"} without regard to conflicts of law. Disputes resolved by binding arbitration in ${project.stateOfFormation ?? "Delaware"}. Jury trial waiver. Prevailing party entitled to attorneys' fees."
 }`;
 
@@ -91,7 +91,7 @@ export async function buildOperatingAgreement(project: SyndicationProjectFull): 
   const totalEquityRaise = safeNumber(project.totalEquityRaise);
   const loanAmount = safeNumber(project.loanAmount);
   const sponsorEquity = safeNumber(project.sponsorEquity);
-  const sortedTiers = [...project.waterfallTiers].sort((a, b) => a.tierOrder - b.tierOrder);
+  const sortedTiers = [...project.waterfallTiers].sort((a, b) => (a.tierOrder ?? 0) - (b.tierOrder ?? 0));
 
   const children: (Paragraph | Table)[] = [];
 
@@ -315,7 +315,7 @@ export function runOperatingAgreementComplianceChecks(project: SyndicationProjec
   });
 
   // Waterfall split validation
-  const sortedTiers = [...project.waterfallTiers].sort((a, b) => a.tierOrder - b.tierOrder);
+  const sortedTiers = [...project.waterfallTiers].sort((a, b) => (a.tierOrder ?? 0) - (b.tierOrder ?? 0));
   for (const tier of sortedTiers) {
     const totalSplit = tier.lpSplit + tier.gpSplit;
     checks.push({

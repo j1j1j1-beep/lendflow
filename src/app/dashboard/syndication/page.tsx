@@ -48,10 +48,10 @@ const STATUS_FILTERS = [
   { label: "Complete", value: "COMPLETE" },
 ] as const;
 
-const PROCESSING_STATUSES = [
+const PROCESSING_STATUSES = new Set([
   "GENERATING_DOCS",
   "COMPLIANCE_REVIEW",
-];
+]);
 
 const PROPERTY_TYPE_LABELS: Record<string, string> = {
   MULTIFAMILY: "Multifamily",
@@ -117,7 +117,7 @@ export default function SyndicationPage() {
       const params = new URLSearchParams();
       if (filter !== "all") {
         if (filter === "processing") {
-          params.set("status", PROCESSING_STATUSES.join(","));
+          params.set("status", [...PROCESSING_STATUSES].join(","));
         } else {
           params.set("status", filter);
         }
@@ -251,7 +251,7 @@ export default function SyndicationPage() {
               label: project.status,
               variant: "outline" as const,
             };
-            const isProcessing = PROCESSING_STATUSES.includes(project.status);
+            const isProcessing = PROCESSING_STATUSES.has(project.status);
 
             return (
               <Link

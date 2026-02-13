@@ -7,17 +7,25 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { MarketingLogo } from "@/components/product-switcher";
 
-const NAV_LINKS = [
+const LENDING_NAV_LINKS = [
   { href: "/#features", label: "Features" },
   { href: "/#how-it-works", label: "How It Works" },
   { href: "/#programs", label: "Programs" },
   { href: "/#pricing", label: "Pricing" },
 ];
 
+const BIO_NAV_LINKS = [
+  { href: "/bio#features", label: "Features" },
+  { href: "/bio#how-it-works", label: "How It Works" },
+  { href: "/bio#documents", label: "Documents" },
+  { href: "/bio#pricing", label: "Pricing" },
+];
+
 export function MarketingNav() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const navLinks = NAV_LINKS;
+  const isBio = pathname.startsWith("/bio");
+  const navLinks = isBio ? BIO_NAV_LINKS : LENDING_NAV_LINKS;
 
   return (
     <nav className="w-full border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">

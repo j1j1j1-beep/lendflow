@@ -227,7 +227,7 @@ export function buildLOI(
     children.push(sectionHeading("HSR Act Notice"));
     children.push(
       bodyText(
-        `The parties acknowledge that this transaction may be subject to premerger notification requirements under the Hart-Scott-Rodino Antitrust Improvements Act of 1976, as amended (15 U.S.C. Section 18a). Based on the 2026 jurisdictional thresholds, transactions valued at $133.9 million or above require HSR filing. Each party shall use its reasonable best efforts to prepare and file all required notifications and shall cooperate fully with any requests from the Federal Trade Commission or the Department of Justice.`,
+        `The parties acknowledge that this transaction may be subject to premerger notification requirements under the Hart-Scott-Rodino Antitrust Improvements Act of 1976, as amended (15 U.S.C. Section 18a). Based on the 2026 jurisdictional thresholds, transactions valued at $119.5 million or above require HSR filing. Each party shall use its reasonable best efforts to prepare and file all required notifications and shall cooperate fully with any requests from the Federal Trade Commission or the Department of Justice.`,
       ),
     );
     children.push(spacer(8));

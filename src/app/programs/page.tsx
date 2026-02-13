@@ -310,7 +310,7 @@ const DOC_CATEGORIES: DocCategory[] = [
 
 export default function ProgramsPage() {
   return (
-    <div className="dark flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
+    <div className="flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
       {/* Gradient orbs */}
       <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-primary/5 blur-3xl" />
       <div className="pointer-events-none absolute top-[40%] -left-40 h-[500px] w-[500px] rounded-full bg-primary/3 blur-3xl" />

@@ -4,10 +4,15 @@ import { requireAuth } from "@/lib/auth-helpers";
 // import { checkPaywall } from "@/lib/paywall"; // TODO: Enable after launch
 import { inngest } from "@/inngest/client";
 import { logAudit } from "@/lib/audit";
+import { withRateLimit } from "@/lib/with-rate-limit";
+import { pipelineLimit } from "@/lib/rate-limit";
 
 // POST /api/analyze - Trigger analysis pipeline for a deal
 
 export async function POST(request: NextRequest) {
+  const limited = await withRateLimit(request, pipelineLimit);
+  if (limited) return limited;
+
   try {
     const { user, org } = await requireAuth();
 
