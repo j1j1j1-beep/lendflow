@@ -45,7 +45,55 @@ export type AuditAction =
   | "bio.doc.downloaded"
   | "bio.doc.package_downloaded"
   | "bio.sample_created"
-  | "bio.sample_pipeline_started";
+  | "bio.sample_pipeline_started"
+  // Capital (Fund Formation)
+  | "capital.project_created"
+  | "capital.pipeline_started"
+  | "capital.docs_generated"
+  | "capital.compliance_review"
+  | "capital.pipeline_complete"
+  | "capital.pipeline_error"
+  | "capital.doc.edited"
+  | "capital.doc.saved"
+  | "capital.doc.regenerated"
+  | "capital.doc.downloaded"
+  | "capital.doc.package_downloaded"
+  // M&A Deals
+  | "ma.project_created"
+  | "ma.pipeline_started"
+  | "ma.docs_generated"
+  | "ma.compliance_review"
+  | "ma.pipeline_complete"
+  | "ma.pipeline_error"
+  | "ma.doc.edited"
+  | "ma.doc.saved"
+  | "ma.doc.regenerated"
+  | "ma.doc.downloaded"
+  | "ma.doc.package_downloaded"
+  // Syndication
+  | "syndication.project_created"
+  | "syndication.pipeline_started"
+  | "syndication.docs_generated"
+  | "syndication.compliance_review"
+  | "syndication.pipeline_complete"
+  | "syndication.pipeline_error"
+  | "syndication.doc.edited"
+  | "syndication.doc.saved"
+  | "syndication.doc.regenerated"
+  | "syndication.doc.downloaded"
+  | "syndication.doc.package_downloaded"
+  // Compliance (LP Reporting)
+  | "compliance.project_created"
+  | "compliance.pipeline_started"
+  | "compliance.docs_generated"
+  | "compliance.compliance_review"
+  | "compliance.pipeline_complete"
+  | "compliance.pipeline_error"
+  | "compliance.doc.edited"
+  | "compliance.doc.saved"
+  | "compliance.doc.regenerated"
+  | "compliance.doc.downloaded"
+  | "compliance.doc.package_downloaded";
 
 export async function logAudit(params: {
   orgId: string;
@@ -53,6 +101,8 @@ export async function logAudit(params: {
   userEmail?: string;
   dealId?: string;
   programId?: string; // Bio program ID
+  entityType?: string; // "capital", "ma", "syndication", "compliance"
+  entityId?: string; // The project ID
   action: AuditAction;
   target?: string;
   metadata?: Record<string, unknown>;
@@ -64,6 +114,8 @@ export async function logAudit(params: {
         userId: params.userId ?? null,
         userEmail: params.userEmail ?? null,
         dealId: params.dealId ?? null,
+        entityType: params.entityType ?? null,
+        entityId: params.entityId ?? null,
         action: params.action,
         target: params.target ?? null,
         metadata: params.metadata

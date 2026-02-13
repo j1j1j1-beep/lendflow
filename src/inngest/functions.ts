@@ -2558,6 +2558,18 @@ export const sampleDealPipeline = inngest.createFunction(
 // Bio pipeline functions
 import { bioFunctions } from "./bio-functions";
 
+// Capital pipeline functions
+import { capitalFunctions } from "./capital-functions";
+
+// M&A pipeline functions
+import { maFunctions } from "./ma-functions";
+
+// Syndication pipeline functions
+import { syndicationFunctions } from "./syndication-functions";
+
+// Compliance pipeline functions
+import { complianceFunctions } from "./compliance-functions";
+
 // Exports
 
-export const functions = [analysisPipeline, resumeAfterReview, resumeAfterTermReview, sampleDealPipeline, ...bioFunctions];
+export const functions = [analysisPipeline, resumeAfterReview, resumeAfterTermReview, sampleDealPipeline, ...bioFunctions, ...capitalFunctions, ...maFunctions, ...syndicationFunctions, ...complianceFunctions];
