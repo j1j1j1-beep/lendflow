@@ -326,7 +326,7 @@ export async function PATCH(
       userEmail: user.email,
       entityType: "compliance",
       entityId: projectId,
-      action: "compliance.project_created", // using closest available action
+      action: "compliance.project_updated",
       metadata: { updatedFields: Object.keys(data).filter((k) => k !== "updatedBy") },
     });
 

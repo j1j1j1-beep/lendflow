@@ -160,6 +160,16 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
             { bold: true, color: "CC0000" },
           ),
         );
+      } else if (opinionText.includes("disclaimer")) {
+        children.push(
+          bodyText(
+            "Disclaimer of Opinion — The auditor was unable to obtain sufficient appropriate " +
+            "audit evidence to provide a basis for an audit opinion. A disclaimer does not indicate " +
+            "that the financial statements are incorrect, but rather that the auditor could not " +
+            "complete the audit procedures necessary to form an opinion.",
+            { bold: true, color: "CC0000" },
+          ),
+        );
       }
     }
     children.push(spacer(8));
@@ -326,6 +336,14 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
         ["Level 3", "Unobservable inputs based on models and assumptions", "Private equity, real estate, venture capital (most fund investments)"],
       ],
       { alternateRows: true },
+    ),
+  );
+  children.push(spacer(4));
+
+  children.push(
+    bodyText(
+      "Valuations are also consistent with the International Private Equity and Venture Capital " +
+      "Valuation (IPEV) Guidelines, the industry-recognized framework for private fund asset valuations.",
     ),
   );
   children.push(spacer(4));

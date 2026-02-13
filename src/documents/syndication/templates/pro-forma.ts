@@ -12,6 +12,7 @@ import {
   sectionHeading,
   bodyText,
   bodyTextRuns,
+  bulletPoint,
   spacer,
   keyTermsTable,
   createTable,
@@ -588,6 +589,54 @@ export function buildProForma(project: SyndicationProjectFull): Document {
   children.push(bodyText("5. IRR is calculated using the Newton-Raphson method on the projected cash flow stream."));
   children.push(bodyText("6. Waterfall distributions are applied to annual distributable cash flow. Capital event (sale) proceeds are distributed separately per the Operating Agreement."));
   children.push(bodyText("7. These projections do not account for income taxes, depreciation benefits, capital expenditure reserves, or property management fee deductions from NOI."));
+  children.push(spacer(8));
+
+  // ── Depreciation Schedule (Estimated) ──────────────────────────────
+
+  children.push(sectionHeading("Depreciation Schedule (Estimated)"));
+
+  const isResidential = project.propertyType?.toLowerCase().includes("residential") ||
+    project.propertyType?.toLowerCase().includes("multifamily") ||
+    project.propertyType?.toLowerCase().includes("apartment");
+  const depreciationYears = isResidential ? 27.5 : 39;
+  const landValue = purchasePrice * 0.20; // Estimate land at 20% of purchase price
+  const depreciableBasis = purchasePrice - landValue;
+  const annualDepreciation = depreciationYears > 0 ? depreciableBasis / depreciationYears : 0;
+  const bonusDepreciationRate = 0.20; // 2026: 20% per TCJA phase-down
+  const bonusDepreciationYear1 = depreciableBasis * bonusDepreciationRate;
+
+  children.push(bodyText(
+    `Under 26 U.S.C. Section 168, the depreciable basis of the property (excluding land) is depreciated on a straight-line basis over ${depreciationYears} years (${isResidential ? "residential rental property" : "nonresidential real property"}).`,
+  ));
+  children.push(spacer(4));
+
+  children.push(bulletPoint(`Purchase Price: ${formatCurrency(purchasePrice)}`));
+  children.push(bulletPoint(`Estimated Land Value (20%): ${formatCurrency(landValue)}`));
+  children.push(bulletPoint(`Depreciable Basis: ${formatCurrency(depreciableBasis)}`));
+  children.push(bulletPoint(`Depreciation Period: ${depreciationYears} years (${isResidential ? "residential — 27.5 years" : "commercial — 39 years"})`));
+  children.push(bulletPoint(`Annual Straight-Line Depreciation: ${formatCurrency(annualDepreciation)}`));
+  children.push(spacer(4));
+
+  children.push(bodyText("Bonus Depreciation (2026):", { bold: true }));
+  children.push(bodyText(
+    `Per 26 U.S.C. Section 168(k), as modified by the Tax Cuts and Jobs Act (TCJA) phase-down schedule, the 2026 first-year bonus depreciation rate is 20% of the depreciable basis for qualifying property placed in service during the tax year.`,
+  ));
+  children.push(bulletPoint(`Year 1 Bonus Depreciation (20%): ${formatCurrency(bonusDepreciationYear1)}`));
+  children.push(bulletPoint(`Remaining Basis After Bonus: ${formatCurrency(depreciableBasis - bonusDepreciationYear1)}`));
+  children.push(spacer(4));
+
+  if (purchasePrice > 1000000) {
+    children.push(bodyText("Cost Segregation Study:", { bold: true }));
+    children.push(bodyText(
+      `For properties valued above $1,000,000, a cost segregation study is recommended. Cost segregation reclassifies building components (e.g., electrical, plumbing, flooring, site improvements) into shorter-lived asset categories (5, 7, or 15 years), accelerating depreciation deductions. For a property with a depreciable basis of ${formatCurrency(depreciableBasis)}, a cost segregation study may reclassify 15-30% of the basis into shorter-lived categories, significantly increasing early-year tax deductions. Investors should consult their tax advisors regarding the applicability and benefits of a cost segregation study for this investment.`,
+    ));
+    children.push(spacer(4));
+  }
+
+  children.push(bodyText(
+    "NOTE: Depreciation estimates are for illustrative purposes only. Actual depreciation deductions depend on the taxpayer's individual circumstances, cost basis allocations determined by an independent appraisal, and applicable IRS rules. Investors should consult their own tax advisors.",
+    { italic: true },
+  ));
 
   return buildLegalDocument({
     title: "Pro Forma Financial Projections",
@@ -697,6 +746,54 @@ export function runProFormaComplianceChecks(project: SyndicationProjectFull): Co
     passed: gapPercent < 0.05,
     note: `Sources: ${formatCurrency(totalSources)}, Uses: ${formatCurrency(totalCost)} — ${gapPercent < 0.05 ? "balanced" : `${(gapPercent * 100).toFixed(1)}% gap`}`,
   });
+
+  // IRR Plausibility check
+  const holdYears = project.projectedHoldYears ?? 5;
+  const rentGrowthRate = project.rentGrowthRate ?? 0.03;
+  const expenseGrowthRate = project.expenseGrowthRate ?? 0.02;
+
+  if (totalEquityRaise > 0 && proFormaNoi > 0) {
+    // Build cash flow stream for IRR
+    const netGrowthRate = rentGrowthRate - (expenseGrowthRate * 0.4);
+    const irrFlows: number[] = [-totalEquityRaise];
+
+    for (let y = 1; y <= holdYears; y++) {
+      const yearNoi = proFormaNoi * Math.pow(1 + netGrowthRate, Math.max(0, y - 1));
+      const yearDebt = calculateAnnualDebtService(
+        loanAmount, interestRate, loanTermYears,
+        project.interestOnly, project.ioTermMonths ?? null, y,
+      );
+      const yearCf = Math.max(0, yearNoi - yearDebt);
+
+      if (y === holdYears) {
+        // Add exit proceeds
+        const exitNoi = yearNoi;
+        const exitVal = exitCapRate > 0 ? exitNoi / exitCapRate : 0;
+        const loanPayoff = calculateLoanBalance(
+          loanAmount, interestRate, loanTermYears,
+          project.interestOnly, project.ioTermMonths ?? null, holdYears,
+        );
+        const dispFee = exitVal * (project.dispositionFee ?? 0);
+        const netProceeds = exitVal - loanPayoff - dispFee;
+        irrFlows.push(yearCf + netProceeds);
+      } else {
+        irrFlows.push(yearCf);
+      }
+    }
+
+    const estimatedIrr = calculateIRR(irrFlows);
+    const irrPlausible = estimatedIrr >= -0.20 && estimatedIrr <= 1.00;
+
+    checks.push({
+      name: "IRR Plausibility",
+      regulation: "Underwriting Best Practices",
+      category: "financial",
+      passed: irrPlausible,
+      note: irrPlausible
+        ? `Projected IRR: ${(estimatedIrr * 100).toFixed(1)}% — within plausible range (-20% to 100%)`
+        : `Projected IRR: ${(estimatedIrr * 100).toFixed(1)}% — outside plausible range (-20% to 100%). Review assumptions for reasonableness.`,
+    });
+  }
 
   return checks;
 }

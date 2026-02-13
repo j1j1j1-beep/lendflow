@@ -391,7 +391,7 @@ export async function PATCH(
       userEmail: user.email,
       entityType: "ma",
       entityId: project.id,
-      action: "ma.project_created", // using closest available action
+      action: "ma.project_updated",
       metadata: { updatedFields: Object.keys(updates) },
     });
 

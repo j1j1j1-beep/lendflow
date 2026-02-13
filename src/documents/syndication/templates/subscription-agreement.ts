@@ -287,8 +287,10 @@ export function runSubscriptionComplianceChecks(project: SyndicationProjectFull)
       name: "506(c) Verification Methods Included",
       regulation: "SEC Rule 506(c)(2)(ii)",
       category: "securities",
-      passed: true,
-      note: "Subscription agreement includes verification requirement for 506(c) — income, net worth, professional cert, and third-party letter methods",
+      passed: project.exemptionType !== "REG_D_506C", // Only require for 506(c)
+      note: project.exemptionType === "REG_D_506C"
+        ? "Rule 506(c) requires verification of accredited investor status via one of four safe harbor methods per 17 CFR 230.506(c)(2)(ii): (A) income verification, (B) net worth verification, (C) professional certification, or (D) third-party letter. Verify all methods are documented."
+        : "Rule 506(b) — self-certification acceptable",
     });
   }
 

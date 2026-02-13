@@ -183,7 +183,7 @@ export async function buildSubscriptionAgreement(project: CapitalProjectFull): P
     children.push(bulletPoint("[ ] Income: Individual income exceeding $200,000 (or $300,000 jointly with spouse/spousal equivalent) in each of the two most recent years, with a reasonable expectation of the same for the current year."));
     children.push(bulletPoint("[ ] Net Worth: Individual net worth (or joint net worth with spouse/spousal equivalent) exceeding $1,000,000, excluding the value of the primary residence."));
     children.push(bulletPoint("[ ] Professional Certification: Holder of a Series 7, Series 65, Series 82 license, or Chartered Financial Analyst (CFA) designation in good standing."));
-    children.push(bulletPoint("[ ] Knowledgeable Employee: Director, executive officer, or advisory committee member of the Fund per Rule 3c-5(a)(4)."));
+    children.push(bulletPoint("[ ] Knowledgeable Employee: Director, executive officer, or advisory committee member of the Fund per 17 CFR 270.3c-5(a)(4)."));
     children.push(bulletPoint("[ ] Family Office: Family office with at least $5,000,000 in assets under management that directs the investment."));
     children.push(spacer(4));
 

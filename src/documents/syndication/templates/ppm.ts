@@ -199,7 +199,8 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
   children.push(spacer(8));
 
   // SEC Legend
-  children.push(bodyText(prose.secLegend ?? `THE MEMBERSHIP INTERESTS OFFERED HEREBY HAVE NOT BEEN REGISTERED UNDER THE SECURITIES ACT OF 1933, AS AMENDED (THE "ACT"), OR UNDER THE SECURITIES LAWS OF ANY STATE. THESE INTERESTS ARE BEING OFFERED AND SOLD IN RELIANCE ON EXEMPTIONS FROM THE REGISTRATION REQUIREMENTS OF THE ACT AND SUCH STATE LAWS. THE INTERESTS MAY NOT BE TRANSFERRED OR RESOLD EXCEPT AS PERMITTED UNDER THE ACT AND APPLICABLE STATE SECURITIES LAWS PURSUANT TO REGISTRATION OR AN EXEMPTION THEREFROM. THERE IS NO PUBLIC MARKET FOR THESE INTERESTS AND NONE IS EXPECTED TO DEVELOP.`, { italic: true }));
+  const ruleRef = project.exemptionType === "REG_D_506C" ? "506(c)" : "506(b)";
+  children.push(bodyText(prose.secLegend ?? `THE MEMBERSHIP INTERESTS OFFERED HEREBY HAVE NOT BEEN REGISTERED UNDER THE SECURITIES ACT OF 1933, AS AMENDED (THE "ACT"), OR UNDER THE SECURITIES LAWS OF ANY STATE. THESE INTERESTS ARE BEING OFFERED AND SOLD IN RELIANCE ON RULE ${ruleRef} OF REGULATION D AND EXEMPTIONS FROM THE REGISTRATION REQUIREMENTS OF THE ACT AND SUCH STATE LAWS. THE INTERESTS MAY NOT BE TRANSFERRED OR RESOLD EXCEPT AS PERMITTED UNDER THE ACT AND APPLICABLE STATE SECURITIES LAWS PURSUANT TO REGISTRATION OR AN EXEMPTION THEREFROM. THERE IS NO PUBLIC MARKET FOR THESE INTERESTS AND NONE IS EXPECTED TO DEVELOP.`, { italic: true }));
 
   children.push(spacer(4));
   children.push(
@@ -619,10 +620,10 @@ export function runPPMComplianceChecks(project: SyndicationProjectFull): Complia
     name: "Form D Filing Status",
     regulation: "SEC Rule 503, Form D",
     category: "securities",
-    passed: true, // Informational — not blocking
+    passed: !!project.formDFilingDate,
     note: project.formDFilingDate
       ? `Form D filed: ${project.formDFilingDate.toISOString().split("T")[0]}`
-      : "Form D not yet filed — must be filed within 15 days of first sale",
+      : "Form D not yet filed — must be filed within 15 days of first investor subscription per 17 CFR 230.503",
   });
 
   // 506(c) accreditation verification

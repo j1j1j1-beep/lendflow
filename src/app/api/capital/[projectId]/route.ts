@@ -310,7 +310,7 @@ export async function PATCH(
       userEmail: user.email,
       entityType: "capital",
       entityId: projectId,
-      action: "capital.project_created",
+      action: "capital.project_updated",
       metadata: { updatedFields: Object.keys(data).filter((k) => k !== "updatedBy") },
     });
 

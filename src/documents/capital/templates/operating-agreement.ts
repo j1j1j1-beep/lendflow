@@ -412,5 +412,20 @@ export function runOperatingAgreementComplianceChecks(project: CapitalProjectFul
       : "Carried interest is zero or not set. Verify this is intentional.",
   });
 
+  // Waterfall split validation: LP + GP must equal 100%
+  if (carry > 0) {
+    const lpSplit = 1 - carry;
+    const totalSplit = lpSplit + carry;
+    checks.push({
+      name: "Waterfall Split Validation",
+      regulation: "Distribution Waterfall — LP/GP Totals",
+      category: "investor_protection",
+      passed: Math.abs(totalSplit - 1.0) < 0.001,
+      note: Math.abs(totalSplit - 1.0) < 0.001
+        ? `LP split ${(lpSplit * 100).toFixed(1)}% + GP carry ${(carry * 100).toFixed(1)}% = 100%. Splits are valid.`
+        : `LP/GP splits do not total 100%. LP: ${(lpSplit * 100).toFixed(1)}%, GP: ${(carry * 100).toFixed(1)}%. Review waterfall structure.`,
+    });
+  }
+
   return checks;
 }

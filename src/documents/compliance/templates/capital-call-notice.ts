@@ -240,7 +240,7 @@ export async function buildCapitalCallNotice(project: ComplianceProjectFull): Pr
   children.push(bulletPoint("Grace Period: 5-10 business days after the due date (per LPA terms)"));
   children.push(
     bulletPoint(
-      `Default Interest: Prime rate + ${defaultPenalty !== null && defaultPenalty !== undefined ? `${(defaultPenalty * 100).toFixed(1)}%` : "2-5%"} per annum on the unpaid amount`,
+      `Default Interest: default interest at the prime rate plus ${defaultPenalty !== null && defaultPenalty !== undefined ? `${(Number(defaultPenalty) * 100).toFixed(1)}%` : "[2-5]%"} per annum on the unpaid amount, accruing from the due date until the defaulted contribution is received in full`,
     ),
   );
   children.push(spacer(4));

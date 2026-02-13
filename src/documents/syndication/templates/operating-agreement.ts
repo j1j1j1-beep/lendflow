@@ -314,7 +314,8 @@ export function runOperatingAgreementComplianceChecks(project: SyndicationProjec
   });
 
   // Waterfall split validation
-  for (const tier of project.waterfallTiers) {
+  const sortedTiers = [...project.waterfallTiers].sort((a, b) => a.tierOrder - b.tierOrder);
+  for (const tier of sortedTiers) {
     const totalSplit = tier.lpSplit + tier.gpSplit;
     checks.push({
       name: `Waterfall Tier ${tier.tierOrder} Split Validation`,
@@ -322,6 +323,21 @@ export function runOperatingAgreementComplianceChecks(project: SyndicationProjec
       category: "waterfall",
       passed: Math.abs(totalSplit - 1.0) < 0.001,
       note: `LP ${(tier.lpSplit * 100).toFixed(0)}% + GP ${(tier.gpSplit * 100).toFixed(0)}% = ${(totalSplit * 100).toFixed(0)}% — ${Math.abs(totalSplit - 1.0) < 0.001 ? "valid" : "does not equal 100%"}`,
+    });
+  }
+
+  // Best practice: Tier 1 should be return of capital (100% LP, 0% hurdle)
+  if (project.waterfallTiers.length > 1) {
+    const tier1 = sortedTiers[0]; // First tier by tierOrder
+    const isStandardTier1 = tier1 && Number(tier1.lpSplit) >= 0.99 && Number(tier1.hurdleRate || 0) === 0;
+    checks.push({
+      name: "Waterfall Tier Order (Best Practice)",
+      regulation: "Industry Standard Waterfall Structure",
+      category: "waterfall",
+      passed: isStandardTier1,
+      note: isStandardTier1
+        ? "Tier 1 is return of capital (100% LP) — standard structure"
+        : "Tier 1 deviates from standard return-of-capital structure (100% LP, 0% hurdle). Non-standard structures should be clearly disclosed to investors.",
     });
   }
 

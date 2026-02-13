@@ -107,10 +107,10 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
     });
     items.push({
       category: "Corporate Approvals",
-      item: "Certified copy of stockholder approval of Target Company (DGCL Section 251(c)) — majority of outstanding shares entitled to vote",
+      item: "Certified copy of stockholder approval of Target Company (DGCL Section 251(c)) — majority of outstanding shares entitled to vote, or written consent in lieu of meeting per DGCL Section 228",
       responsible: "seller",
       status: "open",
-      notes: "Requires majority vote of outstanding stock unless charter requires supermajority",
+      notes: "Requires majority vote of outstanding stock unless charter requires supermajority. Written consent per DGCL § 228 may be used if permitted by certificate of incorporation.",
     });
     items.push({
       category: "Corporate Approvals",

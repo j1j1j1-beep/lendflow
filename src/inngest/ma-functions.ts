@@ -8,17 +8,8 @@ import { inngest } from "./client";
 import { prisma } from "@/lib/db";
 import { uploadToS3 } from "@/lib/s3";
 import { generateMADoc } from "@/documents/deals/generate-doc";
-import { MA_DOC_TYPE_LABELS } from "@/documents/deals/types";
+import { MA_DOC_TYPES, MA_DOC_TYPE_LABELS } from "@/documents/deals/types";
 import type { MAProjectFull } from "@/documents/deals/types";
-
-const MA_DOC_TYPES = [
-  "loi",
-  "nda",
-  "purchase_agreement",
-  "due_diligence_checklist",
-  "disclosure_schedules",
-  "closing_checklist",
-];
 
 /** Wrap a promise with a timeout. Throws a descriptive error on timeout. */
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
@@ -87,7 +78,7 @@ export const maGenerateDocs = inngest.createFunction(
           const currentProject = await prisma.mAProject.findUniqueOrThrow({
             where: { id: projectId },
             include: { maDocuments: true },
-          }) as MAProjectFull;
+          }) as unknown as MAProjectFull;
 
           // AI docs get a longer timeout; deterministic docs are fast
           const isAIDoc = !["due_diligence_checklist", "closing_checklist"].includes(docType);
@@ -195,13 +186,7 @@ export const maGenerateDocs = inngest.createFunction(
 
       console.error(`[ma-generate-docs] Failed at step ${lastStep} for project ${projectId}:`, error);
 
-      return {
-        success: false,
-        projectId,
-        error: errorMsg,
-        failedStep: lastStep,
-        generatedDocs,
-      };
+      throw error;
     }
   },
 );

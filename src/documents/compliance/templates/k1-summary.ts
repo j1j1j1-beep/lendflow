@@ -467,6 +467,20 @@ export function runK1ComplianceChecks(project: ComplianceProjectFull): Complianc
     });
   }
 
+  // UBTI threshold check per IRC §512(a)(3)(A)
+  const ubtiAmount = project.k1UBTI ? Number(project.k1UBTI) : 0;
+  checks.push({
+    name: "UBTI Filing Threshold",
+    regulation: "IRC §512(a)(3)(A) — $1,000 UBTI Threshold",
+    category: "tax",
+    passed: ubtiAmount <= 1000,
+    note: ubtiAmount > 1000
+      ? `UBTI of ${formatCurrency(ubtiAmount)} exceeds $1,000 threshold — tax-exempt partners must file Form 990-T and pay tax at ordinary income rates (up to 37%)`
+      : ubtiAmount > 0
+        ? `UBTI of ${formatCurrency(ubtiAmount)} is below $1,000 filing threshold`
+        : "No UBTI reported for this period",
+  });
+
   // Late filing penalty note
   checks.push({
     name: "Late Filing Penalty Disclosed",

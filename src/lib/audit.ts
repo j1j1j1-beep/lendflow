@@ -48,6 +48,7 @@ export type AuditAction =
   | "bio.sample_pipeline_started"
   // Capital (Fund Formation)
   | "capital.project_created"
+  | "capital.project_updated"
   | "capital.pipeline_started"
   | "capital.docs_generated"
   | "capital.compliance_review"
@@ -60,6 +61,7 @@ export type AuditAction =
   | "capital.doc.package_downloaded"
   // M&A Deals
   | "ma.project_created"
+  | "ma.project_updated"
   | "ma.pipeline_started"
   | "ma.docs_generated"
   | "ma.compliance_review"
@@ -72,6 +74,7 @@ export type AuditAction =
   | "ma.doc.package_downloaded"
   // Syndication
   | "syndication.project_created"
+  | "syndication.project_updated"
   | "syndication.pipeline_started"
   | "syndication.docs_generated"
   | "syndication.compliance_review"
@@ -84,6 +87,7 @@ export type AuditAction =
   | "syndication.doc.package_downloaded"
   // Compliance (LP Reporting)
   | "compliance.project_created"
+  | "compliance.project_updated"
   | "compliance.pipeline_started"
   | "compliance.docs_generated"
   | "compliance.compliance_review"

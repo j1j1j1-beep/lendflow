@@ -314,7 +314,7 @@ export async function PATCH(
       userEmail: user.email,
       entityType: "syndication",
       entityId: projectId,
-      action: "syndication.project_created", // Reuse closest audit action
+      action: "syndication.project_updated",
       metadata: { updatedFields: Object.keys(updateData) },
     });
 

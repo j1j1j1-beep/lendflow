@@ -149,7 +149,7 @@ export async function buildInvestorQuestionnaire(project: CapitalProjectFull): P
   children.push(spacer(2));
   children.push(bulletPoint("[ ] PROFESSIONAL CERTIFICATION: I am a natural person holding one or more of the following licenses in good standing: Series 7, Series 65, Series 82, or I hold a current Chartered Financial Analyst (CFA) designation."));
   children.push(spacer(2));
-  children.push(bulletPoint("[ ] KNOWLEDGEABLE EMPLOYEE: I am a director, executive officer, or a person who serves on the advisory committee of the Fund, or I am an employee of the General Partner who has participated in the investment activities of the Fund or similar funds for at least 12 months (Rule 3c-5(a)(4))."));
+  children.push(bulletPoint("[ ] KNOWLEDGEABLE EMPLOYEE: I am a director, executive officer, or a person who serves on the advisory committee of the Fund, or I am an employee of the General Partner who has participated in the investment activities of the Fund or similar funds for at least 12 months (17 CFR 270.3c-5(a)(4))."));
   children.push(spacer(2));
   children.push(bulletPoint("[ ] FAMILY OFFICE: I am a natural person whose investment in the Fund is directed by a family office (as defined in Rule 202(a)(11)(G)-1 under the Investment Advisers Act) with at least $5,000,000 in assets under management."));
   children.push(spacer(8));
