@@ -15,6 +15,7 @@ import { runFullAnalysis } from "@/analysis/analyze";
 import { generateCreditMemo } from "@/memo/generate";
 import { sendAnalysisComplete, sendReviewNeeded } from "@/lib/resend";
 import { logAudit } from "@/lib/audit";
+import { extractTextFromBuffer } from "@/documents/extract-text";
 import type { DocType } from "@/generated/prisma/client";
 
 // Shared helper: step-level timeout
@@ -147,6 +148,7 @@ async function generateAndSaveDocument(
       ],
     });
     const errorBuffer = await Packer.toBuffer(errorDoc) as Buffer;
+    const extractedText = await extractTextFromBuffer(errorBuffer);
     const s3Key = `${orgId}/${dealId}/loan-documents/${docType}-v1.docx`;
     await uploadToS3(s3Key, errorBuffer, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
     await prisma.generatedDocument.create({
@@ -165,11 +167,13 @@ async function generateAndSaveDocument(
         }] as any,
         verificationStatus: "FAILED",
         verificationIssues: [] as any,
+        extractedText: extractedText || null,
       },
     });
     return;
   }
 
+  const extractedText = await extractTextFromBuffer(result.buffer);
   const s3Key = `${orgId}/${dealId}/loan-documents/${result.docType}-v1.docx`;
   await uploadToS3(
     s3Key,
@@ -188,6 +192,7 @@ async function generateAndSaveDocument(
       verificationStatus: result.verification.passed ? "PASSED" : "FAILED",
       verificationIssues: result.verification.issues as any,
       complianceChecks: result.complianceChecks as any,
+      extractedText: extractedText || null,
     },
   });
 }

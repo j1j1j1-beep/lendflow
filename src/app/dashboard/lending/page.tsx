@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DealCard } from "@/components/DealCard";
 import { toast } from "sonner";
+import { FadeIn, Stagger, StaggerItem, ScaleIn } from "@/components/motion";
 
 type DealSummary = {
   id: string;
@@ -233,15 +234,18 @@ function LoanOriginationPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Loan Origination</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Upload borrower documents, structure deals across 10 loan programs, and generate 38 ready-to-sign legal documents — all verified against federal and state regulations.
-        </p>
-      </div>
+      <FadeIn>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Loan Origination</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Upload borrower documents, structure deals across 10 loan programs, and generate 38 ready-to-sign legal documents — all verified against federal and state regulations.
+          </p>
+        </div>
+      </FadeIn>
 
       {/* Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <FadeIn delay={0.1}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           {STATUS_FILTERS.map((f) => (
             <button
@@ -296,7 +300,8 @@ function LoanOriginationPage() {
             </Link>
           </Button>
         </div>
-      </div>
+        </div>
+      </FadeIn>
 
       {/* Content */}
       {/* L5: Show skeleton on initial load to prevent FOUC */}
@@ -315,13 +320,19 @@ function LoanOriginationPage() {
         </div>
       ) : deals.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
-            <Landmark className="h-8 w-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold">No deals yet</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-md">
-            Upload borrower documents to originate your first loan, or try a sample deal to see the full pipeline in action.
-          </p>
+          <ScaleIn delay={0.1}>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
+              <Landmark className="h-8 w-8 text-primary" />
+            </div>
+          </ScaleIn>
+          <FadeIn delay={0.2}>
+            <div>
+              <h3 className="text-lg font-semibold">No deals yet</h3>
+              <p className="text-sm text-muted-foreground mt-1 max-w-md">
+                Upload borrower documents to originate your first loan, or try a sample deal to see the full pipeline in action.
+              </p>
+            </div>
+          </FadeIn>
           <div className="flex items-center gap-3 mt-6">
             <Button asChild>
               <Link href="/dashboard/lending/new">
@@ -340,13 +351,15 @@ function LoanOriginationPage() {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.05} initialDelay={0.15}>
             {deals.map((deal) => (
-              <Link key={deal.id} href={`/dashboard/lending/${deal.id}`}>
-                <DealCard deal={deal} />
-              </Link>
+              <StaggerItem key={deal.id}>
+                <Link href={`/dashboard/lending/${deal.id}`}>
+                  <DealCard deal={deal} />
+                </Link>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
 
           {/* M1: Pagination controls */}
           {totalPages > 1 && (

@@ -9,6 +9,7 @@ import { generateCapitalDoc, setCapitalSourceDocContent } from "@/documents/capi
 import { CAPITAL_DOC_TYPES, CAPITAL_DOC_TYPE_LABELS } from "@/documents/capital/types";
 import type { CapitalProjectFull } from "@/documents/capital/types";
 import { getMissingSourceDocKeys } from "@/lib/source-doc-check";
+import { extractTextFromBuffer } from "@/documents/extract-text";
 
 const DOCX_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -127,6 +128,9 @@ export const capitalGenerateDocs = inngest.createFunction(
               `generate-${docType}`,
             );
 
+            // Extract text before upload
+            const extractedText = await extractTextFromBuffer(buffer);
+
             // Upload to S3
             const s3Key = `capital/${projectId}/${docType}-v${version}.docx`;
             await uploadToS3(s3Key, buffer, DOCX_CONTENT_TYPE);
@@ -151,6 +155,7 @@ export const capitalGenerateDocs = inngest.createFunction(
                     ? "PASSED"
                     : "PENDING",
                 complianceIssues: complianceChecks.length > 0 ? complianceChecks as any : undefined,
+                extractedText: extractedText || null,
               },
             });
 
@@ -173,6 +178,7 @@ export const capitalGenerateDocs = inngest.createFunction(
               ],
             });
             const errorBuffer = await Packer.toBuffer(errorDoc) as Buffer;
+            const errorExtractedText = await extractTextFromBuffer(errorBuffer);
             const s3Key = `capital/${projectId}/${docType}-v${version}.docx`;
             await uploadToS3(s3Key, errorBuffer, DOCX_CONTENT_TYPE);
 
@@ -191,6 +197,7 @@ export const capitalGenerateDocs = inngest.createFunction(
                   recommendation: "Retry generation or create document manually",
                 }] as any,
                 verificationStatus: "FAILED",
+                extractedText: errorExtractedText || null,
               },
             });
           }

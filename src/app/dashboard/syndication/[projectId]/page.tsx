@@ -52,6 +52,7 @@ import { DocGenTracker } from "@/components/DocGenTracker";
 import { SourceDocChecklist, fetchMissingSourceDocs } from "@/components/source-doc-checklist";
 import { MissingDocsDialog } from "@/components/missing-docs-dialog";
 import type { SourceDocDef } from "@/lib/source-doc-types";
+import { ChatPanel } from "@/components/chat-panel";
 
 /* ---------- Types ---------- */
 
@@ -580,6 +581,13 @@ export default function SyndicationDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {docs.length > 0 && (
+            <ChatPanel
+              module="syndication"
+              projectId={projectId}
+              projectName={project.entityName || project.propertyAddress || "Syndication Deal"}
+            />
+          )}
           {canGenerate && (
             <Button
               onClick={handleGenerate}

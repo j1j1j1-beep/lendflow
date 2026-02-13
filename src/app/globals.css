@@ -125,6 +125,7 @@
   }
   html {
     height: -webkit-fill-available;
+    scroll-behavior: smooth;
   }
   body {
     min-height: 100dvh;
@@ -139,6 +140,20 @@
   select,
   textarea {
     font-size: 16px;
+  }
+  /* Premium selection color */
+  ::selection {
+    background-color: oklch(0.488 0.243 264.376 / 20%);
+    color: inherit;
+  }
+  .dark ::selection {
+    background-color: oklch(0.488 0.243 264.376 / 30%);
+  }
+  /* Better focus-visible for keyboard users */
+  :focus-visible {
+    outline: 2px solid oklch(0.488 0.243 264.376 / 50%);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 }
 
@@ -192,6 +207,35 @@
   /* Smooth number count-up feel */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Glass morphism card effect */
+  .glass {
+    background: oklch(1 0 0 / 60%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid oklch(1 0 0 / 20%);
+  }
+  .dark .glass {
+    background: oklch(0.205 0 0 / 60%);
+    border-color: oklch(1 0 0 / 8%);
+  }
+
+  /* Gradient text utility */
+  .text-gradient {
+    background: linear-gradient(135deg, oklch(0.488 0.243 264.376), oklch(0.627 0.265 303.9));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Smooth line divider with fade */
+  .divider-fade {
+    background: linear-gradient(to right, transparent, oklch(0.922 0 0), transparent);
+    height: 1px;
+  }
+  .dark .divider-fade {
+    background: linear-gradient(to right, transparent, oklch(1 0 0 / 10%), transparent);
   }
 }
 

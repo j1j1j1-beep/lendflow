@@ -11,6 +11,7 @@ import { generateMADoc, setMASourceDocContent } from "@/documents/deals/generate
 import { MA_DOC_TYPES, MA_DOC_TYPE_LABELS } from "@/documents/deals/types";
 import type { MAProjectFull } from "@/documents/deals/types";
 import { getMissingSourceDocKeys } from "@/lib/source-doc-check";
+import { extractTextFromBuffer } from "@/documents/extract-text";
 
 const DOCX_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -138,6 +139,9 @@ export const maGenerateDocs = inngest.createFunction(
               `generate-${docType}`,
             );
 
+            // Extract text before upload
+            const extractedText = await extractTextFromBuffer(buffer);
+
             // Upload to S3
             const s3Key = `ma/${projectId}/${resolvedDocType}-v${version}.docx`;
             await uploadToS3(s3Key, buffer, DOCX_CONTENT_TYPE);
@@ -161,6 +165,7 @@ export const maGenerateDocs = inngest.createFunction(
                 complianceStatus,
                 complianceIssues: complianceChecks.length > 0 ? JSON.parse(JSON.stringify(complianceChecks)) : undefined,
                 verificationStatus: "PASSED",
+                extractedText: extractedText || null,
               },
             });
 
@@ -184,6 +189,7 @@ export const maGenerateDocs = inngest.createFunction(
               ],
             });
             const errorBuffer = await Packer.toBuffer(errorDoc) as Buffer;
+            const errorExtractedText = await extractTextFromBuffer(errorBuffer);
             const s3Key = `ma/${projectId}/${docType}-v${version}.docx`;
             await uploadToS3(s3Key, errorBuffer, DOCX_CONTENT_TYPE);
 
@@ -202,6 +208,7 @@ export const maGenerateDocs = inngest.createFunction(
                   recommendation: "Retry generation or create document manually",
                 }] as any,
                 verificationStatus: "FAILED",
+                extractedText: errorExtractedText || null,
               },
             });
           }

@@ -39,6 +39,7 @@ import { DocGenTracker } from "@/components/DocGenTracker";
 import { SourceDocChecklist, fetchMissingSourceDocs } from "@/components/source-doc-checklist";
 import { MissingDocsDialog } from "@/components/missing-docs-dialog";
 import type { SourceDocDef } from "@/lib/source-doc-types";
+import { ChatPanel } from "@/components/chat-panel";
 
 /* ---------- Types ---------- */
 
@@ -537,6 +538,13 @@ export default function DealDetailPage() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {project.maDocuments.length > 0 && (
+            <ChatPanel
+              module="ma"
+              projectId={projectId}
+              projectName={project.name || "M&A Deal"}
+            />
+          )}
           {canGenerate && (
             <Button
               onClick={handleGenerate}

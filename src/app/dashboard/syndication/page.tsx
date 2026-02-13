@@ -19,6 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { FadeIn, Stagger, StaggerItem, ScaleIn } from "@/components/motion";
 
 /* ---------- Types ---------- */
 
@@ -153,59 +154,61 @@ export default function SyndicationPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Header */}
-      <div>
+      <FadeIn>
         <h1 className="text-2xl font-bold tracking-tight">Syndication</h1>
         <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
           Generate complete real estate syndication packages — PPMs, operating
           agreements, subscription documents, waterfall structures, and property
           disclosures.
         </p>
-      </div>
+      </FadeIn>
 
       {/* Filters + Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2 flex-wrap">
-          {STATUS_FILTERS.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
-                filter === f.value
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search projects..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="h-9 w-64 rounded-lg border border-border bg-background pl-9 pr-8 text-sm outline-none transition-shadow duration-150 focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
-            />
-            {searchInput && (
+      <FadeIn delay={0.1}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            {STATUS_FILTERS.map((f) => (
               <button
-                onClick={() => setSearchInput("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-150"
+                key={f.value}
+                onClick={() => setFilter(f.value)}
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
+                  filter === f.value
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
               >
-                <X className="h-4 w-4" />
+                {f.label}
               </button>
-            )}
+            ))}
           </div>
-          <Button asChild size="sm" className="shadow-sm">
-            <Link href="/dashboard/syndication/new">
-              <Plus className="h-4 w-4 mr-1.5" />
-              New Syndication
-            </Link>
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search projects..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="h-9 w-64 rounded-lg border border-border bg-background pl-9 pr-8 text-sm outline-none transition-shadow duration-150 focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
+              />
+              {searchInput && (
+                <button
+                  onClick={() => setSearchInput("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-150"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <Button asChild size="sm" className="shadow-sm">
+              <Link href="/dashboard/syndication/new">
+                <Plus className="h-4 w-4 mr-1.5" />
+                New Syndication
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
+      </FadeIn>
 
       {/* Content */}
       {loading && isInitialLoad.current ? (
@@ -228,24 +231,28 @@ export default function SyndicationPage() {
         </div>
       ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
-            <Building className="h-8 w-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold">No syndication projects yet</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-md">
-            Create your first real estate syndication to generate a complete
-            document package including PPM, operating agreement, and subscription
-            documents.
-          </p>
-          <Button asChild className="mt-6 shadow-sm">
-            <Link href="/dashboard/syndication/new">
-              <Plus className="h-4 w-4 mr-1.5" />
-              New Syndication
-            </Link>
-          </Button>
+          <ScaleIn delay={0.1}>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
+              <Building className="h-8 w-8 text-primary" />
+            </div>
+          </ScaleIn>
+          <FadeIn delay={0.2}>
+            <h3 className="text-lg font-semibold">No syndication projects yet</h3>
+            <p className="text-sm text-muted-foreground mt-1 max-w-md">
+              Create your first real estate syndication to generate a complete
+              document package including PPM, operating agreement, and subscription
+              documents.
+            </p>
+            <Button asChild className="mt-6 shadow-sm">
+              <Link href="/dashboard/syndication/new">
+                <Plus className="h-4 w-4 mr-1.5" />
+                New Syndication
+              </Link>
+            </Button>
+          </FadeIn>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.05} initialDelay={0.15}>
           {projects.map((project) => {
             const statusConfig = STATUS_CONFIG[project.status] ?? {
               label: project.status,
@@ -254,84 +261,83 @@ export default function SyndicationPage() {
             const isProcessing = PROCESSING_STATUSES.has(project.status);
 
             return (
-              <Link
-                key={project.id}
-                href={`/dashboard/syndication/${project.id}`}
-              >
-                <Card className="group transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full">
-                  <CardContent className="pt-0">
-                    {/* Header row */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors duration-150">
-                          {project.propertyAddress || project.entityName}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                            {PROPERTY_TYPE_LABELS[project.propertyType] ??
-                              project.propertyType}
-                          </Badge>
+              <StaggerItem key={project.id}>
+                <Link href={`/dashboard/syndication/${project.id}`}>
+                  <Card className="group transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full">
+                    <CardContent className="pt-0">
+                      {/* Header row */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors duration-150">
+                            {project.propertyAddress || project.entityName}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                              {PROPERTY_TYPE_LABELS[project.propertyType] ??
+                                project.propertyType}
+                            </Badge>
+                          </div>
+                        </div>
+                        <Badge
+                          variant={statusConfig.variant}
+                          className="shrink-0 ml-2 text-[11px]"
+                        >
+                          {isProcessing && (
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-pulse mr-1" />
+                          )}
+                          {statusConfig.label}
+                        </Badge>
+                      </div>
+
+                      {/* Financials */}
+                      <div className="flex items-baseline gap-3 mb-1">
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <DollarSign className="h-3 w-3" />
+                            Purchase
+                          </p>
+                          <p className="text-lg font-semibold tracking-tight tabular-nums truncate">
+                            {formatCurrency(project.purchasePrice)}
+                          </p>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted-foreground">Equity Raise</p>
+                          <p className="text-sm font-medium tracking-tight tabular-nums truncate">
+                            {formatCurrency(project.totalEquityRaise)}
+                          </p>
                         </div>
                       </div>
-                      <Badge
-                        variant={statusConfig.variant}
-                        className="shrink-0 ml-2 text-[11px]"
-                      >
-                        {isProcessing && (
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-pulse mr-1" />
-                        )}
-                        {statusConfig.label}
-                      </Badge>
-                    </div>
 
-                    {/* Financials */}
-                    <div className="flex items-baseline gap-3 mb-1">
-                      <div className="min-w-0">
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <DollarSign className="h-3 w-3" />
-                          Purchase
-                        </p>
-                        <p className="text-lg font-semibold tracking-tight tabular-nums truncate">
-                          {formatCurrency(project.purchasePrice)}
-                        </p>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs text-muted-foreground">Equity Raise</p>
-                        <p className="text-sm font-medium tracking-tight tabular-nums truncate">
-                          {formatCurrency(project.totalEquityRaise)}
-                        </p>
-                      </div>
-                    </div>
+                      {/* Sponsor */}
+                      <p className="text-xs text-muted-foreground truncate mb-3">
+                        {project.sponsorName}
+                      </p>
 
-                    {/* Sponsor */}
-                    <p className="text-xs text-muted-foreground truncate mb-3">
-                      {project.sponsorName}
-                    </p>
-
-                    {/* Footer */}
-                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border/50">
-                      <div className="flex items-center gap-3">
+                      {/* Footer */}
+                      <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border/50">
+                        <div className="flex items-center gap-3">
+                          <span className="flex items-center gap-1">
+                            <FileText className="h-3.5 w-3.5" />
+                            {project._count.syndicationDocuments} doc
+                            {project._count.syndicationDocuments !== 1 ? "s" : ""}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3.5 w-3.5" />
+                            {project._count.syndicationInvestors}
+                          </span>
+                        </div>
                         <span className="flex items-center gap-1">
-                          <FileText className="h-3.5 w-3.5" />
-                          {project._count.syndicationDocuments} doc
-                          {project._count.syndicationDocuments !== 1 ? "s" : ""}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3.5 w-3.5" />
-                          {project._count.syndicationInvestors}
+                          <Calendar className="h-3.5 w-3.5" />
+                          {formatDate(project.createdAt)}
                         </span>
                       </div>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {formatDate(project.createdAt)}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </StaggerItem>
             );
           })}
-        </div>
+        </Stagger>
       )}
     </div>
   );

@@ -14,6 +14,7 @@ import {
 } from "@/documents/compliance/types";
 import type { ComplianceProjectFull } from "@/documents/compliance/types";
 import { getMissingSourceDocKeys } from "@/lib/source-doc-check";
+import { extractTextFromBuffer } from "@/documents/extract-text";
 
 const DOCX_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -146,6 +147,9 @@ export const complianceGenerateDocs = inngest.createFunction(
             `generate-${docType}`,
           );
 
+          // Extract text before upload
+          const extractedText = await extractTextFromBuffer(buffer);
+
           // Upload to S3
           const s3Key = `compliance/${projectId}/${docType}-v${version}.docx`;
           await uploadToS3(s3Key, buffer, DOCX_CONTENT_TYPE);
@@ -170,6 +174,7 @@ export const complianceGenerateDocs = inngest.createFunction(
                   ? "PASSED"
                   : "PENDING",
               complianceIssues: complianceChecks.length > 0 ? complianceChecks as any : undefined,
+              extractedText: extractedText || null,
             },
           });
 
@@ -192,6 +197,7 @@ export const complianceGenerateDocs = inngest.createFunction(
             ],
           });
           const errorBuffer = await Packer.toBuffer(errorDoc) as Buffer;
+          const errorExtractedText = await extractTextFromBuffer(errorBuffer);
           const s3Key = `compliance/${projectId}/${docType}-v${version}.docx`;
           await uploadToS3(s3Key, errorBuffer, DOCX_CONTENT_TYPE);
 
@@ -210,6 +216,7 @@ export const complianceGenerateDocs = inngest.createFunction(
                 recommendation: "Retry generation or create document manually",
               }] as any,
               verificationStatus: "FAILED",
+              extractedText: errorExtractedText || null,
             },
           });
         }

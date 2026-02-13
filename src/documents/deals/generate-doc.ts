@@ -104,7 +104,7 @@ export function setMASourceDocContent(content: Record<string, string>) {
   _sourceDocContent = content;
 }
 
-function buildMAContext(project: MAProjectFull): string {
+export function buildMAContext(project: MAProjectFull): string {
   const purchasePrice = safeNumber(project.purchasePrice);
   const cashComponent = safeNumber(project.cashComponent);
   const stockComponent = safeNumber(project.stockComponent);

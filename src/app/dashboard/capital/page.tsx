@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { FadeIn, Stagger, StaggerItem, ScaleIn } from "@/components/motion";
 
 type CapitalProject = {
   id: string;
@@ -120,59 +121,61 @@ export default function CapitalListPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Header */}
-      <div>
+      <FadeIn>
         <h1 className="text-2xl font-bold tracking-tight">Capital</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Generate complete fund formation and private placement packages — PPMs,
           subscription agreements, operating agreements, SPV docs, and Form D
           filings.
         </p>
-      </div>
+      </FadeIn>
 
       {/* Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          {STATUS_FILTERS.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 ease-out ${
-                filter === f.value
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search funds..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="h-9 w-64 rounded-lg border border-border bg-background pl-9 pr-8 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
-            />
-            {searchInput && (
+      <FadeIn delay={0.1}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            {STATUS_FILTERS.map((f) => (
               <button
-                onClick={() => setSearchInput("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-150"
+                key={f.value}
+                onClick={() => setFilter(f.value)}
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 ease-out ${
+                  filter === f.value
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
               >
-                <X className="h-4 w-4" />
+                {f.label}
               </button>
-            )}
+            ))}
           </div>
-          <Button asChild size="sm" className="transition-all duration-200 hover:shadow-md">
-            <Link href="/dashboard/capital/new">
-              <Plus className="h-4 w-4 mr-1.5" />
-              New Fund
-            </Link>
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search funds..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="h-9 w-64 rounded-lg border border-border bg-background pl-9 pr-8 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
+              />
+              {searchInput && (
+                <button
+                  onClick={() => setSearchInput("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-150"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <Button asChild size="sm" className="transition-all duration-200 hover:shadow-md">
+              <Link href="/dashboard/capital/new">
+                <Plus className="h-4 w-4 mr-1.5" />
+                New Fund
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
+      </FadeIn>
 
       {/* Content */}
       {loading && isInitialLoad.current ? (
@@ -195,15 +198,19 @@ export default function CapitalListPage() {
         </div>
       ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4 transition-transform duration-300 hover:scale-105">
-            <Building2 className="h-8 w-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold">No fund projects yet</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-md">
-            Create your first fund to generate a complete capital formation
-            package including PPM, subscription agreement, operating agreement,
-            and more.
-          </p>
+          <ScaleIn delay={0.1}>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4 transition-transform duration-300 hover:scale-105">
+              <Building2 className="h-8 w-8 text-primary" />
+            </div>
+          </ScaleIn>
+          <FadeIn delay={0.2}>
+            <h3 className="text-lg font-semibold">No fund projects yet</h3>
+            <p className="text-sm text-muted-foreground mt-1 max-w-md">
+              Create your first fund to generate a complete capital formation
+              package including PPM, subscription agreement, operating agreement,
+              and more.
+            </p>
+          </FadeIn>
           <div className="flex items-center gap-3 mt-6">
             <Button asChild className="transition-all duration-200 hover:shadow-md">
               <Link href="/dashboard/capital/new">
@@ -214,7 +221,7 @@ export default function CapitalListPage() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.05} initialDelay={0.15}>
           {projects.map((project) => {
             const statusConfig = STATUS_CONFIG[project.status] ?? {
               label: project.status,
@@ -223,53 +230,55 @@ export default function CapitalListPage() {
             const isProcessing = PROCESSING_STATUSES.has(project.status);
 
             return (
-              <Link key={project.id} href={`/dashboard/capital/${project.id}`}>
-                <Card className="group transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer">
-                  <CardContent className="pt-0">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors duration-150">
-                          {project.fundName}
-                        </h3>
+              <StaggerItem key={project.id}>
+                <Link href={`/dashboard/capital/${project.id}`}>
+                  <Card className="group transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer">
+                    <CardContent className="pt-0">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors duration-150">
+                            {project.fundName}
+                          </h3>
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] mt-1 font-normal"
+                          >
+                            {FUND_TYPE_LABELS[project.fundType] ?? project.fundType}
+                          </Badge>
+                        </div>
                         <Badge
-                          variant="secondary"
-                          className="text-[10px] mt-1 font-normal"
+                          variant={statusConfig.variant}
+                          className="shrink-0 ml-2 text-[11px]"
                         >
-                          {FUND_TYPE_LABELS[project.fundType] ?? project.fundType}
+                          {isProcessing && (
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-pulse mr-1" />
+                          )}
+                          {statusConfig.label}
                         </Badge>
                       </div>
-                      <Badge
-                        variant={statusConfig.variant}
-                        className="shrink-0 ml-2 text-[11px]"
-                      >
-                        {isProcessing && (
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-pulse mr-1" />
-                        )}
-                        {statusConfig.label}
-                      </Badge>
-                    </div>
 
-                    <p className="text-xl font-semibold tracking-tight mb-4 tabular-nums">
-                      {formatCurrency(project.targetRaise)}
-                    </p>
+                      <p className="text-xl font-semibold tracking-tight mb-4 tabular-nums">
+                        {formatCurrency(project.targetRaise)}
+                      </p>
 
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1.5">
-                        <FileText className="h-3.5 w-3.5" />
-                        {project._count.capitalDocuments} doc
-                        {project._count.capitalDocuments !== 1 ? "s" : ""}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {formatDate(project.createdAt)}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <FileText className="h-3.5 w-3.5" />
+                          {project._count.capitalDocuments} doc
+                          {project._count.capitalDocuments !== 1 ? "s" : ""}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {formatDate(project.createdAt)}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </StaggerItem>
             );
           })}
-        </div>
+        </Stagger>
       )}
     </div>
   );

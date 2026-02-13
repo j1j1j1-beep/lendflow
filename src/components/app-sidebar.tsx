@@ -15,7 +15,7 @@ import {
   Handshake,
   Building,
   ShieldCheck,
-  TestTubes,
+  Users,
 } from "lucide-react";
 import {
   Sidebar,
@@ -36,11 +36,11 @@ import { ProductSwitcher } from "@/components/product-switcher";
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Lending", href: "/dashboard/lending", icon: Landmark },
-  { label: "Bio", href: "/dashboard/bio", icon: TestTubes },
   { label: "Capital", href: "/dashboard/capital", icon: Building2 },
   { label: "Deals", href: "/dashboard/deals", icon: Handshake },
   { label: "Syndication", href: "/dashboard/syndication", icon: Building },
   { label: "Compliance", href: "/dashboard/compliance", icon: ShieldCheck },
+  { label: "Contacts", href: "/dashboard/contacts", icon: Users },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 

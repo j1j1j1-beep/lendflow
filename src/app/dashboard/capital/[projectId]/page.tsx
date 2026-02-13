@@ -38,6 +38,7 @@ import { DocGenTracker } from "@/components/DocGenTracker";
 import { SourceDocChecklist, fetchMissingSourceDocs } from "@/components/source-doc-checklist";
 import { MissingDocsDialog } from "@/components/missing-docs-dialog";
 import type { SourceDocDef } from "@/lib/source-doc-types";
+import { ChatPanel } from "@/components/chat-panel";
 
 type CapitalDocument = {
   id: string;
@@ -514,27 +515,38 @@ export default function CapitalDetailPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <Link
-          href="/dashboard/capital"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-150 hover:-translate-x-0.5 mb-2"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Capital
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {project.fundName}
-        </h1>
-        <div className="flex items-center gap-3 mt-2 flex-wrap">
-          <Badge variant={statusConfig.variant} className="text-xs">
-            {isProcessing && (
-              <Loader2 className="h-3 w-3 animate-spin mr-1" />
-            )}
-            {statusConfig.label}
-          </Badge>
-          <Badge variant="secondary" className="text-xs font-normal">
-            {FUND_TYPE_LABELS[project.fundType] ?? project.fundType}
-          </Badge>
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <Link
+            href="/dashboard/capital"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-150 hover:-translate-x-0.5 mb-2"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to Capital
+          </Link>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {project.fundName}
+          </h1>
+          <div className="flex items-center gap-3 mt-2 flex-wrap">
+            <Badge variant={statusConfig.variant} className="text-xs">
+              {isProcessing && (
+                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+              )}
+              {statusConfig.label}
+            </Badge>
+            <Badge variant="secondary" className="text-xs font-normal">
+              {FUND_TYPE_LABELS[project.fundType] ?? project.fundType}
+            </Badge>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {hasDocs && (
+            <ChatPanel
+              module="capital"
+              projectId={projectId}
+              projectName={project.fundName || "Capital Project"}
+            />
+          )}
         </div>
       </div>
 

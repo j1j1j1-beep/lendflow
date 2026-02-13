@@ -58,6 +58,7 @@ import { AnalysisResults } from "@/components/AnalysisResults";
 import { RiskFlagPanel } from "@/components/RiskFlagPanel";
 import { MemoDownload } from "@/components/MemoDownload";
 import { DocumentPreview } from "@/components/DocumentPreview";
+import { ChatPanel } from "@/components/chat-panel";
 
 type Document = {
   id: string;
@@ -854,6 +855,13 @@ export default function DealDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {deal.generatedDocuments.length > 0 && (
+            <ChatPanel
+              module="lending"
+              projectId={dealId}
+              projectName={deal.borrowerName || "Lending Deal"}
+            />
+          )}
           {isComplete && <MemoDownload dealId={dealId} />}
           <AlertDialog>
             <AlertDialogTrigger asChild>

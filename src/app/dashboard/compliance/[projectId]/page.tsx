@@ -34,6 +34,7 @@ import { DocGenTracker } from "@/components/DocGenTracker";
 import { SourceDocChecklist, fetchMissingSourceDocs } from "@/components/source-doc-checklist";
 import { MissingDocsDialog } from "@/components/missing-docs-dialog";
 import type { SourceDocDef } from "@/lib/source-doc-types";
+import { ChatPanel } from "@/components/chat-panel";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -389,30 +390,39 @@ export default function ComplianceDetailPage() {
           </div>
         </div>
 
-        {canGenerate && (
-          <Button
-            onClick={handleGenerate}
-            disabled={generating || classifying}
-            className="shadow-sm shrink-0"
-          >
-            {classifying ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Analyzing documents...
-              </>
-            ) : generating ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Starting...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="h-4 w-4 mr-1.5" />
-                Generate Document
-              </>
-            )}
-          </Button>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {project.complianceDocuments.length > 0 && (
+            <ChatPanel
+              module="compliance"
+              projectId={projectId}
+              projectName={project.fundName || project.reportType || "Compliance Report"}
+            />
+          )}
+          {canGenerate && (
+            <Button
+              onClick={handleGenerate}
+              disabled={generating || classifying}
+              className="shadow-sm shrink-0"
+            >
+              {classifying ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyzing documents...
+                </>
+              ) : generating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Starting...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-1.5" />
+                  Generate Document
+                </>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Processing indicator */}

@@ -16,6 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { FadeIn, Stagger, StaggerItem, ScaleIn } from "@/components/motion";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -145,60 +146,62 @@ export default function CompliancePage() {
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div>
+      <FadeIn>
         <h1 className="text-2xl font-bold tracking-tight">Compliance</h1>
         <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
           Generate investor reports, compliance filings, and fund administration
           documents — LP reports, capital calls, distributions, K-1 prep, and
           Form ADV documentation.
         </p>
-      </div>
+      </FadeIn>
 
       {/* Filters + Search + New */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2 flex-wrap">
-          {STATUS_FILTERS.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
-                filter === f.value
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-foreground" />
-            <input
-              type="text"
-              placeholder="Search reports..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="h-9 w-64 rounded-lg border border-border bg-background pl-9 pr-8 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
-            />
-            {searchInput && (
+      <FadeIn delay={0.1}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            {STATUS_FILTERS.map((f) => (
               <button
-                onClick={() => setSearchInput("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                key={f.value}
+                onClick={() => setFilter(f.value)}
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
+                  filter === f.value
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
               >
-                <X className="h-4 w-4" />
+                {f.label}
               </button>
-            )}
+            ))}
           </div>
-          <Button asChild size="sm" className="shadow-sm">
-            <Link href="/dashboard/compliance/new">
-              <Plus className="h-4 w-4 mr-1.5" />
-              New Report
-            </Link>
-          </Button>
+
+          <div className="flex items-center gap-3">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-foreground" />
+              <input
+                type="text"
+                placeholder="Search reports..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="h-9 w-64 rounded-lg border border-border bg-background pl-9 pr-8 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
+              />
+              {searchInput && (
+                <button
+                  onClick={() => setSearchInput("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <Button asChild size="sm" className="shadow-sm">
+              <Link href="/dashboard/compliance/new">
+                <Plus className="h-4 w-4 mr-1.5" />
+                New Report
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
+      </FadeIn>
 
       {/* Content */}
       {loading && isInitialLoad.current ? (
@@ -221,23 +224,27 @@ export default function CompliancePage() {
         </div>
       ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
-            <ShieldCheck className="h-8 w-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold">No compliance reports yet</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-md">
-            Generate LP quarterly reports, capital call notices, distribution
-            notices, K-1 summaries, and more to keep your fund compliant.
-          </p>
-          <Button asChild className="mt-6 shadow-sm">
-            <Link href="/dashboard/compliance/new">
-              <Plus className="h-4 w-4 mr-1.5" />
-              New Report
-            </Link>
-          </Button>
+          <ScaleIn delay={0.1}>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
+              <ShieldCheck className="h-8 w-8 text-primary" />
+            </div>
+          </ScaleIn>
+          <FadeIn delay={0.2}>
+            <h3 className="text-lg font-semibold">No compliance reports yet</h3>
+            <p className="text-sm text-muted-foreground mt-1 max-w-md">
+              Generate LP quarterly reports, capital call notices, distribution
+              notices, K-1 summaries, and more to keep your fund compliant.
+            </p>
+            <Button asChild className="mt-6 shadow-sm">
+              <Link href="/dashboard/compliance/new">
+                <Plus className="h-4 w-4 mr-1.5" />
+                New Report
+              </Link>
+            </Button>
+          </FadeIn>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.05} initialDelay={0.15}>
           {projects.map((project) => {
             const statusCfg = STATUS_CONFIG[project.status] ?? {
               label: project.status,
@@ -246,68 +253,67 @@ export default function CompliancePage() {
             const isProcessing = PROCESSING_STATUSES.has(project.status);
 
             return (
-              <Link
-                key={project.id}
-                href={`/dashboard/compliance/${project.id}`}
-              >
-                <Card className="group transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full">
-                  <CardContent className="pt-0 flex flex-col h-full">
-                    {/* Title row */}
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors duration-150">
-                          {project.name}
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                          {project.fundName}
-                        </p>
+              <StaggerItem key={project.id}>
+                <Link href={`/dashboard/compliance/${project.id}`}>
+                  <Card className="group transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full">
+                    <CardContent className="pt-0 flex flex-col h-full">
+                      {/* Title row */}
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors duration-150">
+                            {project.name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                            {project.fundName}
+                          </p>
+                        </div>
+                        <Badge
+                          variant={statusCfg.variant}
+                          className="shrink-0 ml-2 text-[11px]"
+                        >
+                          {isProcessing && (
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-pulse mr-1" />
+                          )}
+                          {statusCfg.label}
+                        </Badge>
                       </div>
-                      <Badge
-                        variant={statusCfg.variant}
-                        className="shrink-0 ml-2 text-[11px]"
-                      >
-                        {isProcessing && (
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-pulse mr-1" />
-                        )}
-                        {statusCfg.label}
-                      </Badge>
-                    </div>
 
-                    {/* Report type badge */}
-                    <div className="mb-3">
-                      <Badge variant="secondary" className="text-xs">
-                        {REPORT_TYPE_LABELS[project.reportType] ??
-                          project.reportType}
-                      </Badge>
-                    </div>
+                      {/* Report type badge */}
+                      <div className="mb-3">
+                        <Badge variant="secondary" className="text-xs">
+                          {REPORT_TYPE_LABELS[project.reportType] ??
+                            project.reportType}
+                        </Badge>
+                      </div>
 
-                    {/* Quarter / Tax Year */}
-                    <div className="flex-1" />
-                    {(project.reportingQuarter || project.taxYear) && (
-                      <p className="text-sm font-medium tabular-nums mb-3">
-                        {project.reportingQuarter ??
-                          `Tax Year ${project.taxYear}`}
-                      </p>
-                    )}
+                      {/* Quarter / Tax Year */}
+                      <div className="flex-1" />
+                      {(project.reportingQuarter || project.taxYear) && (
+                        <p className="text-sm font-medium tabular-nums mb-3">
+                          {project.reportingQuarter ??
+                            `Tax Year ${project.taxYear}`}
+                        </p>
+                      )}
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1.5">
-                        <FileText className="h-3.5 w-3.5" />
-                        {project._count.complianceDocuments} doc
-                        {project._count.complianceDocuments !== 1 ? "s" : ""}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {formatDate(project.createdAt)}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                      {/* Footer */}
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <FileText className="h-3.5 w-3.5" />
+                          {project._count.complianceDocuments} doc
+                          {project._count.complianceDocuments !== 1 ? "s" : ""}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {formatDate(project.createdAt)}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </StaggerItem>
             );
           })}
-        </div>
+        </Stagger>
       )}
     </div>
   );

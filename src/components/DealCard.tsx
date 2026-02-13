@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Calendar } from "lucide-react";
@@ -92,48 +91,45 @@ export function DealCard({ deal }: DealCardProps) {
   const isProcessing = PROCESSING_STATUSES.includes(deal.status);
 
   return (
-    <Link href={`/dashboard/lending/${deal.id}`}>
-      <Card className="group transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm">
-        <CardContent className="pt-0">
-          <div className="flex items-start justify-between mb-3">
-            <div className="min-w-0 flex-1">
-              {/* L3: Title attribute for truncated borrower name */}
-              <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors duration-150" title={deal.borrowerName}>
-                {deal.borrowerName}
-              </h3>
-              {deal.loanType && (
-                <p className="text-xs text-muted-foreground mt-0.5" title={formatLoanType(deal.loanType)}>
-                  {formatLoanType(deal.loanType)}
-                </p>
-              )}
-            </div>
-            <Badge
-              variant={statusConfig.variant}
-              className="shrink-0 ml-2 text-[11px]"
-            >
-              {isProcessing && (
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-pulse mr-1" />
-              )}
-              {statusConfig.label}
-            </Badge>
+    <Card className="group transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full">
+      <CardContent className="pt-0">
+        <div className="flex items-start justify-between mb-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors duration-150" title={deal.borrowerName}>
+              {deal.borrowerName}
+            </h3>
+            {deal.loanType && (
+              <p className="text-xs text-muted-foreground mt-0.5" title={formatLoanType(deal.loanType)}>
+                {formatLoanType(deal.loanType)}
+              </p>
+            )}
           </div>
+          <Badge
+            variant={statusConfig.variant}
+            className="shrink-0 ml-2 text-[11px]"
+          >
+            {isProcessing && (
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-pulse mr-1" />
+            )}
+            {statusConfig.label}
+          </Badge>
+        </div>
 
-          <p className="text-xl font-semibold tracking-tight mb-4 tabular-nums">
-            {formatCurrency(deal.loanAmount)}
-          </p>
+        <p className="text-xl font-semibold tracking-tight mb-4 tabular-nums">
+          {formatCurrency(deal.loanAmount)}
+        </p>
 
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <FileText className="h-3.5 w-3.5" />
-              {deal._count.documents} doc{deal._count.documents !== 1 ? "s" : ""}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5" />
-              {formatDate(deal.createdAt)}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <FileText className="h-3.5 w-3.5" />
+            {deal._count.documents} doc{deal._count.documents !== 1 ? "s" : ""}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Calendar className="h-3.5 w-3.5" />
+            {formatDate(deal.createdAt)}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

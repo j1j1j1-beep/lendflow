@@ -1,283 +1,471 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, X, Landmark } from "lucide-react";
+import {
+  Landmark,
+  Building2,
+  Handshake,
+  Building,
+  ShieldCheck,
+  FileText,
+  AlertTriangle,
+  Calendar,
+  Clock,
+  Plus,
+  TrendingUp,
+  Activity,
+  ArrowUpRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DealCard } from "@/components/DealCard";
+import {
+  FadeIn,
+  Stagger,
+  StaggerItem,
+  CountUp,
+  ScaleIn,
+  AnimatedListItem,
+} from "@/components/motion";
 
-type DealSummary = {
-  id: string;
-  borrowerName: string;
-  loanAmount: string | null;
-  loanType: string | null;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  _count: { documents: number };
+type Module = "lending" | "capital" | "ma" | "syndication" | "compliance";
+
+interface DashboardData {
+  stats: {
+    total: number;
+    active: number;
+    needsReview: number;
+    complete: number;
+    error: number;
+    docsGenerated: number;
+    byModule: Record<Module, number>;
+  };
+  recent: Array<{
+    module: Module;
+    id: string;
+    name: string;
+    status: string;
+    updatedAt: string;
+    docs: number;
+  }>;
+  deadlines: Array<{
+    module: string;
+    projectId: string;
+    projectName: string;
+    label: string;
+    date: string;
+  }>;
+  flagged: Array<{
+    module: Module;
+    id: string;
+    name: string;
+    status: string;
+  }>;
+}
+
+const MODULE_CONFIG: Record<
+  Module,
+  { label: string; icon: typeof Landmark; href: string; color: string; bg: string; newHref: string }
+> = {
+  lending: { label: "Lending", icon: Landmark, href: "/dashboard/lending", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/50", newHref: "/dashboard/lending/new" },
+  capital: { label: "Capital", icon: Building2, href: "/dashboard/capital", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/50", newHref: "/dashboard/capital/new" },
+  ma: { label: "Deals/M&A", icon: Handshake, href: "/dashboard/deals", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/50", newHref: "/dashboard/deals/new" },
+  syndication: { label: "Syndication", icon: Building, href: "/dashboard/syndication", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/50", newHref: "/dashboard/syndication/new" },
+  compliance: { label: "Compliance", icon: ShieldCheck, href: "/dashboard/compliance", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-950/50", newHref: "/dashboard/compliance/new" },
 };
 
-const STATUS_FILTERS = [
-  { label: "All", value: "all" },
-  { label: "Processing", value: "processing" },
-  { label: "Needs Review", value: "NEEDS_REVIEW" },
-  { label: "Complete", value: "COMPLETE" },
-] as const;
+const STATUS_STYLES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  CREATED: { label: "Created", variant: "secondary" },
+  GENERATING_DOCS: { label: "Generating", variant: "secondary" },
+  COMPLIANCE_REVIEW: { label: "In Review", variant: "secondary" },
+  NEEDS_REVIEW: { label: "Needs Review", variant: "outline" },
+  NEEDS_TERM_REVIEW: { label: "Needs Review", variant: "outline" },
+  COMPLETE: { label: "Complete", variant: "default" },
+  ERROR: { label: "Error", variant: "destructive" },
+};
 
-const PROCESSING_STATUSES = [
-  "UPLOADED",
-  "PROCESSING_OCR",
-  "CLASSIFYING",
-  "EXTRACTING",
-  "VERIFYING",
-  "RESOLVING",
-  "ANALYZING",
-  "STRUCTURING",
-  "GENERATING_DOCS",
-  "GENERATING_MEMO",
-];
+function projectHref(module: Module, id: string): string {
+  if (module === "lending") return `/dashboard/lending/${id}`;
+  if (module === "ma") return `/dashboard/deals/${id}`;
+  return `/dashboard/${module}/${id}`;
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function daysUntil(dateStr: string): { text: string; urgent: boolean } {
+  const diff = new Date(dateStr).getTime() - Date.now();
+  const days = Math.ceil(diff / 86_400_000);
+  if (days < 0) return { text: `${Math.abs(days)}d overdue`, urgent: true };
+  if (days === 0) return { text: "Today", urgent: true };
+  if (days === 1) return { text: "Tomorrow", urgent: true };
+  if (days <= 7) return { text: `${days} days`, urgent: true };
+  if (days <= 30) return { text: `${days} days`, urgent: false };
+  return { text: `${Math.floor(days / 30)}mo`, urgent: false };
+}
 
 export default function DashboardPage() {
-  const [deals, setDeals] = useState<DealSummary[]>([]);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>("all");
-  const [searchInput, setSearchInput] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const isInitialLoad = useRef(true);
-
-  // Debounce search input (300ms)
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(searchInput.trim()), 300);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
-  // Fetch deals from server — only depends on debounced search (tab switching is instant/client-side)
-  const fetchDeals = useCallback(async () => {
-    try {
-      setFetchError(null);
-      const params = new URLSearchParams();
-      if (debouncedSearch) {
-        params.set("search", debouncedSearch);
-      }
-      params.set("limit", "200");
-      const res = await fetch(`/api/deals?${params.toString()}`);
-      if (!res.ok) throw new Error("Failed to load deals");
-      const data = await res.json();
-      setDeals(data.deals ?? data);
-    } catch (err) {
-      if (isInitialLoad.current) {
-        setFetchError(err instanceof Error ? err.message : "Failed to load deals");
-      }
-    } finally {
-      setLoading(false);
-      isInitialLoad.current = false;
-    }
-  }, [debouncedSearch]);
 
   useEffect(() => {
-    if (isInitialLoad.current) setLoading(true);
-    fetchDeals();
-  }, [fetchDeals]);
+    fetch("/api/dashboard")
+      .then((res) => res.json())
+      .then((d) => { setData(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
 
-  // Polling for active deals — ref-based to avoid interval recreation on every render
-  const fetchDealsRef = useRef(fetchDeals);
-  useEffect(() => { fetchDealsRef.current = fetchDeals; }, [fetchDeals]);
+  if (loading) return <DashboardSkeleton />;
+  if (!data) return <DashboardEmpty />;
 
-  useEffect(() => {
-    const hasActiveDeals = deals.some((d) =>
-      PROCESSING_STATUSES.includes(d.status)
-    );
-    if (!hasActiveDeals) return;
+  const { stats, recent, deadlines, flagged } = data;
+  const hasProjects = stats.total > 0;
 
-    const interval = setInterval(() => fetchDealsRef.current(), 10000);
-    return () => clearInterval(interval);
-  }, [deals]);
+  if (!hasProjects) return <DashboardEmpty />;
 
-  // Client-side filtering (instant, no re-fetch needed for tab switching or typing)
-  const trimmedSearch = searchInput.trim().toLowerCase();
-  const searchedDeals = trimmedSearch
-    ? deals.filter((d) =>
-        d.borrowerName.toLowerCase().includes(trimmedSearch)
-      )
-    : deals;
-
-  const filteredDeals =
-    filter === "all"
-      ? searchedDeals
-      : filter === "processing"
-        ? searchedDeals.filter((d) => PROCESSING_STATUSES.includes(d.status))
-        : filter === "NEEDS_REVIEW"
-          ? searchedDeals.filter((d) => d.status === "NEEDS_REVIEW" || d.status === "NEEDS_TERM_REVIEW")
-          : searchedDeals.filter((d) => d.status === filter);
-
-  const stats = {
-    total: deals.length,
-    processing: deals.filter((d) => PROCESSING_STATUSES.includes(d.status)).length,
-    review: deals.filter((d) => d.status === "NEEDS_REVIEW" || d.status === "NEEDS_TERM_REVIEW").length,
-    complete: deals.filter((d) => d.status === "COMPLETE").length,
-  };
+  const activeModules = (Object.entries(stats.byModule) as [Module, number][])
+    .filter(([, count]) => count > 0);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight">Deals</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Manage loan applications and credit analyses
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative w-full sm:w-[300px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            <input
-              type="text"
-              aria-label="Search deals by borrower name"
-              placeholder="Search by borrower name..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              maxLength={100}
-              className="h-9 w-full rounded-lg border bg-background pl-9 pr-9 text-sm transition-all duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
-            />
-            {searchInput && (
-              <button
-                onClick={() => setSearchInput("")}
-                aria-label="Clear search"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
+      <FadeIn delay={0} duration={0.5}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Overview across all your products
+            </p>
           </div>
-          <Link href="/dashboard/lending/new" className="shrink-0">
-            <Button size="sm">
-              <Plus className="h-4 w-4" />
-              New Deal
-            </Button>
-          </Link>
+        </div>
+      </FadeIn>
+
+      {/* Stats row */}
+      <Stagger className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3" staggerDelay={0.08} initialDelay={0.1}>
+        <StaggerItem>
+          <StatCard label="Total Projects" value={stats.total} icon={Activity} />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard label="Active" value={stats.active} icon={TrendingUp} />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard label="Needs Review" value={stats.needsReview} icon={AlertTriangle} highlight={stats.needsReview > 0} />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard label="Complete" value={stats.complete} icon={FileText} />
+        </StaggerItem>
+        <StaggerItem className="col-span-2 sm:col-span-1">
+          <StatCard label="Docs Generated" value={stats.docsGenerated} icon={FileText} />
+        </StaggerItem>
+      </Stagger>
+
+      {/* Module cards */}
+      <Stagger className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" staggerDelay={0.06} initialDelay={0.3}>
+        {activeModules.map(([mod, count]) => {
+          const config = MODULE_CONFIG[mod];
+          const Icon = config.icon;
+          return (
+            <StaggerItem key={mod}>
+              <Link href={config.href}>
+                <Card className="group cursor-pointer transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110 ${config.color} ${config.bg}`}>
+                      <Icon className="h-4.5 w-4.5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{config.label}</p>
+                      <p className="text-xs text-muted-foreground">{count} project{count !== 1 ? "s" : ""}</p>
+                    </div>
+                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/0 group-hover:text-muted-foreground transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </CardContent>
+                </Card>
+              </Link>
+            </StaggerItem>
+          );
+        })}
+      </Stagger>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent projects */}
+        <FadeIn delay={0.4} className="lg:col-span-2">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y">
+                {recent.map((project, i) => {
+                  const config = MODULE_CONFIG[project.module];
+                  const Icon = config.icon;
+                  const statusCfg = STATUS_STYLES[project.status];
+                  return (
+                    <AnimatedListItem key={`${project.module}-${project.id}`} index={i}>
+                      <Link
+                        href={projectHref(project.module, project.id)}
+                        className="flex items-center gap-3 px-6 py-3 hover:bg-muted/50 transition-colors group"
+                      >
+                        <div className={`flex h-8 w-8 items-center justify-center rounded-lg shrink-0 transition-transform duration-200 group-hover:scale-105 ${config.color} ${config.bg}`}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium truncate group-hover:text-primary transition-colors duration-150">{project.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {config.label} &middot; {project.docs} doc{project.docs !== 1 ? "s" : ""} &middot; {timeAgo(project.updatedAt)}
+                          </p>
+                        </div>
+                        {statusCfg && (
+                          <Badge variant={statusCfg.variant} className="text-[10px] shrink-0">
+                            {statusCfg.label}
+                          </Badge>
+                        )}
+                      </Link>
+                    </AnimatedListItem>
+                  );
+                })}
+                {recent.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-8">No recent activity</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </FadeIn>
+
+        {/* Right sidebar: Deadlines + Flags */}
+        <div className="space-y-6">
+          {/* Deadlines */}
+          <FadeIn delay={0.5}>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  Upcoming Deadlines
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y">
+                  {deadlines.length > 0 ? deadlines.map((dl, i) => {
+                    const due = daysUntil(dl.date);
+                    return (
+                      <AnimatedListItem key={i} index={i}>
+                        <Link
+                          href={projectHref(dl.module as Module, dl.projectId)}
+                          className="flex items-center justify-between px-6 py-3 hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">{dl.projectName}</p>
+                            <p className="text-xs text-muted-foreground">{dl.label}</p>
+                          </div>
+                          <span className={`text-xs font-medium shrink-0 tabular-nums ${due.urgent ? "text-destructive" : "text-muted-foreground"}`}>
+                            {due.text}
+                          </span>
+                        </Link>
+                      </AnimatedListItem>
+                    );
+                  }) : (
+                    <p className="text-sm text-muted-foreground text-center py-6">No upcoming deadlines</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </FadeIn>
+
+          {/* Flagged */}
+          {flagged.length > 0 && (
+            <FadeIn delay={0.6}>
+              <Card className="border-amber-200 dark:border-amber-900/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                    Needs Attention
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {flagged.map((project, i) => {
+                      const config = MODULE_CONFIG[project.module];
+                      const statusCfg = STATUS_STYLES[project.status];
+                      return (
+                        <AnimatedListItem key={`${project.module}-${project.id}`} index={i}>
+                          <Link
+                            href={projectHref(project.module, project.id)}
+                            className="flex items-center justify-between px-6 py-3 hover:bg-muted/50 transition-colors"
+                          >
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">{project.name}</p>
+                              <p className="text-xs text-muted-foreground">{config.label}</p>
+                            </div>
+                            {statusCfg && (
+                              <Badge variant={statusCfg.variant} className="text-[10px] shrink-0">
+                                {statusCfg.label}
+                              </Badge>
+                            )}
+                          </Link>
+                        </AnimatedListItem>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </FadeIn>
+          )}
         </div>
       </div>
 
-      {/* Fetch Error */}
-      {fetchError && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 mb-6">
-          <p className="text-sm text-destructive font-medium">{fetchError}</p>
-          <button
-            onClick={() => { isInitialLoad.current = true; setLoading(true); fetchDeals(); }}
-            className="text-sm text-destructive underline mt-1"
-          >
-            Try again
-          </button>
-        </div>
-      )}
-
-      {/* Stats */}
-      {!loading && !fetchError && deals.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          {[
-            { label: "Total", value: stats.total },
-            { label: "Processing", value: stats.processing },
-            { label: "Needs Review", value: stats.review },
-            { label: "Complete", value: stats.complete },
-          ].map((stat, i) => (
-            <div
-              key={stat.label}
-              className="rounded-lg border bg-card p-3 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-foreground/15 animate-fade-up"
-              style={{ animationDelay: `${i * 50}ms` }}
-            >
-              <p className="text-xs font-medium text-muted-foreground">
-                {stat.label}
-              </p>
-              <p className="text-2xl font-semibold tracking-tight mt-0.5 tabular-nums">
-                {stat.value}
-              </p>
+      {/* Quick actions */}
+      <FadeIn delay={0.7}>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Quick Start</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {activeModules.map(([mod]) => {
+                const config = MODULE_CONFIG[mod];
+                const Icon = config.icon;
+                return (
+                  <Link key={mod} href={config.newHref}>
+                    <Button variant="outline" size="sm" className="gap-2 transition-all duration-200 hover:shadow-sm hover:-translate-y-px active:translate-y-0">
+                      <Plus className="h-3.5 w-3.5" />
+                      <Icon className="h-3.5 w-3.5" />
+                      New {config.label}
+                    </Button>
+                  </Link>
+                );
+              })}
             </div>
-          ))}
-        </div>
-      )}
+          </CardContent>
+        </Card>
+      </FadeIn>
+    </div>
+  );
+}
 
-      {/* Status Filter Tabs */}
-      <div className="flex gap-1 mb-5 rounded-lg bg-muted p-1 w-fit">
-        {STATUS_FILTERS.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setFilter(tab.value)}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-150 ease-out ${
-              filter === tab.value
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-            }`}
-          >
-            {tab.label}
-          </button>
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  highlight,
+  className,
+}: {
+  label: string;
+  value: number;
+  icon: typeof Activity;
+  highlight?: boolean;
+  className?: string;
+}) {
+  return (
+    <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${className ?? ""}`}>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+          <Icon className={`h-4 w-4 ${highlight ? "text-amber-500" : "text-muted-foreground/50"}`} />
+        </div>
+        <p className={`text-2xl font-semibold tracking-tight tabular-nums ${highlight ? "text-amber-600 dark:text-amber-400" : ""}`}>
+          <CountUp to={value} duration={0.8} />
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <div>
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-4 w-60 mt-2" />
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-4 space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-8 w-12" />
+            </CardContent>
+          </Card>
         ))}
       </div>
-
-      {/* Deal Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-xl border bg-card p-5 space-y-3">
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-4 w-24" />
-              <div className="flex justify-between pt-2">
-                <Skeleton className="h-4 w-20" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+          <CardContent className="p-6 space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <Skeleton className="h-8 w-8 rounded-lg" />
+                <div className="flex-1 space-y-1">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-3 w-28" />
+                </div>
                 <Skeleton className="h-5 w-16 rounded-full" />
               </div>
-            </div>
-          ))}
-        </div>
-      ) : filteredDeals.length === 0 ? (
-        filter === "all" && !searchInput ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 px-4">
-          <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <Landmark className="h-5 w-5 text-primary" />
+            ))}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+                <Skeleton className="h-4 w-12" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function DashboardEmpty() {
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 px-4">
+        <ScaleIn delay={0.1}>
+          <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
+            <Activity className="h-7 w-7 text-primary" />
           </div>
-          <h3 className="text-lg font-semibold mb-1">Welcome to OpenShut</h3>
-          <p className="text-sm text-muted-foreground mb-6 text-center max-w-md">
-            Upload borrower documents to generate a complete loan package — credit analysis, deal structuring, and legal documents in minutes.
+        </ScaleIn>
+        <FadeIn delay={0.2}>
+          <h2 className="text-xl font-semibold mb-2 text-center">Welcome to OpenShut</h2>
+        </FadeIn>
+        <FadeIn delay={0.3}>
+          <p className="text-sm text-muted-foreground text-center max-w-md mb-8">
+            Legal document automation for private equity, lending, syndication, M&A, and fund compliance. Get started by creating your first project.
           </p>
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard/lending/new">
-              <Button size="sm">
-                <Plus className="h-4 w-4" />
-                New Deal
-              </Button>
-            </Link>
-            <span className="text-xs text-muted-foreground">or</span>
-            <Link href="/dashboard/lending/new">
-              <Button size="sm" variant="outline">
-                Try Sample Deal
-              </Button>
-            </Link>
-          </div>
-        </div>
-        ) : (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 px-4 transition-colors duration-200 hover:border-foreground/20">
-          <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4 animate-fade-up">
-            <Search className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <h3 className="text-base font-medium mb-1">
-            {searchInput
-              ? `No deals matching "${searchInput.trim()}"`
-              : "No matching deals"}
-          </h3>
-          <p className="text-sm text-muted-foreground mb-5 text-center max-w-xs">
-            {searchInput
-              ? "Try a different search term or clear the filter."
-              : "Try a different filter."}
-          </p>
-        </div>
-        )
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredDeals.map((deal) => (
-            <DealCard key={deal.id} deal={deal} />
-          ))}
-        </div>
-      )}
+        </FadeIn>
+        <Stagger className="flex flex-wrap justify-center gap-3" staggerDelay={0.08} initialDelay={0.4}>
+          {(["lending", "capital", "syndication", "ma", "compliance"] as Module[]).map((mod) => {
+            const config = MODULE_CONFIG[mod];
+            const Icon = config.icon;
+            return (
+              <StaggerItem key={mod}>
+                <Link href={config.newHref}>
+                  <Button variant="outline" className="gap-2 transition-all duration-200 hover:shadow-sm hover:-translate-y-px">
+                    <Icon className="h-4 w-4" />
+                    {config.label}
+                  </Button>
+                </Link>
+              </StaggerItem>
+            );
+          })}
+        </Stagger>
+      </div>
     </div>
   );
 }

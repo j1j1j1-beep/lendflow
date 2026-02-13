@@ -26,6 +26,15 @@ model Organization {
   syndicationProjects   SyndicationProject[]
   complianceProjects    ComplianceProject[]
 
+  // Contacts directories
+  borrowers         Borrower[]
+  investors         Investor[]
+  buyerSellers      BuyerSeller[]
+  lpContacts        LPContact[]
+
+  // AI Document Assistant
+  chatThreads       ChatThread[]
+
   // Bio vertical
   bioPrograms      BioProgram[]
   bioSubscription  BioSubscription?
@@ -435,6 +444,7 @@ model GeneratedDocument {
   verificationStatus String? // PENDING, PASSED, FAILED
   verificationIssues Json?
   complianceChecks   Json?   // Array of ComplianceCheck objects — regulatory provisions checked
+  extractedText      String? @db.Text // Full document text captured before DOCX conversion
 
   signedBy  String?
   signedAt  DateTime?
@@ -667,6 +677,7 @@ model CapitalDocument {
   complianceIssues   Json?
   verificationStatus VerificationCheckStatus?
   verificationIssues Json?
+  extractedText      String? @db.Text // Full document text captured before DOCX conversion
 
   createdBy          String?
   updatedBy          String?
@@ -850,6 +861,7 @@ model MADocument {
   complianceIssues   Json?
   verificationStatus VerificationCheckStatus?
   verificationIssues Json?
+  extractedText      String? @db.Text // Full document text captured before DOCX conversion
 
   createdBy          String?
   updatedBy          String?
@@ -1023,6 +1035,7 @@ model SyndicationDocument {
   complianceIssues   Json?
   verificationStatus VerificationCheckStatus?
   verificationIssues Json?
+  extractedText      String? @db.Text // Full document text captured before DOCX conversion
 
   createdBy          String?
   updatedBy          String?
@@ -1263,6 +1276,7 @@ model ComplianceDocument {
   complianceIssues   Json?
   verificationStatus VerificationCheckStatus?
   verificationIssues Json?
+  extractedText      String? @db.Text // Full document text captured before DOCX conversion
 
   createdBy          String?
   updatedBy          String?
@@ -1273,6 +1287,36 @@ model ComplianceDocument {
 
   @@index([projectId])
   @@unique([projectId, docType, version])
+}
+
+// ──────────────────────────────────────────────
+// AI Document Assistant (Chat per project)
+// ──────────────────────────────────────────────
+
+model ChatThread {
+  id        String   @id @default(cuid())
+  orgId     String
+  org       Organization @relation(fields: [orgId], references: [id])
+  module    String   // "lending" | "capital" | "syndication" | "ma" | "compliance"
+  projectId String   // module-specific project ID
+  messages  ChatMessage[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([module, projectId])
+  @@index([orgId])
+}
+
+model ChatMessage {
+  id        String     @id @default(cuid())
+  threadId  String
+  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  role      String     // "user" | "assistant"
+  content   String     @db.Text
+  metadata  Json?      // { model, inputTokens, outputTokens }
+  createdAt DateTime   @default(now())
+
+  @@index([threadId, createdAt])
 }
 
 // ──────────────────────────────────────────────
@@ -1302,6 +1346,123 @@ model SourceDocument {
 
   @@index([module, projectId])
   @@index([orgId])
+}
+
+// ──────────────────────────────────────────────
+// Contacts Directory (per-module, org-level)
+// ──────────────────────────────────────────────
+
+model Borrower {
+  id              String       @id @default(cuid())
+  orgId           String
+  org             Organization @relation(fields: [orgId], references: [id])
+
+  name            String
+  email           String?
+  phone           String?
+  company         String?
+  address         String?
+  city            String?
+  state           String?
+  zip             String?
+  entityType      String?      // "individual", "llc", "corporation", "partnership", "trust"
+  einOrSsn        String?      // Encrypted/masked in UI
+  creditScore     Int?
+  notes           String?      @db.Text
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+
+  @@index([orgId])
+  @@index([orgId, name])
+}
+
+model Investor {
+  id              String       @id @default(cuid())
+  orgId           String
+  org             Organization @relation(fields: [orgId], references: [id])
+
+  name            String
+  email           String?
+  phone           String?
+  company         String?
+  investorType    InvestorType?
+  accreditationStatus AccreditationStatus @default(PENDING)
+  accreditationDate   DateTime?
+  accreditationExpiry DateTime?
+  accreditationMethod String?
+  address         String?
+  city            String?
+  state           String?
+  zip             String?
+  preferredMinInvestment Decimal? @db.Decimal(18, 2)
+  preferredMaxInvestment Decimal? @db.Decimal(18, 2)
+  preferredFundTypes     Json?   // Array of strings
+  notes           String?      @db.Text
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+
+  @@index([orgId])
+  @@index([orgId, name])
+}
+
+model BuyerSeller {
+  id              String       @id @default(cuid())
+  orgId           String
+  org             Organization @relation(fields: [orgId], references: [id])
+
+  name            String       // Person or company name
+  role            String       @default("buyer") // "buyer", "seller", "both"
+  email           String?
+  phone           String?
+  company         String?
+  entityName      String?      // Legal entity name
+  counsel         String?      // Law firm / attorney name
+  industry        String?
+  stateOfIncorp   String?
+  address         String?
+  city            String?
+  state           String?
+  zip             String?
+  notes           String?      @db.Text
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+
+  @@index([orgId])
+  @@index([orgId, name])
+}
+
+model LPContact {
+  id              String       @id @default(cuid())
+  orgId           String
+  org             Organization @relation(fields: [orgId], references: [id])
+
+  name            String
+  email           String?
+  phone           String?
+  company         String?
+  investorType    InvestorType?
+  accreditationStatus AccreditationStatus @default(PENDING)
+  accreditationDate   DateTime?
+  accreditationExpiry DateTime?
+  address         String?
+  city            String?
+  state           String?
+  zip             String?
+  taxId           String?      // For K-1 purposes
+  notes           String?      @db.Text
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+
+  @@index([orgId])
+  @@index([orgId, name])
 }
 
 // Bio Vertical (separate from lending — shares Org, User, AuditLog only)
