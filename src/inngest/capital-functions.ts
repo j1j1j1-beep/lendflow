@@ -5,9 +5,10 @@
 import { inngest } from "./client";
 import { prisma } from "@/lib/db";
 import { uploadToS3 } from "@/lib/s3";
-import { generateCapitalDoc } from "@/documents/capital/generate-doc";
+import { generateCapitalDoc, setCapitalSourceDocContent } from "@/documents/capital/generate-doc";
 import { CAPITAL_DOC_TYPES, CAPITAL_DOC_TYPE_LABELS } from "@/documents/capital/types";
 import type { CapitalProjectFull } from "@/documents/capital/types";
+import { getMissingSourceDocKeys } from "@/lib/source-doc-check";
 
 const DOCX_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -72,7 +73,28 @@ export const capitalGenerateDocs = inngest.createFunction(
         });
       });
 
-      // Step 3: Generate each document type in its own step for retry isolation
+      // Step 3: Fetch missing source docs (once, reused for all doc types)
+      const missingDocs = await step.run("fetch-missing-source-docs", async () => {
+        return getMissingSourceDocKeys("capital", projectId);
+      });
+
+      // Step 3b: Load extracted source doc content for injection into AI prompts
+      const sourceDocContent = await step.run("load-source-doc-content", async () => {
+        const docs = await prisma.sourceDocument.findMany({
+          where: { module: "capital", projectId, deletedAt: null, docType: { not: null }, ocrText: { not: null } },
+          select: { docType: true, ocrText: true },
+        });
+        const content: Record<string, string> = {};
+        for (const doc of docs) {
+          if (doc.docType && doc.ocrText) content[doc.docType] = doc.ocrText;
+        }
+        return content;
+      });
+
+      // Inject source doc content into the module-level var so buildProjectContext picks it up
+      setCapitalSourceDocContent(sourceDocContent);
+
+      // Step 4: Generate each document type in its own step for retry isolation
       for (const docType of CAPITAL_DOC_TYPES) {
         lastStep = `generate-${docType}`;
         const label = CAPITAL_DOC_TYPE_LABELS[docType] ?? docType;
@@ -100,7 +122,7 @@ export const capitalGenerateDocs = inngest.createFunction(
             // Generate the document (30s for deterministic, 180s for AI)
             const isDeterministic = ["form_d_draft", "investor_questionnaire"].includes(docType);
             const { buffer, complianceChecks } = await withTimeout(
-              generateCapitalDoc(freshProject, docType),
+              generateCapitalDoc(freshProject, docType, missingDocs),
               isDeterministic ? 30_000 : 180_000,
               `generate-${docType}`,
             );

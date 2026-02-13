@@ -32,7 +32,7 @@ export default async function BioLanding() {
   if (userId) redirect("/dashboard/bio");
 
   return (
-    <div className="dark flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
+    <div className="flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
       {/* Emerald Gradient Orbs */}
       <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-emerald-500/5 blur-3xl" />
       <div className="pointer-events-none absolute top-1/3 -left-40 h-[500px] w-[500px] rounded-full bg-emerald-500/3 blur-3xl" />
@@ -77,7 +77,7 @@ export default async function BioLanding() {
                 </button>
               </SignInButton>
               <Link
-                href="/bio/features"
+                href="/bio#features"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-emerald-500/20 px-8 text-sm font-medium text-muted-foreground transition-all duration-200 ease-out hover:text-foreground hover:border-emerald-500/40 hover:bg-emerald-500/5"
               >
                 See All Features
@@ -141,7 +141,7 @@ export default async function BioLanding() {
       {/* ============================================ */}
       {/* PLATFORM OVERVIEW */}
       {/* ============================================ */}
-      <section className="w-full">
+      <section id="features" className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-3xl mx-auto mb-14">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up">
@@ -511,7 +511,7 @@ export default async function BioLanding() {
       {/* ============================================ */}
       {/* CTA */}
       {/* ============================================ */}
-      <section className="w-full border-t border-emerald-500/10 bg-emerald-500/[0.03]">
+      <section id="pricing" className="w-full border-t border-emerald-500/10 bg-emerald-500/[0.03]">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="relative rounded-2xl border border-emerald-500/20 bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5 animate-fade-up">
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -535,7 +535,7 @@ export default async function BioLanding() {
                   </button>
                 </SignInButton>
                 <Link
-                  href="/bio/pricing"
+                  href="/bio#pricing"
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-emerald-500/20 px-8 text-sm font-medium text-muted-foreground transition-all duration-200 ease-out hover:text-foreground hover:border-emerald-500/40 hover:bg-emerald-500/5"
                 >
                   View Pricing

@@ -3,12 +3,17 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
 import { inngest } from "@/inngest/client";
 import { logAudit } from "@/lib/audit";
+import { withRateLimit } from "@/lib/with-rate-limit";
+import { pipelineLimit } from "@/lib/rate-limit";
 
 // POST /api/bio/programs/[programId]/analyze — Trigger bio analysis pipeline
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ programId: string }> },
 ) {
+  const limited = await withRateLimit(request, pipelineLimit);
+  if (limited) return limited;
+
   try {
     const { user, org } = await requireAuth();
     const { programId } = await params;

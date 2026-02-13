@@ -686,13 +686,15 @@ export function ensureProseArray(value: unknown): string[] {
   return [String(value)];
 }
 
-export function buildLegalDocument(options: {
+export type LegalDocBuildOptions = {
   title: string;
   headerLeft?: string;
   headerRight?: string;
   children: Paragraph[] | (Paragraph | Table)[];
-}): Document {
-  return new Document({
+};
+
+export function buildLegalDocument(options: LegalDocBuildOptions): Document {
+  const doc = new Document({
     styles: {
       default: {
         document: {
@@ -812,4 +814,84 @@ export function buildLegalDocument(options: {
       },
     ],
   });
+  // Store build options so prependToDocument can rebuild with notices
+  (doc as any)._buildOptions = options;
+  return doc;
+}
+
+/**
+ * Rebuild a document with additional paragraphs prepended.
+ * Works with documents created by buildLegalDocument.
+ */
+export function prependToDocument(
+  doc: Document,
+  paragraphs: (Paragraph | Table)[],
+): Document {
+  if (!paragraphs.length) return doc;
+  const opts = (doc as any)._buildOptions as LegalDocBuildOptions | undefined;
+  if (!opts) return doc;
+  return buildLegalDocument({
+    ...opts,
+    children: [...paragraphs, ...opts.children],
+  });
+}
+
+// ─── Pending Source Document Notices ─────────────────────────────────
+
+/**
+ * Build paragraphs for missing source documents that affect a specific output doc.
+ * Returns an array of paragraphs (empty if no relevant docs are missing).
+ */
+export function pendingDocNotices(
+  missingSourceDocs: string[],
+  outputDocType: string,
+  sourceDocDefs: Array<{ key: string; label: string; affectsOutputDocs: string[] }>,
+): Paragraph[] {
+  if (!missingSourceDocs.length) return [];
+
+  const relevant = sourceDocDefs.filter(
+    (def) =>
+      missingSourceDocs.includes(def.key) &&
+      def.affectsOutputDocs.some(
+        (d) => d.toLowerCase() === outputDocType.toLowerCase(),
+      ),
+  );
+  if (!relevant.length) return [];
+
+  const paragraphs: Paragraph[] = [
+    spacer(12),
+    new Paragraph({
+      spacing: { before: 200, after: 100 },
+      border: {
+        top: { style: BorderStyle.SINGLE, size: 2, color: COLORS.black },
+        bottom: { style: BorderStyle.SINGLE, size: 2, color: COLORS.black },
+      },
+      children: [
+        new TextRun({
+          text: "NOTICE: PENDING SOURCE DOCUMENTS",
+          bold: true,
+          size: 22,
+          font: FONTS.legal,
+          color: COLORS.black,
+        }),
+      ],
+    }),
+    bodyText(
+      "The following source documents were not provided at the time of generation. " +
+      "Sections that reference these documents contain placeholder text. " +
+      "Upload the missing documents and regenerate to produce a complete document.",
+      { italic: true },
+    ),
+  ];
+
+  for (const def of relevant) {
+    paragraphs.push(
+      bodyText(`[PENDING: ${def.label} — upload this document and regenerate]`, {
+        bold: true,
+      }),
+    );
+  }
+
+  paragraphs.push(spacer(12));
+  return paragraphs;
 }

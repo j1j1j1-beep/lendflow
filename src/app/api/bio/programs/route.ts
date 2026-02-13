@@ -116,24 +116,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // #20: Validate DAR range (0-20) if provided
+    if (dar !== undefined && dar !== null && dar !== "") {
+      const parsedDar = parseFloat(dar);
+      if (isNaN(parsedDar) || parsedDar < 0 || parsedDar > 20) {
+        return NextResponse.json(
+          { error: "DAR must be between 0 and 20" },
+          { status: 400 },
+        );
+      }
+    }
+
     const validToolTypes = ["DATA_ANALYSIS", "REGULATORY_DOCS", "COMPLIANCE_AUDIT"];
     const validPhases = ["PRECLINICAL", "IND_FILING", "PHASE_1", "PHASE_1B", "PHASE_2", "PHASE_2B", "PHASE_3", "NDA_BLA", "APPROVED", "POST_MARKET"];
+
+    // #7: Normalize drugClass to uppercase for consistent storage
+    const normalizedDrugClass = drugClass ? String(drugClass).toUpperCase() : null;
 
     const program = await prisma.bioProgram.create({
       data: {
         name,
         drugName,
-        drugClass: drugClass || null,
+        drugClass: normalizedDrugClass,
         target: target || null,
         mechanism: mechanism || null,
         indication: indication || null,
-        phase: phase && validPhases.includes(phase) ? phase : null,
+        phase: phase && validPhases.includes(phase) ? phase : "PHASE_1",
         sponsorName: sponsorName || null,
         toolType: validToolTypes.includes(toolType) ? toolType : "REGULATORY_DOCS",
         antibodyType: antibodyType || null,
         linkerType: linkerType || null,
         payloadType: payloadType || null,
-        dar: dar ? (isNaN(parseFloat(dar)) ? null : parseFloat(dar)) : null,
+        dar: dar ? (isNaN(parseFloat(dar)) || Math.abs(parseFloat(dar)) > 1e15 ? null : parseFloat(dar)) : null,
         orgId: org.id,
         userId: user.id,
       },
@@ -145,7 +159,7 @@ export async function POST(request: NextRequest) {
       programId: program.id,
       action: "bio.program_created",
       target: program.id,
-      metadata: { programName: name, drugName, drugClass },
+      metadata: { programName: name, drugName, drugClass: normalizedDrugClass },
     });
 
     return NextResponse.json(program, { status: 201 });

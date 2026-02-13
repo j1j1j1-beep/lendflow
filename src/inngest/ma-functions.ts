@@ -7,9 +7,10 @@
 import { inngest } from "./client";
 import { prisma } from "@/lib/db";
 import { uploadToS3 } from "@/lib/s3";
-import { generateMADoc } from "@/documents/deals/generate-doc";
+import { generateMADoc, setMASourceDocContent } from "@/documents/deals/generate-doc";
 import { MA_DOC_TYPES, MA_DOC_TYPE_LABELS } from "@/documents/deals/types";
 import type { MAProjectFull } from "@/documents/deals/types";
+import { getMissingSourceDocKeys } from "@/lib/source-doc-check";
 
 const DOCX_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -86,6 +87,27 @@ export const maGenerateDocs = inngest.createFunction(
         }
       });
 
+      // Fetch missing source docs (once, reused for all doc types)
+      const missingDocs = await step.run("fetch-missing-source-docs", async () => {
+        return getMissingSourceDocKeys("ma", projectId);
+      });
+
+      // Load extracted source doc content for injection into AI prompts
+      const sourceDocContent = await step.run("load-source-doc-content", async () => {
+        const docs = await prisma.sourceDocument.findMany({
+          where: { module: "ma", projectId, deletedAt: null, docType: { not: null }, ocrText: { not: null } },
+          select: { docType: true, ocrText: true },
+        });
+        const content: Record<string, string> = {};
+        for (const doc of docs) {
+          if (doc.docType && doc.ocrText) content[doc.docType] = doc.ocrText;
+        }
+        return content;
+      });
+
+      // Inject source doc content into the module-level var so buildMAContext picks it up
+      setMASourceDocContent(sourceDocContent);
+
       // Generate each document type in its own step (with per-doc error handling)
       for (const docType of MA_DOC_TYPES) {
         lastStep = docType;
@@ -111,7 +133,7 @@ export const maGenerateDocs = inngest.createFunction(
             const timeoutMs = isAIDoc ? 180_000 : 30_000; // 3 min for AI, 30s for deterministic
 
             const { buffer, complianceChecks, resolvedDocType } = await withTimeout(
-              generateMADoc(currentProject, docType),
+              generateMADoc(currentProject, docType, missingDocs),
               timeoutMs,
               `generate-${docType}`,
             );

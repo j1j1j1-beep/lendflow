@@ -9,10 +9,22 @@ import type { SyndicationProjectFull, ComplianceCheck } from "./types";
 import { SYNDICATION_DOC_TYPE_LABELS } from "./types";
 import {
   buildLegalDocument,
+  prependToDocument,
+  pendingDocNotices,
   documentTitle,
   bodyText,
   formatCurrency,
 } from "../doc-helpers";
+import { SOURCE_DOCS } from "@/lib/source-doc-types";
+
+// Map internal docType keys to output doc labels used in source doc definitions
+const DOC_TYPE_TO_OUTPUT_LABEL: Record<string, string> = {
+  ppm: "PPM",
+  operating_agreement: "Operating Agreement",
+  subscription_agreement: "Subscription Agreement",
+  investor_questionnaire: "Investor Questionnaire",
+  pro_forma: "Pro Forma",
+};
 
 // Template builders
 import { buildPPM, runPPMComplianceChecks } from "./templates/ppm";
@@ -21,10 +33,43 @@ import { buildSubscriptionAgreement, runSubscriptionComplianceChecks } from "./t
 import { buildInvestorQuestionnaire, runQuestionnaireComplianceChecks } from "./templates/investor-questionnaire";
 import { buildProForma, runProFormaComplianceChecks } from "./templates/pro-forma";
 
+// ─── Source Doc Content (module-level var) ───────────────────────────
+
+let _sourceDocContent: Record<string, string> = {};
+
+/** Set extracted source doc content before generation. Called by Inngest pipeline. */
+export function setSyndicationSourceDocContent(content: Record<string, string>) {
+  _sourceDocContent = content;
+}
+
+// ─── Source Doc Content Helper ────────────────────────────────────────
+
+/** Append extracted source doc content to a context string for AI prompts. */
+function appendSourceDocContent(
+  context: string,
+  sourceDocContent: Record<string, string>,
+): string {
+  const entries = Object.entries(sourceDocContent);
+  if (entries.length === 0) return context;
+
+  const sourceBlock = entries
+    .map(([docType, text]) => {
+      const truncated = text.length > 8000 ? text.slice(0, 8000) + "\n[... truncated]" : text;
+      return `\nSOURCE DOCUMENT — ${docType}:\n${truncated}`;
+    })
+    .join("\n");
+  return context + "\n\n" + sourceBlock;
+}
+
 // ─── Project Context Builder ─────────────────────────────────────────
 
-/** Builds a context string from project data for AI prompts. */
-export function buildProjectContext(project: SyndicationProjectFull): string {
+/** Builds a context string from project data for AI prompts.
+ *  If sourceDocContent is provided, extracted OCR text from uploaded source docs
+ *  is appended so the AI can reference real data in its prose. */
+export function buildProjectContext(
+  project: SyndicationProjectFull,
+  sourceDocContent: Record<string, string> = _sourceDocContent,
+): string {
   const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
   const renovationBudget = project.renovationBudget ? Number(project.renovationBudget) : 0;
   const closingCosts = project.closingCosts ? Number(project.closingCosts) : 0;
@@ -69,7 +114,7 @@ export function buildProjectContext(project: SyndicationProjectFull): string {
   // Blue sky filings
   const blueSkyFilings = Array.isArray(project.blueSkyFilings) ? project.blueSkyFilings as string[] : null;
 
-  return `SYNDICATION PROJECT DETAILS (source of truth — use these exact terms):
+  const context = `SYNDICATION PROJECT DETAILS (source of truth — use these exact terms):
 Project Name: ${project.name}
 Entity Name: ${project.entityName}
 Entity Type: ${project.entityType}
@@ -155,6 +200,8 @@ CURRENT INVESTORS:
 ${investorSummary}
 
 Date: ${new Date().toISOString().split("T")[0]}`;
+
+  return appendSourceDocContent(context, sourceDocContent);
 }
 
 // ─── Main Dispatcher ─────────────────────────────────────────────────
@@ -162,42 +209,46 @@ Date: ${new Date().toISOString().split("T")[0]}`;
 /**
  * Generate a single syndication document.
  * Returns the DOCX buffer and compliance check results.
+ * If missingSourceDocs is provided, relevant [PENDING: X] notices are prepended.
  */
 export async function generateSyndicationDoc(
   project: SyndicationProjectFull,
   docType: string,
+  missingSourceDocs: string[] = [],
 ): Promise<{ buffer: Buffer; complianceChecks: ComplianceCheck[] }> {
   const label = SYNDICATION_DOC_TYPE_LABELS[docType] ?? docType;
+  const outputLabel = DOC_TYPE_TO_OUTPUT_LABEL[docType] ?? label;
+  const notices = pendingDocNotices(missingSourceDocs, outputLabel, SOURCE_DOCS.syndication);
 
   try {
     switch (docType) {
       case "ppm": {
-        const doc = await buildPPM(project);
+        const doc = prependToDocument(await buildPPM(project), notices);
         const buffer = await Packer.toBuffer(doc) as Buffer;
         const checks = runPPMComplianceChecks(project);
         return { buffer, complianceChecks: checks };
       }
       case "operating_agreement": {
-        const doc = await buildOperatingAgreement(project);
+        const doc = prependToDocument(await buildOperatingAgreement(project), notices);
         const buffer = await Packer.toBuffer(doc) as Buffer;
         const checks = runOperatingAgreementComplianceChecks(project);
         return { buffer, complianceChecks: checks };
       }
       case "subscription_agreement": {
-        const doc = await buildSubscriptionAgreement(project);
+        const doc = prependToDocument(await buildSubscriptionAgreement(project), notices);
         const buffer = await Packer.toBuffer(doc) as Buffer;
         const checks = runSubscriptionComplianceChecks(project);
         return { buffer, complianceChecks: checks };
       }
       case "investor_questionnaire": {
-        const doc = await buildInvestorQuestionnaire(project);
+        const doc = prependToDocument(await buildInvestorQuestionnaire(project), notices);
         const buffer = await Packer.toBuffer(doc) as Buffer;
         const checks = runQuestionnaireComplianceChecks(project);
         return { buffer, complianceChecks: checks };
       }
       case "pro_forma": {
         // Pro forma is 100% deterministic — no AI
-        const doc = buildProForma(project);
+        const doc = prependToDocument(buildProForma(project), notices);
         const buffer = await Packer.toBuffer(doc) as Buffer;
         const checks = runProFormaComplianceChecks(project);
         return { buffer, complianceChecks: checks };

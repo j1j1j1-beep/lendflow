@@ -24,6 +24,8 @@ export async function POST(
 
     const body = await request.json().catch(() => ({}));
     const officerNotes = body.notes as string | undefined;
+    // #12: Optimistic concurrency — caller passes expected version
+    const expectedVersion = typeof body.version === "number" ? body.version : undefined;
 
     // Get the existing bio generated document with program + analysis
     const doc = await prisma.bioGeneratedDocument.findFirst({
@@ -47,12 +49,12 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Double-click protection: reject if doc status indicates active regen
-    // BioGeneratedDocument.status is a free-form string (DRAFT, REVIEWED, etc.)
-    // We use "REGENERATING" as a transient guard
-    if (doc.status === "REGENERATING") {
+    // #12: Optimistic concurrency — reject if version doesn't match
+    if (expectedVersion !== undefined && doc.version !== expectedVersion) {
       return NextResponse.json(
-        { error: "Document is already being regenerated" },
+        {
+          error: `Version conflict: expected v${expectedVersion} but document is at v${doc.version}. Please refresh and try again.`,
+        },
         { status: 409 },
       );
     }
@@ -60,11 +62,18 @@ export async function POST(
     // Save original status to restore on failure
     originalStatus = doc.status;
 
-    // Mark as regenerating to prevent concurrent requests
-    await prisma.bioGeneratedDocument.update({
-      where: { id: docId },
+    // #11 + #12: Atomic check-and-update using version + status filter to prevent race conditions
+    const updateResult = await prisma.bioGeneratedDocument.updateMany({
+      where: { id: docId, version: doc.version, status: { not: "REGENERATING" } },
       data: { status: "REGENERATING" },
     });
+
+    if (updateResult.count === 0) {
+      return NextResponse.json(
+        { error: "Document is already being regenerated or was modified concurrently. Please refresh and try again." },
+        { status: 409 },
+      );
+    }
 
     // Build the feedback string from existing issues + officer notes
     const feedbackParts: string[] = [];

@@ -67,7 +67,14 @@ export async function DELETE(
       return NextResponse.json({ error: "Program not found" }, { status: 404 });
     }
 
-    // Cascade delete handled by Prisma onDelete: Cascade
+    // #31: Explicitly delete BioParameters before program deletion.
+    // While Prisma schema has onDelete: Cascade for BioParameters, we delete
+    // explicitly as a safety net in case cascade configuration changes.
+    await prisma.bioParameters.deleteMany({
+      where: { programId },
+    });
+
+    // Cascade delete handled by Prisma onDelete: Cascade for other relations
     await prisma.bioProgram.delete({
       where: { id: programId },
     });

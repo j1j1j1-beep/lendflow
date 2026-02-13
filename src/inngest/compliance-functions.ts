@@ -7,12 +7,13 @@
 import { inngest } from "./client";
 import { prisma } from "@/lib/db";
 import { uploadToS3 } from "@/lib/s3";
-import { generateComplianceDoc } from "@/documents/compliance/generate-doc";
+import { generateComplianceDoc, setComplianceSourceDocContent } from "@/documents/compliance/generate-doc";
 import {
   REPORT_TYPE_TO_DOC_TYPE,
   COMPLIANCE_DOC_TYPE_LABELS,
 } from "@/documents/compliance/types";
 import type { ComplianceProjectFull } from "@/documents/compliance/types";
+import { getMissingSourceDocKeys } from "@/lib/source-doc-check";
 
 const DOCX_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -96,7 +97,28 @@ export const complianceGenerateDocs = inngest.createFunction(
         });
       });
 
-      // Step 4: Generate the single document
+      // Step 4: Fetch missing source docs
+      const missingDocs = await step.run("fetch-missing-source-docs", async () => {
+        return getMissingSourceDocKeys("compliance", projectId);
+      });
+
+      // Step 4b: Load extracted source doc content for injection into AI prompts
+      const sourceDocContent = await step.run("load-source-doc-content", async () => {
+        const docs = await prisma.sourceDocument.findMany({
+          where: { module: "compliance", projectId, deletedAt: null, docType: { not: null }, ocrText: { not: null } },
+          select: { docType: true, ocrText: true },
+        });
+        const content: Record<string, string> = {};
+        for (const doc of docs) {
+          if (doc.docType && doc.ocrText) content[doc.docType] = doc.ocrText;
+        }
+        return content;
+      });
+
+      // Inject source doc content into the module-level var so buildProjectContext picks it up
+      setComplianceSourceDocContent(sourceDocContent);
+
+      // Step 5: Generate the single document
       lastStep = `generate-${docType}`;
       await step.run(`generate-${docType}`, async () => {
         console.log(`[Compliance] Generating ${label} for project ${projectId}`);
@@ -119,7 +141,7 @@ export const complianceGenerateDocs = inngest.createFunction(
         try {
           // Generate the document (all compliance docs use AI — 180s timeout)
           const { buffer, complianceChecks } = await withTimeout(
-            generateComplianceDoc(freshProject, docType),
+            generateComplianceDoc(freshProject, docType, missingDocs),
             180_000,
             `generate-${docType}`,
           );

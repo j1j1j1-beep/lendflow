@@ -113,21 +113,47 @@ export default function BioDashboardPage() {
     fetchRef.current = fetchPrograms;
   }, [fetchPrograms]);
 
+  // #9: Max polling duration (5 min) with exponential backoff to prevent
+  // infinite polling. After 300s, polling stops with a message.
+  const pollStartTime = useRef<number>(0);
+  const pollIntervalMs = useRef(5000);
+  const [pollTimedOut, setPollTimedOut] = useState(false);
+
   useEffect(() => {
     const hasActive = programs.some((p) =>
       PROCESSING_STATUSES.includes(p.status)
     );
-    if (!hasActive) return;
+    if (!hasActive) {
+      pollStartTime.current = 0;
+      pollIntervalMs.current = 5000;
+      setPollTimedOut(false);
+      return;
+    }
     if (pollErrorCount.current >= 3) return;
-    const interval = setInterval(() => {
-      if (pollErrorCount.current >= 3) {
-        clearInterval(interval);
+    if (pollTimedOut) return;
+
+    // Start tracking poll time
+    if (pollStartTime.current === 0) {
+      pollStartTime.current = Date.now();
+    }
+
+    const MAX_POLL_DURATION_MS = 300_000; // 5 minutes
+
+    const tick = () => {
+      if (pollErrorCount.current >= 3) return;
+      const elapsed = Date.now() - pollStartTime.current;
+      if (elapsed >= MAX_POLL_DURATION_MS) {
+        setPollTimedOut(true);
         return;
       }
       fetchRef.current();
-    }, 10000);
+      // Exponential backoff: 5s -> 7.5s -> 11.25s ... capped at 30s
+      pollIntervalMs.current = Math.min(pollIntervalMs.current * 1.5, 30000);
+    };
+
+    const interval = setInterval(tick, pollIntervalMs.current);
     return () => clearInterval(interval);
-  }, [programs]);
+  }, [programs, pollTimedOut]);
 
   // Client-side filtering
   const trimmedSearch = searchInput.trim().toLowerCase();
@@ -193,6 +219,26 @@ export default function BioDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* #9: Poll timeout message */}
+      {pollTimedOut && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 mb-6">
+          <p className="text-sm text-amber-700 font-medium">
+            Taking longer than expected. Please refresh to check status.
+          </p>
+          <button
+            onClick={() => {
+              setPollTimedOut(false);
+              pollStartTime.current = Date.now();
+              pollIntervalMs.current = 5000;
+              fetchPrograms();
+            }}
+            className="text-sm text-amber-700 underline mt-1"
+          >
+            Resume polling
+          </button>
+        </div>
+      )}
 
       {/* Fetch Error */}
       {fetchError && (

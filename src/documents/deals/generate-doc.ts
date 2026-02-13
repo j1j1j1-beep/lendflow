@@ -7,6 +7,8 @@ import { Packer } from "docx";
 import { claudeJson } from "@/lib/claude";
 import {
   buildLegalDocument,
+  prependToDocument,
+  pendingDocNotices,
   documentTitle,
   bodyText,
   formatCurrency,
@@ -15,6 +17,20 @@ import {
 
 import type { MAProjectFull, ComplianceCheck } from "./types";
 import { MA_DOC_TYPE_LABELS } from "./types";
+import { SOURCE_DOCS } from "@/lib/source-doc-types";
+
+// Map internal docType keys to output doc labels used in source doc definitions
+const DOC_TYPE_TO_OUTPUT_LABEL: Record<string, string> = {
+  loi: "LOI",
+  nda: "NDA",
+  purchase_agreement: "Purchase Agreement",
+  stock_purchase_agreement: "Purchase Agreement",
+  asset_purchase_agreement: "Purchase Agreement",
+  merger_agreement: "Purchase Agreement",
+  due_diligence_checklist: "Due Diligence Checklist",
+  disclosure_schedules: "Disclosure Schedules",
+  closing_checklist: "Closing Checklist",
+};
 
 // Template imports
 import { buildLOI } from "./templates/loi";
@@ -29,6 +45,23 @@ const ZERO_AI_DOCS = new Set([
   "due_diligence_checklist",
   "closing_checklist",
 ]);
+
+/** Append extracted source doc content to a context string for AI prompts. */
+function appendSourceDocContent(
+  context: string,
+  sourceDocContent: Record<string, string>,
+): string {
+  const entries = Object.entries(sourceDocContent);
+  if (entries.length === 0) return context;
+
+  const sourceBlock = entries
+    .map(([docType, text]) => {
+      const truncated = text.length > 8000 ? text.slice(0, 8000) + "\n[... truncated]" : text;
+      return `\nSOURCE DOCUMENT — ${docType}:\n${truncated}`;
+    })
+    .join("\n");
+  return context + "\n\n" + sourceBlock;
+}
 
 // System prompt for M&A document prose generation
 const MA_SYSTEM_PROMPT = `You are a senior M&A attorney with 25+ years of experience at a top-tier law firm. You draft enforceable, production-ready M&A transaction documents for institutional clients. Your documents must withstand judicial scrutiny and regulatory examination.
@@ -63,6 +96,14 @@ This AI-generated content is for document drafting assistance only and does not 
  * Build deal context string from MAProject data.
  * Injects ALL numbers into the prompt so AI writes around them.
  */
+// Stored source doc content is injected at generate time by the Inngest pipeline
+let _sourceDocContent: Record<string, string> = {};
+
+/** Set source doc content for the current generation run. */
+export function setMASourceDocContent(content: Record<string, string>) {
+  _sourceDocContent = content;
+}
+
 function buildMAContext(project: MAProjectFull): string {
   const purchasePrice = safeNumber(project.purchasePrice);
   const cashComponent = safeNumber(project.cashComponent);
@@ -103,7 +144,7 @@ function buildMAContext(project: MAProjectFull): string {
   // Escrow percentage: handle 0-1 (decimal) vs 0-100 (whole number) ambiguity
   // If escrowPercent > 1, user likely entered a whole percentage (e.g. 10 instead of 0.10)
 
-  return `M&A DEAL TERMS (source of truth — use these exact numbers):
+  const context = `M&A DEAL TERMS (source of truth — use these exact numbers):
 
 Transaction Name: ${project.name}
 Transaction Type: ${transactionTypeLabel[project.transactionType] ?? project.transactionType}
@@ -176,6 +217,8 @@ Change of Control Provisions: ${project.changeOfControlProvisions ? "Yes" : "No"
   >$5.466B: $2,335,000
 - 30-day waiting period (15 for cash tender); Second Request: 30 days after substantial compliance with the Second Request (10 days for cash tender offers per 16 CFR 803.10(b)). Substantial compliance required; 30-day waiting period restarts upon certification of compliance.
 - Penalty for failure to file: up to $54,540 per day`;
+
+  return appendSourceDocContent(context, _sourceDocContent);
 }
 
 /**
@@ -203,10 +246,12 @@ function resolvePurchaseAgreementType(transactionType: string): string {
 /**
  * Generate a single M&A document.
  * Returns the DOCX buffer and compliance checks.
+ * If missingSourceDocs is provided, relevant [PENDING: X] notices are prepended.
  */
 export async function generateMADoc(
   project: MAProjectFull,
   docType: string,
+  missingSourceDocs: string[] = [],
 ): Promise<{ buffer: Buffer; complianceChecks: ComplianceCheck[]; resolvedDocType: string }> {
   const isZeroAI = ZERO_AI_DOCS.has(docType);
   const complianceChecks: ComplianceCheck[] = [];
@@ -216,6 +261,9 @@ export async function generateMADoc(
   if (docType === "purchase_agreement") {
     resolvedDocType = resolvePurchaseAgreementType(project.transactionType);
   }
+
+  const outputLabel = DOC_TYPE_TO_OUTPUT_LABEL[docType] ?? DOC_TYPE_TO_OUTPUT_LABEL[resolvedDocType] ?? (MA_DOC_TYPE_LABELS[docType] ?? docType);
+  const notices = pendingDocNotices(missingSourceDocs, outputLabel, SOURCE_DOCS.ma);
 
   try {
     let doc;
@@ -255,6 +303,7 @@ export async function generateMADoc(
       });
     }
 
+    doc = prependToDocument(doc, notices);
     const buffer = await Packer.toBuffer(doc) as Buffer;
     return { buffer, complianceChecks, resolvedDocType };
   } catch (error) {

@@ -36,6 +36,9 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { DocGenTracker } from "@/components/DocGenTracker";
+import { SourceDocChecklist, fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+import { MissingDocsDialog } from "@/components/missing-docs-dialog";
+import type { SourceDocDef } from "@/lib/source-doc-types";
 
 /* ---------- Types ---------- */
 
@@ -301,6 +304,10 @@ export default function DealDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [pollErrorCount, setPollErrorCount] = useState(0);
+  const [missingDocsOpen, setMissingDocsOpen] = useState(false);
+  const [missingRequired, setMissingRequired] = useState<SourceDocDef[]>([]);
+  const [missingOptional, setMissingOptional] = useState<SourceDocDef[]>([]);
+  const [classifying, setClassifying] = useState(false);
 
   /* Fetch project */
   const fetchProject = useCallback(async () => {
@@ -332,7 +339,7 @@ export default function DealDetailPage() {
   }, [project, fetchProject, pollErrorCount]);
 
   /* Generate handler */
-  const handleGenerate = async () => {
+  const doGenerate = async () => {
     setGenerating(true);
     try {
       const res = await fetch(`/api/ma/${projectId}/generate`, {
@@ -351,6 +358,27 @@ export default function DealDetailPage() {
     } finally {
       setGenerating(false);
     }
+  };
+
+  const handleGenerate = async () => {
+    setClassifying(true);
+    try {
+      const { missingRequired: mr, missingOptional: mo } =
+        await fetchMissingSourceDocs("ma", projectId);
+      if (mr.length > 0 || mo.length > 0) {
+        setMissingRequired(mr);
+        setMissingOptional(mo);
+        setMissingDocsOpen(true);
+        return;
+      }
+      doGenerate();
+    } finally {
+      setClassifying(false);
+    }
+  };
+
+  const scrollToChecklist = () => {
+    document.getElementById("source-doc-checklist")?.scrollIntoView({ behavior: "smooth" });
   };
 
   /* Loading state */
@@ -512,10 +540,15 @@ export default function DealDetailPage() {
           {canGenerate && (
             <Button
               onClick={handleGenerate}
-              disabled={generating}
+              disabled={generating || classifying}
               className="gap-1.5 shadow-sm transition-all duration-200"
             >
-              {generating ? (
+              {classifying ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyzing documents...
+                </>
+              ) : generating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Starting...
@@ -584,6 +617,13 @@ export default function DealDetailPage() {
             </Button>
           </AlertDescription>
         </Alert>
+      )}
+
+      {/* Source Document Checklist */}
+      {canGenerate && (
+        <div className="mb-6 animate-in fade-in-0 slide-in-from-top-2 duration-300">
+          <SourceDocChecklist module="ma" projectId={projectId} />
+        </div>
       )}
 
       {/* Overview section */}
@@ -786,10 +826,15 @@ export default function DealDetailPage() {
               {canGenerate && (
                 <Button
                   onClick={handleGenerate}
-                  disabled={generating}
+                  disabled={generating || classifying}
                   className="mt-4 gap-1.5"
                 >
-                  {generating ? (
+                  {classifying ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Analyzing documents...
+                    </>
+                  ) : generating ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Starting...
@@ -854,6 +899,16 @@ export default function DealDetailPage() {
           </p>
         </div>
       </div>
+
+      {/* Missing docs pre-generation dialog */}
+      <MissingDocsDialog
+        open={missingDocsOpen}
+        onOpenChange={setMissingDocsOpen}
+        missingRequired={missingRequired}
+        missingOptional={missingOptional}
+        onUploadMissing={scrollToChecklist}
+        onContinueAnyway={doGenerate}
+      />
     </div>
   );
 }

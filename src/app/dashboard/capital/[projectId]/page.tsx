@@ -35,6 +35,9 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { DocGenTracker } from "@/components/DocGenTracker";
+import { SourceDocChecklist, fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+import { MissingDocsDialog } from "@/components/missing-docs-dialog";
+import type { SourceDocDef } from "@/lib/source-doc-types";
 
 type CapitalDocument = {
   id: string;
@@ -304,6 +307,10 @@ export default function CapitalDetailPage() {
   const [generating, setGenerating] = useState(false);
   const [expandedDocs, setExpandedDocs] = useState<Set<string>>(new Set());
   const [pollErrorCount, setPollErrorCount] = useState(0);
+  const [missingDocsOpen, setMissingDocsOpen] = useState(false);
+  const [missingRequired, setMissingRequired] = useState<SourceDocDef[]>([]);
+  const [missingOptional, setMissingOptional] = useState<SourceDocDef[]>([]);
+  const [classifying, setClassifying] = useState(false);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -346,7 +353,7 @@ export default function CapitalDetailPage() {
     });
   };
 
-  const handleGenerate = async () => {
+  const doGenerate = async () => {
     setGenerating(true);
     try {
       const res = await fetch(`/api/capital/${projectId}/generate`, {
@@ -363,6 +370,27 @@ export default function CapitalDetailPage() {
     } finally {
       setGenerating(false);
     }
+  };
+
+  const handleGenerate = async () => {
+    setClassifying(true);
+    try {
+      const { missingRequired: mr, missingOptional: mo } =
+        await fetchMissingSourceDocs("capital", projectId);
+      if (mr.length > 0 || mo.length > 0) {
+        setMissingRequired(mr);
+        setMissingOptional(mo);
+        setMissingDocsOpen(true);
+        return;
+      }
+      doGenerate();
+    } finally {
+      setClassifying(false);
+    }
+  };
+
+  const scrollToChecklist = () => {
+    document.getElementById("source-doc-checklist")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleRetry = async () => {
@@ -562,6 +590,13 @@ export default function CapitalDetailPage() {
         </Card>
       )}
 
+      {/* Source Document Checklist */}
+      {(project.status === "CREATED" || project.status === "ERROR") && (
+        <div className="mb-6 animate-in fade-in-0 slide-in-from-top-2 duration-300">
+          <SourceDocChecklist module="capital" projectId={projectId} />
+        </div>
+      )}
+
       {/* Generate button for CREATED / ERROR */}
       {(project.status === "CREATED" || project.status === "ERROR") && (
         <Card className="mb-6 border-dashed animate-in fade-in-0 slide-in-from-top-2 duration-300">
@@ -580,10 +615,15 @@ export default function CapitalDetailPage() {
             </div>
             <Button
               onClick={handleGenerate}
-              disabled={generating}
+              disabled={generating || classifying}
               className="transition-all duration-200 hover:shadow-md"
             >
-              {generating ? (
+              {classifying ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyzing documents...
+                </>
+              ) : generating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Starting...
@@ -795,6 +835,16 @@ export default function CapitalDetailPage() {
           </p>
         </div>
       </div>
+
+      {/* Missing docs pre-generation dialog */}
+      <MissingDocsDialog
+        open={missingDocsOpen}
+        onOpenChange={setMissingDocsOpen}
+        missingRequired={missingRequired}
+        missingOptional={missingOptional}
+        onUploadMissing={scrollToChecklist}
+        onContinueAnyway={doGenerate}
+      />
     </div>
   );
 }

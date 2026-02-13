@@ -49,6 +49,9 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { DocGenTracker } from "@/components/DocGenTracker";
+import { SourceDocChecklist, fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+import { MissingDocsDialog } from "@/components/missing-docs-dialog";
+import type { SourceDocDef } from "@/lib/source-doc-types";
 
 /* ---------- Types ---------- */
 
@@ -323,6 +326,10 @@ export default function SyndicationDetailPage() {
   const [generating, setGenerating] = useState(false);
   const [pollErrorCount, setPollErrorCount] = useState(0);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [missingDocsOpen, setMissingDocsOpen] = useState(false);
+  const [missingRequired, setMissingRequired] = useState<SourceDocDef[]>([]);
+  const [missingOptional, setMissingOptional] = useState<SourceDocDef[]>([]);
+  const [classifying, setClassifying] = useState(false);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -364,7 +371,7 @@ export default function SyndicationDetailPage() {
     };
   }, [project, fetchProject, pollErrorCount]);
 
-  const handleGenerate = async () => {
+  const doGenerate = async () => {
     setGenerating(true);
     try {
       const res = await fetch(`/api/syndication/${projectId}/generate`, {
@@ -383,6 +390,27 @@ export default function SyndicationDetailPage() {
     } finally {
       setGenerating(false);
     }
+  };
+
+  const handleGenerate = async () => {
+    setClassifying(true);
+    try {
+      const { missingRequired: mr, missingOptional: mo } =
+        await fetchMissingSourceDocs("syndication", projectId);
+      if (mr.length > 0 || mo.length > 0) {
+        setMissingRequired(mr);
+        setMissingOptional(mo);
+        setMissingDocsOpen(true);
+        return;
+      }
+      doGenerate();
+    } finally {
+      setClassifying(false);
+    }
+  };
+
+  const scrollToChecklist = () => {
+    document.getElementById("source-doc-checklist")?.scrollIntoView({ behavior: "smooth" });
   };
 
   /* ---------- Loading ---------- */
@@ -555,10 +583,15 @@ export default function SyndicationDetailPage() {
           {canGenerate && (
             <Button
               onClick={handleGenerate}
-              disabled={generating}
+              disabled={generating || classifying}
               className="shadow-sm transition-all duration-150"
             >
-              {generating ? (
+              {classifying ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyzing documents...
+                </>
+              ) : generating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Generating...
@@ -624,6 +657,13 @@ export default function SyndicationDetailPage() {
             </Button>
           </AlertDescription>
         </Alert>
+      )}
+
+      {/* Source Document Checklist */}
+      {canGenerate && (
+        <div className="mb-6 animate-in fade-in-0 slide-in-from-top-2 duration-300">
+          <SourceDocChecklist module="syndication" projectId={projectId} />
+        </div>
       )}
 
       {/* Main Content Tabs */}
@@ -890,10 +930,15 @@ export default function SyndicationDetailPage() {
               {canGenerate && (
                 <Button
                   onClick={handleGenerate}
-                  disabled={generating}
+                  disabled={generating || classifying}
                   className="mt-6 shadow-sm"
                 >
-                  {generating ? (
+                  {classifying ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Analyzing documents...
+                    </>
+                  ) : generating ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Generating...
@@ -907,6 +952,16 @@ export default function SyndicationDetailPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Missing docs pre-generation dialog */}
+      <MissingDocsDialog
+        open={missingDocsOpen}
+        onOpenChange={setMissingDocsOpen}
+        missingRequired={missingRequired}
+        missingOptional={missingOptional}
+        onUploadMissing={scrollToChecklist}
+        onContinueAnyway={doGenerate}
+      />
     </div>
   );
 }

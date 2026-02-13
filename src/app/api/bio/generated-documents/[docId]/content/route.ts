@@ -19,7 +19,8 @@ export async function GET(
       },
     });
 
-    if (!doc || doc.program.orgId !== org.id) {
+    // #17: Null check for doc.program before accessing orgId
+    if (!doc || !doc.program || doc.program.orgId !== org.id) {
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
     }
 

@@ -9,11 +9,24 @@ import type { ComplianceProjectFull, ComplianceCheck } from "./types";
 import { COMPLIANCE_DOC_TYPE_LABELS } from "./types";
 import {
   buildLegalDocument,
+  prependToDocument,
+  pendingDocNotices,
   documentTitle,
   bodyText,
   formatCurrency,
   safeNumber,
 } from "../doc-helpers";
+import { SOURCE_DOCS } from "@/lib/source-doc-types";
+
+// Map internal docType keys to output doc labels used in source doc definitions
+const DOC_TYPE_TO_OUTPUT_LABEL: Record<string, string> = {
+  lp_quarterly_report: "LP Quarterly Report",
+  capital_call_notice: "Capital Call Notice",
+  distribution_notice: "Distribution Notice",
+  k1_summary: "K-1 Summary",
+  annual_report: "Annual Report",
+  form_adv_summary: "Form ADV Summary",
+};
 
 // Template builders
 import { buildLPQuarterlyReport, runLPReportComplianceChecks } from "./templates/lp-quarterly-report";
@@ -23,10 +36,43 @@ import { buildK1Summary, runK1ComplianceChecks } from "./templates/k1-summary";
 import { buildAnnualReport, runAnnualReportComplianceChecks } from "./templates/annual-report";
 import { buildFormADVSummary, runFormADVComplianceChecks } from "./templates/form-adv-summary";
 
+// ─── Source Doc Content (module-level var) ───────────────────────────
+
+let _sourceDocContent: Record<string, string> = {};
+
+/** Set extracted source doc content before generation. Called by Inngest pipeline. */
+export function setComplianceSourceDocContent(content: Record<string, string>) {
+  _sourceDocContent = content;
+}
+
+// ─── Source Doc Content Helper ────────────────────────────────────────
+
+/** Append extracted source doc content to a context string for AI prompts. */
+function appendSourceDocContent(
+  context: string,
+  sourceDocContent: Record<string, string>,
+): string {
+  const entries = Object.entries(sourceDocContent);
+  if (entries.length === 0) return context;
+
+  const sourceBlock = entries
+    .map(([docType, text]) => {
+      const truncated = text.length > 8000 ? text.slice(0, 8000) + "\n[... truncated]" : text;
+      return `\nSOURCE DOCUMENT — ${docType}:\n${truncated}`;
+    })
+    .join("\n");
+  return context + "\n\n" + sourceBlock;
+}
+
 // ─── Project Context Builder ─────────────────────────────────────────
 
-/** Builds a context string from project data for AI prompts. */
-export function buildProjectContext(project: ComplianceProjectFull): string {
+/** Builds a context string from project data for AI prompts.
+ *  If sourceDocContent is provided, extracted OCR text from uploaded source docs
+ *  is appended so the AI can reference real data in its prose. */
+export function buildProjectContext(
+  project: ComplianceProjectFull,
+  sourceDocContent: Record<string, string> = _sourceDocContent,
+): string {
   const nav = project.nav ? Number(project.nav) : 0;
   const totalContributions = project.totalContributions ? Number(project.totalContributions) : 0;
   const totalDistributions = project.totalDistributions ? Number(project.totalDistributions) : 0;
@@ -47,7 +93,7 @@ export function buildProjectContext(project: ComplianceProjectFull): string {
       ).join("\n")
     : "  No portfolio data provided";
 
-  return `FUND DETAILS (source of truth — use these exact terms):
+  const context = `FUND DETAILS (source of truth — use these exact terms):
 Fund Name: ${project.fundName}
 Fund Type: ${project.fundType ?? "Not specified"}
 Vintage Year: ${project.vintageYear ?? "Not specified"}
@@ -106,6 +152,8 @@ PORTFOLIO COMPANIES:
 ${portfolioBlock}
 
 Date: ${new Date().toISOString().split("T")[0]}`;
+
+  return appendSourceDocContent(context, sourceDocContent);
 }
 
 // ─── Main Dispatcher ─────────────────────────────────────────────────
@@ -113,47 +161,51 @@ Date: ${new Date().toISOString().split("T")[0]}`;
 /**
  * Generate a single compliance document.
  * Returns the DOCX buffer and compliance check results.
+ * If missingSourceDocs is provided, relevant [PENDING: X] notices are prepended.
  */
 export async function generateComplianceDoc(
   project: ComplianceProjectFull,
   docType: string,
+  missingSourceDocs: string[] = [],
 ): Promise<{ buffer: Buffer; complianceChecks: ComplianceCheck[] }> {
   const label = COMPLIANCE_DOC_TYPE_LABELS[docType] ?? docType;
+  const outputLabel = DOC_TYPE_TO_OUTPUT_LABEL[docType] ?? label;
+  const notices = pendingDocNotices(missingSourceDocs, outputLabel, SOURCE_DOCS.compliance);
 
   try {
     switch (docType) {
       case "lp_quarterly_report": {
-        const doc = await buildLPQuarterlyReport(project);
+        const doc = prependToDocument(await buildLPQuarterlyReport(project), notices);
         const buffer = await Packer.toBuffer(doc) as Buffer;
         const checks = runLPReportComplianceChecks(project);
         return { buffer, complianceChecks: checks };
       }
       case "capital_call_notice": {
-        const doc = await buildCapitalCallNotice(project);
+        const doc = prependToDocument(await buildCapitalCallNotice(project), notices);
         const buffer = await Packer.toBuffer(doc) as Buffer;
         const checks = runCapitalCallComplianceChecks(project);
         return { buffer, complianceChecks: checks };
       }
       case "distribution_notice": {
-        const doc = await buildDistributionNotice(project);
+        const doc = prependToDocument(await buildDistributionNotice(project), notices);
         const buffer = await Packer.toBuffer(doc) as Buffer;
         const checks = runDistributionComplianceChecks(project);
         return { buffer, complianceChecks: checks };
       }
       case "k1_summary": {
-        const doc = await buildK1Summary(project);
+        const doc = prependToDocument(await buildK1Summary(project), notices);
         const buffer = await Packer.toBuffer(doc) as Buffer;
         const checks = runK1ComplianceChecks(project);
         return { buffer, complianceChecks: checks };
       }
       case "annual_report": {
-        const doc = await buildAnnualReport(project);
+        const doc = prependToDocument(await buildAnnualReport(project), notices);
         const buffer = await Packer.toBuffer(doc) as Buffer;
         const checks = runAnnualReportComplianceChecks(project);
         return { buffer, complianceChecks: checks };
       }
       case "form_adv_summary": {
-        const doc = await buildFormADVSummary(project);
+        const doc = prependToDocument(await buildFormADVSummary(project), notices);
         const buffer = await Packer.toBuffer(doc) as Buffer;
         const checks = runFormADVComplianceChecks(project);
         return { buffer, complianceChecks: checks };

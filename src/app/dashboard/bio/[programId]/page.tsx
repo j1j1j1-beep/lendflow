@@ -243,15 +243,19 @@ function BioGenDocCard({ doc, onRefresh }: { doc: BioGeneratedDocument; onRefres
       .finally(() => setDocLoading(false));
   }, [expanded, doc.id]);
 
+  // #16: docx-preview is known to retain DOM nodes and internal state after
+  // rendering. There is no official destroy/cleanup API. We mitigate memory
+  // leaks by clearing innerHTML on unmount and when the blob changes.
   useEffect(() => {
     if (!docxBlob || !containerRef.current) return;
     let cancelled = false;
+    const container = containerRef.current;
     async function render() {
       try {
         const { renderAsync } = await import("docx-preview");
-        if (cancelled || !containerRef.current) return;
-        containerRef.current.innerHTML = "";
-        await renderAsync(docxBlob!, containerRef.current, undefined, {
+        if (cancelled || !container) return;
+        container.innerHTML = "";
+        await renderAsync(docxBlob!, container, undefined, {
           className: "docx-preview",
           inWrapper: true,
           ignoreWidth: true,
@@ -272,6 +276,8 @@ function BioGenDocCard({ doc, onRefresh }: { doc: BioGeneratedDocument; onRefres
     render();
     return () => {
       cancelled = true;
+      // #16: Clear rendered DOM to help GC reclaim docx-preview nodes
+      if (container) container.innerHTML = "";
     };
   }, [docxBlob]);
 
@@ -578,18 +584,41 @@ export default function BioProgramDetailPage() {
     fetchRef.current = fetchProgram;
   }, [fetchProgram]);
 
+  // #9: Max polling duration (5 min) with exponential backoff
+  const pollStartTime = useRef<number>(0);
+  const pollIntervalMs = useRef(5000);
+  const [pollTimedOut, setPollTimedOut] = useState(false);
+
   useEffect(() => {
-    if (!program || !PROCESSING_STATUSES.includes(program.status)) return;
+    if (!program || !PROCESSING_STATUSES.includes(program.status)) {
+      pollStartTime.current = 0;
+      pollIntervalMs.current = 5000;
+      setPollTimedOut(false);
+      return;
+    }
     if (pollErrorCount.current >= 3) return;
-    const interval = setInterval(() => {
-      if (pollErrorCount.current >= 3) {
-        clearInterval(interval);
+    if (pollTimedOut) return;
+
+    if (pollStartTime.current === 0) {
+      pollStartTime.current = Date.now();
+    }
+
+    const MAX_POLL_DURATION_MS = 300_000; // 5 minutes
+
+    const tick = () => {
+      if (pollErrorCount.current >= 3) return;
+      const elapsed = Date.now() - pollStartTime.current;
+      if (elapsed >= MAX_POLL_DURATION_MS) {
+        setPollTimedOut(true);
         return;
       }
       fetchRef.current();
-    }, 10000);
+      pollIntervalMs.current = Math.min(pollIntervalMs.current * 1.5, 30000);
+    };
+
+    const interval = setInterval(tick, pollIntervalMs.current);
     return () => clearInterval(interval);
-  }, [program]);
+  }, [program, pollTimedOut]);
 
   const handleAnalyze = async () => {
     setAnalyzing(true);
@@ -704,20 +733,33 @@ export default function BioProgramDetailPage() {
     ["CREATED", "UPLOADING", "COMPLETE", "ERROR"].includes(program.status) &&
     program.bioDocuments.length > 0;
 
-  const riskFlags = program.bioAnalysis?.riskFlags;
-  const riskFlagArray: Array<{
+  // #8: Safe JSON field parsing with try-catch to prevent render crashes
+  // from unexpected data shapes stored in JSON columns
+  let riskFlagArray: Array<{
     severity: string;
     title: string;
     description: string;
     regulation?: string;
-  }> = Array.isArray(riskFlags) ? riskFlags : [];
-
-  const regulatoryFlags = program.bioAnalysis?.regulatoryFlags;
-  const regulatoryFlagArray: Array<{
+  }> = [];
+  let regulatoryFlagArray: Array<{
     regulation: string;
     description: string;
     severity: string;
-  }> = Array.isArray(regulatoryFlags) ? regulatoryFlags : [];
+  }> = [];
+
+  try {
+    const riskFlags = program.bioAnalysis?.riskFlags;
+    riskFlagArray = Array.isArray(riskFlags) ? riskFlags : [];
+  } catch {
+    riskFlagArray = [];
+  }
+
+  try {
+    const regulatoryFlags = program.bioAnalysis?.regulatoryFlags;
+    regulatoryFlagArray = Array.isArray(regulatoryFlags) ? regulatoryFlags : [];
+  } catch {
+    regulatoryFlagArray = [];
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
@@ -838,6 +880,37 @@ export default function BioProgramDetailPage() {
                   This page will refresh automatically.
                 </p>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* #9: Poll timeout message */}
+      {pollTimedOut && (
+        <Card className="mb-6 border-amber-500/20 bg-amber-500/5">
+          <CardContent className="pt-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-600" />
+                <div>
+                  <p className="font-medium text-sm">Taking longer than expected</p>
+                  <p className="text-xs text-muted-foreground">
+                    Please refresh to check status.
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setPollTimedOut(false);
+                  pollStartTime.current = Date.now();
+                  pollIntervalMs.current = 5000;
+                  fetchProgram();
+                }}
+              >
+                Resume
+              </Button>
             </div>
           </CardContent>
         </Card>

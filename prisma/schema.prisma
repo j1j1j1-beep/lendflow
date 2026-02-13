@@ -1275,6 +1275,35 @@ model ComplianceDocument {
   @@unique([projectId, docType, version])
 }
 
+// ──────────────────────────────────────────────
+// SourceDocument (Upload Checklist — cross-module)
+// ──────────────────────────────────────────────
+
+model SourceDocument {
+  id          String    @id @default(cuid())
+  module      String    // "lending" | "capital" | "syndication" | "ma" | "compliance"
+  projectId   String    // module-specific project ID
+  docType     String?   // nullable — starts unclassified, set after Textract classification
+  fileName    String
+  s3Key       String
+  contentType String    @default("application/pdf")
+  fileSize    Int
+  orgId       String
+  userId      String
+
+  // Textract extraction results (populated at classify time)
+  ocrText                  String?   @db.Text
+  textractOutput           Json?
+  classifiedAt             DateTime?
+  classificationConfidence Float?
+
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  @@index([module, projectId])
+  @@index([orgId])
+}
+
 // Bio Vertical (separate from lending — shares Org, User, AuditLog only)
 
 model BioSubscription {

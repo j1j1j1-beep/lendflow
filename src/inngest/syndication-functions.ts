@@ -5,9 +5,10 @@
 import { inngest } from "./client";
 import { prisma } from "@/lib/db";
 import { uploadToS3 } from "@/lib/s3";
-import { generateSyndicationDoc } from "@/documents/syndication/generate-doc";
+import { generateSyndicationDoc, setSyndicationSourceDocContent } from "@/documents/syndication/generate-doc";
 import { SYNDICATION_DOC_TYPES, SYNDICATION_DOC_TYPE_LABELS } from "@/documents/syndication/types";
 import type { SyndicationProjectFull } from "@/documents/syndication/types";
+import { getMissingSourceDocKeys } from "@/lib/source-doc-check";
 
 const DOCX_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -73,7 +74,28 @@ export const syndicationGenerateDocs = inngest.createFunction(
         });
       });
 
-      // Step 3: Generate each document type in its own step for retry isolation
+      // Step 3: Fetch missing source docs (once, reused for all doc types)
+      const missingDocs = await step.run("fetch-missing-source-docs", async () => {
+        return getMissingSourceDocKeys("syndication", projectId);
+      });
+
+      // Step 3b: Load extracted source doc content for injection into AI prompts
+      const sourceDocContent = await step.run("load-source-doc-content", async () => {
+        const docs = await prisma.sourceDocument.findMany({
+          where: { module: "syndication", projectId, deletedAt: null, docType: { not: null }, ocrText: { not: null } },
+          select: { docType: true, ocrText: true },
+        });
+        const content: Record<string, string> = {};
+        for (const doc of docs) {
+          if (doc.docType && doc.ocrText) content[doc.docType] = doc.ocrText;
+        }
+        return content;
+      });
+
+      // Inject source doc content into the module-level var so buildProjectContext picks it up
+      setSyndicationSourceDocContent(sourceDocContent);
+
+      // Step 4: Generate each document type in its own step for retry isolation
       for (const docType of [...SYNDICATION_DOC_TYPES]) {
         lastStep = `generate-${docType}`;
         const label = SYNDICATION_DOC_TYPE_LABELS[docType] ?? docType;
@@ -102,7 +124,7 @@ export const syndicationGenerateDocs = inngest.createFunction(
             // Generate the document (30s for deterministic, 180s for AI)
             const isDeterministic = docType === "pro_forma";
             const { buffer, complianceChecks } = await withTimeout(
-              generateSyndicationDoc(freshProject, docType),
+              generateSyndicationDoc(freshProject, docType, missingDocs),
               isDeterministic ? 30_000 : 180_000,
               `generate-${docType}`,
             );

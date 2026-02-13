@@ -60,16 +60,32 @@ export interface StabilityTimepoint {
   aggregation?: number;
 }
 
-// FDA body surface area conversion factors (animal dose to HED).
+// FDA body surface area Km factors per species.
 // Source: FDA Guidance "Estimating the Maximum Safe Starting Dose in
-// Initial Clinical Trials for Therapeutics in Adult Healthy Volunteers" (2005)
-const BSA_CONVERSION_FACTORS: Record<string, number> = {
-  mouse: 12.3,
-  rat: 6.2,
-  rabbit: 3.1,
-  monkey: 3.1,
-  dog: 1.8,
+// Initial Clinical Trials for Therapeutics in Adult Healthy Volunteers" (2005), Table 1.
+// Standard Km values: Human=37, Mouse=3, Rat=6, Hamster=5, Guinea Pig=8,
+// Rabbit=12, Dog=20, Monkey(NHP)=12, Mini-pig=27, Micro-pig=35.
+// Conversion factor = Human Km / Animal Km (used to calculate HED from animal dose).
+const SPECIES_KM_FACTORS: Record<string, number> = {
+  human: 37,
+  mouse: 3,
+  rat: 6,
+  hamster: 5,
+  guinea_pig: 8,
+  rabbit: 12,
+  dog: 20,
+  monkey: 12,        // Non-human primate (NHP), Km = 12 per FDA 2005 guidance
+  mini_pig: 27,
+  minipig: 27,       // Alias
+  micro_pig: 35,
 };
+
+// BSA conversion factors = Human Km / Animal Km. HED = Animal Dose / factor.
+const BSA_CONVERSION_FACTORS: Record<string, number> = Object.fromEntries(
+  Object.entries(SPECIES_KM_FACTORS)
+    .filter(([species]) => species !== "human")
+    .map(([species, km]) => [species, SPECIES_KM_FACTORS.human / km]),
+);
 
 const DEFAULT_HUMAN_WEIGHT_KG = 60;
 

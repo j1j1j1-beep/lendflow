@@ -111,9 +111,10 @@ export const bioPipeline = inngest.createFunction(
               data: { status: "OCR_PROCESSING" },
             });
 
+            // #11: Increased timeout from 120s to 180s for large bio PDFs (up to 50MB)
             const textractResult = await withTimeout(
               analyzeDocument(doc.s3Key),
-              120_000,
+              180_000,
               `OCR-bio-${doc.id}`,
             );
 
@@ -574,7 +575,7 @@ export const bioPipeline = inngest.createFunction(
       await step.run("mark-complete", async () => {
         await prisma.bioProgram.update({
           where: { id: programId },
-          data: { status: "COMPLETE" },
+          data: { status: "COMPLETE", errorMessage: null, errorStep: null },
         });
       });
 

@@ -5,7 +5,7 @@ import { checkBioPaywall } from "@/lib/bio-paywall";
 import { inngest } from "@/inngest/client";
 import { logAudit } from "@/lib/audit";
 import { withRateLimit } from "@/lib/with-rate-limit";
-import { writeLimit } from "@/lib/rate-limit";
+import { pipelineLimit } from "@/lib/rate-limit";
 import {
   SAMPLE_BIO_PROGRAM,
   SAMPLE_BIO_DOCUMENTS,
@@ -18,7 +18,7 @@ import { Prisma } from "@/generated/prisma/client";
 // then triggers the sample pipeline via Inngest (analyze + generate docs).
 
 export async function POST(request: NextRequest) {
-  const limited = await withRateLimit(request, writeLimit);
+  const limited = await withRateLimit(request, pipelineLimit);
   if (limited) return limited;
 
   try {
