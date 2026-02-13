@@ -139,7 +139,8 @@ function formatCurrency(value: number | null): string {
 
 function formatPercent(value: number | null): string {
   if (value === null || value === undefined) return "--";
-  return `${(value * 100).toFixed(1)}%`;
+  const num = (value * 100).toFixed(1);
+  return `${parseFloat(num)}%`;
 }
 
 function DocumentCard({
@@ -172,7 +173,7 @@ function DocumentCard({
               <div className="flex items-center gap-2 mt-0.5">
                 <Badge
                   variant={
-                    doc.complianceStatus === "REVIEWED"
+                    doc.complianceStatus === "PASSED"
                       ? "default"
                       : doc.complianceStatus === "FLAGGED"
                       ? "destructive"
@@ -180,7 +181,7 @@ function DocumentCard({
                   }
                   className="text-xs"
                 >
-                  {doc.complianceStatus === "REVIEWED"
+                  {doc.complianceStatus === "PASSED"
                     ? "Passed"
                     : doc.complianceStatus === "FLAGGED"
                     ? "Review Required"
@@ -302,6 +303,7 @@ export default function CapitalDetailPage() {
   const [retrying, setRetrying] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [expandedDocs, setExpandedDocs] = useState<Set<string>>(new Set());
+  const [pollErrorCount, setPollErrorCount] = useState(0);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -310,8 +312,10 @@ export default function CapitalDetailPage() {
       const data = await res.json();
       setProject(data.project);
       setError(null);
+      setPollErrorCount(0); // Reset error count on success
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load project");
+      setPollErrorCount(prev => prev + 1);
     } finally {
       setLoading(false);
     }
@@ -325,9 +329,10 @@ export default function CapitalDetailPage() {
   useEffect(() => {
     if (!project) return;
     if (!PROCESSING_STATUSES.includes(project.status)) return;
+    if (pollErrorCount >= 3) return; // Stop polling after 3 consecutive errors
     const interval = setInterval(fetchProject, 5000);
     return () => clearInterval(interval);
-  }, [project?.status, fetchProject]);
+  }, [project, fetchProject, pollErrorCount]);
 
   const toggleDoc = (docId: string) => {
     setExpandedDocs((prev) => {
@@ -557,8 +562,8 @@ export default function CapitalDetailPage() {
         </Card>
       )}
 
-      {/* Generate button for CREATED / NEEDS_REVIEW */}
-      {(project.status === "CREATED" || project.status === "NEEDS_REVIEW") && (
+      {/* Generate button for CREATED / ERROR */}
+      {(project.status === "CREATED" || project.status === "ERROR") && (
         <Card className="mb-6 border-dashed animate-in fade-in-0 slide-in-from-top-2 duration-300">
           <CardContent className="flex items-center justify-between py-5">
             <div className="flex items-center gap-3">
@@ -670,7 +675,7 @@ export default function CapitalDetailPage() {
                       <p className="text-xs text-muted-foreground">
                         {
                           project.capitalDocuments.filter(
-                            (d) => d.complianceStatus === "REVIEWED"
+                            (d) => d.complianceStatus === "PASSED"
                           ).length
                         }{" "}
                         of {project.capitalDocuments.length} documents passed
@@ -681,14 +686,14 @@ export default function CapitalDetailPage() {
                   <Badge
                     variant={
                       project.capitalDocuments.every(
-                        (d) => d.complianceStatus === "REVIEWED"
+                        (d) => d.complianceStatus === "PASSED"
                       )
                         ? "default"
                         : "destructive"
                     }
                   >
                     {project.capitalDocuments.every(
-                      (d) => d.complianceStatus === "REVIEWED"
+                      (d) => d.complianceStatus === "PASSED"
                     )
                       ? "All Checks Passed"
                       : "Review Required"}

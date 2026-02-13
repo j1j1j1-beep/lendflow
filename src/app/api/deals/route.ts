@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
   try {
     const { user, org } = await requireAuth();
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: "Request body is required" }, { status: 400 });
+    }
 
     // Validate required fields
     if (!body.borrowerName || typeof body.borrowerName !== "string" || body.borrowerName.trim() === "") {
@@ -114,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const statusParam = searchParams.get("status");
-    const status = statusParam && VALID_STATUSES.has(statusParam) ? statusParam : null;
+    const statusList = statusParam?.split(",").filter(s => VALID_STATUSES.has(s.trim())).map(s => s.trim()) ?? [];
     const page = Math.max(1, Number(searchParams.get("page") || "1"));
     const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit") || "20")));
     const skip = (page - 1) * limit;
@@ -122,10 +125,12 @@ export async function GET(request: NextRequest) {
     const searchQuery = searchParams.get("search");
 
     const where: Record<string, unknown> = { orgId: org.id };
-    if (status) {
-      where.status = status;
+    if (statusList.length === 1) {
+      where.status = statusList[0];
+    } else if (statusList.length > 1) {
+      where.status = { in: statusList };
     }
-    if (searchQuery && searchQuery.trim()) {
+    if (searchQuery && searchQuery.trim() && searchQuery.trim().length <= 200) {
       where.borrowerName = { contains: searchQuery.trim(), mode: "insensitive" };
     }
 

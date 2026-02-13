@@ -31,7 +31,10 @@ export async function POST(request: NextRequest) {
   try {
     const { user, org } = await requireAuth();
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: "Request body is required" }, { status: 400 });
+    }
 
     // Validate required fields
     if (!body.name || typeof body.name !== "string" || body.name.trim() === "") {
@@ -145,12 +148,15 @@ export async function POST(request: NextRequest) {
       metadata: { name: project.name, fundType: project.fundType },
     });
 
-    // Convert Decimal fields to numbers for JSON serialization
+    // Convert Decimal and Float fields to numbers for JSON serialization
     const serialized = {
       ...project,
       targetRaise: project.targetRaise ? Number(project.targetRaise) : null,
       minInvestment: project.minInvestment ? Number(project.minInvestment) : null,
       gpCommitment: project.gpCommitment ? Number(project.gpCommitment) : null,
+      managementFee: project.managementFee ? Number(project.managementFee) : null,
+      carriedInterest: project.carriedInterest ? Number(project.carriedInterest) : null,
+      preferredReturn: project.preferredReturn ? Number(project.preferredReturn) : null,
     };
 
     return NextResponse.json({ project: serialized }, { status: 201 });
@@ -174,7 +180,12 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const statusParam = searchParams.get("status");
-    const status = statusParam && VALID_STATUSES.has(statusParam) ? statusParam : null;
+    let statusFilter: string | string[] | null = null;
+    if (statusParam) {
+      const statuses = statusParam.split(",").filter(s => VALID_STATUSES.has(s.trim()));
+      if (statuses.length === 1) statusFilter = statuses[0];
+      else if (statuses.length > 1) statusFilter = statuses;
+    }
     const page = Math.max(1, Number(searchParams.get("page") || "1"));
     const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit") || "20")));
     const skip = (page - 1) * limit;
@@ -182,11 +193,14 @@ export async function GET(request: NextRequest) {
     const searchQuery = searchParams.get("search");
 
     const where: Record<string, unknown> = { orgId: org.id, deletedAt: null };
-    if (status) {
-      where.status = status;
+    if (statusFilter) {
+      where.status = Array.isArray(statusFilter) ? { in: statusFilter } : statusFilter;
     }
     if (searchQuery && searchQuery.trim()) {
-      where.name = { contains: searchQuery.trim(), mode: "insensitive" };
+      where.OR = [
+        { name: { contains: searchQuery.trim(), mode: "insensitive" } },
+        { fundName: { contains: searchQuery.trim(), mode: "insensitive" } },
+      ];
     }
 
     const [projects, total] = await Promise.all([
@@ -204,12 +218,15 @@ export async function GET(request: NextRequest) {
       prisma.capitalProject.count({ where }),
     ]);
 
-    // Convert Decimal fields for JSON serialization
+    // Convert Decimal and Float fields for JSON serialization
     const serialized = projects.map((p) => ({
       ...p,
       targetRaise: p.targetRaise ? Number(p.targetRaise) : null,
       minInvestment: p.minInvestment ? Number(p.minInvestment) : null,
       gpCommitment: p.gpCommitment ? Number(p.gpCommitment) : null,
+      managementFee: p.managementFee ? Number(p.managementFee) : null,
+      carriedInterest: p.carriedInterest ? Number(p.carriedInterest) : null,
+      preferredReturn: p.preferredReturn ? Number(p.preferredReturn) : null,
     }));
 
     return NextResponse.json({

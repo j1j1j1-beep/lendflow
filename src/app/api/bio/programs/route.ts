@@ -9,8 +9,15 @@ export async function GET(request: NextRequest) {
     const { org } = await requireAuth();
 
     const searchParams = request.nextUrl.searchParams;
-    const search = searchParams.get("search")?.trim() || "";
+    const search = searchParams.get("search")?.trim().slice(0, 200) || "";
     const status = searchParams.get("status") || "";
+
+    const validStatuses = new Set([
+      "all", "processing", "CREATED", "UPLOADING", "PROCESSING_OCR",
+      "EXTRACTING", "CLASSIFYING", "VERIFYING", "ANALYZING",
+      "GENERATING_DOCS", "COMPLIANCE_REVIEW", "NEEDS_REVIEW",
+      "COMPLETE", "ERROR",
+    ]);
 
     const where: any = { orgId: org.id };
 
@@ -22,14 +29,18 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    if (status && status !== "all") {
+    if (status && status !== "all" && validStatuses.has(status)) {
       if (status === "processing") {
         where.status = {
           in: [
+            "UPLOADING",
+            "PROCESSING_OCR",
             "EXTRACTING",
             "CLASSIFYING",
+            "VERIFYING",
             "ANALYZING",
             "GENERATING_DOCS",
+            "COMPLIANCE_REVIEW",
           ],
         };
       } else {
@@ -62,7 +73,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { user, org } = await requireAuth();
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: "Request body is required" }, { status: 400 });
+    }
 
     const {
       name,
@@ -128,6 +142,7 @@ export async function POST(request: NextRequest) {
     void logAudit({
       orgId: org.id,
       userId: user.id,
+      programId: program.id,
       action: "bio.program_created",
       target: program.id,
       metadata: { programName: name, drugName, drugClass },

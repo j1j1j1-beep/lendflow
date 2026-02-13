@@ -23,6 +23,7 @@ import {
   formatCurrency,
   formatPercent,
   ensureProseArray,
+  safeNumber,
   COLORS,
 } from "../../doc-helpers";
 
@@ -86,10 +87,10 @@ Return a JSON object with these keys:
 export async function buildOperatingAgreement(project: SyndicationProjectFull): Promise<Document> {
   const prose = await generateOAProse(project);
 
-  const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
-  const totalEquityRaise = project.totalEquityRaise ? Number(project.totalEquityRaise) : 0;
-  const loanAmount = project.loanAmount ? Number(project.loanAmount) : 0;
-  const sponsorEquity = project.sponsorEquity ? Number(project.sponsorEquity) : 0;
+  const purchasePrice = safeNumber(project.purchasePrice);
+  const totalEquityRaise = safeNumber(project.totalEquityRaise);
+  const loanAmount = safeNumber(project.loanAmount);
+  const sponsorEquity = safeNumber(project.sponsorEquity);
   const sortedTiers = [...project.waterfallTiers].sort((a, b) => a.tierOrder - b.tierOrder);
 
   const children: (Paragraph | Table)[] = [];
@@ -205,13 +206,13 @@ export async function buildOperatingAgreement(project: SyndicationProjectFull): 
 
   // Fee schedule table
   const feeRows: string[][] = [];
-  if (project.acquisitionFee) feeRows.push(["Acquisition Fee", `${(project.acquisitionFee * 100).toFixed(1)}%`, "Of purchase price", "At closing"]);
-  if (project.assetMgmtFee) feeRows.push(["Asset Management Fee", `${(project.assetMgmtFee * 100).toFixed(1)}%`, "Of EGI or equity", "Monthly/Quarterly"]);
-  if (project.propertyMgmtFee) feeRows.push(["Property Management Fee", `${(project.propertyMgmtFee * 100).toFixed(1)}%`, "Of gross rental income", "Monthly"]);
-  if (project.constructionMgmtFee) feeRows.push(["Construction Mgmt Fee", `${(project.constructionMgmtFee * 100).toFixed(1)}%`, "Of renovation budget", "As incurred"]);
-  if (project.dispositionFee) feeRows.push(["Disposition Fee", `${(project.dispositionFee * 100).toFixed(1)}%`, "Of sale price", "At sale"]);
-  if (project.refinancingFee) feeRows.push(["Refinancing Fee", `${(project.refinancingFee * 100).toFixed(1)}%`, "Of new loan amount", "At refinance"]);
-  if (project.guaranteeFee) feeRows.push(["Guarantee Fee", `${(project.guaranteeFee * 100).toFixed(1)}%`, "Of loan amount", "At closing"]);
+  if (project.acquisitionFee) feeRows.push(["Acquisition Fee", `${(safeNumber(project.acquisitionFee) * 100).toFixed(1)}%`, "Of purchase price", "At closing"]);
+  if (project.assetMgmtFee) feeRows.push(["Asset Management Fee", `${(safeNumber(project.assetMgmtFee) * 100).toFixed(1)}%`, "Of EGI or equity", "Monthly/Quarterly"]);
+  if (project.propertyMgmtFee) feeRows.push(["Property Management Fee", `${(safeNumber(project.propertyMgmtFee) * 100).toFixed(1)}%`, "Of gross rental income", "Monthly"]);
+  if (project.constructionMgmtFee) feeRows.push(["Construction Mgmt Fee", `${(safeNumber(project.constructionMgmtFee) * 100).toFixed(1)}%`, "Of renovation budget", "As incurred"]);
+  if (project.dispositionFee) feeRows.push(["Disposition Fee", `${(safeNumber(project.dispositionFee) * 100).toFixed(1)}%`, "Of sale price", "At sale"]);
+  if (project.refinancingFee) feeRows.push(["Refinancing Fee", `${(safeNumber(project.refinancingFee) * 100).toFixed(1)}%`, "Of new loan amount", "At refinance"]);
+  if (project.guaranteeFee) feeRows.push(["Guarantee Fee", `${(safeNumber(project.guaranteeFee) * 100).toFixed(1)}%`, "Of loan amount", "At closing"]);
 
   if (feeRows.length > 0) {
     children.push(
@@ -329,7 +330,7 @@ export function runOperatingAgreementComplianceChecks(project: SyndicationProjec
   // Best practice: Tier 1 should be return of capital (100% LP, 0% hurdle)
   if (project.waterfallTiers.length > 1) {
     const tier1 = sortedTiers[0]; // First tier by tierOrder
-    const isStandardTier1 = tier1 && Number(tier1.lpSplit) >= 0.99 && Number(tier1.hurdleRate || 0) === 0;
+    const isStandardTier1 = tier1 && safeNumber(tier1.lpSplit) >= 0.99 && safeNumber(tier1.hurdleRate) === 0;
     checks.push({
       name: "Waterfall Tier Order (Best Practice)",
       regulation: "Industry Standard Waterfall Structure",

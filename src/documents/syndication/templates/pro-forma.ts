@@ -18,6 +18,7 @@ import {
   createTable,
   formatCurrency,
   formatCurrencyDetailed,
+  safeNumber,
   COLORS,
   AlignmentType,
   TextRun,
@@ -241,21 +242,21 @@ function calculateIRR(cashFlows: number[], maxIterations = 100, tolerance = 0.00
 // ─── DOCX Builder (Deterministic) ───────────────────────────────────
 
 export function buildProForma(project: SyndicationProjectFull): Document {
-  const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
-  const renovationBudget = project.renovationBudget ? Number(project.renovationBudget) : 0;
-  const closingCosts = project.closingCosts ? Number(project.closingCosts) : 0;
-  const totalEquityRaise = project.totalEquityRaise ? Number(project.totalEquityRaise) : 0;
-  const loanAmount = project.loanAmount ? Number(project.loanAmount) : 0;
-  const interestRate = project.interestRate ?? 0;
+  const purchasePrice = safeNumber(project.purchasePrice);
+  const renovationBudget = safeNumber(project.renovationBudget);
+  const closingCosts = safeNumber(project.closingCosts);
+  const totalEquityRaise = safeNumber(project.totalEquityRaise);
+  const loanAmount = safeNumber(project.loanAmount);
+  const interestRate = safeNumber(project.interestRate);
   const loanTermYears = project.loanTermYears ?? 30;
   const holdYears = project.projectedHoldYears ?? 5;
-  const currentNoi = project.currentNoi ? Number(project.currentNoi) : 0;
-  const proFormaNoi = project.proFormaNoi ? Number(project.proFormaNoi) : 0;
-  const vacancyRate = project.vacancyRate ?? 0.05;
-  const rentGrowthRate = project.rentGrowthRate ?? 0.03;
-  const expenseGrowthRate = project.expenseGrowthRate ?? 0.02;
-  const exitCapRate = project.exitCapRate ?? 0.06;
-  const preferredReturn = project.preferredReturn ?? 0.08;
+  const currentNoi = safeNumber(project.currentNoi);
+  const proFormaNoi = safeNumber(project.proFormaNoi);
+  const vacancyRate = safeNumber(project.vacancyRate, 0.05);
+  const rentGrowthRate = safeNumber(project.rentGrowthRate, 0.03);
+  const expenseGrowthRate = safeNumber(project.expenseGrowthRate, 0.02);
+  const exitCapRate = safeNumber(project.exitCapRate, 0.06);
+  const preferredReturn = safeNumber(project.preferredReturn, 0.08);
   const totalCost = purchasePrice + renovationBudget + closingCosts;
   const capRate = purchasePrice > 0 ? currentNoi / purchasePrice : 0;
   const ltv = purchasePrice > 0 ? loanAmount / purchasePrice : 0;
@@ -509,7 +510,7 @@ export function buildProForma(project: SyndicationProjectFull): Document {
     { label: "Exit Cap Rate", value: `${(exitCapRate * 100).toFixed(2)}%` },
     { label: "Implied Exit Value", value: formatCurrency(exitValue) },
     { label: "Loan Payoff", value: `(${formatCurrency(loanPayoff)})` },
-    { label: "Disposition Fee", value: project.dispositionFee ? `(${formatCurrency(dispositionFeeAmount)}) — ${(project.dispositionFee * 100).toFixed(1)}%` : "None" },
+    { label: "Disposition Fee", value: project.dispositionFee ? `(${formatCurrency(dispositionFeeAmount)}) — ${(safeNumber(project.dispositionFee) * 100).toFixed(1)}%` : "None" },
     { label: "Net Sale Proceeds to Equity", value: formatCurrency(netProceeds) },
   ];
   children.push(keyTermsTable(exitRows));
@@ -602,7 +603,7 @@ export function buildProForma(project: SyndicationProjectFull): Document {
   const landValue = purchasePrice * 0.20; // Estimate land at 20% of purchase price
   const depreciableBasis = purchasePrice - landValue;
   const annualDepreciation = depreciationYears > 0 ? depreciableBasis / depreciationYears : 0;
-  const bonusDepreciationRate = 0.20; // 2026: 20% per TCJA phase-down
+  const bonusDepreciationRate = 1.0; // 2026: 100% per The One Big Beautiful Bill Act (OBBBA) of July 2025 — permanently restored for property acquired after January 19, 2025
   const bonusDepreciationYear1 = depreciableBasis * bonusDepreciationRate;
 
   children.push(bodyText(
@@ -619,9 +620,9 @@ export function buildProForma(project: SyndicationProjectFull): Document {
 
   children.push(bodyText("Bonus Depreciation (2026):", { bold: true }));
   children.push(bodyText(
-    `Per 26 U.S.C. Section 168(k), as modified by the Tax Cuts and Jobs Act (TCJA) phase-down schedule, the 2026 first-year bonus depreciation rate is 20% of the depreciable basis for qualifying property placed in service during the tax year.`,
+    `Per 26 U.S.C. Section 168(k), as modified by The One Big Beautiful Bill Act (OBBBA) of July 2025, 100% bonus depreciation has been permanently restored for qualifying property placed in service after January 19, 2025. The previous TCJA phase-down schedule no longer applies.`,
   ));
-  children.push(bulletPoint(`Year 1 Bonus Depreciation (20%): ${formatCurrency(bonusDepreciationYear1)}`));
+  children.push(bulletPoint(`Year 1 Bonus Depreciation (100%): ${formatCurrency(bonusDepreciationYear1)}`));
   children.push(bulletPoint(`Remaining Basis After Bonus: ${formatCurrency(depreciableBasis - bonusDepreciationYear1)}`));
   children.push(spacer(4));
 
@@ -650,11 +651,11 @@ export function buildProForma(project: SyndicationProjectFull): Document {
 export function runProFormaComplianceChecks(project: SyndicationProjectFull): ComplianceCheck[] {
   const checks: ComplianceCheck[] = [];
 
-  const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
-  const loanAmount = project.loanAmount ? Number(project.loanAmount) : 0;
-  const totalEquityRaise = project.totalEquityRaise ? Number(project.totalEquityRaise) : 0;
-  const currentNoi = project.currentNoi ? Number(project.currentNoi) : 0;
-  const proFormaNoi = project.proFormaNoi ? Number(project.proFormaNoi) : 0;
+  const purchasePrice = safeNumber(project.purchasePrice);
+  const loanAmount = safeNumber(project.loanAmount);
+  const totalEquityRaise = safeNumber(project.totalEquityRaise);
+  const currentNoi = safeNumber(project.currentNoi);
+  const proFormaNoi = safeNumber(project.proFormaNoi);
   const ltv = purchasePrice > 0 ? loanAmount / purchasePrice : 0;
 
   // DSCR check
@@ -735,7 +736,7 @@ export function runProFormaComplianceChecks(project: SyndicationProjectFull): Co
   });
 
   // Capital stack adds up
-  const totalCost = purchasePrice + (project.renovationBudget ? Number(project.renovationBudget) : 0) + (project.closingCosts ? Number(project.closingCosts) : 0);
+  const totalCost = purchasePrice + safeNumber(project.renovationBudget) + safeNumber(project.closingCosts);
   const totalSources = loanAmount + totalEquityRaise;
   const gapPercent = totalCost > 0 ? Math.abs(totalSources - totalCost) / totalCost : 0;
 

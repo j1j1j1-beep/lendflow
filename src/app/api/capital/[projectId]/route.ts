@@ -21,13 +21,16 @@ const VALID_ICA_EXEMPTIONS = new Set(["SECTION_3C1", "SECTION_3C7"]);
 // Statuses that allow editing
 const EDITABLE_STATUSES = new Set(["CREATED", "NEEDS_REVIEW"]);
 
-/** Convert Decimal fields on a project to plain numbers for JSON */
+/** Convert Decimal and Float fields on a project to plain numbers for JSON */
 function serializeProject(project: Record<string, unknown>) {
   return {
     ...project,
     targetRaise: project.targetRaise ? Number(project.targetRaise) : null,
     minInvestment: project.minInvestment ? Number(project.minInvestment) : null,
     gpCommitment: project.gpCommitment ? Number(project.gpCommitment) : null,
+    managementFee: project.managementFee ? Number(project.managementFee) : null,
+    carriedInterest: project.carriedInterest ? Number(project.carriedInterest) : null,
+    preferredReturn: project.preferredReturn ? Number(project.preferredReturn) : null,
   };
 }
 

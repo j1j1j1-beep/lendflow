@@ -58,6 +58,16 @@ function createLimiter(config: RateLimitConfig): RateLimiter {
   return {
     config,
     check(identifier: string): RateLimitResult {
+      // Emergency cleanup if store gets too large
+      if (store.size > 10000) {
+        const cleanupNow = Date.now();
+        for (const [key, timestamps] of store) {
+          const filtered = timestamps.filter((t) => cleanupNow - t < config.windowMs);
+          if (filtered.length === 0) store.delete(key);
+          else store.set(key, filtered);
+        }
+      }
+
       const now = Date.now();
       const windowStart = now - config.windowMs;
 

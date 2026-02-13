@@ -18,7 +18,7 @@
 // k1UBTI → Box 20 Code V
 //
 // Filing deadline: March 15 (or September 15 with extension)
-// Late filing penalty: $240/partner/month (2025 rate, 26 USC §6698)
+// Late filing penalty: $255/partner/month (2025 rate, 26 USC §6698)
 
 import {
   Document,
@@ -35,6 +35,7 @@ import {
   keyTermsTable,
   formatCurrency,
   formatCurrencyDetailed,
+  safeNumber,
   COLORS,
 } from "../../doc-helpers";
 
@@ -50,7 +51,7 @@ RULES:
 1. All financial numbers will be provided separately in a table — do not invent or modify numbers.
 2. Explain what each major K-1 category means for the LP's tax return.
 3. Reference correct IRS form numbers and IRC sections.
-4. Filing deadline and penalty information must be accurate (March 15, or Sept 15 with extension; $240/partner/month late penalty under 26 USC §6698).
+4. Filing deadline and penalty information must be accurate (March 15, or Sept 15 with extension; $255/partner/month late penalty under 26 USC §6698).
 5. Output ONLY valid JSON matching the requested schema.`;
 
 async function generateK1Prose(project: ComplianceProjectFull): Promise<K1SummaryProse> {
@@ -76,8 +77,7 @@ Return JSON with these keys:
 // ─── Helper: Decimal to Number ───────────────────────────────────────
 
 function d2n(val: unknown): number {
-  if (val === null || val === undefined) return 0;
-  return Number(val);
+  return safeNumber(val);
 }
 
 // ─── Template Builder ────────────────────────────────────────────────
@@ -165,7 +165,7 @@ export async function buildK1Summary(project: ComplianceProjectFull): Promise<Do
       { label: "Partnership Return (Form 1065)", value: filingDeadline },
       { label: "K-1 Delivery Deadline", value: filingDeadline },
       { label: "Extension Deadline (Form 7004)", value: extensionDeadline },
-      { label: "Late Filing Penalty", value: "$240 per partner per month (max 12 months)" },
+      { label: "Late Filing Penalty", value: "$255 per partner per month (max 12 months)" },
       { label: "Penalty Authority", value: "26 U.S.C. § 6698" },
     ]),
   );
@@ -344,7 +344,7 @@ export async function buildK1Summary(project: ComplianceProjectFull): Promise<Do
   children.push(bulletPoint("If you received an extension, the K-1 may be revised; please check with the fund administrator."));
   children.push(
     bulletPoint(
-      `Late filing penalty: $240 per partner per month, up to 12 months, under 26 U.S.C. § 6698 (2025 rate).`,
+      `Late filing penalty: $255 per partner per month, up to 12 months, under 26 U.S.C. § 6698 (2026 rate).`,
     ),
   );
   children.push(spacer(8));
@@ -432,7 +432,7 @@ export function runK1ComplianceChecks(project: ComplianceProjectFull): Complianc
   const nonZeroFields = k1Fields.filter(
     (f) => {
       const val = (project as Record<string, unknown>)[f.field];
-      return val !== null && val !== undefined && Number(val) !== 0;
+      return val !== null && val !== undefined && safeNumber(val) !== 0;
     },
   );
 
@@ -451,12 +451,12 @@ export function runK1ComplianceChecks(project: ComplianceProjectFull): Complianc
     category: "irs",
     passed: project.k1EndingCapitalAccount !== null,
     note: project.k1EndingCapitalAccount !== null
-      ? `Ending capital account: ${formatCurrencyDetailed(Number(project.k1EndingCapitalAccount))}`
+      ? `Ending capital account: ${formatCurrencyDetailed(safeNumber(project.k1EndingCapitalAccount))}`
       : "Ending capital account not reported — required on K-1 Part II, Item L",
   });
 
   // UBTI warning for tax-exempt investors
-  const ubti = project.k1UBTI ? Number(project.k1UBTI) : 0;
+  const ubti = safeNumber(project.k1UBTI);
   if (ubti !== 0) {
     checks.push({
       name: "UBTI Disclosure",
@@ -468,7 +468,7 @@ export function runK1ComplianceChecks(project: ComplianceProjectFull): Complianc
   }
 
   // UBTI threshold check per IRC §512(a)(3)(A)
-  const ubtiAmount = project.k1UBTI ? Number(project.k1UBTI) : 0;
+  const ubtiAmount = safeNumber(project.k1UBTI);
   checks.push({
     name: "UBTI Filing Threshold",
     regulation: "IRC §512(a)(3)(A) — $1,000 UBTI Threshold",
@@ -487,7 +487,7 @@ export function runK1ComplianceChecks(project: ComplianceProjectFull): Complianc
     regulation: "26 U.S.C. § 6698",
     category: "irs",
     passed: true, // Always included in template
-    note: "Late filing penalty of $240/partner/month (2025 rate) disclosed per 26 U.S.C. § 6698",
+    note: "Late filing penalty of $255/partner/month (2026 rate) disclosed per 26 U.S.C. § 6698",
   });
 
   return checks;

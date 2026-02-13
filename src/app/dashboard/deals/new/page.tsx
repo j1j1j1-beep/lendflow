@@ -110,14 +110,14 @@ export default function NewDealPage() {
           stockComponent: stockComponent ? parseFloat(stockComponent) : null,
           earnoutAmount: earnoutAmount ? parseFloat(earnoutAmount) : null,
           exclusivityDays: exclusivityDays
-            ? parseInt(exclusivityDays)
+            ? parseInt(exclusivityDays, 10)
             : null,
           dueDiligenceDays: dueDiligenceDays
-            ? parseInt(dueDiligenceDays)
+            ? parseInt(dueDiligenceDays, 10)
             : null,
           targetIndustry: targetIndustry.trim() || null,
           governingLaw: governingLaw.trim() || "Delaware",
-          nonCompeteYears: nonCompeteYears ? parseInt(nonCompeteYears) : null,
+          nonCompeteYears: nonCompeteYears ? parseInt(nonCompeteYears, 10) : null,
           escrowPercent: escrowPercent
             ? parseFloat(escrowPercent) / 100
             : null,

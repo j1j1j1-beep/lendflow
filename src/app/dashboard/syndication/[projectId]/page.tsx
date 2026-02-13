@@ -150,7 +150,6 @@ const STATUS_CONFIG: Record<
 };
 
 const PROCESSING_STATUSES = [
-  "CREATED",
   "GENERATING_DOCS",
   "COMPLIANCE_REVIEW",
 ];
@@ -172,13 +171,10 @@ function formatCurrency(value: number | string | null): string {
 function formatPercent(value: number | null): string {
   if (value === null || value === undefined) return "--";
   // Values are stored as decimals (0.08 = 8%), display as percentage
-  return `${(value * 100).toFixed(1)}%`;
+  const num = (value * 100).toFixed(1);
+  return `${parseFloat(num)}%`;
 }
 
-function formatPercentRaw(value: number | null): string {
-  if (value === null || value === undefined) return "--";
-  return `${(value * 100).toFixed(1)}%`;
-}
 
 /* ---------- Document Card Sub-component ---------- */
 
@@ -326,6 +322,7 @@ export default function SyndicationDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [pollErrorCount, setPollErrorCount] = useState(0);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchProject = useCallback(async () => {
@@ -335,8 +332,10 @@ export default function SyndicationDetailPage() {
       const data = await res.json();
       setProject(data.project);
       setError(null);
+      setPollErrorCount(0); // Reset error count on success
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load project");
+      setPollErrorCount(prev => prev + 1);
     } finally {
       setLoading(false);
     }
@@ -351,7 +350,8 @@ export default function SyndicationDetailPage() {
   useEffect(() => {
     if (
       project &&
-      PROCESSING_STATUSES.includes(project.status)
+      PROCESSING_STATUSES.includes(project.status) &&
+      pollErrorCount < 3 // Stop polling after 3 consecutive errors
     ) {
       pollingRef.current = setInterval(fetchProject, 5000);
     } else if (pollingRef.current) {
@@ -363,7 +363,7 @@ export default function SyndicationDetailPage() {
         clearInterval(pollingRef.current);
       }
     };
-  }, [project?.status, fetchProject]);
+  }, [project, fetchProject, pollErrorCount]);
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -430,7 +430,7 @@ export default function SyndicationDetailPage() {
   const isProcessing = PROCESSING_STATUSES.includes(project.status);
   const isComplete = project.status === "COMPLETE";
   const canGenerate =
-    project.status === "CREATED" || project.status === "NEEDS_REVIEW";
+    project.status === "CREATED" || project.status === "ERROR";
   const statusConfig = STATUS_CONFIG[project.status] ?? {
     label: project.status,
     variant: "outline" as const,
@@ -506,12 +506,12 @@ export default function SyndicationDetailPage() {
     },
     {
       label: "Acquisition Fee",
-      value: formatPercentRaw(project.acquisitionFee),
+      value: formatPercent(project.acquisitionFee),
       icon: Percent,
     },
     {
       label: "Asset Mgmt Fee",
-      value: formatPercentRaw(project.assetMgmtFee),
+      value: formatPercent(project.assetMgmtFee),
       icon: Percent,
     },
   ];

@@ -112,14 +112,18 @@ export async function logAudit(params: {
   metadata?: Record<string, unknown>;
 }) {
   try {
+    // Map programId to entityType/entityId for bio module audit logs
+    const entityType = params.entityType ?? (params.programId ? "bio" : null);
+    const entityId = params.entityId ?? params.programId ?? null;
+
     await prisma.auditLog.create({
       data: {
         orgId: params.orgId,
         userId: params.userId ?? null,
         userEmail: params.userEmail ?? null,
         dealId: params.dealId ?? null,
-        entityType: params.entityType ?? null,
-        entityId: params.entityId ?? null,
+        entityType,
+        entityId,
         action: params.action,
         target: params.target ?? null,
         metadata: params.metadata

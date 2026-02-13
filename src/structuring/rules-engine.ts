@@ -85,6 +85,9 @@ export interface RulesEngineOutput {
 // In production, these should be fetched from a live rate feed (FRED API, Bloomberg, or similar).
 // Stale rates directly impact loan pricing for every deal.
 // Last updated: 2026-02-11
+// WARNING: These rates are hardcoded approximations for development/demo only.
+// In production, fetch live rates from FRED API (https://fred.stlouisfed.org/)
+// or a market data provider. Stale rates will mis-price loans.
 
 const BASE_RATES: Record<string, number> = {
   prime: 0.0675,    // WSJ Prime Rate (updated Feb 2026)
@@ -299,19 +302,22 @@ export function calculateMonthlyPayment(
 
   if (interestOnly || amortizationMonths <= 0) {
     // Interest-only payment
-    return Math.round((principal * annualRate / 12) * 100) / 100;
+    // Use 4 decimal places internally to avoid compounding rounding errors
+    return Math.round((principal * annualRate / 12) * 10000) / 10000;
   }
 
   const monthlyRate = annualRate / 12;
   if (monthlyRate === 0) {
-    return Math.round((principal / amortizationMonths) * 100) / 100;
+    // Use 4 decimal places internally to avoid compounding rounding errors
+    return Math.round((principal / amortizationMonths) * 10000) / 10000;
   }
 
   // Standard amortization formula: P * r(1+r)^n / ((1+r)^n - 1)
   const factor = Math.pow(1 + monthlyRate, amortizationMonths);
   const payment = principal * (monthlyRate * factor) / (factor - 1);
 
-  return Math.round(payment * 100) / 100;
+  // Use 4 decimal places internally to avoid compounding rounding errors
+  return Math.round(payment * 10000) / 10000;
 }
 
 // Fee calculation

@@ -27,6 +27,8 @@ const STATUS_FILTERS = [
 ] as const;
 
 const PROCESSING_STATUSES = [
+  "UPLOADING",
+  "PROCESSING_OCR",
   "EXTRACTING",
   "CLASSIFYING",
   "VERIFYING",
@@ -46,6 +48,7 @@ export default function BioDashboardPage() {
   const isInitialLoad = useRef(true);
   const [sampleLoading, setSampleLoading] = useState(false);
   const [sampleError, setSampleError] = useState<string | null>(null);
+  const pollErrorCount = useRef(0);
 
   const handleTrySample = async () => {
     setSampleLoading(true);
@@ -87,7 +90,9 @@ export default function BioDashboardPage() {
       if (!res.ok) throw new Error("Failed to load programs");
       const data = await res.json();
       setPrograms(Array.isArray(data) ? data : data.programs ?? []);
+      pollErrorCount.current = 0;
     } catch (err) {
+      pollErrorCount.current += 1;
       if (isInitialLoad.current) {
         setFetchError(err instanceof Error ? err.message : "Failed to load programs");
       }
@@ -113,7 +118,14 @@ export default function BioDashboardPage() {
       PROCESSING_STATUSES.includes(p.status)
     );
     if (!hasActive) return;
-    const interval = setInterval(() => fetchRef.current(), 10000);
+    if (pollErrorCount.current >= 3) return;
+    const interval = setInterval(() => {
+      if (pollErrorCount.current >= 3) {
+        clearInterval(interval);
+        return;
+      }
+      fetchRef.current();
+    }, 10000);
     return () => clearInterval(interval);
   }, [programs]);
 

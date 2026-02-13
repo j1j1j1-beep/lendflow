@@ -124,6 +124,8 @@ type BioProgram = {
 };
 
 const PROCESSING_STATUSES = [
+  "UPLOADING",
+  "PROCESSING_OCR",
   "EXTRACTING",
   "CLASSIFYING",
   "VERIFYING",
@@ -176,20 +178,22 @@ const GEN_DOC_TYPE_LABELS: Record<string, string> = {
 
 const DOC_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   PENDING: { label: "Pending", color: "text-muted-foreground" },
+  UPLOADING: { label: "Uploading", color: "text-blue-600" },
   OCR_PROCESSING: { label: "OCR Processing", color: "text-blue-600" },
   OCR_COMPLETE: { label: "OCR Complete", color: "text-blue-600" },
   CLASSIFYING: { label: "Classifying", color: "text-amber-600" },
   CLASSIFIED: { label: "Classified", color: "text-emerald-600" },
   EXTRACTING: { label: "Extracting", color: "text-amber-600" },
   EXTRACTED: { label: "Extracted", color: "text-emerald-600" },
+  VERIFYING: { label: "Verifying", color: "text-amber-600" },
   VERIFIED: { label: "Verified", color: "text-emerald-600" },
   ERROR: { label: "Error", color: "text-destructive" },
 };
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + " B";
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  if (bytes < 1024 * 1024) return parseFloat((bytes / 1024).toFixed(1)) + " KB";
+  return parseFloat((bytes / (1024 * 1024)).toFixed(1)) + " MB";
 }
 
 function formatDate(dateStr: string): string {
@@ -547,6 +551,7 @@ export default function BioProgramDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pollErrorCount = useRef(0);
 
   const fetchProgram = useCallback(async () => {
     try {
@@ -554,7 +559,9 @@ export default function BioProgramDetailPage() {
       if (!res.ok) throw new Error("Failed to load program");
       const data = await res.json();
       setProgram(data);
+      pollErrorCount.current = 0;
     } catch (err) {
+      pollErrorCount.current += 1;
       setError(err instanceof Error ? err.message : "Failed to load program");
     } finally {
       setLoading(false);
@@ -573,7 +580,14 @@ export default function BioProgramDetailPage() {
 
   useEffect(() => {
     if (!program || !PROCESSING_STATUSES.includes(program.status)) return;
-    const interval = setInterval(() => fetchRef.current(), 10000);
+    if (pollErrorCount.current >= 3) return;
+    const interval = setInterval(() => {
+      if (pollErrorCount.current >= 3) {
+        clearInterval(interval);
+        return;
+      }
+      fetchRef.current();
+    }, 10000);
     return () => clearInterval(interval);
   }, [program]);
 
@@ -979,14 +993,14 @@ export default function BioProgramDetailPage() {
                   </p>
                   <p
                     className={`text-2xl font-semibold tracking-tight mt-0.5 tabular-nums ${
-                      (program.bioAnalysis.riskScore * 10) <= 3
+                      ((program.bioAnalysis?.riskScore ?? 0) * 10) <= 3
                         ? "text-emerald-600"
-                        : (program.bioAnalysis.riskScore * 10) <= 6
+                        : ((program.bioAnalysis?.riskScore ?? 0) * 10) <= 6
                           ? "text-amber-600"
                           : "text-destructive"
                     }`}
                   >
-                    {(program.bioAnalysis.riskScore * 10).toFixed(1)}/10
+                    {parseFloat(((program.bioAnalysis?.riskScore ?? 0) * 10).toFixed(1))}/10
                   </p>
                 </div>
               </div>

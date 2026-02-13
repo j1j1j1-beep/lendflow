@@ -5,7 +5,7 @@
 // Form ADV Part 2A — Firm Brochure has 18 items.
 // Must be written in PLAIN ENGLISH per SEC requirement.
 // Private fund adviser considerations: fund strategy, fees, conflicts, risk factors.
-// Delivery: before or at time of advisory agreement; annual update within 120 days of fiscal year end.
+// Delivery: before or at time of advisory agreement; SEC filing deadline 90 days of fiscal year end per 17 CFR 275.204-1; client delivery 120 days per 17 CFR 275.204-3.
 //
 // Source: https://www.sec.gov/about/forms/formadv-part2.pdf
 // Regulation: 17 CFR 275.203-1
@@ -24,6 +24,7 @@ import {
   createTable,
   keyTermsTable,
   formatCurrency,
+  safeNumber,
   COLORS,
 } from "../../doc-helpers";
 
@@ -80,7 +81,7 @@ Return JSON with these keys (each should be 1-3 paragraphs in PLAIN ENGLISH):
 export async function buildFormADVSummary(project: ComplianceProjectFull): Promise<Document> {
   const prose = await generateFormADVProse(project);
 
-  const fundSize = project.fundSize ? Number(project.fundSize) : 0;
+  const fundSize = safeNumber(project.fundSize);
 
   const dateFormatted = new Date().toLocaleDateString("en-US", {
     year: "numeric",
@@ -88,10 +89,14 @@ export async function buildFormADVSummary(project: ComplianceProjectFull): Promi
     day: "numeric",
   });
 
-  // Fiscal year end delivery deadline (120 days)
+  // Fiscal year end SEC filing deadline (90 days per 17 CFR 275.204-1)
   const fiscalYearEnd = project.periodEnd ?? new Date();
-  const deliveryDeadline = new Date(fiscalYearEnd);
-  deliveryDeadline.setDate(deliveryDeadline.getDate() + 120);
+  const secFilingDeadline = new Date(fiscalYearEnd);
+  secFilingDeadline.setDate(secFilingDeadline.getDate() + 90);
+
+  // Client delivery deadline (120 days per 17 CFR 275.204-3)
+  const clientDeliveryDeadline = new Date(fiscalYearEnd);
+  clientDeliveryDeadline.setDate(clientDeliveryDeadline.getDate() + 120);
 
   const children: (Paragraph | Table)[] = [];
 
@@ -110,8 +115,12 @@ export async function buildFormADVSummary(project: ComplianceProjectFull): Promi
       { label: "Assets Under Management", value: formatCurrency(fundSize) },
       { label: "Brochure Date", value: dateFormatted },
       {
-        label: "Annual Update Deadline",
-        value: deliveryDeadline.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        label: "SEC Filing Deadline (90 days)",
+        value: secFilingDeadline.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+      },
+      {
+        label: "Client Delivery Deadline (120 days)",
+        value: clientDeliveryDeadline.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
       },
     ]),
   );
@@ -312,7 +321,12 @@ export async function buildFormADVSummary(project: ComplianceProjectFull): Promi
           "17 CFR 275.204-3",
         ],
         [
-          "Annual update",
+          "SEC annual filing",
+          "Within 90 days of fiscal year end",
+          "17 CFR 275.204-1",
+        ],
+        [
+          "Client delivery",
           "Within 120 days of fiscal year end",
           "17 CFR 275.204-3",
         ],
@@ -350,7 +364,7 @@ export async function buildFormADVSummary(project: ComplianceProjectFull): Promi
 export function runFormADVComplianceChecks(project: ComplianceProjectFull): ComplianceCheck[] {
   const checks: ComplianceCheck[] = [];
 
-  const fundSize = project.fundSize ? Number(project.fundSize) : 0;
+  const fundSize = safeNumber(project.fundSize);
 
   // SEC registration threshold
   checks.push({

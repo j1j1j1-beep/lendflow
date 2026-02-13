@@ -27,6 +27,7 @@ import {
   keyTermsTable,
   formatCurrency,
   formatCurrencyDetailed,
+  safeNumber,
   COLORS,
   AlignmentType,
 } from "../../doc-helpers";
@@ -76,11 +77,11 @@ export async function buildLPQuarterlyReport(project: ComplianceProjectFull): Pr
   const prose = await generateLPReportProse(project);
 
   // Extract numeric values
-  const nav = project.nav ? Number(project.nav) : 0;
-  const totalContributions = project.totalContributions ? Number(project.totalContributions) : 0;
-  const totalDistributions = project.totalDistributions ? Number(project.totalDistributions) : 0;
-  const fundSize = project.fundSize ? Number(project.fundSize) : 0;
-  const unfundedCommitments = project.unfundedCommitments ? Number(project.unfundedCommitments) : 0;
+  const nav = safeNumber(project.nav);
+  const totalContributions = safeNumber(project.totalContributions);
+  const totalDistributions = safeNumber(project.totalDistributions);
+  const fundSize = safeNumber(project.fundSize);
+  const unfundedCommitments = safeNumber(project.unfundedCommitments);
 
   // Compute performance metrics deterministically
   // TVPI = (totalDistributions + NAV) / totalContributions
@@ -167,10 +168,10 @@ export async function buildLPQuarterlyReport(project: ComplianceProjectFull): Pr
   const performanceRows: Array<{ label: string; value: string }> = [];
 
   if (netIrr !== null && netIrr !== undefined) {
-    performanceRows.push({ label: "Net IRR (Since Inception)", value: `${(netIrr * 100).toFixed(2)}%` });
+    performanceRows.push({ label: "Net IRR (Since Inception)", value: `${(safeNumber(netIrr) * 100).toFixed(2)}%` });
   }
   if (grossIrr !== null && grossIrr !== undefined) {
-    performanceRows.push({ label: "Gross IRR (Since Inception)", value: `${(grossIrr * 100).toFixed(2)}%` });
+    performanceRows.push({ label: "Gross IRR (Since Inception)", value: `${(safeNumber(grossIrr) * 100).toFixed(2)}%` });
   }
   performanceRows.push({ label: "TVPI (Total Value to Paid-In)", value: `${tvpi.toFixed(3)}x` });
   performanceRows.push({ label: "DPI (Distributions to Paid-In)", value: `${dpi.toFixed(3)}x` });
@@ -186,7 +187,7 @@ export async function buildLPQuarterlyReport(project: ComplianceProjectFull): Pr
   }
 
   if (project.moic !== null && project.moic !== undefined) {
-    performanceRows.push({ label: "MOIC", value: `${project.moic.toFixed(3)}x` });
+    performanceRows.push({ label: "MOIC", value: `${safeNumber(project.moic).toFixed(3)}x` });
   }
 
   children.push(keyTermsTable(performanceRows));
@@ -213,15 +214,15 @@ export async function buildLPQuarterlyReport(project: ComplianceProjectFull): Pr
         portfolioSummary.map((p) => [
           String(p.company ?? "N/A"),
           String(p.dateInvested ?? "N/A"),
-          formatCurrencyDetailed(Number(p.cost ?? 0)),
-          formatCurrencyDetailed(Number(p.fairValue ?? 0)),
+          formatCurrencyDetailed(safeNumber(p.cost)),
+          formatCurrencyDetailed(safeNumber(p.fairValue)),
           nav > 0 && p.fairValue
-            ? `${((Number(p.fairValue) / nav) * 100).toFixed(1)}%`
+            ? `${((safeNumber(p.fairValue) / nav) * 100).toFixed(1)}%`
             : p.percentOfNav
-              ? `${(Number(p.percentOfNav) * 100).toFixed(1)}%`
+              ? `${(safeNumber(p.percentOfNav) * 100).toFixed(1)}%`
               : "N/A",
-          p.irr !== undefined && p.irr !== null ? `${(Number(p.irr) * 100).toFixed(1)}%` : "N/A",
-          p.moic !== undefined && p.moic !== null ? `${Number(p.moic).toFixed(2)}x` : "N/A",
+          p.irr !== undefined && p.irr !== null ? `${(safeNumber(p.irr) * 100).toFixed(1)}%` : "N/A",
+          p.moic !== undefined && p.moic !== null ? `${safeNumber(p.moic).toFixed(2)}x` : "N/A",
           String(p.status ?? "unrealized").replace(/_/g, " "),
         ]),
         { alternateRows: true },
@@ -230,8 +231,8 @@ export async function buildLPQuarterlyReport(project: ComplianceProjectFull): Pr
     children.push(spacer(4));
 
     // Portfolio totals row
-    const totalCost = portfolioSummary.reduce((sum, p) => sum + Number(p.cost ?? 0), 0);
-    const totalFV = portfolioSummary.reduce((sum, p) => sum + Number(p.fairValue ?? 0), 0);
+    const totalCost = portfolioSummary.reduce((sum, p) => sum + safeNumber(p.cost), 0);
+    const totalFV = portfolioSummary.reduce((sum, p) => sum + safeNumber(p.fairValue), 0);
     children.push(
       bodyTextRuns([
         { text: "Total Portfolio: ", bold: true },
@@ -292,6 +293,26 @@ export async function buildLPQuarterlyReport(project: ComplianceProjectFull): Pr
     children.push(spacer(8));
   }
 
+  // ─── ESG / DEI Reporting (Optional) ────────────────────────────
+  children.push(sectionHeading("9. ESG and Diversity, Equity & Inclusion (DEI) (Optional)"));
+  children.push(
+    bodyText(
+      "The fund tracks environmental, social, and governance (ESG) metrics at the portfolio company level where applicable. As institutional investors increasingly request ESG disclosures, this section may include: (1) carbon footprint / greenhouse gas emissions tracking; (2) diversity statistics for portfolio company boards and management teams; (3) workplace safety metrics; (4) community impact initiatives; and (5) alignment with UN Sustainable Development Goals or other ESG frameworks. ESG reporting is voluntary and evolving. The GP will continue to assess ESG reporting best practices and investor preferences.",
+      { italic: true },
+    ),
+  );
+  children.push(spacer(8));
+
+  // ─── Cybersecurity Disclosure ──────────────────────────────────
+  children.push(sectionHeading("10. Cybersecurity and Data Privacy"));
+  children.push(
+    bodyText(
+      "The SEC's cybersecurity disclosure rules (17 CFR 229.106, effective December 2023) require registered investment advisers to disclose material cybersecurity incidents and cybersecurity risk management policies. While most private funds are not directly subject to these rules, institutional LPs may require disclosure of material cybersecurity incidents affecting the fund or portfolio companies. If a material cybersecurity incident has occurred during the reporting period (such as data breach, ransomware attack, or unauthorized access to sensitive investor information), the GP will disclose: (1) nature and timing of the incident; (2) impact on fund operations and investor data; and (3) remediation steps taken. No material cybersecurity incidents were reported for this period.",
+      { italic: true },
+    ),
+  );
+  children.push(spacer(8));
+
   // ─── Disclaimers ───────────────────────────────────────────────
   children.push(sectionHeading("Important Disclaimers"));
   children.push(
@@ -317,9 +338,9 @@ export async function buildLPQuarterlyReport(project: ComplianceProjectFull): Pr
 
 export function runLPReportComplianceChecks(project: ComplianceProjectFull): ComplianceCheck[] {
   const checks: ComplianceCheck[] = [];
-  const totalContributions = project.totalContributions ? Number(project.totalContributions) : 0;
-  const totalDistributions = project.totalDistributions ? Number(project.totalDistributions) : 0;
-  const nav = project.nav ? Number(project.nav) : 0;
+  const totalContributions = safeNumber(project.totalContributions);
+  const totalDistributions = safeNumber(project.totalDistributions);
+  const nav = safeNumber(project.nav);
 
   // ILPA reporting completeness
   checks.push({

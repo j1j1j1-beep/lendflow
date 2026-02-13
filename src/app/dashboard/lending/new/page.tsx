@@ -106,7 +106,7 @@ export default function NewDealPage() {
           loanType: selectedProgram?.category ?? null,
           propertyAddress: propertyAddress || null,
           proposedRate: proposedRate ? parseFloat(proposedRate) : null,
-          proposedTerm: proposedTerm ? parseInt(proposedTerm) : null,
+          proposedTerm: proposedTerm ? parseInt(proposedTerm, 10) : null,
           selectedOutputDocs,
         }),
       });

@@ -49,7 +49,6 @@ const STATUS_FILTERS = [
 ] as const;
 
 const PROCESSING_STATUSES = [
-  "CREATED",
   "GENERATING_DOCS",
   "COMPLIANCE_REVIEW",
 ];

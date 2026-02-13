@@ -18,6 +18,7 @@ import {
   signatureBlock,
   keyTermsTable,
   formatCurrency,
+  safeNumber,
   COLORS,
 } from "../../doc-helpers";
 import { claudeJson } from "@/lib/claude";
@@ -91,14 +92,14 @@ export async function buildOperatingAgreement(project: CapitalProjectFull): Prom
     maxTokens: 12000,
   });
 
-  const targetRaise = Number(project.targetRaise ?? 0);
-  const minInvestment = Number(project.minInvestment ?? 0);
-  const gpCommitment = Number(project.gpCommitment ?? 0);
-  const managementFee = project.managementFee ?? 0;
-  const carriedInterest = project.carriedInterest ?? 0;
-  const preferredReturn = project.preferredReturn ?? 0;
-  const hurdles = project.hurdles as Array<{ rate: number; split: string }> | null;
-  const keyPersonNames = project.keyPersonNames as string[] | null;
+  const targetRaise = safeNumber(project.targetRaise);
+  const minInvestment = safeNumber(project.minInvestment);
+  const gpCommitment = safeNumber(project.gpCommitment);
+  const managementFee = safeNumber(project.managementFee);
+  const carriedInterest = safeNumber(project.carriedInterest);
+  const preferredReturn = safeNumber(project.preferredReturn);
+  const hurdles = (Array.isArray(project.hurdles) ? project.hurdles : []) as Array<{ rate: number; split: string }>;
+  const keyPersonNames = (Array.isArray(project.keyPersonNames) ? project.keyPersonNames : []) as string[];
   const stateOfFormation = project.gpStateOfFormation ?? "Delaware";
   const entityType = project.fundType === "HEDGE_FUND" ? "LLC" : "Limited Partnership";
 
@@ -156,7 +157,7 @@ export async function buildOperatingAgreement(project: CapitalProjectFull): Prom
   ]));
   children.push(bodyTextRuns([
     { text: "GP Commitment: ", bold: true },
-    { text: `${formatCurrency(gpCommitment)} (${targetRaise > 0 ? ((gpCommitment / targetRaise) * 100).toFixed(1) : "0"}% of target fund size)` },
+    { text: `${formatCurrency(gpCommitment)} (${targetRaise !== 0 ? ((gpCommitment / targetRaise) * 100).toFixed(1) : "0.0"}% of target fund size)` },
   ]));
   children.push(spacer(8));
 
@@ -179,11 +180,11 @@ export async function buildOperatingAgreement(project: CapitalProjectFull): Prom
     children.push(bulletPoint(`Step 4 — Carried Interest Split: ${(100 - carriedInterest * 100).toFixed(1)}% to Limited Partners (pro rata) and ${(carriedInterest * 100).toFixed(1)}% to the General Partner as carried interest.`));
   }
 
-  if (hurdles && hurdles.length > 0) {
+  if (hurdles.length > 0) {
     children.push(spacer(4));
     children.push(bodyText("Hurdle Rate Tiers:", { bold: true }));
     for (const h of hurdles) {
-      children.push(bulletPoint(`${(h.rate * 100).toFixed(1)}% hurdle: ${h.split}`));
+      children.push(bulletPoint(`${(safeNumber(h.rate) * 100).toFixed(1)}% hurdle: ${String(h.split ?? "")}`));
     }
   }
   children.push(spacer(8));
@@ -228,7 +229,7 @@ export async function buildOperatingAgreement(project: CapitalProjectFull): Prom
 
   // Article VII: Key Person
   children.push(sectionHeading("Article VII — Key Person Provision"));
-  if (project.keyPersonProvision && keyPersonNames && keyPersonNames.length > 0) {
+  if (project.keyPersonProvision && keyPersonNames.length > 0) {
     children.push(bodyText(prose.keyPersonProvision));
     children.push(spacer(4));
     children.push(bodyTextRuns([
@@ -258,6 +259,13 @@ export async function buildOperatingAgreement(project: CapitalProjectFull): Prom
   children.push(
     bodyText(
       "The Advisory Committee shall consist of 3-7 representatives selected from the largest Limited Partners by commitment amount. The Advisory Committee shall review and provide guidance on: (a) conflicts of interest; (b) valuation of Fund assets; (c) modifications to investment restrictions; (d) extension of the Fund term; and (e) any other matters submitted to it by the General Partner. The Advisory Committee shall have no authority to make investment decisions on behalf of the Fund.",
+    ),
+  );
+  children.push(spacer(4));
+  children.push(
+    bodyText(
+      "ERISA Monitoring: The General Partner shall monitor the aggregate commitment amounts of Benefit Plan Investors (as defined in ERISA Section 3(42)) and ensure that Benefit Plan Investors do not hold 25% or more of the value of any class of equity interests in the Fund. If Benefit Plan Investor ownership approaches 25%, the General Partner shall take reasonable steps to prevent the Fund from becoming subject to ERISA fiduciary obligations and prohibited transaction rules, including limiting future subscriptions from Benefit Plan Investors or offering them a separate class of interests.",
+      { italic: true },
     ),
   );
   children.push(spacer(8));
@@ -370,14 +378,14 @@ export function runOperatingAgreementComplianceChecks(project: CapitalProjectFul
     category: "investor_protection",
     passed: project.keyPersonProvision,
     note: project.keyPersonProvision
-      ? `Key person provision included. Key persons: ${(project.keyPersonNames as string[] | null)?.join(", ") ?? "Not specified"}.`
+      ? `Key person provision included. Key persons: ${(Array.isArray(project.keyPersonNames) ? (project.keyPersonNames as string[]).join(", ") : "Not specified")}.`
       : "WARNING: No key person provision. LPs typically require suspension of the investment period if key persons depart.",
   });
 
   // GP Commitment
-  const gpCommitment = Number(project.gpCommitment ?? 0);
-  const targetRaise = Number(project.targetRaise ?? 0);
-  const gpPct = targetRaise > 0 ? (gpCommitment / targetRaise) * 100 : 0;
+  const gpCommitment = safeNumber(project.gpCommitment);
+  const targetRaise = safeNumber(project.targetRaise);
+  const gpPct = targetRaise !== 0 ? (gpCommitment / targetRaise) * 100 : 0;
   checks.push({
     name: "GP Commitment Alignment",
     regulation: "Market Standard (1-5% of fund size)",
@@ -389,7 +397,7 @@ export function runOperatingAgreementComplianceChecks(project: CapitalProjectFul
   });
 
   // Management fee
-  const mgmtFee = project.managementFee ?? 0;
+  const mgmtFee = safeNumber(project.managementFee);
   checks.push({
     name: "Management Fee Disclosed",
     regulation: "Rule 10b-5 (17 CFR 240.10b-5)",
@@ -401,7 +409,7 @@ export function runOperatingAgreementComplianceChecks(project: CapitalProjectFul
   });
 
   // Carried interest
-  const carry = project.carriedInterest ?? 0;
+  const carry = safeNumber(project.carriedInterest);
   checks.push({
     name: "Carried Interest Disclosed",
     regulation: "26 U.S.C. Section 1061",

@@ -20,6 +20,8 @@ import {
   keyTermsTable,
   formatCurrency,
   formatPercent,
+  safeNumber,
+  ensureProseArray,
   COLORS,
   FONTS,
 } from "../../doc-helpers";
@@ -91,14 +93,14 @@ export async function buildPPM(project: CapitalProjectFull): Promise<Document> {
     maxTokens: 12000,
   });
 
-  const targetRaise = Number(project.targetRaise ?? 0);
-  const minInvestment = Number(project.minInvestment ?? 0);
-  const gpCommitment = Number(project.gpCommitment ?? 0);
-  const managementFee = project.managementFee ?? 0;
-  const carriedInterest = project.carriedInterest ?? 0;
-  const preferredReturn = project.preferredReturn ?? 0;
-  const hurdles = project.hurdles as Array<{ rate: number; split: string }> | null;
-  const keyPersonNames = project.keyPersonNames as string[] | null;
+  const targetRaise = safeNumber(project.targetRaise);
+  const minInvestment = safeNumber(project.minInvestment);
+  const gpCommitment = safeNumber(project.gpCommitment);
+  const managementFee = safeNumber(project.managementFee);
+  const carriedInterest = safeNumber(project.carriedInterest);
+  const preferredReturn = safeNumber(project.preferredReturn);
+  const hurdles = (Array.isArray(project.hurdles) ? project.hurdles : []) as Array<{ rate: number; split: string }>;
+  const keyPersonNames = (Array.isArray(project.keyPersonNames) ? project.keyPersonNames : []) as string[];
   const is506c = project.exemptionType === "REG_D_506C";
   const is3c7 = project.icaExemption === "SECTION_3C7";
 
@@ -296,9 +298,9 @@ export async function buildPPM(project: CapitalProjectFull): Promise<Document> {
   );
   children.push(spacer(4));
 
-  const riskFactors = Array.isArray(prose.riskFactors) ? prose.riskFactors : [prose.riskFactors ?? "Risk factors not generated."];
+  const riskFactors = ensureProseArray(prose.riskFactors);
   for (const risk of riskFactors) {
-    children.push(bulletPoint(risk));
+    children.push(bulletPoint(String(risk)));
   }
   children.push(spacer(8));
 
@@ -332,7 +334,7 @@ export async function buildPPM(project: CapitalProjectFull): Promise<Document> {
       { text: project.gpEntityName },
     ]),
   );
-  if (keyPersonNames && keyPersonNames.length > 0) {
+  if (keyPersonNames.length > 0) {
     children.push(
       bodyTextRuns([
         { text: "Key Persons: ", bold: true },
@@ -366,8 +368,8 @@ export async function buildPPM(project: CapitalProjectFull): Promise<Document> {
       ]),
     );
   }
-  const targetIndustries = project.targetIndustries as string[] | null;
-  if (targetIndustries && targetIndustries.length > 0) {
+  const targetIndustries = (Array.isArray(project.targetIndustries) ? project.targetIndustries : []) as string[];
+  if (targetIndustries.length > 0) {
     children.push(
       bodyTextRuns([
         { text: "Target Industries: ", bold: true },
@@ -392,11 +394,11 @@ export async function buildPPM(project: CapitalProjectFull): Promise<Document> {
     children.push(bulletPoint(`Fourth, ${(100 - carriedInterest * 100).toFixed(1)}% to Limited Partners and ${(carriedInterest * 100).toFixed(1)}% to the General Partner (as carried interest).`));
   }
 
-  if (hurdles && hurdles.length > 0) {
+  if (hurdles.length > 0) {
     children.push(spacer(4));
     children.push(bodyText("Hurdle Tiers:", { bold: true }));
     for (const h of hurdles) {
-      children.push(bulletPoint(`${(h.rate * 100).toFixed(1)}% hurdle: ${h.split}`));
+      children.push(bulletPoint(`${(safeNumber(h.rate) * 100).toFixed(1)}% hurdle: ${String(h.split ?? "")}`));
     }
   }
   children.push(spacer(8));
@@ -605,7 +607,7 @@ export function runPPMComplianceChecks(project: CapitalProjectFull): ComplianceC
   });
 
   // 10. Management fee within market norms
-  const mgmtFee = project.managementFee ?? 0;
+  const mgmtFee = safeNumber(project.managementFee);
   checks.push({
     name: "Management Fee Market Standard",
     regulation: "Market Standard (informational)",

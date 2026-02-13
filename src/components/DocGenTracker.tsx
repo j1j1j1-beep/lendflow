@@ -35,11 +35,21 @@ export function DocGenTracker({
 }: DocGenTrackerProps) {
   const [elapsed, setElapsed] = useState(0);
   const mountTime = useRef(Date.now());
+  const processingStarted = useRef(false);
 
   const isProcessing =
     status === "GENERATING_DOCS" || status === "COMPLIANCE_REVIEW";
   const isError = status === "ERROR";
   const isComplete = status === "COMPLETE" || status === "NEEDS_REVIEW";
+
+  // Reset timer when processing starts for the first time
+  useEffect(() => {
+    if (isProcessing && !processingStarted.current) {
+      processingStarted.current = true;
+      mountTime.current = Date.now();
+      setElapsed(0);
+    }
+  }, [isProcessing]);
 
   // Elapsed timer
   useEffect(() => {
@@ -118,7 +128,14 @@ export function DocGenTracker({
         </div>
 
         {/* Progress bar */}
-        <div className="relative h-2.5 w-full rounded-full bg-muted overflow-hidden">
+        <div
+          className="relative h-2.5 w-full rounded-full bg-muted overflow-hidden"
+          role="progressbar"
+          aria-valuenow={percent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Document generation progress"
+        >
           <div
             className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${barClass} transition-all duration-700 ease-out ${
               percent > 0 ? `shadow-md ${glowClass}` : ""
@@ -138,7 +155,7 @@ export function DocGenTracker({
       </div>
 
       {/* Document steps */}
-      <div className="space-y-0.5">
+      <div className="space-y-0.5" role="list" aria-label="Document generation progress">
         {expectedDocs.map((doc, i) => {
           const isDone = isDocCompleted(doc.type);
           const isCurrent = i === currentIdx;
@@ -147,6 +164,7 @@ export function DocGenTracker({
           return (
             <div
               key={doc.type}
+              role="listitem"
               className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
                 isDone
                   ? "bg-emerald-500/5"

@@ -17,6 +17,7 @@ import {
   keyTermsTable,
   createTable,
   formatCurrency,
+  safeNumber,
   COLORS,
 } from "../../doc-helpers";
 import { claudeJson } from "@/lib/claude";
@@ -92,10 +93,10 @@ export async function buildFormDDraft(project: CapitalProjectFull): Promise<Docu
     maxTokens: 4000,
   });
 
-  const targetRaise = Number(project.targetRaise ?? 0);
-  const minInvestment = Number(project.minInvestment ?? 0);
-  const keyPersonNames = project.keyPersonNames as string[] | null;
-  const stateFilings = project.stateFilings as string[] | null;
+  const targetRaise = safeNumber(project.targetRaise);
+  const minInvestment = safeNumber(project.minInvestment);
+  const keyPersonNames = (Array.isArray(project.keyPersonNames) ? project.keyPersonNames : []) as string[];
+  const stateFilings = (Array.isArray(project.stateFilings) ? project.stateFilings : []) as string[];
   const is506c = project.exemptionType === "REG_D_506C";
 
   const children: (Paragraph | Table)[] = [];
@@ -148,7 +149,7 @@ export async function buildFormDDraft(project: CapitalProjectFull): Promise<Docu
   );
   children.push(spacer(4));
 
-  if (keyPersonNames && keyPersonNames.length > 0) {
+  if (keyPersonNames.length > 0) {
     const personRows = keyPersonNames.map((name) => [
       name,
       "Executive Officer / Director",
@@ -319,7 +320,7 @@ export async function buildFormDDraft(project: CapitalProjectFull): Promise<Docu
   );
   children.push(spacer(4));
 
-  if (stateFilings && stateFilings.length > 0) {
+  if (stateFilings.length > 0) {
     children.push(bodyText("Notice filings required in:", { bold: true }));
     for (const state of stateFilings) {
       children.push(bulletPoint(`${state} — notice filing fee and Form D copy required`));
@@ -339,6 +340,13 @@ export async function buildFormDDraft(project: CapitalProjectFull): Promise<Docu
     bodyText(
       "FILING DEADLINE: Form D must be filed electronically through EDGAR within 15 calendar days after the first sale of securities. An amendment is required annually if the offering continues beyond 12 months, or upon any material change in the information provided.",
       { bold: true },
+    ),
+  );
+  children.push(spacer(4));
+  children.push(
+    bodyText(
+      "EDGAR NEXT ENROLLMENT: New filers must enroll in EDGAR Next (the SEC's updated electronic filing system) before submitting Form D. Enrollment requires verifying identity, creating login credentials, and linking to an EDGAR filer account. Enrollment typically takes 2-5 business days. Existing EDGAR filers can continue using legacy EDGAR or migrate to EDGAR Next. For enrollment instructions, visit: www.sec.gov/edgar/next",
+      { italic: true, color: COLORS.textGray },
     ),
   );
   children.push(spacer(4));
@@ -405,14 +413,14 @@ export function runFormDComplianceChecks(project: CapitalProjectFull): Complianc
   });
 
   // State filings
-  const stateFilings = project.stateFilings as string[] | null;
+  const complianceStateFilings = (Array.isArray(project.stateFilings) ? project.stateFilings : []) as string[];
   checks.push({
     name: "State Blue Sky Notice Filings",
     regulation: "NSMIA / State securities laws",
     category: "state_filing",
     passed: true,
-    note: stateFilings && stateFilings.length > 0
-      ? `State notice filings identified: ${stateFilings.join(", ")}. File within 15 days of first sale to residents of each state.`
+    note: complianceStateFilings.length > 0
+      ? `State notice filings identified: ${complianceStateFilings.join(", ")}. File within 15 days of first sale to residents of each state.`
       : "No state filings specified. Determine required filings based on investor residency before first closing.",
   });
 

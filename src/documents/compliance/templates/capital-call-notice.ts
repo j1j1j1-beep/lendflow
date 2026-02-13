@@ -28,6 +28,7 @@ import {
   keyTermsTable,
   formatCurrency,
   formatCurrencyDetailed,
+  safeNumber,
   COLORS,
 } from "../../doc-helpers";
 
@@ -61,7 +62,7 @@ Return JSON with these keys:
   "callNarrative": "1-2 paragraph formal notice opening paragraph referencing the LPA and calling capital",
   "purposeDescription": "1-2 paragraphs describing the purpose of the capital call in detail",
   "wireInstructions": "Wire instruction section with placeholders for bank name, ABA routing number, account number, account name, reference, and SWIFT code",
-  "defaultProvisionsNarrative": "2-3 paragraphs detailing default provisions including grace period (5-10 business days), default interest (prime + 2-5%), and escalating remedies per the LPA"
+  "defaultProvisionsNarrative": "2-3 paragraphs detailing default provisions including grace period (5-10 business days), default interest (prime + 3% as standard default rate), and escalating remedies per the LPA"
 }`,
     maxTokens: 3000,
   });
@@ -70,12 +71,15 @@ Return JSON with these keys:
 // ─── Business Day Calculator ─────────────────────────────────────────
 
 function businessDaysBetween(start: Date, end: Date): number {
+  if (start >= end) return 0;
   let count = 0;
   const current = new Date(start);
-  while (current < end) {
+  let iterations = 0;
+  while (current < end && iterations < 10000) {
     current.setDate(current.getDate() + 1);
     const day = current.getDay();
     if (day !== 0 && day !== 6) count++;
+    iterations++;
   }
   return count;
 }
@@ -85,9 +89,9 @@ function businessDaysBetween(start: Date, end: Date): number {
 export async function buildCapitalCallNotice(project: ComplianceProjectFull): Promise<Document> {
   const prose = await generateCapitalCallProse(project);
 
-  const callAmount = project.callAmount ? Number(project.callAmount) : 0;
-  const unfundedCommitments = project.unfundedCommitments ? Number(project.unfundedCommitments) : 0;
-  const fundSize = project.fundSize ? Number(project.fundSize) : 0;
+  const callAmount = safeNumber(project.callAmount);
+  const unfundedCommitments = safeNumber(project.unfundedCommitments);
+  const fundSize = safeNumber(project.fundSize);
   const noticeRequiredDays = project.callNoticeRequiredDays ?? 10;
   const defaultPenalty = project.callDefaultPenalty;
 
@@ -240,7 +244,7 @@ export async function buildCapitalCallNotice(project: ComplianceProjectFull): Pr
   children.push(bulletPoint("Grace Period: 5-10 business days after the due date (per LPA terms)"));
   children.push(
     bulletPoint(
-      `Default Interest: default interest at the prime rate plus ${defaultPenalty !== null && defaultPenalty !== undefined ? `${(Number(defaultPenalty) * 100).toFixed(1)}%` : "[2-5]%"} per annum on the unpaid amount, accruing from the due date until the defaulted contribution is received in full`,
+      `Default Interest: default interest at the prime rate plus ${defaultPenalty !== null && defaultPenalty !== undefined ? `${(safeNumber(defaultPenalty) * 100).toFixed(1)}%` : "[2-5]%"} per annum on the unpaid amount, accruing from the due date until the defaulted contribution is received in full`,
     ),
   );
   children.push(spacer(4));
@@ -330,8 +334,8 @@ export async function buildCapitalCallNotice(project: ComplianceProjectFull): Pr
 export function runCapitalCallComplianceChecks(project: ComplianceProjectFull): ComplianceCheck[] {
   const checks: ComplianceCheck[] = [];
 
-  const callAmount = project.callAmount ? Number(project.callAmount) : 0;
-  const unfundedCommitments = project.unfundedCommitments ? Number(project.unfundedCommitments) : 0;
+  const callAmount = safeNumber(project.callAmount);
+  const unfundedCommitments = safeNumber(project.unfundedCommitments);
   const noticeRequiredDays = project.callNoticeRequiredDays ?? 10;
 
   // Call amount provided
@@ -372,13 +376,7 @@ export function runCapitalCallComplianceChecks(project: ComplianceProjectFull): 
   // Notice period validation
   if (project.callDueDate) {
     const today = new Date();
-    let businessDays = 0;
-    const current = new Date(today);
-    while (current < project.callDueDate) {
-      current.setDate(current.getDate() + 1);
-      const day = current.getDay();
-      if (day !== 0 && day !== 6) businessDays++;
-    }
+    const businessDays = businessDaysBetween(today, project.callDueDate);
 
     checks.push({
       name: "Notice Period Compliance",

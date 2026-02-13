@@ -127,7 +127,7 @@ export default function NewSyndicationPage() {
             ? parseFloat(projectedIrr) / 100
             : null,
           projectedHoldYears: projectedHoldYears
-            ? parseInt(projectedHoldYears)
+            ? parseInt(projectedHoldYears, 10)
             : null,
           acquisitionFee: acquisitionFee
             ? parseFloat(acquisitionFee) / 100
@@ -135,8 +135,8 @@ export default function NewSyndicationPage() {
           assetMgmtFee: assetMgmtFee
             ? parseFloat(assetMgmtFee) / 100
             : null,
-          units: units ? parseInt(units) : null,
-          yearBuilt: yearBuilt ? parseInt(yearBuilt) : null,
+          units: units ? parseInt(units, 10) : null,
+          yearBuilt: yearBuilt ? parseInt(yearBuilt, 10) : null,
         }),
       });
 
@@ -155,7 +155,7 @@ export default function NewSyndicationPage() {
       );
 
       if (!genRes.ok) {
-        toast.warning(
+        toast.error(
           "Project created but document generation failed to start. You can retry from the project page."
         );
       } else {

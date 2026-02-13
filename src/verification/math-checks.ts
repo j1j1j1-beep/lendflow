@@ -4,7 +4,9 @@
 // and 2% relative tolerance for ratio checks.
 
 const ABSOLUTE_TOLERANCE = 1; // $1 for rounding differences
-const PERCENT_TOLERANCE = 0.02; // 2% for ratio comparisons
+// 2% tolerance for ratio comparisons (e.g., DTI, LTV calculations).
+// For "sum to 100%" checks, use tighter tolerance (0.5%) — see specific check functions.
+const PERCENT_TOLERANCE = 0.02;
 
 // Types
 

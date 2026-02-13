@@ -23,6 +23,7 @@ import {
   formatPercent,
   formatPercentShort,
   ensureProseArray,
+  safeNumber,
   COLORS,
   FONTS,
   PageBreak,
@@ -43,7 +44,7 @@ ABSOLUTE RULES:
 2. CITE SPECIFIC STATUTES: Reference SEC Rule 506(b) or 506(c), the Securities Act of 1933, the Investment Company Act of 1940, and applicable tax code sections by number.
 3. COMPLETE PROVISIONS: Every section must be substantive legal disclosure, not a summary or outline.
 4. RISK FACTORS must be comprehensive, specific to the actual property and deal, and cover all categories specified.
-5. TAX CONSIDERATIONS must accurately reflect current 2026 tax law including bonus depreciation phase-down to 20%.
+5. TAX CONSIDERATIONS must accurately reflect current 2026 tax law including 100% bonus depreciation under The One Big Beautiful Bill Act (OBBBA) of July 2025 for property acquired after January 19, 2025.
 6. OUTPUT: Respond ONLY with valid JSON matching the requested schema. No commentary or disclaimers.
 
 AI-GENERATED CONTENT DISCLAIMER: This AI-generated content is for document drafting assistance only and does not constitute legal advice or a securities offering. All offering documents must be reviewed by qualified securities counsel before distribution to investors.`;
@@ -59,7 +60,7 @@ ${context}
 
 ADDITIONAL CONTEXT:
 - Depreciation schedule: ${depreciationYears}-year straight-line (${isResidential ? "residential" : "commercial"})
-- Bonus depreciation: ${project.bonusDepreciationPct != null ? (project.bonusDepreciationPct * 100).toFixed(0) : "20"}% (2026 TCJA phase-down)
+- Bonus depreciation: ${project.bonusDepreciationPct != null ? (safeNumber(project.bonusDepreciationPct) * 100).toFixed(0) : "100"}% (The One Big Beautiful Bill Act of July 2025 permanently restored 100% bonus depreciation for property acquired after January 19, 2025)
 - Property classification: ${isResidential ? "Residential rental" : "Commercial"}
 
 Return a JSON object with these keys:
@@ -71,7 +72,7 @@ Return a JSON object with these keys:
   "marketAnalysis": "Market analysis covering: submarket overview, comparable properties, rental rate trends, vacancy rate context, population/employment growth drivers, and competitive positioning.",
   "businessPlan": "Business plan covering: value-add strategy (if renovation budget exists), renovation scope and timeline, target rents after stabilization, property management approach, and exit strategy.",
   "sponsorInformation": "Sponsor information covering: principal biography, relevant track record (use data if provided), management team, and organizational structure.",
-  "taxConsiderations": "Tax considerations covering: depreciation (${depreciationYears}-year for ${isResidential ? "residential" : "commercial"}), bonus depreciation at ${project.bonusDepreciationPct != null ? (project.bonusDepreciationPct * 100).toFixed(0) : "20"}% in 2026, passive activity rules under Section 469, REPS qualification, QOZ benefits if applicable, 1031 exchange limitations for LP interests, UBTI for tax-exempt investors, and SALT limitations.",
+  "taxConsiderations": "Tax considerations covering: depreciation (${depreciationYears}-year for ${isResidential ? "residential" : "commercial"}), bonus depreciation at ${project.bonusDepreciationPct != null ? (safeNumber(project.bonusDepreciationPct) * 100).toFixed(0) : "100"}% under The One Big Beautiful Bill Act (OBBBA) of July 2025 for property acquired after January 19, 2025, passive activity rules under Section 469, REPS qualification, QOZ benefits if applicable, 1031 exchange limitations for LP interests, UBTI for tax-exempt investors, and SALT limitations.",
   "subscriptionProcedures": "Subscription procedures covering: minimum investment amount, subscription process, closing conditions, capital call rights, and investor communication.",
   "operatingAgreementSummary": "Summary of key operating agreement terms: manager-managed structure, voting rights, transfer restrictions, reporting obligations, and dissolution provisions."
 }`;
@@ -88,15 +89,15 @@ Return a JSON object with these keys:
 export async function buildPPM(project: SyndicationProjectFull): Promise<Document> {
   const prose = await generatePPMProse(project);
 
-  const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
-  const renovationBudget = project.renovationBudget ? Number(project.renovationBudget) : 0;
-  const closingCosts = project.closingCosts ? Number(project.closingCosts) : 0;
-  const totalEquityRaise = project.totalEquityRaise ? Number(project.totalEquityRaise) : 0;
-  const minInvestment = project.minInvestment ? Number(project.minInvestment) : 0;
-  const loanAmount = project.loanAmount ? Number(project.loanAmount) : 0;
-  const sponsorEquity = project.sponsorEquity ? Number(project.sponsorEquity) : 0;
-  const currentNoi = project.currentNoi ? Number(project.currentNoi) : 0;
-  const proFormaNoi = project.proFormaNoi ? Number(project.proFormaNoi) : 0;
+  const purchasePrice = safeNumber(project.purchasePrice);
+  const renovationBudget = safeNumber(project.renovationBudget);
+  const closingCosts = safeNumber(project.closingCosts);
+  const totalEquityRaise = safeNumber(project.totalEquityRaise);
+  const minInvestment = safeNumber(project.minInvestment);
+  const loanAmount = safeNumber(project.loanAmount);
+  const sponsorEquity = safeNumber(project.sponsorEquity);
+  const currentNoi = safeNumber(project.currentNoi);
+  const proFormaNoi = safeNumber(project.proFormaNoi);
   const totalCost = purchasePrice + renovationBudget + closingCosts;
   const capRate = purchasePrice > 0 ? currentNoi / purchasePrice : 0;
   const ltv = purchasePrice > 0 ? loanAmount / purchasePrice : 0;
@@ -237,9 +238,9 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
     { label: "Total Project Cost", value: formatCurrency(totalCost) },
     { label: "Total Equity Raise", value: formatCurrency(totalEquityRaise) },
     { label: "Senior Debt", value: `${formatCurrency(loanAmount)} (${(ltv * 100).toFixed(1)}% LTV)` },
-    { label: "Preferred Return", value: project.preferredReturn ? `${(project.preferredReturn * 100).toFixed(1)}%` : "N/A" },
-    { label: "Projected IRR", value: project.projectedIrr ? `${(project.projectedIrr * 100).toFixed(1)}%` : "N/A" },
-    { label: "Projected Equity Multiple", value: project.projectedEquityMultiple ? `${project.projectedEquityMultiple.toFixed(2)}x` : "N/A" },
+    { label: "Preferred Return", value: project.preferredReturn ? `${(safeNumber(project.preferredReturn) * 100).toFixed(1)}%` : "N/A" },
+    { label: "Projected IRR", value: project.projectedIrr ? `${(safeNumber(project.projectedIrr) * 100).toFixed(1)}%` : "N/A" },
+    { label: "Projected Equity Multiple", value: project.projectedEquityMultiple ? `${safeNumber(project.projectedEquityMultiple).toFixed(2)}x` : "N/A" },
     { label: "Projected Hold Period", value: project.projectedHoldYears ? `${project.projectedHoldYears} years` : "N/A" },
     { label: "Going-In Cap Rate", value: `${(capRate * 100).toFixed(2)}%` },
     { label: "Minimum Investment", value: formatCurrency(minInvestment) },
@@ -309,11 +310,11 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
     { label: "Current NOI", value: formatCurrency(currentNoi) },
     { label: "Pro Forma NOI (Stabilized)", value: formatCurrency(proFormaNoi) },
     { label: "Going-In Cap Rate", value: `${(capRate * 100).toFixed(2)}%` },
-    { label: "Exit Cap Rate", value: project.exitCapRate ? `${(project.exitCapRate * 100).toFixed(2)}%` : "N/A" },
-    { label: "Vacancy Assumption", value: project.vacancyRate ? `${(project.vacancyRate * 100).toFixed(1)}%` : "N/A" },
-    { label: "Rent Growth Assumption", value: project.rentGrowthRate ? `${(project.rentGrowthRate * 100).toFixed(1)}% per annum` : "N/A" },
-    { label: "Projected IRR", value: project.projectedIrr ? `${(project.projectedIrr * 100).toFixed(1)}%` : "N/A" },
-    { label: "Projected Equity Multiple", value: project.projectedEquityMultiple ? `${project.projectedEquityMultiple.toFixed(2)}x` : "N/A" },
+    { label: "Exit Cap Rate", value: project.exitCapRate ? `${(safeNumber(project.exitCapRate) * 100).toFixed(2)}%` : "N/A" },
+    { label: "Vacancy Assumption", value: project.vacancyRate ? `${(safeNumber(project.vacancyRate) * 100).toFixed(1)}%` : "N/A" },
+    { label: "Rent Growth Assumption", value: project.rentGrowthRate ? `${(safeNumber(project.rentGrowthRate) * 100).toFixed(1)}% per annum` : "N/A" },
+    { label: "Projected IRR", value: project.projectedIrr ? `${(safeNumber(project.projectedIrr) * 100).toFixed(1)}%` : "N/A" },
+    { label: "Projected Equity Multiple", value: project.projectedEquityMultiple ? `${safeNumber(project.projectedEquityMultiple).toFixed(2)}x` : "N/A" },
   ];
   children.push(keyTermsTable(financialRows));
   children.push(spacer(4));
@@ -353,18 +354,19 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
 
   const feeRows: string[][] = [];
   if (project.acquisitionFee) {
+    const acqFee = safeNumber(project.acquisitionFee);
     feeRows.push([
       "Acquisition Fee",
-      `${(project.acquisitionFee * 100).toFixed(1)}%`,
+      `${(acqFee * 100).toFixed(1)}%`,
       "Of purchase price",
       "At closing",
-      formatCurrency(purchasePrice * project.acquisitionFee),
+      formatCurrency(purchasePrice * acqFee),
     ]);
   }
   if (project.assetMgmtFee) {
     feeRows.push([
       "Asset Management Fee",
-      `${(project.assetMgmtFee * 100).toFixed(1)}%`,
+      `${(safeNumber(project.assetMgmtFee) * 100).toFixed(1)}%`,
       "Of effective gross income",
       "Monthly/Quarterly",
       "Varies",
@@ -373,25 +375,26 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
   if (project.propertyMgmtFee) {
     feeRows.push([
       "Property Management Fee",
-      `${(project.propertyMgmtFee * 100).toFixed(1)}%`,
+      `${(safeNumber(project.propertyMgmtFee) * 100).toFixed(1)}%`,
       "Of gross rental income",
       "Monthly",
       "Varies",
     ]);
   }
   if (project.constructionMgmtFee && renovationBudget > 0) {
+    const constFee = safeNumber(project.constructionMgmtFee);
     feeRows.push([
       "Construction Management Fee",
-      `${(project.constructionMgmtFee * 100).toFixed(1)}%`,
+      `${(constFee * 100).toFixed(1)}%`,
       "Of renovation budget",
       "As incurred",
-      formatCurrency(renovationBudget * project.constructionMgmtFee),
+      formatCurrency(renovationBudget * constFee),
     ]);
   }
   if (project.dispositionFee) {
     feeRows.push([
       "Disposition Fee",
-      `${(project.dispositionFee * 100).toFixed(1)}%`,
+      `${(safeNumber(project.dispositionFee) * 100).toFixed(1)}%`,
       "Of sale price",
       "At sale",
       "Varies",
@@ -400,19 +403,20 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
   if (project.refinancingFee) {
     feeRows.push([
       "Refinancing Fee",
-      `${(project.refinancingFee * 100).toFixed(1)}%`,
+      `${(safeNumber(project.refinancingFee) * 100).toFixed(1)}%`,
       "Of new loan amount",
       "At refinance",
       "Varies",
     ]);
   }
   if (project.guaranteeFee) {
+    const guarFee = safeNumber(project.guaranteeFee);
     feeRows.push([
       "Guarantee Fee",
-      `${(project.guaranteeFee * 100).toFixed(1)}%`,
+      `${(guarFee * 100).toFixed(1)}%`,
       "Of loan amount",
       "At closing/Annually",
-      formatCurrency(loanAmount * project.guaranteeFee),
+      formatCurrency(loanAmount * guarFee),
     ]);
   }
 
@@ -495,6 +499,93 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
   children.push(bodyText(prose.operatingAgreementSummary));
   children.push(spacer(8));
 
+  // ── Additional Disclosure Sections (State Laws, Environmental, Insurance, etc.) ───
+
+  // State Securities Law Compliance
+  children.push(sectionHeading("State Securities Laws Compliance"));
+  children.push(
+    bodyText(
+      "This offering is made in compliance with applicable state securities laws. While offerings under Rule 506 of Regulation D are federally covered securities and preempted from state registration requirements under the National Securities Markets Improvement Act (NSMIA), states retain authority to require notice filings, collect fees, and enforce anti-fraud provisions. The Company will file required notices and consent to service of process in states where investors reside. Investors may have rights under state securities laws in addition to federal securities laws. For questions regarding state law compliance, investors should consult their legal advisors.",
+    ),
+  );
+  children.push(spacer(8));
+
+  // Environmental Disclosure
+  children.push(sectionHeading("Environmental Matters"));
+  children.push(
+    bodyText(
+      "A Phase I Environmental Site Assessment (ESA) will be conducted prior to acquisition to identify recognized environmental conditions (RECs) in accordance with ASTM E1527-21 standards. The property is located in a flood zone designation to be confirmed by FEMA Flood Insurance Rate Map (FIRM) review. Flood insurance will be obtained if the property is located in a Special Flood Hazard Area (SFHA) as required by lenders and prudent risk management. The Company will comply with all applicable federal, state, and local environmental laws, including but not limited to the Comprehensive Environmental Response, Compensation, and Liability Act (CERCLA), the Resource Conservation and Recovery Act (RCRA), and applicable state environmental regulations. Any environmental remediation costs identified in the Phase I ESA or subsequent assessments will be disclosed to investors and factored into the purchase price and budget.",
+    ),
+  );
+  children.push(spacer(8));
+
+  // Insurance Disclosure
+  children.push(sectionHeading("Insurance Coverage"));
+  children.push(
+    bodyText(
+      "The property will be insured with commercially reasonable insurance coverage including: (1) Property insurance covering replacement cost of buildings and improvements; (2) General liability insurance with minimum coverage of $1-2 million per occurrence and $2-4 million aggregate; (3) Flood insurance if the property is located in a Special Flood Hazard Area, with coverage amounts sufficient to satisfy lender requirements and protect equity; (4) Umbrella liability insurance providing additional coverage above primary liability limits; (5) Loss of rents / business interruption insurance; and (6) Any additional coverage required by lenders or applicable law. All insurance policies will name the Company as the insured and lenders as loss payees or additional insureds as required. Insurance costs are included in the operating expense projections.",
+    ),
+  );
+  children.push(spacer(8));
+
+  // Title and Zoning
+  children.push(sectionHeading("Title Insurance and Zoning Compliance"));
+  children.push(
+    bodyText(
+      "The Company will obtain an ALTA (American Land Title Association) owner's policy of title insurance insuring the Company's fee simple title to the property, subject only to Permitted Exceptions as defined in the purchase agreement. The title policy will include standard and customary endorsements including zoning, access, and survey endorsements. A current ALTA survey will be obtained confirming that the property improvements are within lot lines, do not encroach on easements or setbacks, and comply with local zoning ordinances. The property's current zoning designation and permitted uses will be verified to confirm that the intended use (multifamily residential, commercial, etc.) is a permitted use or legal nonconforming use. Any zoning variances, conditional use permits, or special exceptions required for the business plan will be obtained prior to or promptly after closing.",
+    ),
+  );
+  children.push(spacer(8));
+
+  // Placement Agent / Broker-Dealer Fees
+  children.push(sectionHeading("Placement Agent Compensation"));
+  children.push(
+    bodyText(
+      "The Company has not engaged a placement agent or broker-dealer for this offering. If a placement agent is engaged in the future, their compensation and any affiliated entity relationships will be disclosed in a supplement to this Memorandum and in the Form D filing. Any such fees (typically 1-3% of capital raised) would be paid from offering proceeds. Investors introduced by any placement agent should review FINRA BrokerCheck (www.finra.org/brokercheck) for the agent's registration status and disciplinary history.",
+    ),
+  );
+  children.push(spacer(8));
+
+  // Passive Activity Loss Rules Expansion
+  children.push(sectionHeading("Passive Activity Loss Rules — Detailed Analysis"));
+  children.push(
+    bodyText(
+      "Under Section 469 of the Internal Revenue Code, losses from passive activities (including rental real estate) may only offset income from passive activities and cannot offset wages, business income, or portfolio income. However, qualifying taxpayers may utilize the following exceptions:",
+    ),
+  );
+  children.push(spacer(4));
+  children.push(bulletPoint("Active Participation Exception (26 U.S.C. § 469(i)): Individuals who actively participate in rental real estate activities may deduct up to $25,000 of rental real estate losses against non-passive income. This exception phases out ratably for taxpayers with adjusted gross income (AGI) between $100,000 and $150,000. No deduction is available for AGI above $150,000."));
+  children.push(bulletPoint("Real Estate Professional Status (REPS) (26 U.S.C. § 469(c)(7)): Taxpayers who qualify as real estate professionals may treat rental real estate losses as non-passive. To qualify, the taxpayer must: (1) spend more than 50% of personal service time in real property trades or businesses; and (2) perform more than 750 hours of services in real property trades or businesses during the tax year. Material participation (generally 500+ hours per property or activity) is also required."));
+  children.push(bulletPoint("Suspended Losses: Passive losses that cannot be deducted in the current year are carried forward indefinitely and may be deducted in future years when the taxpayer has sufficient passive income or upon full disposition of the activity."));
+  children.push(spacer(4));
+  children.push(
+    bodyText(
+      "Most investors in this offering will be passive investors and will not qualify for the active participation exception or REPS. Investors should consult their tax advisors regarding the applicability of passive activity loss limitations to their individual circumstances.",
+    ),
+  );
+  children.push(spacer(8));
+
+  // 1031 Exchange Clarification
+  children.push(sectionHeading("Section 1031 Exchange Limitations"));
+  children.push(
+    bodyText(
+      "LLC membership interests or limited partnership interests in the Company are NOT eligible for Section 1031 like-kind exchange treatment under 26 U.S.C. § 1031. Section 1031 applies only to direct ownership of real property, not to interests in entities that own real property (see Rev. Rul. 2004-86). Investors seeking to use 1031 exchange proceeds to invest in this offering will recognize gain on the relinquished property and cannot defer such gain through investment in the Company. However, the Company itself may conduct a Section 1031 exchange upon disposition of the property, which may defer gain recognition at the entity level and preserve more capital for distribution to investors. The availability and structure of any such entity-level 1031 exchange will be evaluated at the time of disposition based on then-current tax law and market conditions.",
+    ),
+  );
+  children.push(spacer(8));
+
+  // Interest Rate Validation (Compliance Check)
+  const interestRate = project.interestRate ?? 0;
+  if (interestRate < 0.045 || interestRate > 0.12) {
+    children.push(sectionHeading("Interest Rate Risk Disclosure"));
+    children.push(
+      bodyText(
+        `The senior debt for this acquisition carries an interest rate of ${(interestRate * 100).toFixed(2)}%, which is ${interestRate < 0.045 ? "below" : "above"} the typical market range of 4.5% to 12.0% for commercial real estate financing as of 2026. ${interestRate < 0.045 ? "While this favorable rate reduces debt service costs and improves cash flow, investors should verify the terms of the financing commitment and ensure there are no unusual conditions, prepayment penalties, or yield maintenance provisions that could impact the economics." : "This elevated interest rate increases debt service costs and may constrain cash flow available for distribution. Investors should carefully review the debt service coverage ratio (DSCR) projections and assess refinancing risk if interest rates remain elevated at the anticipated refinance or sale date. The high interest rate may reflect higher leverage, shorter loan term, construction/renovation risk, or borrower credit profile."}`,
+      ),
+    );
+    children.push(spacer(8));
+  }
+
   // ── Disclaimers and Signature ──────────────────────────────────────
 
   children.push(sectionHeading("XIII. Important Notices"));
@@ -530,9 +621,9 @@ export async function buildPPM(project: SyndicationProjectFull): Promise<Documen
 
 export function runPPMComplianceChecks(project: SyndicationProjectFull): ComplianceCheck[] {
   const checks: ComplianceCheck[] = [];
-  const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
-  const loanAmount = project.loanAmount ? Number(project.loanAmount) : 0;
-  const totalEquityRaise = project.totalEquityRaise ? Number(project.totalEquityRaise) : 0;
+  const purchasePrice = safeNumber(project.purchasePrice);
+  const loanAmount = safeNumber(project.loanAmount);
+  const totalEquityRaise = safeNumber(project.totalEquityRaise);
   const ltv = purchasePrice > 0 ? loanAmount / purchasePrice : 0;
 
   // Securities exemption disclosure
@@ -573,9 +664,9 @@ export function runPPMComplianceChecks(project: SyndicationProjectFull): Complia
     name: "Minimum Investment Disclosed",
     regulation: "Investor Protection Standards",
     category: "investor_protection",
-    passed: (project.minInvestment ? Number(project.minInvestment) : 0) > 0,
+    passed: safeNumber(project.minInvestment) > 0,
     note: project.minInvestment
-      ? `Minimum: ${formatCurrency(Number(project.minInvestment))}`
+      ? `Minimum: ${formatCurrency(safeNumber(project.minInvestment))}`
       : "No minimum investment specified",
   });
 
@@ -654,9 +745,9 @@ export function runPPMComplianceChecks(project: SyndicationProjectFull): Complia
     name: "Sponsor Co-Investment",
     regulation: "Best Practices — Alignment of Interest",
     category: "investor_protection",
-    passed: (project.sponsorEquity ? Number(project.sponsorEquity) : 0) > 0,
+    passed: safeNumber(project.sponsorEquity) > 0,
     note: project.sponsorEquity
-      ? `Sponsor co-investing ${formatCurrency(Number(project.sponsorEquity))}`
+      ? `Sponsor co-investing ${formatCurrency(safeNumber(project.sponsorEquity))}`
       : "No sponsor co-investment disclosed — potential alignment concern",
   });
 

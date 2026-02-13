@@ -19,6 +19,7 @@ import {
   formatCurrency,
   formatDate,
   ensureProseArray,
+  safeNumber,
   COLORS,
 } from "@/documents/doc-helpers";
 
@@ -28,12 +29,12 @@ export function buildLOI(
   project: MAProjectFull,
   prose: LOIProse,
 ): Document {
-  const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
-  const cashComponent = project.cashComponent ? Number(project.cashComponent) : 0;
-  const stockComponent = project.stockComponent ? Number(project.stockComponent) : 0;
-  const sellerNote = project.sellerNote ? Number(project.sellerNote) : 0;
-  const earnoutAmount = project.earnoutAmount ? Number(project.earnoutAmount) : 0;
-  const workingCapitalTarget = project.workingCapitalTarget ? Number(project.workingCapitalTarget) : 0;
+  const purchasePrice = safeNumber(project.purchasePrice);
+  const cashComponent = safeNumber(project.cashComponent);
+  const stockComponent = safeNumber(project.stockComponent);
+  const sellerNote = safeNumber(project.sellerNote);
+  const earnoutAmount = safeNumber(project.earnoutAmount);
+  const workingCapitalTarget = safeNumber(project.workingCapitalTarget);
   const dateFormatted = formatDate(new Date());
   const governingLaw = project.governingLaw ?? "Delaware";
 
@@ -101,7 +102,7 @@ export function buildLOI(
   if (project.escrowPercent) {
     termRows.push({
       label: "Escrow",
-      value: `${(project.escrowPercent * 100).toFixed(1)}%${project.escrowTermMonths ? ` for ${project.escrowTermMonths} months` : ""}`,
+      value: `${(safeNumber(project.escrowPercent) * 100).toFixed(1)}%${project.escrowTermMonths ? ` for ${project.escrowTermMonths} months` : ""}`,
     });
   }
   if (project.exclusivityDays) {

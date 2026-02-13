@@ -242,6 +242,38 @@ export default function SettingsPage() {
     fetchMembers();
   }, [fetchBilling, fetchMembers]);
 
+  // ─── Poll for subscription update after returning from Stripe checkout ─────
+
+  useEffect(() => {
+    if (searchParams.get("billing") !== "success") return;
+
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const res = await fetch("/api/billing");
+        if (!res.ok) return;
+        const data: BillingResponse = await res.json();
+        const isActive = data.subscription?.status === "active";
+        const isPaid = data.subscription?.licensePaid === true;
+
+        if (isActive || isPaid || attempts >= maxAttempts) {
+          clearInterval(interval);
+          setBilling(data);
+          if (isActive || isPaid) {
+            toast.success("Payment confirmed! Your plan has been updated.");
+          }
+        }
+      } catch {
+        // Silently retry on network errors
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [searchParams]);
+
   // ─── Billing actions ───────────────────────────────────────────────────────
 
   const handleCheckout = async (type: "license" | "subscription") => {

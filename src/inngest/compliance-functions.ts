@@ -17,11 +17,29 @@ import type { ComplianceProjectFull } from "@/documents/compliance/types";
 const DOCX_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
+/** Wrap a promise with a timeout. Throws a descriptive error on timeout. */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`Timeout: ${label} exceeded ${ms / 1000}s limit`)),
+      ms,
+    );
+    promise.then(
+      (val) => { clearTimeout(timer); resolve(val); },
+      (err) => { clearTimeout(timer); reject(err); },
+    );
+  });
+}
+
 export const complianceGenerateDocs = inngest.createFunction(
-  { id: "compliance-generate-docs", retries: 1 },
+  {
+    id: "compliance-generate-docs",
+    retries: 1,
+    idempotency: "event.data.projectId + '-' + event.data.triggeredAt",
+  },
   { event: "compliance/project.generate" },
   async ({ event, step }) => {
-    const { projectId } = event.data as { projectId: string };
+    const { projectId } = event.data as { projectId: string; triggeredAt?: number };
 
     // Step 1: Load project with all relations
     const project = await step.run("load-project", async () => {
@@ -33,6 +51,19 @@ export const complianceGenerateDocs = inngest.createFunction(
       });
       return p as unknown as ComplianceProjectFull;
     });
+
+    // Guard: check project exists and is in correct state
+    const statusCheck = await step.run("check-status", async (): Promise<{ skip: boolean; error?: string }> => {
+      const current = await prisma.complianceProject.findUnique({ where: { id: projectId }, select: { status: true } });
+      if (!current) return { skip: true, error: "Project not found" };
+      if (current.status !== "CREATED" && current.status !== "GENERATING_DOCS") {
+        return { skip: true, error: `Project in ${current.status} state` };
+      }
+      return { skip: false };
+    });
+    if (statusCheck.skip) {
+      return { success: false, projectId, error: statusCheck.error };
+    }
 
     let lastStep = "load-project";
 
@@ -51,6 +82,7 @@ export const complianceGenerateDocs = inngest.createFunction(
             },
           });
         });
+        // Intentional early return — unsupported report types are terminal errors, no retry needed
         return { success: false, projectId, error: `Unsupported report type: ${project.reportType}` };
       }
 
@@ -77,10 +109,11 @@ export const complianceGenerateDocs = inngest.createFunction(
           },
         }) as unknown as ComplianceProjectFull;
 
-        // Generate the document
-        const { buffer, complianceChecks } = await generateComplianceDoc(
-          freshProject,
-          docType,
+        // Generate the document (all compliance docs use AI — 180s timeout)
+        const { buffer, complianceChecks } = await withTimeout(
+          generateComplianceDoc(freshProject, docType),
+          180_000,
+          `generate-${docType}`,
         );
 
         // Determine version (increment if doc already exists)

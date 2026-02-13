@@ -299,6 +299,7 @@ export default function DealDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [pollErrorCount, setPollErrorCount] = useState(0);
 
   /* Fetch project */
   const fetchProject = useCallback(async () => {
@@ -308,8 +309,10 @@ export default function DealDetailPage() {
       const { project: data } = await res.json();
       setProject(data);
       setError(null);
+      setPollErrorCount(0); // Reset error count on success
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load project");
+      setPollErrorCount(prev => prev + 1);
     } finally {
       setLoading(false);
     }
@@ -322,9 +325,10 @@ export default function DealDetailPage() {
   /* Polling when processing */
   useEffect(() => {
     if (!project || !PROCESSING_STATUSES.includes(project.status)) return;
+    if (pollErrorCount >= 3) return; // Stop polling after 3 consecutive errors
     const interval = setInterval(fetchProject, 5000);
     return () => clearInterval(interval);
-  }, [project?.status, fetchProject]);
+  }, [project, fetchProject, pollErrorCount]);
 
   /* Generate handler */
   const handleGenerate = async () => {
@@ -394,7 +398,7 @@ export default function DealDetailPage() {
   const isProcessing = PROCESSING_STATUSES.includes(project.status);
   const isComplete = project.status === "COMPLETE";
   const canGenerate =
-    project.status === "CREATED" || project.status === "NEEDS_REVIEW";
+    project.status === "CREATED" || project.status === "ERROR";
   const statusConf = STATUS_CONFIG[project.status] ?? {
     label: project.status,
     variant: "outline" as const,

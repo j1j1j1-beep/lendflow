@@ -69,6 +69,20 @@ export const maGenerateDocs = inngest.createFunction(
         return p;
       });
 
+      // Update status to GENERATING_DOCS (if not already set by API)
+      await step.run("ensure-status-generating", async () => {
+        const current = await prisma.mAProject.findUnique({
+          where: { id: projectId },
+          select: { status: true },
+        });
+        if (current?.status !== "GENERATING_DOCS") {
+          await prisma.mAProject.update({
+            where: { id: projectId },
+            data: { status: "GENERATING_DOCS" },
+          });
+        }
+      });
+
       // Generate each document type in its own step
       for (const docType of MA_DOC_TYPES) {
         lastStep = docType;
@@ -110,37 +124,31 @@ export const maGenerateDocs = inngest.createFunction(
               ? "FLAGGED"
               : "PASSED";
 
-          // Upsert document record
-          const existingDoc = existing.find((d) => d.version === version);
-          if (existingDoc) {
-            await prisma.mADocument.update({
-              where: { id: existingDoc.id },
-              data: {
-                s3Key,
-                status: isAIDoc ? "REVIEWED" : "REVIEWED",
-                complianceStatus,
-                complianceIssues: complianceChecks.length > 0 ? JSON.parse(JSON.stringify(complianceChecks)) : undefined,
-                verificationStatus: "PASSED",
-              },
-            });
-          } else {
-            await prisma.mADocument.create({
-              data: {
-                projectId,
-                docType: resolvedDocType,
-                s3Key,
-                version,
-                status: "REVIEWED",
-                complianceStatus,
-                complianceIssues: complianceChecks.length > 0 ? JSON.parse(JSON.stringify(complianceChecks)) : undefined,
-                verificationStatus: "PASSED",
-              },
-            });
-          }
+          // Save document record (version is always max+1, so always a new record)
+          await prisma.mADocument.create({
+            data: {
+              projectId,
+              docType: resolvedDocType,
+              s3Key,
+              version,
+              status: "REVIEWED",
+              complianceStatus,
+              complianceIssues: complianceChecks.length > 0 ? JSON.parse(JSON.stringify(complianceChecks)) : undefined,
+              verificationStatus: "PASSED",
+            },
+          });
 
           generatedDocs.push(resolvedDocType);
         });
       }
+
+      // Update status to COMPLIANCE_REVIEW before running checks
+      await step.run("update-status-compliance-review", async () => {
+        await prisma.mAProject.update({
+          where: { id: projectId },
+          data: { status: "COMPLIANCE_REVIEW" },
+        });
+      });
 
       // All docs generated — update project status
       await step.run("finalize", async () => {

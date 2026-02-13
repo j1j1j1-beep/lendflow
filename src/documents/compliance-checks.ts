@@ -101,8 +101,20 @@ function checkUsury(input: DocumentInput): ComplianceCheckResult {
   }
 
   const limit = STATE_USURY_LIMITS[state];
+  if (!limit) {
+    return {
+      name: "Usury Compliance",
+      passed: true,
+      regulation: "State usury statutes",
+      description: `State "${state}" found in guard but missing from usury table. Manual review recommended.`,
+      severity: "warning",
+    };
+  }
 
   // Check if commercial exemption applies
+  // NOTE: CA commercial exemption requires entity borrower (corp/LLC/partnership).
+  // Individual borrowers are NOT eligible per CA Finance Code § 22002.
+  // TODO: Add borrowerEntityType check when field is available in Deal model.
   if (limit.commercialExemptAbove && principal >= limit.commercialExemptAbove) {
     // Some states raise the cap instead of removing it (e.g. FL: 25% for >$500K, TX: 28% commercial ceiling)
     if (limit.commercialCeiling) {
@@ -333,6 +345,9 @@ function checkHpml(input: DocumentInput): ComplianceCheckResult {
   // Current APOR ~6.1% (as of 2025) → first-lien threshold ~7.6%.
   // TODO: Replace with dynamic APOR lookup from FFIEC/CFPB weekly table for production use.
   // Using 7.6% as conservative threshold — should be recalculated as APOR + 1.5% for first-lien.
+  // WARNING: The APOR-based threshold changes weekly. This hardcoded value is a
+  // conservative estimate. In production, integrate with FFIEC APOR table API
+  // at https://www.ffiec.gov/ratespread/aportables.htm for accurate checks.
   const conservativeHpmlThreshold = 0.076;
   const isLikelyHpml = rate > conservativeHpmlThreshold;
 
@@ -542,50 +557,61 @@ function checkGeniusActCompliance(input: DocumentInput): ComplianceCheckResult {
   // Signed into law July 18, 2025. Requires stablecoin issuers to maintain 1:1 reserves,
   // register with federal/state regulators, and comply with AML/sanctions requirements.
   // Loans collateralized by stablecoins or crypto must verify issuer compliance.
-  const hasCryptoCollateral = input.collateralTypes.some((t) => {
+  // Only flag stablecoin-specific requirements per GENIUS Act.
+  // BTC, ETH, and other non-stablecoin crypto are outside GENIUS Act scope.
+  // The GENIUS Act specifically regulates "payment stablecoins" — digital assets
+  // pegged to fiat currency value. General crypto (BTC, ETH, utility tokens)
+  // is not subject to GENIUS Act reserve/registration requirements.
+  const hasStablecoinCollateral = input.collateralTypes.some((t) => {
     const lower = t.toLowerCase();
     return (
-      lower.includes("crypto") ||
       lower.includes("stablecoin") ||
-      lower.includes("digital_asset") ||
-      lower.includes("digital asset") ||
-      lower.includes("bitcoin") ||
-      lower.includes("ethereum") ||
-      lower.includes("token")
+      lower.includes("usdc") ||
+      lower.includes("usdt") ||
+      lower.includes("dai") ||
+      lower.includes("busd") ||
+      lower.includes("tusd") ||
+      lower.includes("usdp") ||
+      lower.includes("frax") ||
+      lower.includes("pyusd")
     );
   });
 
-  if (!hasCryptoCollateral) {
+  if (!hasStablecoinCollateral) {
     return {
-      name: "GENIUS Act — Stablecoin/Crypto Collateral Compliance",
+      name: "GENIUS Act — Stablecoin Collateral Compliance",
       passed: true,
       regulation: "GENIUS Act (P.L. 119-XX, signed July 18, 2025); 12 USC §5401 et seq.",
       description:
-        "No crypto or stablecoin collateral identified. GENIUS Act compliance check is not applicable to this transaction.",
+        "No stablecoin collateral identified. GENIUS Act compliance check is not applicable to this transaction. " +
+        "Note: Non-stablecoin crypto (BTC, ETH, etc.) is outside GENIUS Act scope but may be subject to " +
+        "other BSA/AML and securities regulations.",
       severity: "info",
     };
   }
 
-  // Crypto/stablecoin collateral detected — flag for GENIUS Act review
+  // Stablecoin collateral detected — flag for GENIUS Act review
   return {
-    name: "GENIUS Act — Stablecoin/Crypto Collateral Compliance",
+    name: "GENIUS Act — Stablecoin Collateral Compliance",
     passed: false,
     regulation: "GENIUS Act (P.L. 119-XX, signed July 18, 2025); 12 USC §5401 et seq.",
     description:
-      "This loan involves crypto/stablecoin collateral subject to the GENIUS Act (signed July 18, 2025). " +
-      "Required verification: (1) If stablecoin collateral, confirm the issuer is a licensed payment stablecoin issuer " +
+      "This loan involves stablecoin collateral subject to the GENIUS Act (signed July 18, 2025). " +
+      "Required verification: (1) Confirm the issuer is a licensed payment stablecoin issuer " +
       "under the GENIUS Act with 1:1 reserve backing (U.S. Treasuries, insured deposits, or approved reserve assets), " +
       "(2) Verify the issuer is registered with a federal prudential regulator or approved state regulator, " +
       "(3) Confirm monthly reserve attestation reports are current and publicly available, " +
       "(4) Non-compliant stablecoins (foreign-issued without U.S. registration, algorithmic stablecoins without " +
       "qualifying reserves) may not be accepted as collateral without enhanced risk assessment, " +
-      "(5) Document the specific stablecoin/token, issuer, and compliance status in the loan file. " +
+      "(5) Document the specific stablecoin, issuer, and compliance status in the loan file. " +
       "Manual review required — this check cannot be fully automated.",
     severity: "critical",
   };
 }
 
 // States requiring TILA-like commercial financing disclosures
+// NOTE: Illinois and Maryland have pending commercial lending disclosure
+// legislation that may take effect in 2026. Monitor for updates.
 const COMMERCIAL_DISCLOSURE_STATES: Record<string, string> = {
   CA: "SB 1235 (Cal. Fin. Code §22800 et seq.)",
   NY: "S5470-B (N.Y. Fin. Serv. Law §801 et seq.)",

@@ -10,7 +10,10 @@ export async function POST(request: NextRequest) {
   try {
     const { user, org } = await requireAuth();
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: "Request body is required" }, { status: 400 });
+    }
     const { type } = body as { type: "license" | "monthly" };
 
     if (type !== "license" && type !== "monthly") {
@@ -47,6 +50,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Validate that the required Stripe price ID is configured
+    const priceId = type === "license" ? STRIPE_BIO_PRICES.license : STRIPE_BIO_PRICES.monthly;
+    if (!priceId || typeof priceId !== "string") {
+      return NextResponse.json(
+        { error: "Valid price ID is required. Check Stripe Bio environment configuration." },
+        { status: 400 }
+      );
+    }
+
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
     const common = {
@@ -60,12 +72,12 @@ export async function POST(request: NextRequest) {
       ? await stripe.checkout.sessions.create({
           ...common,
           mode: "payment" as const,
-          line_items: [{ price: STRIPE_BIO_PRICES.license, quantity: 1 }],
+          line_items: [{ price: priceId, quantity: 1 }],
         })
       : await stripe.checkout.sessions.create({
           ...common,
           mode: "subscription" as const,
-          line_items: [{ price: STRIPE_BIO_PRICES.monthly, quantity: 1 }],
+          line_items: [{ price: priceId, quantity: 1 }],
           subscription_data: { metadata: { orgId: org.id, vertical: "bio" } },
         });
 

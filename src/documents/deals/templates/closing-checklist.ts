@@ -17,6 +17,7 @@ import {
   createTable,
   formatCurrency,
   formatDate,
+  safeNumber,
   COLORS,
 } from "@/documents/doc-helpers";
 
@@ -31,7 +32,7 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
   const isAsset = ["ASSET_PURCHASE", "SECTION_363_SALE"].includes(project.transactionType);
   const isStock = project.transactionType === "STOCK_PURCHASE" || project.transactionType === "TENDER_OFFER";
   const governingLaw = project.governingLaw ?? "Delaware";
-  const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
+  const purchasePrice = safeNumber(project.purchasePrice);
 
   // ─── Transaction Documents ─────────────────────────────
   items.push({
@@ -48,7 +49,7 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
       item: "Escrow Agreement (fully executed by all parties and escrow agent)",
       responsible: "both",
       status: "open",
-      notes: `Escrow: ${(project.escrowPercent * 100).toFixed(1)}% of Purchase Price for ${project.escrowTermMonths ?? 12} months`,
+      notes: `Escrow: ${(safeNumber(project.escrowPercent) * 100).toFixed(1)}% of Purchase Price for ${project.escrowTermMonths ?? 12} months`,
     });
   }
 
@@ -238,7 +239,7 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
       item: "HSR Act early termination letter or expiration of waiting period (30 days from filing)",
       responsible: "both",
       status: "open",
-      notes: `HSR filing required under 15 U.S.C. Section 18a. 2026 size-of-transaction threshold: $133.9 million. Filing fee: ${project.hsrFilingFee ? formatCurrency(Number(project.hsrFilingFee)) : "Per 2026 fee schedule"}.`,
+      notes: `HSR filing required under 15 U.S.C. Section 18a. 2026 size-of-transaction threshold: $133.9 million. Filing fee: ${project.hsrFilingFee ? formatCurrency(safeNumber(project.hsrFilingFee)) : "Per 2026 fee schedule"}.`,
     });
 
     items.push({
@@ -250,8 +251,8 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
     });
   }
 
-  const requiredApprovals = project.requiredApprovals as string[] | null;
-  if (requiredApprovals && requiredApprovals.length > 0) {
+  const requiredApprovals = (Array.isArray(project.requiredApprovals) ? project.requiredApprovals : []) as string[];
+  if (requiredApprovals.length > 0) {
     for (const approval of requiredApprovals) {
       items.push({
         category: "Regulatory Approvals",
@@ -269,6 +270,22 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
     responsible: "both",
     status: "open",
     notes: "",
+  });
+
+  items.push({
+    category: "Regulatory Approvals",
+    item: "CFIUS clearance (if applicable for foreign buyer) — 31 CFR Part 800",
+    responsible: "buyer",
+    status: "open",
+    notes: "Required for foreign person acquisitions involving U.S. businesses in critical infrastructure, technology, or sensitive data. Voluntary notice recommended if transaction involves critical technologies, proximity to government facilities, or foreign government control.",
+  });
+
+  items.push({
+    category: "Regulatory Approvals",
+    item: "Industry-specific regulatory approvals (if applicable)",
+    responsible: "both",
+    status: "open",
+    notes: "Banking: OCC/FDIC/state approval. Healthcare: HIPAA review, state licenses. Telecom: FCC transfer approval. Defense: CFIUS + DCSA clearances. Verify requirements based on target's industry.",
   });
 
   // ─── Third-Party Consents ──────────────────────────────
@@ -377,10 +394,11 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
   });
 
   if (project.escrowPercent) {
-    const escrowAmt = purchasePrice * project.escrowPercent;
+    const escrowPctCl = safeNumber(project.escrowPercent);
+    const escrowAmt = purchasePrice * escrowPctCl;
     items.push({
       category: "Closing Funds Flow",
-      item: `Escrow deposit funding — ${formatCurrency(escrowAmt)} (${(project.escrowPercent * 100).toFixed(1)}% of Purchase Price)`,
+      item: `Escrow deposit funding — ${formatCurrency(escrowAmt)} (${(escrowPctCl * 100).toFixed(1)}% of Purchase Price)`,
       responsible: "buyer",
       status: "open",
       notes: `Held for ${project.escrowTermMonths ?? 12} months`,
@@ -414,6 +432,14 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
     notes: project.nonCompeteYears ? `${project.nonCompeteYears}-year non-compete` : "",
   });
 
+  items.push({
+    category: "Employee Matters",
+    item: "WARN Act compliance analysis — 60-day notice for plant closings or mass layoffs (29 U.S.C. § 2101)",
+    responsible: "both",
+    status: "open",
+    notes: "Required if 100+ employees and closing/layoff affects 50+ workers. Penalties: back pay up to 60 days + $500/day civil penalty.",
+  });
+
   if (project.changeOfControlProvisions) {
     items.push({
       category: "Employee Matters",
@@ -431,7 +457,7 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
       item: `Representations and Warranties Insurance Policy — bound and in effect as of Closing`,
       responsible: "buyer",
       status: "open",
-      notes: `Premium: ${project.rwiPremiumPercent ? (project.rwiPremiumPercent * 100).toFixed(1) + "% of policy limit" : "Per quote"}`,
+      notes: `Premium: ${project.rwiPremiumPercent ? (safeNumber(project.rwiPremiumPercent) * 100).toFixed(1) + "% of policy limit" : "Per quote"}`,
     });
   }
 
@@ -449,7 +475,7 @@ function buildChecklist(project: MAProjectFull): ClosingChecklistItem[] {
     item: "Working capital true-up calculation (due within 60-90 days post-Closing)",
     responsible: "buyer",
     status: "open",
-    notes: project.workingCapitalTarget ? `Target: ${formatCurrency(Number(project.workingCapitalTarget))}` : "",
+    notes: project.workingCapitalTarget ? `Target: ${formatCurrency(safeNumber(project.workingCapitalTarget))}` : "",
   });
 
   items.push({

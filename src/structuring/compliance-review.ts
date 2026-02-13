@@ -55,7 +55,7 @@ function runDeterministicChecks(input: ComplianceReviewInput): ComplianceIssue[]
         severity: "critical",
         regulation: `State Usury — ${stateAbbr}`,
         description: usuryResult.message,
-        recommendation: `Reduce rate to below ${(usuryResult.limit * 100).toFixed(2)}% or verify commercial exemption applies`,
+        recommendation: `Reduce rate to below ${((usuryResult.limit ?? 0) * 100).toFixed(2)}% or verify commercial exemption applies`,
       });
     }
   }
@@ -73,6 +73,10 @@ function runDeterministicChecks(input: ComplianceReviewInput): ComplianceIssue[]
     }
 
     // SBA 7(a) rate caps by loan size (4 tiers per SBA SOP 50 10 8)
+    // Per SBA SOP 50 10 8, the $350K boundary uses the Small Loan tier for
+    // loans of exactly $350,000 (i.e., > $350K gets the Standard/lower spread).
+    // Loans <= $350,000: Small Loan tier (Prime + 4.5%)
+    // Loans > $350,000: Standard tier (Prime + 3.0%)
     const totalRate = rulesOutput.rate.totalRate;
     const prime = rulesOutput.rate.baseRateValue;
     if (loanAmount <= 50000 && totalRate > prime + 0.065) {
@@ -149,6 +153,9 @@ function runDeterministicChecks(input: ComplianceReviewInput): ComplianceIssue[]
 
   // 5. Prepayment penalty compliance
   if (rulesOutput.prepaymentPenalty) {
+    // TODO: Investment properties (non-owner-occupied) are exempt from Dodd-Frank
+    // prepayment penalty rules per 15 USC §1639c. Add loanPurpose check when available.
+
     // Non-QM residential mortgages: Dodd-Frank Section 1414 (15 U.S.C. §1639c(c))
     // PROHIBITS prepayment penalties on non-QM residential mortgages. This is a
     // legal violation, not merely a best-practice warning.

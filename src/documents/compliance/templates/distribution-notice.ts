@@ -30,6 +30,7 @@ import {
   keyTermsTable,
   formatCurrency,
   formatCurrencyDetailed,
+  safeNumber,
   COLORS,
 } from "../../doc-helpers";
 
@@ -93,12 +94,12 @@ function distributionTypeLabel(type: string | null): string {
 export async function buildDistributionNotice(project: ComplianceProjectFull): Promise<Document> {
   const prose = await generateDistributionProse(project);
 
-  const distributionAmount = project.distributionAmount ? Number(project.distributionAmount) : 0;
-  const withholdingAmount = project.withholdingAmount ? Number(project.withholdingAmount) : 0;
+  const distributionAmount = safeNumber(project.distributionAmount);
+  const withholdingAmount = safeNumber(project.withholdingAmount);
   const withholdingRate = project.withholdingRate;
-  const nav = project.nav ? Number(project.nav) : 0;
-  const totalContributions = project.totalContributions ? Number(project.totalContributions) : 0;
-  const totalDistributions = project.totalDistributions ? Number(project.totalDistributions) : 0;
+  const nav = safeNumber(project.nav);
+  const totalContributions = safeNumber(project.totalContributions);
+  const totalDistributions = safeNumber(project.totalDistributions);
 
   const netDistribution = distributionAmount - withholdingAmount;
 
@@ -137,7 +138,7 @@ export async function buildDistributionNotice(project: ComplianceProjectFull): P
       {
         label: "Tax Withholding",
         value: withholdingAmount > 0
-          ? `${formatCurrency(withholdingAmount)} (${withholdingRate !== null && withholdingRate !== undefined ? (withholdingRate * 100).toFixed(1) + "%" : "rate per schedule"})`
+          ? `${formatCurrency(withholdingAmount)} (${withholdingRate !== null && withholdingRate !== undefined ? (safeNumber(withholdingRate) * 100).toFixed(1) + "%" : "rate per schedule"})`
           : "None",
       },
       { label: "Net Distribution Amount", value: formatCurrency(netDistribution) },
@@ -227,7 +228,7 @@ export async function buildDistributionNotice(project: ComplianceProjectFull): P
     children.push(
       bodyTextRuns([
         { text: "Withholding Applied: ", bold: true },
-        { text: `${formatCurrency(withholdingAmount)} at ${withholdingRate !== null && withholdingRate !== undefined ? (withholdingRate * 100).toFixed(1) + "%" : "applicable rate"}` },
+        { text: `${formatCurrency(withholdingAmount)} at ${withholdingRate !== null && withholdingRate !== undefined ? (safeNumber(withholdingRate) * 100).toFixed(1) + "%" : "applicable rate"}` },
       ]),
     );
     if (project.withholdingType) {
@@ -250,7 +251,7 @@ export async function buildDistributionNotice(project: ComplianceProjectFull): P
       ["Scenario", "Withholding Rate", "Legal Authority"],
       [
         ["Foreign LP (non-FIRPTA)", "30% (or applicable treaty rate)", "26 U.S.C. § 1446"],
-        ["Foreign LP (FIRPTA — US real property)", "15% of amount realized (or 35% of gain)", "26 U.S.C. § 1445 / 1446(f)"],
+        ["Foreign LP (FIRPTA — US real property)", "15% of amount realized (Note: 35% is maximum tax liability, not withholding rate)", "26 U.S.C. § 1445 / 1446(f)"],
         ["Backup withholding (missing TIN)", "24%", "26 U.S.C. § 3406"],
         ["State withholding (CA)", "7%", "CA Revenue & Taxation Code"],
         ["State withholding (NY)", "8.82%", "NY Tax Law"],
@@ -343,9 +344,9 @@ export async function buildDistributionNotice(project: ComplianceProjectFull): P
 export function runDistributionComplianceChecks(project: ComplianceProjectFull): ComplianceCheck[] {
   const checks: ComplianceCheck[] = [];
 
-  const distributionAmount = project.distributionAmount ? Number(project.distributionAmount) : 0;
+  const distributionAmount = safeNumber(project.distributionAmount);
   const withholdingRate = project.withholdingRate;
-  const withholdingAmount = project.withholdingAmount ? Number(project.withholdingAmount) : 0;
+  const withholdingAmount = safeNumber(project.withholdingAmount);
 
   // Distribution amount
   checks.push({
@@ -371,7 +372,7 @@ export function runDistributionComplianceChecks(project: ComplianceProjectFull):
 
   // Withholding consistency
   if (withholdingRate !== null && withholdingRate !== undefined && distributionAmount > 0) {
-    const expectedWithholding = distributionAmount * withholdingRate;
+    const expectedWithholding = distributionAmount * safeNumber(withholdingRate);
     const withholdingMatch = withholdingAmount > 0
       ? Math.abs(withholdingAmount - expectedWithholding) / expectedWithholding < 0.01
       : false;
@@ -382,14 +383,14 @@ export function runDistributionComplianceChecks(project: ComplianceProjectFull):
       category: "tax",
       passed: withholdingMatch || withholdingAmount === 0,
       note: withholdingMatch
-        ? `Withholding (${formatCurrency(withholdingAmount)}) consistent with rate (${(withholdingRate * 100).toFixed(1)}%)`
+        ? `Withholding (${formatCurrency(withholdingAmount)}) consistent with rate (${(safeNumber(withholdingRate) * 100).toFixed(1)}%)`
         : withholdingAmount === 0
           ? "No withholding amount specified despite withholding rate being set"
-          : `Withholding (${formatCurrency(withholdingAmount)}) does not match rate (${(withholdingRate * 100).toFixed(1)}%) x amount (${formatCurrency(distributionAmount)})`,
+          : `Withholding (${formatCurrency(withholdingAmount)}) does not match rate (${(safeNumber(withholdingRate) * 100).toFixed(1)}%) x amount (${formatCurrency(distributionAmount)})`,
     });
   }
 
-  // Foreign LP withholding rates
+  // Foreign LP withholding rates — this block uses withholdingRate directly
   if (project.withholdingType) {
     const type = project.withholdingType.toLowerCase();
     let expectedRate: number | null = null;
@@ -407,17 +408,19 @@ export function runDistributionComplianceChecks(project: ComplianceProjectFull):
     }
 
     if (expectedRate !== null && withholdingRate !== null && withholdingRate !== undefined) {
+      const whRate = safeNumber(withholdingRate);
       checks.push({
         name: `Withholding Rate — ${project.withholdingType}`,
         regulation: statute,
         category: "tax",
-        passed: Math.abs(withholdingRate - expectedRate) < 0.001,
-        note: Math.abs(withholdingRate - expectedRate) < 0.001
-          ? `Withholding rate (${(withholdingRate * 100).toFixed(1)}%) matches ${statute} requirement`
-          : `Withholding rate (${(withholdingRate * 100).toFixed(1)}%) does not match expected ${(expectedRate * 100).toFixed(0)}% under ${statute}`,
-      });
+        passed: Math.abs(whRate - expectedRate) < 0.001,
+        note: Math.abs(whRate - expectedRate) < 0.001
+          ? `Withholding rate (${(whRate * 100).toFixed(1)}%) matches ${statute} requirement`
+          : `Withholding rate (${(whRate * 100).toFixed(1)}%) does not match expected ${(expectedRate * 100).toFixed(0)}% under ${statute}`,
+    });
     }
   }
+
 
   // Waterfall included
   checks.push({

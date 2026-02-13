@@ -45,17 +45,17 @@ export function MarketingFooter() {
             <h4 className="text-sm font-semibold text-foreground mb-3">Lending</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/features" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                <Link href="/#features" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="/programs" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                <Link href="/#programs" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                   Loan Programs
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                <Link href="/#pricing" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                   Pricing
                 </Link>
               </li>

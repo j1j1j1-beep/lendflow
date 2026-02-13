@@ -16,6 +16,7 @@ import {
   bulletPoint,
   spacer,
   signatureBlock,
+  ensureProseArray,
   COLORS,
 } from "../../doc-helpers";
 import { claudeJson } from "@/lib/claude";
@@ -35,10 +36,11 @@ ${is3c7 ? "The fund relies on Section 3(c)(7) of the Investment Company Act. All
 This questionnaire must verify investor eligibility. Include:
 
 FOR ALL OFFERINGS:
-1. All accredited investor criteria from 17 CFR 230.501(a):
+1. All accredited investor criteria from 17 CFR 230.501(a) (thresholds current as of 2020 amendments):
    - Individual: $200K/$300K income, $1M net worth (excl. primary residence), Series 7/65/82/CFA, knowledgeable employee
    - Entity: $5M assets (not formed to acquire these securities), all equity owners accredited, bank/insurance/RIA/BDC/SBIC, ERISA plan with $5M+ or directed by bank/adviser
    - Family office with $5M+ AUM
+   NOTE: Thresholds reviewed and confirmed accurate as of 2020 SEC amendments to Regulation D Rule 501(a). Monitor for future updates.
 
 ${is506c ? `FOR 506(c) OFFERINGS:
 2. Verification mechanism per 17 CFR 230.506(c)(2)(ii):
@@ -263,11 +265,9 @@ export async function buildInvestorQuestionnaire(project: CapitalProjectFull): P
   children.push(bodyText("The undersigned represents and warrants:"));
   children.push(spacer(4));
 
-  const reps = Array.isArray(prose.representationsAndWarranties)
-    ? prose.representationsAndWarranties
-    : [prose.representationsAndWarranties ?? "Representations not generated."];
+  const reps = ensureProseArray(prose.representationsAndWarranties);
   for (const rep of reps) {
-    children.push(bulletPoint(rep));
+    children.push(bulletPoint(String(rep)));
   }
   children.push(spacer(8));
 

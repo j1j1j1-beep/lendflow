@@ -636,6 +636,20 @@ export function collateralLabel(type: string): string {
   return COLLATERAL_DESCRIPTIONS[type] ?? type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+// Safe number conversion — handles Prisma Decimal, string, number, null, undefined
+
+/**
+ * Safely convert a Prisma Decimal / string / number / null / undefined to a
+ * plain JavaScript number. Returns 0 for any value that can't be converted.
+ * Use this instead of `Number(project.x ?? 0)` throughout templates.
+ */
+export function safeNumber(val: unknown, fallback = 0): number {
+  if (val == null) return fallback;
+  if (typeof val === "number") return isFinite(val) ? val : fallback;
+  const n = Number(String(val));
+  return isFinite(n) ? n : fallback;
+}
+
 // Prose array safety — prevents character-by-character rendering
 
 /**
@@ -656,8 +670,8 @@ export function ensureProseArray(value: unknown): string[] {
   }
 
   if (Array.isArray(value)) {
-    // Filter out non-strings and empty values
-    const strings = value.filter((v): v is string => typeof v === "string" && v.length > 0);
+    // Filter out non-strings, empty values, and whitespace-only strings
+    const strings = value.filter((v): v is string => typeof v === "string" && v.trim().length > 0);
     if (strings.length === 0) {
       return ["[This section was not generated. Manual review required.]"];
     }

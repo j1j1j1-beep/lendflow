@@ -16,6 +16,7 @@ import {
   spacer,
   signatureBlock,
   formatCurrency,
+  safeNumber,
   COLORS,
 } from "../../doc-helpers";
 import { claudeJson } from "@/lib/claude";
@@ -125,7 +126,7 @@ export async function buildSideLetter(project: CapitalProjectFull): Promise<Docu
   children.push(sectionHeading("2. Fee Discount"));
   children.push(bodyText(prose.feeDiscount));
   children.push(spacer(4));
-  const managementFee = project.managementFee ?? 0;
+  const managementFee = safeNumber(project.managementFee);
   children.push(bodyTextRuns([
     { text: "Standard Management Fee: ", bold: true },
     { text: `${(managementFee * 100).toFixed(2)}% per annum` },

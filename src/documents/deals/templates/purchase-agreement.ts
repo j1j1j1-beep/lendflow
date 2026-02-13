@@ -25,6 +25,7 @@ import {
   formatDate,
   numberToWords,
   ensureProseArray,
+  safeNumber,
   COLORS,
 } from "@/documents/doc-helpers";
 
@@ -55,19 +56,19 @@ export function buildPurchaseAgreement(
   project: MAProjectFull,
   prose: PurchaseAgreementProse,
 ): Document {
-  const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
-  const cashComponent = project.cashComponent ? Number(project.cashComponent) : 0;
-  const stockComponent = project.stockComponent ? Number(project.stockComponent) : 0;
-  const sellerNote = project.sellerNote ? Number(project.sellerNote) : 0;
-  const earnoutAmount = project.earnoutAmount ? Number(project.earnoutAmount) : 0;
-  const workingCapitalTarget = project.workingCapitalTarget ? Number(project.workingCapitalTarget) : 0;
+  const purchasePrice = safeNumber(project.purchasePrice);
+  const cashComponent = safeNumber(project.cashComponent);
+  const stockComponent = safeNumber(project.stockComponent);
+  const sellerNote = safeNumber(project.sellerNote);
+  const earnoutAmount = safeNumber(project.earnoutAmount);
+  const workingCapitalTarget = safeNumber(project.workingCapitalTarget);
   const dateFormatted = formatDate(new Date());
   const governingLaw = project.governingLaw ?? "Delaware";
   const title = resolveTitle(project.transactionType);
   const isMerger = ["MERGER_FORWARD", "MERGER_REVERSE_TRIANGULAR", "MERGER_FORWARD_TRIANGULAR", "REVERSE_MERGER"].includes(project.transactionType);
   const isAsset = ["ASSET_PURCHASE", "SECTION_363_SALE"].includes(project.transactionType);
 
-  const macCarveouts = (project.macCarveouts as string[] | null) ?? [
+  const macCarveouts = (Array.isArray(project.macCarveouts) ? project.macCarveouts : null) as string[] | null ?? [
     "Changes in general economic or market conditions",
     "Changes affecting the industry generally",
     "Changes in applicable law or accounting standards",
@@ -128,14 +129,15 @@ export function buildPurchaseAgreement(
   if (earnoutAmount) termRows.push({ label: "Earnout Consideration", value: `${formatCurrency(earnoutAmount)}${project.earnoutTermMonths ? ` over ${project.earnoutTermMonths} months` : ""}` });
   if (workingCapitalTarget) termRows.push({ label: "Working Capital Target", value: formatCurrency(workingCapitalTarget) });
   if (project.escrowPercent) {
-    const escrowAmount = purchasePrice * project.escrowPercent;
-    termRows.push({ label: "Escrow", value: `${(project.escrowPercent * 100).toFixed(1)}% (${formatCurrency(escrowAmount)}) for ${project.escrowTermMonths ?? 12} months` });
+    const escrowPct = safeNumber(project.escrowPercent);
+    const escrowAmount = purchasePrice * escrowPct;
+    termRows.push({ label: "Escrow", value: `${(escrowPct * 100).toFixed(1)}% (${formatCurrency(escrowAmount)}) for ${project.escrowTermMonths ?? 12} months` });
   }
   if (project.outsideDate) termRows.push({ label: "Outside Date", value: formatDate(project.outsideDate) });
   if (project.nonCompeteYears) termRows.push({ label: "Non-Compete", value: `${project.nonCompeteYears} years${project.nonCompeteRadius ? `, ${project.nonCompeteRadius}` : ""}` });
   termRows.push({ label: "Governing Law", value: `State of ${governingLaw}` });
-  if (project.rwiInsurance) termRows.push({ label: "R&W Insurance", value: `Yes${project.rwiPremiumPercent ? ` (premium: ${(project.rwiPremiumPercent * 100).toFixed(1)}% of policy limit)` : ""}` });
-  if (project.hsrRequired) termRows.push({ label: "HSR Filing", value: `Required${project.hsrFilingFee ? ` (fee: ${formatCurrency(Number(project.hsrFilingFee))})` : ""}` });
+  if (project.rwiInsurance) termRows.push({ label: "R&W Insurance", value: `Yes${project.rwiPremiumPercent ? ` (premium: ${(safeNumber(project.rwiPremiumPercent) * 100).toFixed(1)}% of policy limit)` : ""}` });
+  if (project.hsrRequired) termRows.push({ label: "HSR Filing", value: `Required${project.hsrFilingFee ? ` (fee: ${formatCurrency(safeNumber(project.hsrFilingFee))})` : ""}` });
   if (project.taxStructure && project.taxStructure !== "STANDARD") {
     const taxLabels: Record<string, string> = {
       SECTION_338H10: "Section 338(h)(10)",
@@ -186,7 +188,7 @@ export function buildPurchaseAgreement(
     if (sellerNote) considerationRows.push(["Seller Note", formatCurrency(sellerNote)]);
     if (earnoutAmount) considerationRows.push(["Earnout (contingent)", formatCurrency(earnoutAmount)]);
     if (project.escrowPercent) {
-      const escrowAmt = purchasePrice * project.escrowPercent;
+      const escrowAmt = purchasePrice * safeNumber(project.escrowPercent);
       considerationRows.push(["Holdback to Escrow", `(${formatCurrency(escrowAmt)})`]);
     }
     considerationRows.push(["Total Purchase Price", formatCurrency(purchasePrice)]);
@@ -209,11 +211,12 @@ export function buildPurchaseAgreement(
 
   // Escrow provisions (deterministic — if applicable)
   if (project.escrowPercent) {
-    const escrowAmt = purchasePrice * project.escrowPercent;
+    const escrowPctBody = safeNumber(project.escrowPercent);
+    const escrowAmt = purchasePrice * escrowPctBody;
     children.push(sectionSubheading("2.4", "Escrow"));
     children.push(
       bodyText(
-        `At the Closing, ${(project.escrowPercent * 100).toFixed(1)}% of the Purchase Price (${formatCurrency(escrowAmt)}) (the "Escrow Amount") shall be deposited with a mutually agreed escrow agent (the "Escrow Agent") pursuant to the terms of an escrow agreement to be entered into at Closing (the "Escrow Agreement"). The Escrow Amount shall be held for a period of ${project.escrowTermMonths ?? 12} months following the Closing Date (the "Escrow Period") to secure Seller's indemnification obligations under Article VII. Upon expiration of the Escrow Period, the Escrow Agent shall release any remaining funds to the Seller, less any amounts subject to pending claims.`,
+        `At the Closing, ${(escrowPctBody * 100).toFixed(1)}% of the Purchase Price (${formatCurrency(escrowAmt)}) (the "Escrow Amount") shall be deposited with a mutually agreed escrow agent (the "Escrow Agent") pursuant to the terms of an escrow agreement to be entered into at Closing (the "Escrow Agreement"). The Escrow Amount shall be held for a period of ${project.escrowTermMonths ?? 12} months following the Closing Date (the "Escrow Period") to secure Seller's indemnification obligations under Article VII. Upon expiration of the Escrow Period, the Escrow Agent shall release any remaining funds to the Seller, less any amounts subject to pending claims.`,
       ),
     );
     children.push(spacer(4));
@@ -406,7 +409,7 @@ export function buildPurchaseAgreement(
     children.push(sectionSubheading("7.2", "Representations and Warranties Insurance"));
     children.push(
       bodyText(
-        `The Parties acknowledge that Buyer intends to obtain a buyer-side representations and warranties insurance policy (the "R&W Policy") with respect to the representations and warranties of ${isMerger ? "the Target Company" : "Seller"} set forth in Article III. ${project.rwiPremiumPercent ? `The premium for the R&W Policy shall be approximately ${(project.rwiPremiumPercent * 100).toFixed(1)}% of the policy limit, which shall be borne by the Buyer.` : "The premium for the R&W Policy (typically 1.0-2.5% of the policy limit) shall be borne by the Buyer."} The R&W Policy shall not (a) limit the indemnification obligations of ${isMerger ? "the Target Company" : "Seller"} under this Article VII for fraud or willful breach, (b) provide recourse to ${isMerger ? "the Target Company" : "Seller"} except in cases of fraud or willful breach, or (c) limit ${isMerger ? "Parent's" : "Buyer's"} right to bring claims against ${isMerger ? "the Target Company" : "Seller"} for fraud or willful breach. The policy retention (deductible) shall be 0.5-1% of enterprise value, with step-down to 50% of the retention after 12 months.`,
+        `The Parties acknowledge that Buyer intends to obtain a buyer-side representations and warranties insurance policy (the "R&W Policy") with respect to the representations and warranties of ${isMerger ? "the Target Company" : "Seller"} set forth in Article III. ${project.rwiPremiumPercent ? `The premium for the R&W Policy shall be approximately ${(safeNumber(project.rwiPremiumPercent) * 100).toFixed(1)}% of the policy limit, which shall be borne by the Buyer.` : "The premium for the R&W Policy (typically 1.0-2.5% of the policy limit) shall be borne by the Buyer."} The R&W Policy shall not (a) limit the indemnification obligations of ${isMerger ? "the Target Company" : "Seller"} under this Article VII for fraud or willful breach, (b) provide recourse to ${isMerger ? "the Target Company" : "Seller"} except in cases of fraud or willful breach, or (c) limit ${isMerger ? "Parent's" : "Buyer's"} right to bring claims against ${isMerger ? "the Target Company" : "Seller"} for fraud or willful breach. The policy retention (deductible) shall be 0.5-1% of enterprise value, with step-down to 50% of the retention after 12 months.`,
       ),
     );
     children.push(spacer(4));

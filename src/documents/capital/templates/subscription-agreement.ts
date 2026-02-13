@@ -17,6 +17,8 @@ import {
   signatureBlock,
   keyTermsTable,
   formatCurrency,
+  safeNumber,
+  ensureProseArray,
   COLORS,
 } from "../../doc-helpers";
 import { claudeJson } from "@/lib/claude";
@@ -78,7 +80,7 @@ export async function buildSubscriptionAgreement(project: CapitalProjectFull): P
     maxTokens: 10000,
   });
 
-  const minInvestment = Number(project.minInvestment ?? 0);
+  const minInvestment = safeNumber(project.minInvestment);
   const is506c = project.exemptionType === "REG_D_506C";
   const is3c7 = project.icaExemption === "SECTION_3C7";
 
@@ -131,11 +133,9 @@ export async function buildSubscriptionAgreement(project: CapitalProjectFull): P
   );
   children.push(spacer(4));
 
-  const investorReps = Array.isArray(prose.investorRepresentations)
-    ? prose.investorRepresentations
-    : [prose.investorRepresentations ?? "Investor representations not generated."];
+  const investorReps = ensureProseArray(prose.investorRepresentations);
   for (const rep of investorReps) {
-    children.push(bulletPoint(rep));
+    children.push(bulletPoint(String(rep)));
   }
   children.push(spacer(8));
 
@@ -146,11 +146,9 @@ export async function buildSubscriptionAgreement(project: CapitalProjectFull): P
   );
   children.push(spacer(4));
 
-  const suitabilityReps = Array.isArray(prose.suitabilityRepresentations)
-    ? prose.suitabilityRepresentations
-    : [prose.suitabilityRepresentations ?? "Suitability representations not generated."];
+  const suitabilityReps = ensureProseArray(prose.suitabilityRepresentations);
   for (const rep of suitabilityReps) {
-    children.push(bulletPoint(rep));
+    children.push(bulletPoint(String(rep)));
   }
   children.push(spacer(8));
 

@@ -172,7 +172,8 @@ function formatCurrency(value: number | null): string {
 
 function formatPercent(value: number | null): string {
   if (value === null) return "--";
-  return `${(value * 100).toFixed(2)}%`;
+  const num = (value * 100).toFixed(2);
+  return `${parseFloat(num)}%`;
 }
 
 function formatDate(dateStr: string | null): string {
@@ -226,6 +227,7 @@ export default function ComplianceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [pollErrorCount, setPollErrorCount] = useState(0);
 
   /* ---------- Fetch ---------- */
 
@@ -236,8 +238,10 @@ export default function ComplianceDetailPage() {
       const data = await res.json();
       setProject(data.project);
       setError(null);
+      setPollErrorCount(0); // Reset error count on success
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load report");
+      setPollErrorCount(prev => prev + 1);
     } finally {
       setLoading(false);
     }
@@ -252,9 +256,10 @@ export default function ComplianceDetailPage() {
   /* 5s polling while processing */
   useEffect(() => {
     if (!project || !PROCESSING_STATUSES.has(project.status)) return;
+    if (pollErrorCount >= 3) return; // Stop polling after 3 consecutive errors
     const interval = setInterval(fetchProject, 5_000);
     return () => clearInterval(interval);
-  }, [project?.status, fetchProject]);
+  }, [project, fetchProject, pollErrorCount]);
 
   /* ---------- Generate handler ---------- */
 
@@ -318,7 +323,7 @@ export default function ComplianceDetailPage() {
   };
   const isProcessing = PROCESSING_STATUSES.has(project.status);
   const canGenerate =
-    project.status === "CREATED" || project.status === "NEEDS_REVIEW";
+    project.status === "CREATED" || project.status === "ERROR";
   const showPerformance = PERFORMANCE_TYPES.has(project.reportType);
   const showCapitalCall = project.reportType === "CAPITAL_CALL_NOTICE";
   const showDistribution = project.reportType === "DISTRIBUTION_NOTICE";

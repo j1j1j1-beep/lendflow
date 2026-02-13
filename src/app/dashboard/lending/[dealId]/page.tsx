@@ -260,7 +260,8 @@ function formatCurrency(value: string | number | null): string {
 
 function formatPercent(value: number | null): string {
   if (value === null) return "--";
-  return `${value.toFixed(1)}%`;
+  const num = value.toFixed(1);
+  return `${parseFloat(num)}%`;
 }
 
 function formatFileSize(bytes: number): string {
@@ -352,7 +353,10 @@ function DocumentComplianceCard({ doc, onRefresh }: {
       }
     }
     render();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      if (containerRef.current) containerRef.current.innerHTML = '';
+    };
   }, [docxBlob]);
 
   const handleEdit = useCallback(() => {
@@ -457,7 +461,7 @@ function DocumentComplianceCard({ doc, onRefresh }: {
           <div className="flex items-center gap-1">
             {doc.downloadUrl && (
               <a href={doc.downloadUrl} target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label="Download document">
                   <Download className="h-4 w-4" />
                 </Button>
               </a>
@@ -720,6 +724,7 @@ export default function DealDetailPage() {
   const [retryError, setRetryError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [retryingDocs, setRetryingDocs] = useState(false);
+  const [showAllDeposits, setShowAllDeposits] = useState(false);
 
   const fetchDeal = useCallback(async () => {
     try {
@@ -835,7 +840,7 @@ export default function DealDetailPage() {
           {isComplete && <MemoDownload dealId={dealId} />}
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" aria-label="Delete deal">
                 <Trash2 className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
@@ -1139,7 +1144,7 @@ export default function DealDetailPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {(deal.analysis.largeDeposits as LargeDeposit[]).map((dep, i) => (
+                        {(deal.analysis.largeDeposits as LargeDeposit[]).slice(0, showAllDeposits ? undefined : 50).map((dep, i) => (
                           <TableRow key={i}>
                             <TableCell>{dep.date}</TableCell>
                             <TableCell>{dep.description || "--"}</TableCell>
@@ -1148,6 +1153,11 @@ export default function DealDetailPage() {
                         ))}
                       </TableBody>
                     </Table>
+                    {(deal.analysis.largeDeposits as LargeDeposit[]).length > 50 && !showAllDeposits && (
+                      <Button variant="ghost" size="sm" className="mt-2 w-full" onClick={() => setShowAllDeposits(true)}>
+                        Show all {(deal.analysis.largeDeposits as LargeDeposit[]).length} deposits
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               )}
@@ -1168,11 +1178,11 @@ export default function DealDetailPage() {
               <div className="space-y-6">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   {[
-                    { label: "Approved Amount", value: formatCurrency(deal.dealTerms.approvedAmount) },
-                    { label: "Interest Rate", value: `${(deal.dealTerms.interestRate * 100).toFixed(3)}%` },
-                    { label: "Term", value: `${deal.dealTerms.termMonths} mo`, sub: deal.dealTerms.amortizationMonths !== deal.dealTerms.termMonths ? `${deal.dealTerms.amortizationMonths} mo amort` : undefined },
-                    { label: "Monthly Payment", value: formatCurrency(deal.dealTerms.monthlyPayment), badge: deal.dealTerms.interestOnly ? "IO" : undefined },
-                    { label: "LTV", value: deal.dealTerms.ltv !== null ? `${(deal.dealTerms.ltv * 100).toFixed(1)}%` : "N/A" },
+                    { label: "Approved Amount", value: formatCurrency(deal.dealTerms?.approvedAmount ?? null) },
+                    { label: "Interest Rate", value: deal.dealTerms?.interestRate != null ? `${(Number(deal.dealTerms.interestRate) * 100).toFixed(3)}%` : "N/A" },
+                    { label: "Term", value: deal.dealTerms?.termMonths != null ? `${deal.dealTerms.termMonths} mo` : "N/A", sub: deal.dealTerms?.amortizationMonths != null && deal.dealTerms.amortizationMonths !== deal.dealTerms?.termMonths ? `${deal.dealTerms.amortizationMonths} mo amort` : undefined },
+                    { label: "Monthly Payment", value: formatCurrency(deal.dealTerms?.monthlyPayment ?? null), badge: deal.dealTerms?.interestOnly ? "IO" : undefined },
+                    { label: "LTV", value: deal.dealTerms?.ltv != null ? `${(Number(deal.dealTerms.ltv) * 100).toFixed(1)}%` : "N/A" },
                   ].map((metric) => (
                     <Card key={metric.label} className="card-hover">
                       <CardContent className="pt-0">
@@ -1191,33 +1201,33 @@ export default function DealDetailPage() {
                     <div className="grid grid-cols-3 gap-4">
                       <div className="rounded-lg border bg-muted/30 p-3 transition-all duration-200 hover:-translate-y-px hover:shadow-sm">
                         <p className="text-xs text-muted-foreground font-medium">Base Rate</p>
-                        <p className="text-lg font-semibold tracking-tight mt-0.5 tabular-nums">{(deal.dealTerms.baseRateValue * 100).toFixed(2)}%</p>
-                        <p className="text-xs text-muted-foreground mt-0.5 uppercase">{deal.dealTerms.baseRateType}</p>
+                        <p className="text-lg font-semibold tracking-tight mt-0.5 tabular-nums">{deal.dealTerms?.baseRateValue != null ? `${(Number(deal.dealTerms.baseRateValue) * 100).toFixed(2)}%` : "N/A"}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 uppercase">{deal.dealTerms?.baseRateType ?? "N/A"}</p>
                       </div>
                       <div className="rounded-lg border bg-muted/30 p-3 transition-all duration-200 hover:-translate-y-px hover:shadow-sm">
                         <p className="text-xs text-muted-foreground font-medium">Spread</p>
-                        <p className="text-lg font-semibold tracking-tight mt-0.5 tabular-nums">+{(deal.dealTerms.spread * 100).toFixed(3)}%</p>
+                        <p className="text-lg font-semibold tracking-tight mt-0.5 tabular-nums">{deal.dealTerms?.spread != null ? `+${(Number(deal.dealTerms.spread) * 100).toFixed(3)}%` : "N/A"}</p>
                       </div>
                       <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 transition-all duration-200 hover:-translate-y-px hover:shadow-md hover:shadow-primary/10">
                         <p className="text-xs text-primary font-medium">Total Rate</p>
-                        <p className="text-lg font-semibold tracking-tight mt-0.5 tabular-nums">{(deal.dealTerms.interestRate * 100).toFixed(3)}%</p>
+                        <p className="text-lg font-semibold tracking-tight mt-0.5 tabular-nums">{deal.dealTerms?.interestRate != null ? `${(Number(deal.dealTerms.interestRate) * 100).toFixed(3)}%` : "N/A"}</p>
                       </div>
                     </div>
                     <div className="flex gap-2 mt-4 flex-wrap">
-                      {deal.dealTerms.prepaymentPenalty && <Badge variant="outline" className="text-xs">Prepayment Penalty</Badge>}
-                      {deal.dealTerms.personalGuaranty && <Badge variant="outline" className="text-xs">Personal Guaranty</Badge>}
-                      {deal.dealTerms.requiresAppraisal && <Badge variant="outline" className="text-xs">Appraisal Required</Badge>}
+                      {deal.dealTerms?.prepaymentPenalty && <Badge variant="outline" className="text-xs">Prepayment Penalty</Badge>}
+                      {deal.dealTerms?.personalGuaranty && <Badge variant="outline" className="text-xs">Personal Guaranty</Badge>}
+                      {deal.dealTerms?.requiresAppraisal && <Badge variant="outline" className="text-xs">Appraisal Required</Badge>}
                     </div>
                   </CardContent>
                 </Card>
 
-                {deal.dealTerms.complianceIssues && deal.dealTerms.complianceIssues.length > 0 && (
+                {deal.dealTerms?.complianceIssues && deal.dealTerms.complianceIssues.length > 0 && (
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         Compliance Issues
-                        <Badge variant={deal.dealTerms.complianceStatus?.toLowerCase() === "compliant" ? "default" : "destructive"}>
-                          {deal.dealTerms.complianceStatus}
+                        <Badge variant={deal.dealTerms?.complianceStatus?.toLowerCase() === "compliant" ? "default" : "destructive"}>
+                          {deal.dealTerms?.complianceStatus}
                         </Badge>
                       </CardTitle>
                     </CardHeader>
@@ -1238,7 +1248,7 @@ export default function DealDetailPage() {
                   </Card>
                 )}
 
-                {deal.dealTerms.covenants.length > 0 && (
+                {deal.dealTerms?.covenants && deal.dealTerms.covenants.length > 0 && (
                   <Card>
                     <CardHeader><CardTitle>Covenants</CardTitle></CardHeader>
                     <CardContent className="pt-0">
@@ -1257,12 +1267,12 @@ export default function DealDetailPage() {
                   </Card>
                 )}
 
-                {deal.dealTerms.conditions.length > 0 && (
+                {deal.dealTerms?.conditions && deal.dealTerms.conditions.length > 0 && (
                   <Card>
                     <CardHeader><CardTitle>Conditions</CardTitle></CardHeader>
                     <CardContent className="pt-0 space-y-4">
                       {(["prior_to_closing", "prior_to_funding", "post_closing"] as const).map((cat) => {
-                        const items = deal.dealTerms!.conditions.filter((c) => c.category === cat);
+                        const items = (deal.dealTerms?.conditions ?? []).filter((c) => c.category === cat);
                         if (items.length === 0) return null;
                         return (
                           <div key={cat}>
@@ -1286,7 +1296,7 @@ export default function DealDetailPage() {
                   </Card>
                 )}
 
-                {deal.dealTerms.fees.length > 0 && (
+                {deal.dealTerms?.fees && deal.dealTerms.fees.length > 0 && (
                   <Card>
                     <CardHeader><CardTitle>Fees</CardTitle></CardHeader>
                     <CardContent className="pt-0">
@@ -1318,7 +1328,7 @@ export default function DealDetailPage() {
                   </Card>
                 )}
 
-                {deal.dealTerms.specialTerms && deal.dealTerms.specialTerms.length > 0 && (
+                {deal.dealTerms?.specialTerms && deal.dealTerms.specialTerms.length > 0 && (
                   <Card>
                     <CardHeader><CardTitle>Special Terms</CardTitle></CardHeader>
                     <CardContent className="pt-0">
@@ -1334,7 +1344,7 @@ export default function DealDetailPage() {
                   </Card>
                 )}
 
-                {deal.dealTerms.justification && (
+                {deal.dealTerms?.justification && (
                   <Card>
                     <CardHeader><CardTitle>Structuring Justification</CardTitle></CardHeader>
                     <CardContent className="pt-0">
@@ -1450,7 +1460,7 @@ export default function DealDetailPage() {
                               const url = URL.createObjectURL(blob);
                               const a = document.createElement("a");
                               a.href = url;
-                              a.download = `${deal.borrowerName.replace(/[^a-zA-Z0-9_\s-]/g, "").replace(/\s+/g, "_")}_Loan_Package.zip`;
+                              a.download = `${deal.borrowerName.replace(/[^a-zA-Z0-9_\s-]/g, "").replace(/\s+/g, "_").replace(/_+/g, "_")}_Loan_Package.zip`;
                               a.click();
                               URL.revokeObjectURL(url);
                               toast.success("Download started");
@@ -1606,7 +1616,7 @@ export default function DealDetailPage() {
         {deal.proposedRate && (
           <div>
             <p className="text-muted-foreground text-xs font-medium">Proposed Rate</p>
-            <p className="mt-0.5">{deal.proposedRate < 1 ? (deal.proposedRate * 100).toFixed(2) : deal.proposedRate}%</p>
+            <p className="mt-0.5">{(Number(deal.proposedRate) * 100).toFixed(2)}%</p>
           </div>
         )}
         {deal.proposedTerm && (

@@ -26,6 +26,7 @@ import {
   keyTermsTable,
   formatCurrency,
   formatCurrencyDetailed,
+  safeNumber,
   COLORS,
 } from "../../doc-helpers";
 
@@ -72,11 +73,11 @@ Return JSON with these keys:
 export async function buildAnnualReport(project: ComplianceProjectFull): Promise<Document> {
   const prose = await generateAnnualReportProse(project);
 
-  const nav = project.nav ? Number(project.nav) : 0;
-  const totalContributions = project.totalContributions ? Number(project.totalContributions) : 0;
-  const totalDistributions = project.totalDistributions ? Number(project.totalDistributions) : 0;
-  const fundSize = project.fundSize ? Number(project.fundSize) : 0;
-  const unfundedCommitments = project.unfundedCommitments ? Number(project.unfundedCommitments) : 0;
+  const nav = safeNumber(project.nav);
+  const totalContributions = safeNumber(project.totalContributions);
+  const totalDistributions = safeNumber(project.totalDistributions);
+  const fundSize = safeNumber(project.fundSize);
+  const unfundedCommitments = safeNumber(project.unfundedCommitments);
 
   const tvpi = totalContributions > 0 ? (totalDistributions + nav) / totalContributions : 0;
   const dpi = totalContributions > 0 ? totalDistributions / totalContributions : 0;
@@ -182,10 +183,10 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
 
   // Compute derived values
   const totalCost = portfolioSummary
-    ? portfolioSummary.reduce((sum, p) => sum + Number(p.cost ?? 0), 0)
+    ? portfolioSummary.reduce((sum, p) => sum + safeNumber(p.cost), 0)
     : 0;
   const totalFairValue = portfolioSummary
-    ? portfolioSummary.reduce((sum, p) => sum + Number(p.fairValue ?? 0), 0)
+    ? portfolioSummary.reduce((sum, p) => sum + safeNumber(p.fairValue), 0)
     : nav;
   const unrealizedGainLoss = totalFairValue - totalCost;
 
@@ -222,7 +223,7 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
       [
         ["INVESTMENT INCOME", ""],
         ["Unrealized appreciation (depreciation)", formatCurrencyDetailed(unrealizedGainLoss)],
-        ["Realized gains (losses)", formatCurrencyDetailed(totalDistributions > 0 ? totalDistributions * 0.2 : 0)],
+        ["Realized gains (losses) (estimated)", formatCurrencyDetailed(totalDistributions > 0 ? totalDistributions * 0.2 : 0)],
         ["Interest and dividend income", "$0"],
         ["Total Investment Income", formatCurrencyDetailed(unrealizedGainLoss)],
         ["", ""],
@@ -292,10 +293,10 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
         portfolioSummary.map((p) => [
           String(p.company ?? "N/A"),
           String(p.dateInvested ?? "N/A"),
-          formatCurrencyDetailed(Number(p.cost ?? 0)),
-          formatCurrencyDetailed(Number(p.fairValue ?? 0)),
+          formatCurrencyDetailed(safeNumber(p.cost)),
+          formatCurrencyDetailed(safeNumber(p.fairValue)),
           nav > 0
-            ? `${((Number(p.fairValue ?? 0) / nav) * 100).toFixed(1)}%`
+            ? `${((safeNumber(p.fairValue) / nav) * 100).toFixed(1)}%`
             : "N/A",
           String(p.status ?? "unrealized").replace(/_/g, " "),
         ]),
@@ -379,10 +380,10 @@ export async function buildAnnualReport(project: ComplianceProjectFull): Promise
 
   const performanceRows: Array<{ label: string; value: string }> = [];
   if (project.netIrr !== null && project.netIrr !== undefined) {
-    performanceRows.push({ label: "Net IRR (Since Inception)", value: `${(project.netIrr * 100).toFixed(2)}%` });
+    performanceRows.push({ label: "Net IRR (Since Inception)", value: `${(safeNumber(project.netIrr) * 100).toFixed(2)}%` });
   }
   if (project.grossIrr !== null && project.grossIrr !== undefined) {
-    performanceRows.push({ label: "Gross IRR (Since Inception)", value: `${(project.grossIrr * 100).toFixed(2)}%` });
+    performanceRows.push({ label: "Gross IRR (Since Inception)", value: `${(safeNumber(project.grossIrr) * 100).toFixed(2)}%` });
   }
   performanceRows.push({ label: "TVPI", value: `${tvpi.toFixed(3)}x` });
   performanceRows.push({ label: "DPI", value: `${dpi.toFixed(3)}x` });
@@ -465,7 +466,7 @@ export function runAnnualReportComplianceChecks(project: ComplianceProjectFull):
     category: "valuation",
     passed: project.nav !== null,
     note: project.nav !== null
-      ? `NAV: ${formatCurrency(Number(project.nav))}`
+      ? `NAV: ${formatCurrency(safeNumber(project.nav))}`
       : "NAV not reported — required for financial statements",
   });
 

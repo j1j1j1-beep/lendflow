@@ -19,6 +19,7 @@ import {
   signatureBlock,
   formatCurrency,
   ensureProseArray,
+  safeNumber,
   COLORS,
 } from "../../doc-helpers";
 
@@ -41,7 +42,7 @@ AI-GENERATED CONTENT DISCLAIMER: This AI-generated content is for document draft
 async function generateIQProse(project: SyndicationProjectFull): Promise<InvestorQuestionnaireProse> {
   const context = buildProjectContext(project);
   const is506c = project.exemptionType === "REG_D_506C";
-  const loanAmount = project.loanAmount ? Number(project.loanAmount) : 0;
+  const loanAmount = safeNumber(project.loanAmount);
 
   const userPrompt = `Generate Investor Questionnaire prose for this real estate syndication.
 
@@ -78,7 +79,7 @@ Return a JSON object with these keys:
 export async function buildInvestorQuestionnaire(project: SyndicationProjectFull): Promise<Document> {
   const prose = await generateIQProse(project);
   const is506c = project.exemptionType === "REG_D_506C";
-  const loanAmount = project.loanAmount ? Number(project.loanAmount) : 0;
+  const loanAmount = safeNumber(project.loanAmount);
 
   const children: (Paragraph | Table)[] = [];
 
@@ -250,7 +251,7 @@ export async function buildInvestorQuestionnaire(project: SyndicationProjectFull
 export function runQuestionnaireComplianceChecks(project: SyndicationProjectFull): ComplianceCheck[] {
   const checks: ComplianceCheck[] = [];
   const is506c = project.exemptionType === "REG_D_506C";
-  const loanAmount = project.loanAmount ? Number(project.loanAmount) : 0;
+  const loanAmount = safeNumber(project.loanAmount);
 
   checks.push({
     name: "Accreditation Method Matches Exemption",

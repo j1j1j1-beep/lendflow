@@ -12,11 +12,29 @@ import type { CapitalProjectFull } from "@/documents/capital/types";
 const DOCX_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
+/** Wrap a promise with a timeout. Throws a descriptive error on timeout. */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`Timeout: ${label} exceeded ${ms / 1000}s limit`)),
+      ms,
+    );
+    promise.then(
+      (val) => { clearTimeout(timer); resolve(val); },
+      (err) => { clearTimeout(timer); reject(err); },
+    );
+  });
+}
+
 export const capitalGenerateDocs = inngest.createFunction(
-  { id: "capital-generate-docs", retries: 1 },
+  {
+    id: "capital-generate-docs",
+    retries: 1,
+    idempotency: "event.data.projectId + '-' + event.data.triggeredAt",
+  },
   { event: "capital/project.generate" },
   async ({ event, step }) => {
-    const { projectId } = event.data as { projectId: string };
+    const { projectId } = event.data as { projectId: string; triggeredAt?: number };
 
     // Step 1: Load project with all relations
     const project = await step.run("load-project", async () => {
@@ -30,10 +48,31 @@ export const capitalGenerateDocs = inngest.createFunction(
       return p as unknown as CapitalProjectFull;
     });
 
+    // Guard: check project exists and is in correct state
+    const statusCheck = await step.run("check-status", async (): Promise<{ skip: boolean; error?: string }> => {
+      const current = await prisma.capitalProject.findUnique({ where: { id: projectId }, select: { status: true } });
+      if (!current) return { skip: true, error: "Project not found" };
+      if (current.status !== "CREATED" && current.status !== "GENERATING_DOCS") {
+        return { skip: true, error: `Project in ${current.status} state` };
+      }
+      return { skip: false };
+    });
+    if (statusCheck.skip) {
+      return { success: false, projectId, error: statusCheck.error };
+    }
+
     let lastStep = "load-project";
 
     try {
-      // Step 2: Generate each document type in its own step for retry isolation
+      // Step 2: Update status to GENERATING_DOCS
+      await step.run("update-status-generating", async () => {
+        await prisma.capitalProject.update({
+          where: { id: projectId },
+          data: { status: "GENERATING_DOCS" },
+        });
+      });
+
+      // Step 3: Generate each document type in its own step for retry isolation
       for (const docType of CAPITAL_DOC_TYPES) {
         lastStep = `generate-${docType}`;
         const label = CAPITAL_DOC_TYPE_LABELS[docType] ?? docType;
@@ -50,10 +89,12 @@ export const capitalGenerateDocs = inngest.createFunction(
             },
           }) as unknown as CapitalProjectFull;
 
-          // Generate the document
-          const { buffer, complianceChecks } = await generateCapitalDoc(
-            freshProject,
-            docType,
+          // Generate the document (30s for deterministic, 180s for AI)
+          const isDeterministic = ["form_d_draft", "investor_questionnaire"].includes(docType);
+          const { buffer, complianceChecks } = await withTimeout(
+            generateCapitalDoc(freshProject, docType),
+            isDeterministic ? 30_000 : 180_000,
+            `generate-${docType}`,
           );
 
           // Determine version (increment if doc already exists)
@@ -96,7 +137,16 @@ export const capitalGenerateDocs = inngest.createFunction(
         });
       }
 
-      // Step 3: Update project status to COMPLETE
+      // Step 4: Update status to COMPLIANCE_REVIEW before running checks
+      lastStep = "compliance-review";
+      await step.run("update-status-compliance-review", async () => {
+        await prisma.capitalProject.update({
+          where: { id: projectId },
+          data: { status: "COMPLIANCE_REVIEW" },
+        });
+      });
+
+      // Step 5: Update project status to COMPLETE
       lastStep = "complete";
       await step.run("update-status-complete", async () => {
         // Check if any docs have compliance issues

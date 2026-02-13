@@ -357,14 +357,18 @@ ${structureGuidance}
 
 Generate the prose sections for a ${MA_DOC_TYPE_LABELS[resolvedType] ?? "Purchase Agreement"}. The deterministic sections (definitions table, party identification, key terms, consideration table, signature blocks) are handled by the template. You provide the legal clauses.
 
-${project.hsrRequired ? "Include HSR filing covenant with 2026 thresholds ($133.9M size-of-transaction minimum). 30-day waiting period. Penalty for failure to file: up to $51,744 per day." : ""}
+${project.hsrRequired ? "Include HSR filing covenant with 2026 thresholds ($133.9M size-of-transaction minimum). 30-day waiting period (15 for cash tender). HSR filing fees (2026): <$189.6M = $35K; $189.6M-$586.9M = $110K; $586.9M-$1.174B = $275K; $1.174B-$2.33B = $550K; $2.33B-$4.66B = $1.1M; >$4.66B = $2.46M. Penalty for failure to file: up to $51,744 per day." : ""}
 ${project.rwiInsurance ? `Include R&W insurance provisions. Premium: ${project.rwiPremiumPercent ? (project.rwiPremiumPercent * 100).toFixed(1) + "% of policy limit" : "1.0-2.5% of policy limit"}. Buyer-side policy. Standard exclusions for known issues and purchase price adjustments.` : ""}
+
+EARNOUT PROVISIONS (if earnout applies): Include detailed earnout mechanics: (1) measurement period and milestones; (2) specific financial metrics (revenue, EBITDA, gross profit) calculated per GAAP consistently applied; (3) independent accounting firm dispute resolution (each party appoints one firm, two firms appoint third if needed); (4) operating covenants restricting extraordinary transactions that could reduce earnout; (5) confidential access to books/records for earnout calculation.
+
+KNOWLEDGE QUALIFIER / SANDBAGGING: Include a knowledge qualifier provision addressing whether Buyer may seek indemnification for breaches of representations even if Buyer had knowledge of the breach at closing. Common approaches: (1) Pro-sandbagging (Delaware/NY default) — Buyer may recover even with knowledge; (2) Anti-sandbagging (CA/TX default) — Buyer may not recover if it had actual knowledge; (3) Hybrid — Buyer may recover unless it had actual knowledge AND failed to disclose. Follow the governing law's default rule or specify the parties' agreement.
 
 Return JSON matching this exact schema:
 {
   "recitals": "string — WHEREAS clauses establishing the parties, their authority, the target company, and the purpose of the transaction",
   "purchaseAndSale": "string — core purchase and sale provision: what is being bought (shares/assets/merger), transfer mechanics, and closing deliverables",
-  "considerationProvisions": "string — detailed consideration provisions: form of payment (cash at closing, stock, seller note, earnout), payment mechanics, and escrow if applicable. Use exact numbers from deal terms.",
+  "considerationProvisions": "string — detailed consideration provisions: form of payment (cash at closing, stock, seller note, earnout), payment mechanics, and escrow if applicable. Use exact numbers from deal terms. If earnout applies, include: measurement period, financial metrics (GAAP), dispute resolution by independent accounting firm, operating covenants, and access rights for calculation.",
   "workingCapitalAdjustment": "string — working capital adjustment mechanism: target working capital amount, preliminary estimate at closing, true-up within 60-90 days, dispute resolution by independent accounting firm, collar/band mechanism if applicable",
   "sellerRepresentations": ["array of strings — each is a seller representation and warranty: organization and good standing, authority, capitalization, subsidiaries, financial statements, absence of undisclosed liabilities, no MAC since last financial statements, material contracts, litigation, IP, real property, environmental, employees/benefits, tax, insurance, regulatory compliance, brokers/finders. 25-40 standard reps."],
   "buyerRepresentations": ["array of strings — each is a buyer representation and warranty: organization and good standing, authority, no conflicts, financing (if applicable), investment intent (for stock purchase), solvency, brokers/finders. 8-12 standard reps."],

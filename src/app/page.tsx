@@ -30,6 +30,8 @@ export default async function Home() {
 
   return (
     <div className="dark flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
+      {/* Landing page forced to dark mode for consistent marketing appearance.
+          Dashboard uses system preference via ThemeProvider in layout.tsx. */}
       {/* Gradient Orbs */}
       <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-primary/5 blur-3xl" />
       <div className="pointer-events-none absolute top-1/3 -left-40 h-[500px] w-[500px] rounded-full bg-primary/3 blur-3xl" />
@@ -76,7 +78,7 @@ export default async function Home() {
       </section>
 
       {/* 2. LOAN PROGRAMS */}
-      <section className="w-full border-y border-border/50 bg-muted/30">
+      <section id="programs" className="w-full border-y border-border/50 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up">
@@ -114,7 +116,7 @@ export default async function Home() {
       </section>
 
       {/* 3. HOW IT WORKS */}
-      <section className="w-full">
+      <section id="how-it-works" className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up">
@@ -170,7 +172,7 @@ export default async function Home() {
       </section>
 
       {/* 4. WHAT OPENSHUT HANDLES */}
-      <section className="w-full border-t border-border/50 bg-muted/30">
+      <section id="features" className="w-full border-t border-border/50 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl animate-fade-up">
@@ -421,8 +423,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 8. BOTTOM CTA */}
-      <section className="w-full border-t border-border/50">
+      {/* 8. BOTTOM CTA / PRICING */}
+      <section id="pricing" className="w-full border-t border-border/50">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="relative rounded-2xl border bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 hover:border-foreground/15 hover:shadow-xl animate-fade-up">
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">

@@ -55,7 +55,10 @@ export async function POST(request: NextRequest) {
   try {
     const { user, org } = await requireAuth();
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: "Request body is required" }, { status: 400 });
+    }
 
     // Validate required fields
     if (!body.name || typeof body.name !== "string" || body.name.trim() === "") {
@@ -153,13 +156,29 @@ export async function POST(request: NextRequest) {
 
     const numericData: Record<string, number | null> = {};
     for (const field of decimalFields) {
-      numericData[field] = body[field] != null ? Number(body[field]) : null;
+      if (body[field] != null) {
+        const n = Number(body[field]);
+        if (!Number.isFinite(n)) {
+          return NextResponse.json({ error: `${field} must be a valid number` }, { status: 400 });
+        }
+        numericData[field] = n;
+      } else {
+        numericData[field] = null;
+      }
     }
 
     const intFields = ["units", "squareFeet", "yearBuilt", "loanTermYears", "projectedHoldYears", "ioTermMonths"] as const;
     const intData: Record<string, number | null> = {};
     for (const field of intFields) {
-      intData[field] = body[field] != null ? Math.round(Number(body[field])) : null;
+      if (body[field] != null) {
+        const n = Math.round(Number(body[field]));
+        if (!Number.isFinite(n)) {
+          return NextResponse.json({ error: `${field} must be a valid integer` }, { status: 400 });
+        }
+        intData[field] = n;
+      } else {
+        intData[field] = null;
+      }
     }
 
     const floatData: Record<string, number | null> = {};
@@ -272,15 +291,20 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const statusParam = searchParams.get("status");
-    const status = statusParam && VALID_STATUSES.has(statusParam) ? statusParam : null;
+    let statusFilter: string | string[] | null = null;
+    if (statusParam) {
+      const statuses = statusParam.split(",").filter(s => VALID_STATUSES.has(s.trim()));
+      if (statuses.length === 1) statusFilter = statuses[0];
+      else if (statuses.length > 1) statusFilter = statuses;
+    }
     const page = Math.max(1, Number(searchParams.get("page") || "1"));
     const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit") || "20")));
     const skip = (page - 1) * limit;
     const searchQuery = searchParams.get("search");
 
     const where: Record<string, unknown> = { orgId: org.id, deletedAt: null };
-    if (status) {
-      where.status = status;
+    if (statusFilter) {
+      where.status = Array.isArray(statusFilter) ? { in: statusFilter } : statusFilter;
     }
     if (searchQuery && searchQuery.trim()) {
       where.OR = [

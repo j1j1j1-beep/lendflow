@@ -98,7 +98,7 @@ export default function NewCapitalPage() {
       if (managementFee) body.managementFee = parseFloat(managementFee) / 100;
       if (carriedInterest) body.carriedInterest = parseFloat(carriedInterest) / 100;
       if (preferredReturn) body.preferredReturn = parseFloat(preferredReturn) / 100;
-      if (fundTermYears) body.fundTermYears = parseInt(fundTermYears);
+      if (fundTermYears) body.fundTermYears = parseInt(fundTermYears, 10);
       if (investmentStrategy.trim()) body.investmentStrategy = investmentStrategy.trim();
       if (geographicFocus.trim()) body.geographicFocus = geographicFocus.trim();
 

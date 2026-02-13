@@ -3,9 +3,13 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+const globalForPg = globalThis as unknown as { pgPool?: import("pg").Pool };
 
 function createPrismaClient() {
-  const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+  if (!globalForPg.pgPool) {
+    globalForPg.pgPool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+  }
+  const pool = globalForPg.pgPool;
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 }

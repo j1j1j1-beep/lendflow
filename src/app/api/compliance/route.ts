@@ -59,7 +59,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const { user, org } = await requireAuth();
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: "Request body is required" }, { status: 400 });
+    }
 
     // --- Required field validation ---
     if (!body.name || typeof body.name !== "string" || body.name.trim() === "") {
@@ -300,8 +303,12 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const statusParam = searchParams.get("status");
-    const status =
-      statusParam && VALID_STATUSES.has(statusParam) ? statusParam : null;
+    let statusFilter: string | string[] | null = null;
+    if (statusParam) {
+      const statuses = statusParam.split(",").filter(s => VALID_STATUSES.has(s.trim()));
+      if (statuses.length === 1) statusFilter = statuses[0];
+      else if (statuses.length > 1) statusFilter = statuses;
+    }
     const reportTypeParam = searchParams.get("reportType");
     const reportType =
       reportTypeParam && VALID_REPORT_TYPES.has(reportTypeParam as ReportType)
@@ -319,8 +326,8 @@ export async function GET(request: NextRequest) {
       orgId: org.id,
       deletedAt: null,
     };
-    if (status) {
-      where.status = status;
+    if (statusFilter) {
+      where.status = Array.isArray(statusFilter) ? { in: statusFilter } : statusFilter;
     }
     if (reportType) {
       where.reportType = reportType;

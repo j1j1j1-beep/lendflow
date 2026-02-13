@@ -16,9 +16,11 @@ export async function POST(
   if (limited) return limited;
 
   let originalStatus: string | undefined;
+  let resolvedDocId: string | undefined;
   try {
     const { user, org } = await requireAuth();
     const { docId } = await params;
+    resolvedDocId = docId;
 
     const body = await request.json().catch(() => ({}));
     const officerNotes = body.notes as string | undefined;
@@ -215,14 +217,15 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     // Reset status from REGENERATING back to previous state on failure
-    const { docId: failedDocId } = await params;
-    try {
-      await prisma.bioGeneratedDocument.update({
-        where: { id: failedDocId },
-        data: { status: originalStatus ?? "DRAFT" },
-      });
-    } catch {
-      /* best-effort reset */
+    if (resolvedDocId) {
+      try {
+        await prisma.bioGeneratedDocument.update({
+          where: { id: resolvedDocId },
+          data: { status: originalStatus ?? "ERROR" },
+        });
+      } catch {
+        /* best-effort reset */
+      }
     }
     console.error(
       "POST /api/bio/generated-documents/[docId]/regenerate error:",

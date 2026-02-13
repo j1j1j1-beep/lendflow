@@ -12,19 +12,29 @@ import type { SyndicationProjectFull } from "@/documents/syndication/types";
 const DOCX_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-const SYNDICATION_DOC_TYPES_LIST: string[] = [
-  "ppm",
-  "operating_agreement",
-  "subscription_agreement",
-  "investor_questionnaire",
-  "pro_forma",
-];
+/** Wrap a promise with a timeout. Throws a descriptive error on timeout. */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`Timeout: ${label} exceeded ${ms / 1000}s limit`)),
+      ms,
+    );
+    promise.then(
+      (val) => { clearTimeout(timer); resolve(val); },
+      (err) => { clearTimeout(timer); reject(err); },
+    );
+  });
+}
 
 export const syndicationGenerateDocs = inngest.createFunction(
-  { id: "syndication-generate-docs", retries: 1 },
+  {
+    id: "syndication-generate-docs",
+    retries: 1,
+    idempotency: "event.data.projectId + '-' + event.data.triggeredAt",
+  },
   { event: "syndication/project.generate" },
   async ({ event, step }) => {
-    const { projectId } = event.data as { projectId: string };
+    const { projectId } = event.data as { projectId: string; triggeredAt?: number };
 
     // Step 1: Load project with all relations
     const project = await step.run("load-project", async () => {
@@ -39,11 +49,32 @@ export const syndicationGenerateDocs = inngest.createFunction(
       return p as unknown as SyndicationProjectFull;
     });
 
+    // Guard: check project exists and is in correct state
+    const statusCheck = await step.run("check-status", async (): Promise<{ skip: boolean; error?: string }> => {
+      const current = await prisma.syndicationProject.findUnique({ where: { id: projectId }, select: { status: true } });
+      if (!current) return { skip: true, error: "Project not found" };
+      if (current.status !== "CREATED" && current.status !== "GENERATING_DOCS") {
+        return { skip: true, error: `Project in ${current.status} state` };
+      }
+      return { skip: false };
+    });
+    if (statusCheck.skip) {
+      return { success: false, projectId, error: statusCheck.error };
+    }
+
     let lastStep = "load-project";
 
     try {
-      // Step 2: Generate each document type in its own step for retry isolation
-      for (const docType of SYNDICATION_DOC_TYPES_LIST) {
+      // Step 2: Update status to GENERATING_DOCS
+      await step.run("update-status-generating", async () => {
+        await prisma.syndicationProject.update({
+          where: { id: projectId },
+          data: { status: "GENERATING_DOCS" },
+        });
+      });
+
+      // Step 3: Generate each document type in its own step for retry isolation
+      for (const docType of [...SYNDICATION_DOC_TYPES]) {
         lastStep = `generate-${docType}`;
         const label = SYNDICATION_DOC_TYPE_LABELS[docType] ?? docType;
 
@@ -60,10 +91,12 @@ export const syndicationGenerateDocs = inngest.createFunction(
             },
           }) as unknown as SyndicationProjectFull;
 
-          // Generate the document
-          const { buffer, complianceChecks } = await generateSyndicationDoc(
-            freshProject,
-            docType,
+          // Generate the document (30s for deterministic, 180s for AI)
+          const isDeterministic = docType === "pro_forma";
+          const { buffer, complianceChecks } = await withTimeout(
+            generateSyndicationDoc(freshProject, docType),
+            isDeterministic ? 30_000 : 180_000,
+            `generate-${docType}`,
           );
 
           // Determine version (increment if doc already exists)
@@ -106,7 +139,16 @@ export const syndicationGenerateDocs = inngest.createFunction(
         });
       }
 
-      // Step 3: Update project status to COMPLETE
+      // Step 4: Update status to COMPLIANCE_REVIEW before running checks
+      lastStep = "compliance-review";
+      await step.run("update-status-compliance-review", async () => {
+        await prisma.syndicationProject.update({
+          where: { id: projectId },
+          data: { status: "COMPLIANCE_REVIEW" },
+        });
+      });
+
+      // Step 5: Update project status to COMPLETE
       lastStep = "complete";
       await step.run("update-status-complete", async () => {
         // Check if any docs have compliance issues

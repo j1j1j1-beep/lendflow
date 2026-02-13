@@ -17,6 +17,7 @@ import {
   createTable,
   formatCurrency,
   formatDate,
+  safeNumber,
   COLORS,
 } from "@/documents/doc-helpers";
 
@@ -27,7 +28,7 @@ export function buildDisclosureSchedules(
   prose: DisclosureSchedulesProse,
 ): Document {
   const dateFormatted = formatDate(new Date());
-  const purchasePrice = project.purchasePrice ? Number(project.purchasePrice) : 0;
+  const purchasePrice = safeNumber(project.purchasePrice);
   const isMerger = ["MERGER_FORWARD", "MERGER_REVERSE_TRIANGULAR", "MERGER_FORWARD_TRIANGULAR", "REVERSE_MERGER"].includes(project.transactionType);
 
   const children: (Paragraph | Table)[] = [];

@@ -55,7 +55,7 @@ export const bioPipeline = inngest.createFunction(
       if (!program) return { skip: true };
 
       const processingStatuses = [
-        "EXTRACTING", "CLASSIFYING", "ANALYZING", "GENERATING_DOCS",
+        "EXTRACTING", "CLASSIFYING", "VERIFYING", "ANALYZING", "GENERATING_DOCS", "COMPLIANCE_REVIEW",
       ];
 
       if (processingStatuses.includes(program.status)) {

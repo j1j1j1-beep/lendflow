@@ -27,17 +27,18 @@ const STATUS_FILTERS = [
   { label: "Complete", value: "COMPLETE" },
 ] as const;
 
-const PROCESSING_STATUSES = [
+const PROCESSING_STATUSES = new Set([
   "UPLOADED",
   "PROCESSING_OCR",
-  "EXTRACTING",
   "CLASSIFYING",
+  "EXTRACTING",
   "VERIFYING",
+  "RESOLVING",
   "ANALYZING",
   "STRUCTURING",
   "GENERATING_DOCS",
-  "COMPLIANCE_REVIEW",
-];
+  "GENERATING_MEMO",
+]);
 
 export default function LoanOriginationPage() {
   const router = useRouter();
@@ -48,6 +49,7 @@ export default function LoanOriginationPage() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const isInitialLoad = useRef(true);
+  const pollErrorCount = useRef(0);
   const [sampleLoading, setSampleLoading] = useState(false);
 
   const handleSampleDeal = async () => {
@@ -73,7 +75,7 @@ export default function LoanOriginationPage() {
       const params = new URLSearchParams();
       if (filter !== "all") {
         if (filter === "processing") {
-          params.set("status", PROCESSING_STATUSES.join(","));
+          params.set("status", [...PROCESSING_STATUSES].join(","));
         } else {
           params.set("status", filter);
         }
@@ -85,7 +87,9 @@ export default function LoanOriginationPage() {
       const data = await res.json();
       setDeals(data.deals ?? []);
       setFetchError(null);
+      pollErrorCount.current = 0;
     } catch {
+      pollErrorCount.current += 1;
       setFetchError("Unable to load deals. Please try again.");
     } finally {
       setLoading(false);
@@ -95,7 +99,10 @@ export default function LoanOriginationPage() {
 
   useEffect(() => {
     fetchDeals();
-    const interval = setInterval(fetchDeals, 10000);
+    const interval = setInterval(() => {
+      if (pollErrorCount.current >= 3) return;
+      fetchDeals();
+    }, 10000);
     return () => clearInterval(interval);
   }, [fetchDeals]);
 
@@ -145,6 +152,7 @@ export default function LoanOriginationPage() {
               <button
                 onClick={() => setSearchInput("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label="Clear search"
               >
                 <X className="h-4 w-4" />
               </button>

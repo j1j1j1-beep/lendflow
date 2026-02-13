@@ -14,6 +14,7 @@ import {
   Handshake,
   Building,
   ShieldCheck,
+  TestTubes,
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,10 +30,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Switch } from "@/components/ui/switch";
+import { ProductSwitcher } from "@/components/product-switcher";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Lending", href: "/dashboard/lending", icon: Landmark },
+  { label: "Bio", href: "/dashboard/bio", icon: TestTubes },
   { label: "Capital", href: "/dashboard/capital", icon: Building2 },
   { label: "Deals", href: "/dashboard/deals", icon: Handshake },
   { label: "Syndication", href: "/dashboard/syndication", icon: Building },
@@ -51,16 +54,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard" className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                  <Landmark className="h-4 w-4" />
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold tracking-tight">OpenShut</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
+            <ProductSwitcher />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

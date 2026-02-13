@@ -19,6 +19,7 @@ import {
   keyTermsTable,
   formatCurrency,
   ensureProseArray,
+  safeNumber,
   COLORS,
 } from "../../doc-helpers";
 
@@ -43,7 +44,7 @@ AI-GENERATED CONTENT DISCLAIMER: This AI-generated content is for document draft
 async function generateSubProse(project: SyndicationProjectFull): Promise<SubscriptionAgreementProse> {
   const context = buildProjectContext(project);
   const is506c = project.exemptionType === "REG_D_506C";
-  const minInvestment = project.minInvestment ? Number(project.minInvestment) : 0;
+  const minInvestment = safeNumber(project.minInvestment);
 
   const userPrompt = `Generate Subscription Agreement prose for this real estate syndication.
 
@@ -76,8 +77,8 @@ Return a JSON object with these keys:
 
 export async function buildSubscriptionAgreement(project: SyndicationProjectFull): Promise<Document> {
   const prose = await generateSubProse(project);
-  const minInvestment = project.minInvestment ? Number(project.minInvestment) : 0;
-  const totalEquityRaise = project.totalEquityRaise ? Number(project.totalEquityRaise) : 0;
+  const minInvestment = safeNumber(project.minInvestment);
+  const totalEquityRaise = safeNumber(project.totalEquityRaise);
   const is506c = project.exemptionType === "REG_D_506C";
 
   const children: (Paragraph | Table)[] = [];
@@ -276,9 +277,9 @@ export function runSubscriptionComplianceChecks(project: SyndicationProjectFull)
     name: "Minimum Investment Specified",
     regulation: "Investor Protection Standards",
     category: "investor_protection",
-    passed: (project.minInvestment ? Number(project.minInvestment) : 0) > 0,
+    passed: safeNumber(project.minInvestment) > 0,
     note: project.minInvestment
-      ? `Minimum: ${formatCurrency(Number(project.minInvestment))}`
+      ? `Minimum: ${formatCurrency(safeNumber(project.minInvestment))}`
       : "No minimum investment — subscription amount unclear",
   });
 
