@@ -1,6 +1,7 @@
 // doc-helpers.ts
-// Shared docx building blocks for loan document generation.
-// Extracted from memo/generate.ts pattern + legal-document-specific additions.
+// Shared docx building blocks for legal document generation.
+// Industry standard: Times New Roman for legal body, Calibri for tables.
+// Black and white only — no accent colors in legal documents.
 
 import {
   Document,
@@ -55,20 +56,25 @@ export {
   TabStopPosition,
 };
 
-// Colors — consistent with credit memo
+// Fonts — legal body uses Times New Roman, tables use Calibri (industry standard)
+export const FONTS = {
+  legal: "Times New Roman",
+  table: "Calibri",
+};
 
+// Colors — professional B&W for legal documents
 export const COLORS = {
-  primary: "1B3A5C",
-  primaryLight: "2C5F8A",
-  accent: "0D7C66",
-  headerBg: "1B3A5C",
-  headerText: "FFFFFF",
-  altRowBg: "F0F4F8",
+  primary: "000000",
+  primaryLight: "333333",
+  accent: "000000",
+  headerBg: "F2F2F2",
+  headerText: "000000",
+  altRowBg: "F8F8F8",
   white: "FFFFFF",
-  black: "1A1A1A",
-  textGray: "4A5568",
-  borderGray: "CBD5E0",
-  lightBorder: "E2E8F0",
+  black: "000000",
+  textGray: "444444",
+  borderGray: "999999",
+  lightBorder: "CCCCCC",
 };
 
 // Border presets
@@ -167,7 +173,7 @@ export function computeMaturityDate(startDate: Date, termMonths: number): Date {
   const targetMonth = d.getMonth() + termMonths;
   const originalDay = d.getDate();
   d.setMonth(targetMonth);
-  // Handle month-end overflow (e.g., Jan 31 + 1 month → Feb 28, not Mar 3)
+  // Handle month-end overflow (e.g., Jan 31 + 1 month -> Feb 28, not Mar 3)
   if (d.getDate() !== originalDay) {
     d.setDate(0); // Roll back to last day of previous month
   }
@@ -194,15 +200,15 @@ export function sectionHeading(text: string): Paragraph {
     heading: HeadingLevel.HEADING_2,
     spacing: { before: 360, after: 120 },
     border: {
-      bottom: { style: BorderStyle.SINGLE, size: 2, color: COLORS.primary },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: COLORS.black },
     },
     children: [
       new TextRun({
         text,
         bold: true,
-        size: 26,
-        color: COLORS.primary,
-        font: "Calibri",
+        size: 24,
+        color: COLORS.black,
+        font: FONTS.legal,
       }),
     ],
   });
@@ -211,22 +217,23 @@ export function sectionHeading(text: string): Paragraph {
 export function articleHeading(number: string, title: string): Paragraph {
   return new Paragraph({
     heading: HeadingLevel.HEADING_2,
+    alignment: AlignmentType.CENTER,
     spacing: { before: 300, after: 120 },
     children: [
       new TextRun({
         text: `ARTICLE ${number}`,
         bold: true,
         size: 24,
-        color: COLORS.primary,
-        font: "Calibri",
+        color: COLORS.black,
+        font: FONTS.legal,
         allCaps: true,
       }),
       new TextRun({
-        text: `  ${title}`,
+        text: `\n${title}`,
         bold: true,
         size: 24,
-        color: COLORS.primary,
-        font: "Calibri",
+        color: COLORS.black,
+        font: FONTS.legal,
         allCaps: true,
       }),
     ],
@@ -241,15 +248,15 @@ export function sectionSubheading(number: string, title: string): Paragraph {
         text: `Section ${number}. `,
         bold: true,
         size: 20,
-        color: COLORS.primary,
-        font: "Calibri",
+        color: COLORS.black,
+        font: FONTS.legal,
       }),
       new TextRun({
         text: title,
         bold: true,
         size: 20,
-        color: COLORS.primary,
-        font: "Calibri",
+        color: COLORS.black,
+        font: FONTS.legal,
       }),
     ],
   });
@@ -262,12 +269,13 @@ export function bodyText(
   const safeText = text ?? "[This section was not generated. Manual review required.]";
   return new Paragraph({
     spacing: { after: 100 },
+    alignment: AlignmentType.JUSTIFIED,
     indent: options?.indent ? { left: convertInchesToTwip(options.indent) } : undefined,
     children: [
       new TextRun({
         text: safeText,
         size: 20,
-        font: "Calibri",
+        font: FONTS.legal,
         bold: options?.bold,
         italics: options?.italic,
         color: options?.color ?? COLORS.black,
@@ -280,12 +288,13 @@ export function bodyText(
 export function bodyTextRuns(runs: Array<{ text: string; bold?: boolean; italic?: boolean; underline?: boolean }>): Paragraph {
   return new Paragraph({
     spacing: { after: 100 },
+    alignment: AlignmentType.JUSTIFIED,
     children: runs.map(
       (r) =>
         new TextRun({
           text: r.text,
           size: 20,
-          font: "Calibri",
+          font: FONTS.legal,
           bold: r.bold,
           italics: r.italic,
           underline: r.underline ? {} : undefined,
@@ -305,7 +314,7 @@ export function bulletPoint(
       new TextRun({
         text,
         size: 20,
-        font: "Calibri",
+        font: FONTS.legal,
         bold: options?.bold,
         color: options?.color ?? COLORS.black,
       }),
@@ -321,14 +330,14 @@ export function numberedItem(text: string, level = 0): Paragraph {
       new TextRun({
         text,
         size: 20,
-        font: "Calibri",
+        font: FONTS.legal,
         color: COLORS.black,
       }),
     ],
   });
 }
 
-/** Build a cell for a header row. */
+/** Build a cell for a header row (tables use Calibri). */
 export function headerCell(text: string, widthPercent?: number): TableCell {
   return new TableCell({
     shading: { type: ShadingType.SOLID, color: COLORS.headerBg, fill: COLORS.headerBg },
@@ -345,7 +354,7 @@ export function headerCell(text: string, widthPercent?: number): TableCell {
             bold: true,
             size: 18,
             color: COLORS.headerText,
-            font: "Calibri",
+            font: FONTS.table,
           }),
         ],
       }),
@@ -353,7 +362,7 @@ export function headerCell(text: string, widthPercent?: number): TableCell {
   });
 }
 
-/** Build a data cell. */
+/** Build a data cell (tables use Calibri). */
 export function dataCell(
   text: string,
   options?: {
@@ -379,7 +388,7 @@ export function dataCell(
           new TextRun({
             text,
             size: 18,
-            font: "Calibri",
+            font: FONTS.table,
             bold: options?.bold,
             color: options?.color ?? COLORS.black,
           }),
@@ -439,9 +448,9 @@ export function documentTitle(title: string): Paragraph {
       new TextRun({
         text: title,
         bold: true,
-        size: 32,
-        color: COLORS.primary,
-        font: "Calibri",
+        size: 28,
+        color: COLORS.black,
+        font: FONTS.legal,
         allCaps: true,
       }),
     ],
@@ -459,10 +468,23 @@ export function signatureBlock(
       spacing: { before: 0, after: 0 },
       children: [
         new TextRun({
-          text: "________________________________________",
+          text: partyName.toUpperCase(),
+          bold: true,
           size: 20,
-          font: "Calibri",
-          color: COLORS.textGray,
+          font: FONTS.legal,
+          color: COLORS.black,
+        }),
+      ],
+    }),
+    spacer(12),
+    new Paragraph({
+      spacing: { before: 0, after: 0 },
+      children: [
+        new TextRun({
+          text: "By: ________________________________________",
+          size: 20,
+          font: FONTS.legal,
+          color: COLORS.black,
         }),
       ],
     }),
@@ -470,37 +492,33 @@ export function signatureBlock(
       spacing: { before: 40, after: 0 },
       children: [
         new TextRun({
-          text: partyName,
-          bold: true,
+          text: "Name:",
           size: 20,
-          font: "Calibri",
+          font: FONTS.legal,
+          color: COLORS.black,
         }),
       ],
     }),
-    ...(title
-      ? [
-          new Paragraph({
-            spacing: { before: 0, after: 0 },
-            children: [
-              new TextRun({
-                text: title,
-                size: 18,
-                font: "Calibri",
-                color: COLORS.textGray,
-              }),
-            ],
-          }),
-        ]
-      : []),
+    new Paragraph({
+      spacing: { before: 40, after: 0 },
+      children: [
+        new TextRun({
+          text: title ? `Title: ${title}` : "Title:",
+          size: 20,
+          font: FONTS.legal,
+          color: COLORS.black,
+        }),
+      ],
+    }),
     spacer(4),
     new Paragraph({
       spacing: { before: 0, after: 0 },
       children: [
         new TextRun({
           text: "Date: ___________________",
-          size: 18,
-          font: "Calibri",
-          color: COLORS.textGray,
+          size: 20,
+          font: FONTS.legal,
+          color: COLORS.black,
         }),
       ],
     }),
@@ -516,21 +534,22 @@ export function partyBlock(role: string, name: string, description?: string): Pa
         text: `${role}: `,
         bold: true,
         size: 20,
-        font: "Calibri",
-        color: COLORS.primary,
+        font: FONTS.legal,
+        color: COLORS.black,
       }),
       new TextRun({
         text: name,
         bold: true,
         size: 20,
-        font: "Calibri",
+        font: FONTS.legal,
+        color: COLORS.black,
       }),
       ...(description
         ? [
             new TextRun({
               text: ` (${description})`,
               size: 20,
-              font: "Calibri",
+              font: FONTS.legal,
               color: COLORS.textGray,
             }),
           ]
@@ -622,10 +641,10 @@ export function collateralLabel(type: string): string {
 /**
  * Safely convert an AI prose value that should be a string[] into an actual
  * string[]. Handles all edge cases:
- *   - Already a proper string[] → returned as-is
- *   - A string (AI returned prose as single text) → wrapped in [string]
- *   - An array of single characters (string was spread) → joined back
- *   - null/undefined → placeholder array
+ *   - Already a proper string[] -> returned as-is
+ *   - A string (AI returned prose as single text) -> wrapped in [string]
+ *   - An array of single characters (string was spread) -> joined back
+ *   - null/undefined -> placeholder array
  */
 export function ensureProseArray(value: unknown): string[] {
   if (!value) {
@@ -642,7 +661,7 @@ export function ensureProseArray(value: unknown): string[] {
     if (strings.length === 0) {
       return ["[This section was not generated. Manual review required.]"];
     }
-    // Detect character-by-character arrays: if average length ≤ 2, it's a spread string
+    // Detect character-by-character arrays: if average length <= 2, it's a spread string
     const avgLen = strings.reduce((sum, s) => sum + s.length, 0) / strings.length;
     if (avgLen <= 2) {
       return [strings.join("")];
@@ -663,7 +682,7 @@ export function buildLegalDocument(options: {
     styles: {
       default: {
         document: {
-          run: { font: "Calibri", size: 20, color: COLORS.black },
+          run: { font: FONTS.legal, size: 20, color: COLORS.black },
           paragraph: { spacing: { line: 276 } },
         },
       },
@@ -724,7 +743,7 @@ export function buildLegalDocument(options: {
                   new TextRun({
                     text: options.headerRight ?? options.title,
                     size: 16,
-                    font: "Calibri",
+                    font: FONTS.legal,
                     color: COLORS.textGray,
                     italics: true,
                   }),
@@ -740,15 +759,21 @@ export function buildLegalDocument(options: {
                 alignment: AlignmentType.CENTER,
                 children: [
                   new TextRun({
-                    text: "Page ",
+                    text: "- ",
                     size: 16,
-                    font: "Calibri",
+                    font: FONTS.legal,
                     color: COLORS.textGray,
                   }),
                   new TextRun({
                     children: [PageNumber.CURRENT],
                     size: 16,
-                    font: "Calibri",
+                    font: FONTS.legal,
+                    color: COLORS.textGray,
+                  }),
+                  new TextRun({
+                    text: " -",
+                    size: 16,
+                    font: FONTS.legal,
                     color: COLORS.textGray,
                   }),
                 ],
@@ -758,9 +783,9 @@ export function buildLegalDocument(options: {
                 spacing: { before: 40 },
                 children: [
                   new TextRun({
-                    text: "CONFIDENTIAL — DRAFT",
+                    text: "CONFIDENTIAL",
                     size: 14,
-                    font: "Calibri",
+                    font: FONTS.legal,
                     color: COLORS.textGray,
                     italics: true,
                   }),

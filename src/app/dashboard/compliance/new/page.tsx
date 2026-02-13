@@ -1,0 +1,679 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
+import { ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+/* ------------------------------------------------------------------ */
+/*  Constants                                                          */
+/* ------------------------------------------------------------------ */
+
+const REPORT_TYPES = [
+  { value: "LP_QUARTERLY_REPORT", label: "LP Quarterly Report" },
+  { value: "CAPITAL_CALL_NOTICE", label: "Capital Call Notice" },
+  { value: "DISTRIBUTION_NOTICE", label: "Distribution Notice" },
+  { value: "K1_SUMMARY", label: "K-1 Summary" },
+  { value: "ANNUAL_REPORT", label: "Annual Report" },
+  { value: "FORM_ADV_SUMMARY", label: "Form ADV Summary" },
+] as const;
+
+const FUND_TYPES = [
+  { value: "PRIVATE_EQUITY", label: "Private Equity" },
+  { value: "VENTURE_CAPITAL", label: "Venture Capital" },
+  { value: "REAL_ESTATE", label: "Real Estate" },
+  { value: "HEDGE_FUND", label: "Hedge Fund" },
+  { value: "CREDIT", label: "Credit" },
+  { value: "INFRASTRUCTURE", label: "Infrastructure" },
+] as const;
+
+const DISTRIBUTION_TYPES = [
+  { value: "return_of_capital", label: "Return of Capital" },
+  { value: "income", label: "Income" },
+  { value: "gain", label: "Capital Gain" },
+] as const;
+
+/* Report types that show performance / NAV fields */
+const PERFORMANCE_TYPES = new Set(["LP_QUARTERLY_REPORT", "ANNUAL_REPORT"]);
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                               */
+/* ------------------------------------------------------------------ */
+
+export default function NewComplianceReportPage() {
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
+
+  /* Required */
+  const [name, setName] = useState("");
+  const [reportType, setReportType] = useState("");
+  const [fundName, setFundName] = useState("");
+
+  /* Shared optional */
+  const [fundType, setFundType] = useState("");
+  const [reportingQuarter, setReportingQuarter] = useState("");
+  const [periodStart, setPeriodStart] = useState("");
+  const [periodEnd, setPeriodEnd] = useState("");
+
+  /* LP Report / Annual Report */
+  const [nav, setNav] = useState("");
+  const [totalContributions, setTotalContributions] = useState("");
+  const [totalDistributions, setTotalDistributions] = useState("");
+  const [netIrr, setNetIrr] = useState("");
+  const [moic, setMoic] = useState("");
+
+  /* Capital Call */
+  const [callAmount, setCallAmount] = useState("");
+  const [callDueDate, setCallDueDate] = useState("");
+  const [callPurpose, setCallPurpose] = useState("");
+
+  /* Distribution */
+  const [distributionAmount, setDistributionAmount] = useState("");
+  const [distributionType, setDistributionType] = useState("");
+
+  /* K-1 */
+  const [taxYear, setTaxYear] = useState("");
+  const [filingDeadline, setFilingDeadline] = useState("");
+
+  /* ---------- Conditional visibility ---------- */
+
+  const showPerformance = PERFORMANCE_TYPES.has(reportType);
+  const showCapitalCall = reportType === "CAPITAL_CALL_NOTICE";
+  const showDistribution = reportType === "DISTRIBUTION_NOTICE";
+  const showK1 = reportType === "K1_SUMMARY";
+
+  /* ---------- Submit ---------- */
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      toast.error("Report name is required");
+      return;
+    }
+    if (!reportType) {
+      toast.error("Please select a report type");
+      return;
+    }
+    if (!fundName.trim()) {
+      toast.error("Fund name is required");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      /* Build body -- only include fields relevant to reportType */
+      const body: Record<string, unknown> = {
+        name: name.trim(),
+        reportType,
+        fundName: fundName.trim(),
+      };
+
+      if (fundType) body.fundType = fundType;
+      if (reportingQuarter.trim()) body.reportingQuarter = reportingQuarter.trim();
+      if (periodStart) body.periodStart = periodStart;
+      if (periodEnd) body.periodEnd = periodEnd;
+
+      if (showPerformance) {
+        if (nav) body.nav = parseFloat(nav);
+        if (totalContributions) body.totalContributions = parseFloat(totalContributions);
+        if (totalDistributions) body.totalDistributions = parseFloat(totalDistributions);
+        if (netIrr) body.netIrr = parseFloat(netIrr) / 100;
+        if (moic) body.moic = parseFloat(moic);
+      }
+
+      if (showCapitalCall) {
+        if (callAmount) body.callAmount = parseFloat(callAmount);
+        if (callDueDate) body.callDueDate = callDueDate;
+        if (callPurpose.trim()) body.callPurpose = callPurpose.trim();
+      }
+
+      if (showDistribution) {
+        if (distributionAmount) body.distributionAmount = parseFloat(distributionAmount);
+        if (distributionType) body.distributionType = distributionType;
+      }
+
+      if (showK1) {
+        if (taxYear) body.taxYear = parseInt(taxYear, 10);
+        if (filingDeadline) body.filingDeadline = filingDeadline;
+      }
+
+      /* 1. Create project */
+      const createRes = await fetch("/api/compliance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!createRes.ok) {
+        const err = await createRes.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to create report");
+      }
+
+      const { project } = await createRes.json();
+
+      /* 2. Trigger generation */
+      const genRes = await fetch(
+        `/api/compliance/${project.id}/generate`,
+        { method: "POST" }
+      );
+
+      if (!genRes.ok) {
+        toast.error(
+          "Report created but document generation failed to start. You can retry from the report page."
+        );
+      } else {
+        toast.success("Report created! Document generation started.");
+      }
+
+      /* 3. Redirect */
+      router.push(`/dashboard/compliance/${project.id}`);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Something went wrong"
+      );
+      setSubmitting(false);
+    }
+  };
+
+  /* ---------- Render ---------- */
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
+      {/* Back + Title */}
+      <div className="mb-6">
+        <Link
+          href="/dashboard/compliance"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-150 hover:-translate-x-0.5 mb-3"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to Compliance
+        </Link>
+        <h1 className="text-2xl font-semibold tracking-tight">New Report</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Select a report type and enter fund details to generate compliance
+          documentation
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* -------------------------------------------------------- */}
+        {/*  Core Information                                         */}
+        {/* -------------------------------------------------------- */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              Report Details
+            </CardTitle>
+            <CardDescription>
+              Choose the document type and provide fund information
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Name */}
+              <div className="md:col-span-2">
+                <Label htmlFor="name">
+                  Report Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Q4 2025 LP Report"
+                  required
+                  className="mt-1.5"
+                />
+              </div>
+
+              {/* Report Type */}
+              <div>
+                <Label htmlFor="reportType">
+                  Report Type <span className="text-destructive">*</span>
+                </Label>
+                <Select value={reportType} onValueChange={setReportType}>
+                  <SelectTrigger className="mt-1.5 w-full">
+                    <SelectValue placeholder="Select report type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {REPORT_TYPES.map((rt) => (
+                      <SelectItem key={rt.value} value={rt.value}>
+                        {rt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Fund Name */}
+              <div>
+                <Label htmlFor="fundName">
+                  Fund Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="fundName"
+                  value={fundName}
+                  onChange={(e) => setFundName(e.target.value)}
+                  placeholder="Acme Capital Partners III, L.P."
+                  required
+                  className="mt-1.5"
+                />
+              </div>
+
+              {/* Fund Type */}
+              <div>
+                <Label htmlFor="fundType">Fund Type</Label>
+                <Select value={fundType} onValueChange={setFundType}>
+                  <SelectTrigger className="mt-1.5 w-full">
+                    <SelectValue placeholder="Select fund type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FUND_TYPES.map((ft) => (
+                      <SelectItem key={ft.value} value={ft.value}>
+                        {ft.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Reporting Quarter */}
+              <div>
+                <Label htmlFor="reportingQuarter">Reporting Quarter</Label>
+                <Input
+                  id="reportingQuarter"
+                  value={reportingQuarter}
+                  onChange={(e) => setReportingQuarter(e.target.value)}
+                  placeholder="Q4 2025"
+                  className="mt-1.5"
+                />
+              </div>
+
+              {/* Period Start */}
+              <div>
+                <Label htmlFor="periodStart">Period Start</Label>
+                <Input
+                  id="periodStart"
+                  type="date"
+                  value={periodStart}
+                  onChange={(e) => setPeriodStart(e.target.value)}
+                  className="mt-1.5"
+                />
+              </div>
+
+              {/* Period End */}
+              <div>
+                <Label htmlFor="periodEnd">Period End</Label>
+                <Input
+                  id="periodEnd"
+                  type="date"
+                  value={periodEnd}
+                  onChange={(e) => setPeriodEnd(e.target.value)}
+                  className="mt-1.5"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* -------------------------------------------------------- */}
+        {/*  Performance Fields (LP Report / Annual Report)           */}
+        {/* -------------------------------------------------------- */}
+        <div
+          className={`grid transition-all duration-300 ease-in-out ${
+            showPerformance
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0 pointer-events-none"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <Card>
+              <CardHeader>
+                <CardTitle>Fund Performance</CardTitle>
+                <CardDescription>
+                  Key financial metrics for the reporting period
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* NAV */}
+                  <div>
+                    <Label htmlFor="nav">Net Asset Value</Label>
+                    <div className="relative mt-1.5">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                        $
+                      </span>
+                      <Input
+                        id="nav"
+                        type="number"
+                        value={nav}
+                        onChange={(e) => setNav(e.target.value)}
+                        placeholder="150000000"
+                        className="pl-7"
+                        min={0}
+                        step={1000}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Total Contributions */}
+                  <div>
+                    <Label htmlFor="totalContributions">
+                      Total Contributions
+                    </Label>
+                    <div className="relative mt-1.5">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                        $
+                      </span>
+                      <Input
+                        id="totalContributions"
+                        type="number"
+                        value={totalContributions}
+                        onChange={(e) => setTotalContributions(e.target.value)}
+                        placeholder="100000000"
+                        className="pl-7"
+                        min={0}
+                        step={1000}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Total Distributions */}
+                  <div>
+                    <Label htmlFor="totalDistributions">
+                      Total Distributions
+                    </Label>
+                    <div className="relative mt-1.5">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                        $
+                      </span>
+                      <Input
+                        id="totalDistributions"
+                        type="number"
+                        value={totalDistributions}
+                        onChange={(e) => setTotalDistributions(e.target.value)}
+                        placeholder="45000000"
+                        className="pl-7"
+                        min={0}
+                        step={1000}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Net IRR */}
+                  <div>
+                    <Label htmlFor="netIrr">Net IRR (%)</Label>
+                    <div className="relative mt-1.5">
+                      <Input
+                        id="netIrr"
+                        type="number"
+                        value={netIrr}
+                        onChange={(e) => setNetIrr(e.target.value)}
+                        placeholder="18.5"
+                        className="pr-8"
+                        min={-100}
+                        max={1000}
+                        step={0.1}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                        %
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* MOIC */}
+                  <div>
+                    <Label htmlFor="moic">MOIC</Label>
+                    <Input
+                      id="moic"
+                      type="number"
+                      value={moic}
+                      onChange={(e) => setMoic(e.target.value)}
+                      placeholder="1.45"
+                      className="mt-1.5"
+                      min={0}
+                      step={0.01}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* -------------------------------------------------------- */}
+        {/*  Capital Call Fields                                       */}
+        {/* -------------------------------------------------------- */}
+        <div
+          className={`grid transition-all duration-300 ease-in-out ${
+            showCapitalCall
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0 pointer-events-none"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <Card>
+              <CardHeader>
+                <CardTitle>Capital Call Details</CardTitle>
+                <CardDescription>
+                  Specify the call amount, due date, and purpose
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Call Amount */}
+                  <div>
+                    <Label htmlFor="callAmount">Call Amount</Label>
+                    <div className="relative mt-1.5">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                        $
+                      </span>
+                      <Input
+                        id="callAmount"
+                        type="number"
+                        value={callAmount}
+                        onChange={(e) => setCallAmount(e.target.value)}
+                        placeholder="5000000"
+                        className="pl-7"
+                        min={0}
+                        step={1000}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Call Due Date */}
+                  <div>
+                    <Label htmlFor="callDueDate">Due Date</Label>
+                    <Input
+                      id="callDueDate"
+                      type="date"
+                      value={callDueDate}
+                      onChange={(e) => setCallDueDate(e.target.value)}
+                      className="mt-1.5"
+                    />
+                  </div>
+
+                  {/* Call Purpose */}
+                  <div className="md:col-span-2">
+                    <Label htmlFor="callPurpose">Purpose</Label>
+                    <Textarea
+                      id="callPurpose"
+                      value={callPurpose}
+                      onChange={(e) => setCallPurpose(e.target.value)}
+                      placeholder="Follow-on investment in Portfolio Company A..."
+                      className="mt-1.5 min-h-[80px] resize-none"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* -------------------------------------------------------- */}
+        {/*  Distribution Fields                                      */}
+        {/* -------------------------------------------------------- */}
+        <div
+          className={`grid transition-all duration-300 ease-in-out ${
+            showDistribution
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0 pointer-events-none"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <Card>
+              <CardHeader>
+                <CardTitle>Distribution Details</CardTitle>
+                <CardDescription>
+                  Specify the distribution amount and type
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Distribution Amount */}
+                  <div>
+                    <Label htmlFor="distributionAmount">
+                      Distribution Amount
+                    </Label>
+                    <div className="relative mt-1.5">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                        $
+                      </span>
+                      <Input
+                        id="distributionAmount"
+                        type="number"
+                        value={distributionAmount}
+                        onChange={(e) => setDistributionAmount(e.target.value)}
+                        placeholder="3000000"
+                        className="pl-7"
+                        min={0}
+                        step={1000}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Distribution Type */}
+                  <div>
+                    <Label htmlFor="distributionType">Distribution Type</Label>
+                    <Select
+                      value={distributionType}
+                      onValueChange={setDistributionType}
+                    >
+                      <SelectTrigger className="mt-1.5 w-full">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DISTRIBUTION_TYPES.map((dt) => (
+                          <SelectItem key={dt.value} value={dt.value}>
+                            {dt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* -------------------------------------------------------- */}
+        {/*  K-1 Fields                                               */}
+        {/* -------------------------------------------------------- */}
+        <div
+          className={`grid transition-all duration-300 ease-in-out ${
+            showK1
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0 pointer-events-none"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <Card>
+              <CardHeader>
+                <CardTitle>K-1 Details</CardTitle>
+                <CardDescription>
+                  Tax year and filing deadline for Schedule K-1 preparation
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Tax Year */}
+                  <div>
+                    <Label htmlFor="taxYear">Tax Year</Label>
+                    <Input
+                      id="taxYear"
+                      type="number"
+                      value={taxYear}
+                      onChange={(e) => setTaxYear(e.target.value)}
+                      placeholder="2025"
+                      className="mt-1.5"
+                      min={2000}
+                      max={2100}
+                    />
+                  </div>
+
+                  {/* Filing Deadline */}
+                  <div>
+                    <Label htmlFor="filingDeadline">Filing Deadline</Label>
+                    <Input
+                      id="filingDeadline"
+                      type="date"
+                      value={filingDeadline}
+                      onChange={(e) => setFilingDeadline(e.target.value)}
+                      className="mt-1.5"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* -------------------------------------------------------- */}
+        {/*  Actions                                                  */}
+        {/* -------------------------------------------------------- */}
+        <div className="flex justify-end gap-3 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/dashboard/compliance")}
+            disabled={submitting}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={submitting} className="shadow-sm">
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Creating Report...
+              </>
+            ) : (
+              "Create Report & Generate"
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
