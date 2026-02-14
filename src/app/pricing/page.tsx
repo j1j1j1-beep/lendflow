@@ -219,7 +219,7 @@ export default function PricingPage() {
                       <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">License (one-time)</th>
                       <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Monthly</th>
                       <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Year 1 Total</th>
-                      <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Year 2 Total</th>
+                      <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Year 2+</th>
                     </tr>
                   </thead>
                   <tbody>
