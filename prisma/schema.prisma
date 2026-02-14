@@ -53,7 +53,7 @@ model Subscription {
   licensePaymentId     String?
   plan                 String    @default("trial") // "trial", "active", "canceled"
   status               String    @default("trialing") // "trialing", "active", "past_due", "canceled", "unpaid"
-  maxSeats             Int       @default(25)
+  maxSeats             Int       @default(15)
   currentPeriodStart   DateTime?
   currentPeriodEnd     DateTime?
   cancelAtPeriodEnd    Boolean   @default(false)

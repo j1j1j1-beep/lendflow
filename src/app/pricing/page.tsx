@@ -53,7 +53,7 @@ const FAQ = [
   { q: "What does the free tier include?", a: "One project in any module. Full document generation, all compliance checks. The exact same output as the paid version." },
   { q: "What happens after my free project?", a: "You need a license to create additional projects. Your first project and all its generated documents stay accessible." },
   { q: "Is the license fee a one-time payment?", a: "Yes. The license is paid once. Monthly fees cover ongoing platform access, updates, and support." },
-  { q: "How do seats work on the standard plan?", a: "Up to 25 seats per organization. Any member can create projects, generate documents, and download packages. Need more than 25? Talk to us about Enterprise." },
+  { q: "How do seats work on the standard plan?", a: "Up to 15 seats per organization. Any member can create projects, generate documents, and download packages. Need more than 15? Talk to us about Enterprise or add seats at $750/seat/month." },
   { q: "Is my data secure?", a: "All uploads are encrypted at rest and in transit. Expiring document links. Organization-level data isolation. Full audit trail. We don't use your data for training." },
   { q: "How does payment work?", a: "License fee paid via wire transfer or ACH. Monthly fees billed automatically." },
 ];
@@ -144,7 +144,7 @@ export default function PricingPage() {
                 <p className="text-sm text-muted-foreground leading-relaxed mb-2">
                   First module. Each additional adds $75,000 to the license and $4,999/month.
                 </p>
-                <p className="text-xs text-muted-foreground/70 mb-8">25 seats included. $499/seat/month after that.</p>
+                <p className="text-xs text-muted-foreground/70 mb-8">15 seats included. $750/seat/month after that.</p>
                 <SignInButton mode="modal" forceRedirectUrl="/dashboard">
                   <button className="w-full inline-flex h-11 items-center justify-center gap-2 rounded-lg text-sm font-medium bg-foreground text-background shadow-sm transition-all duration-150 ease-out hover:bg-foreground/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
                     Get Started
@@ -153,7 +153,7 @@ export default function PricingPage() {
                 </SignInButton>
                 <div className="my-8 border-t border-border/50" />
                 <ul className="space-y-3">
-                  {["Unlimited projects", "Up to 25 seats", "Full document generation per module", "All compliance checks", "Full audit trail", "Inline document editing", "Download packages (ZIP)", "Team management", "Onboarding included", "Wire or ACH payment"].map((f) => (
+                  {["Unlimited projects", "Up to 15 seats", "Full document generation per module", "All compliance checks", "Full audit trail", "Inline document editing", "Download packages (ZIP)", "Team management", "Onboarding included", "Wire or ACH payment"].map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm text-muted-foreground">
                       <CheckCircle2 className="h-4 w-4 text-foreground/30 mt-0.5 shrink-0" />
                       <span>{f}</span>

@@ -25,7 +25,7 @@ export async function checkBioPaywall(orgId: string): Promise<BioPaywallResult> 
         stripeCustomerId: `bio_trial_${orgId}`,
         plan: "trial",
         status: "trialing",
-        maxSeats: 25,
+        maxSeats: 15,
         currentSeats: 1,
       },
     });

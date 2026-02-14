@@ -434,7 +434,7 @@ export default function SettingsPage() {
   const licensePaid = sub?.licensePaid ?? false;
   const subscriptionActive = sub?.status === "active";
   const seatCount = members?.members.length ?? 0;
-  const maxSeats = members?.maxSeats ?? 25;
+  const maxSeats = members?.maxSeats ?? 15;
   const atSeatLimit = seatCount >= maxSeats;
 
   // Bio derived values
