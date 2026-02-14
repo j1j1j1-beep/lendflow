@@ -74,22 +74,22 @@ const TRUST_ITEMS = [
   {
     icon: Lock,
     title: "Encrypted and isolated",
-    desc: "Every file encrypted at rest and in transit. Download links expire after one hour. Each organization's data is completely separated at the database level.",
+    desc: "Every file encrypted at rest and in transit. Download links expire after one hour. Each organization's data is completely separated.",
   },
   {
     icon: Calculator,
     title: "Every number is calculated, not generated",
-    desc: "Interest rates, fees, LTV ratios, K-1 allocations, HSR thresholds. Every figure comes from your deal documents and is calculated with hardcoded math that cannot get an answer wrong. AI writes the legal language. It never picks a number.",
+    desc: "Interest rates, fees, LTV ratios, K-1 allocations, HSR thresholds. Financial figures are calculated separately from legal language generation. Every figure comes directly from your deal inputs and uploaded documents.",
   },
   {
     icon: FileCheck,
-    title: "200+ compliance checks per document",
-    desc: "After generation, documents are checked against federal and state regulations for your deal type, program, and jurisdiction. Usury limits, OFAC screening, SBA eligibility, Reg D requirements, ILPA standards.",
+    title: "Compliance-checked before delivery",
+    desc: "Every document is validated against federal and state regulations for your deal type, program, and jurisdiction. Usury limits, SBA eligibility, Reg D requirements, ILPA standards. Nothing ships without passing.",
   },
   {
     icon: Scale,
     title: "50-state regulatory coverage",
-    desc: "State usury limits, commercial financing disclosures, blue sky filings, community property rules, non-compete enforceability, mini-WARN acts. The system knows which rules apply where.",
+    desc: "State usury limits, commercial financing disclosures, blue sky filings, community property rules, non-compete enforceability, mini-WARN acts. Every document is tailored to your jurisdiction.",
   },
 ];
 
@@ -294,7 +294,7 @@ export default async function Home() {
                 How accuracy works
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                AI writes the legal language. It never handles the numbers.
+                Every number is verified. Every clause is checked. Nothing is left to chance.
               </p>
             </div>
           </FadeIn>
@@ -304,17 +304,17 @@ export default async function Home() {
               {
                 n: "01",
                 title: "Every number is calculated, not generated",
-                desc: "Every financial figure in your documents comes from what you enter or upload. Loan amounts, rates, fees, allocations, tax withholding. The math is hardcoded to the exact specification of each document type. AI writes the legal language around those figures but never touches the numbers.",
+                desc: "Financial figures in your documents are never AI-generated. Loan amounts, rates, fees, allocations, and tax withholding are computed directly from your inputs and uploads. AI handles legal language. Math is handled separately.",
               },
               {
                 n: "02",
                 title: "Legal language is checked against real statutes",
-                desc: "After AI writes default provisions, risk factors, and indemnification clauses, every clause is checked against the specific federal and state regulations for your deal. Citations point to actual statute sections you can look up.",
+                desc: "Every clause is validated against the specific federal and state regulations for your deal type, program, and jurisdiction. Nothing ships without passing.",
               },
               {
                 n: "03",
-                title: "Uploaded financials are cross-checked automatically",
-                desc: "When you upload financials, two independent systems extract every figure. If they disagree by more than $1, the system flags it for your review. You always have your original documents to check against.",
+                title: "Uploaded financials are verified automatically",
+                desc: "When you upload financials, every figure is independently verified before it enters your documents. Discrepancies are flagged for your review. You always have your original documents to check against.",
               },
             ].map((point) => (
               <StaggerItem key={point.n}>
@@ -342,8 +342,8 @@ export default async function Home() {
                     Hallucination-free, guaranteed
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Financial figures are calculated, not generated. Extracted
-                    numbers are cross-checked and flagged if anything is off. AI
+                    Financial figures are calculated, not generated. Uploaded
+                    numbers are verified and flagged if anything is off. AI
                     handles legal language. Math is handled separately. You always
                     have your original uploads to verify against.
                   </p>

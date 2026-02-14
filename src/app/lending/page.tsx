@@ -148,7 +148,7 @@ export default function LendingPage() {
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
                   <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                    Start a Deal Free
+                    See a Sample Deal
                     <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </button>
                 </SignInButton>
@@ -160,7 +160,7 @@ export default function LendingPage() {
                 </Link>
               </div>
               <p className="mt-5 text-sm text-muted-foreground/70">
-                First deal free across all 14 programs.
+                Free demo in any of the 14 programs. No credit card required.
               </p>
             </div>
           </FadeIn>
@@ -208,7 +208,7 @@ export default function LendingPage() {
                     A loan officer quotes Prime + 3.5% on an SBA 7(a) over $350K when the SOP cap is Prime + 3%. A paralegal copies last quarter&apos;s rate into a new commitment letter. Someone rounds a guaranty fee down and the SBA flags it in review. The closing disclosure doesn&apos;t match the loan estimate and you blow the TRID tolerance.
                   </p>
                   <p className="mt-3 text-muted-foreground leading-relaxed max-w-3xl">
-                    These aren&apos;t edge cases. They happen on deals every week. OpenShut calculates every rate, fee, and payment from the program rules, then checks the output against federal and state regulations before you see it. The numbers are right because they come from the rules, not from someone&apos;s memory.
+                    These aren&apos;t edge cases. They happen on deals every week. OpenShut calculates every rate, fee, and payment to the exact specification of the loan program, then checks the output against federal and state regulations before you see it. The numbers are right because they&apos;re calculated, not typed.
                   </p>
                 </div>
               </div>
@@ -495,16 +495,16 @@ export default function LendingPage() {
               <div className="absolute inset-0 bg-grid-pattern opacity-30" />
               <div className="relative z-10">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Run a real deal through it.
+                  See what a full loan package looks like.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  Pick any of the 14 programs. Upload real financials.
-                  Check every number yourself. First deal is free.
+                  Pick any of the 14 programs and generate a sample deal.
+                  Check every number yourself.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">
                     <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                      Start a Deal Free
+                      See a Sample Deal
                       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                     </button>
                   </SignInButton>

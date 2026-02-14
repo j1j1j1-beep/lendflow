@@ -55,15 +55,15 @@ const SECURITY_ITEMS = [
 const ACCURACY_POINTS = [
   {
     title: "Every number is calculated, not generated",
-    desc: "Every financial figure in your documents comes from what you enter or upload. Loan amounts, rates, fees, allocations, tax withholding. The math is hardcoded to the exact specification of each document type. AI writes the legal language around those figures but never touches the numbers.",
+    desc: "Financial figures in your documents are never AI-generated. Loan amounts, rates, fees, allocations, and tax withholding are computed directly from your inputs and uploads. AI handles legal language. Math is handled separately.",
   },
   {
     title: "Legal language is checked against real statutes",
-    desc: "After AI writes default provisions, risk factors, and indemnification clauses, every clause is checked against the specific federal and state regulations for your deal. Citations point to actual statute sections you can look up.",
+    desc: "Every clause is validated against the specific federal and state regulations for your deal type, program, and jurisdiction. Nothing ships without passing.",
   },
   {
-    title: "Uploaded numbers are cross-checked automatically",
-    desc: "When you upload financials, two independent systems extract every figure. If they disagree by more than $1, the system flags it for your review. You always have your original documents to check against.",
+    title: "Uploaded financials are verified automatically",
+    desc: "When you upload financials, every figure is independently verified before it enters your documents. Discrepancies are flagged for your review. You always have your original documents to check against.",
   },
 ];
 
@@ -195,8 +195,7 @@ export default function PlatformPage() {
                 How accuracy works
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                AI writes the legal language. It never handles the numbers. Here is
-                how that separation works in practice.
+                Every number is verified. Every clause is checked. Nothing is left to chance.
               </p>
             </div>
           </FadeIn>
@@ -225,13 +224,13 @@ export default function PlatformPage() {
                 <CheckCircle2 className="h-5 w-5 text-foreground/50 mt-0.5 shrink-0" />
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-1">
-                    Zero hallucination, guaranteed
+                    Hallucination-free, guaranteed
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Financial figures come from program rules. Extracted numbers
-                    are cross-checked and flagged if anything is off. AI handles
-                    legal language. Math is handled separately. You always have
-                    your original uploads to verify against.
+                    Financial figures are calculated, not generated. Uploaded
+                    numbers are verified and flagged if anything is off. AI
+                    handles legal language. Math is handled separately. You always
+                    have your original uploads to verify against.
                   </p>
                 </div>
               </div>

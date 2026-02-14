@@ -36,7 +36,7 @@ export default function CompliancePage() {
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
                   <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                    Run a Period Free
+                    See a Sample Report
                     <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </button>
                 </SignInButton>
@@ -48,7 +48,7 @@ export default function CompliancePage() {
                 </Link>
               </div>
               <p className="mt-5 text-sm text-muted-foreground/70">
-                One reporting period free. All 6 documents.
+                Free demo. All 6 documents for one reporting period.
               </p>
             </div>
           </FadeIn>
@@ -325,17 +325,17 @@ export default function CompliancePage() {
               <div className="absolute inset-0 bg-grid-pattern opacity-30" />
               <div className="relative z-10">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Run one period. Check every number.
+                  See the full compliance package.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  Enter your fund data, get all 6 documents back. If the
+                  Enter sample fund data, get all 6 documents back. If the
                   output is better than what your team is doing now, you&apos;ll
                   know immediately.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">
                     <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                      Run a Period Free
+                      See a Sample Report
                       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                     </button>
                   </SignInButton>

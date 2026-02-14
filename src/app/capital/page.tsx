@@ -96,7 +96,7 @@ export default function CapitalPage() {
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
                   <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                    Start a Fund Free
+                    See a Sample Fund
                     <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </button>
                 </SignInButton>
@@ -108,7 +108,7 @@ export default function CapitalPage() {
                 </Link>
               </div>
               <p className="mt-5 text-sm text-muted-foreground/70">
-                First fund free. All 6 documents. About five minutes of input.
+                Free demo. All 6 documents. About five minutes of input.
               </p>
             </div>
           </FadeIn>
@@ -356,16 +356,15 @@ export default function CapitalPage() {
               <div className="absolute inset-0 bg-grid-pattern opacity-30" />
               <div className="relative z-10">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Generate your fund docs tonight.
+                  See what the full fund package looks like.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  Six documents, consistent terms, ready to send.
-                  First fund is free.
+                  Six documents, consistent terms. Free demo in any fund type.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">
                     <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                      Start a Fund Free
+                      See a Sample Fund
                       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                     </button>
                   </SignInButton>
