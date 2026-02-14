@@ -23,6 +23,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DocumentUploader } from "@/components/DocumentUploader";
+import { MissingDocsDialog } from "@/components/missing-docs-dialog";
+import { fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+import type { SourceDocDef } from "@/lib/source-doc-types";
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -54,6 +58,20 @@ const DISTRIBUTION_TYPES = [
 
 /* Report types that show performance / NAV fields */
 const PERFORMANCE_TYPES = new Set(["LP_QUARTERLY_REPORT", "ANNUAL_REPORT"]);
+
+/* ------------------------------------------------------------------ */
+/*  Number formatting helpers                                          */
+/* ------------------------------------------------------------------ */
+
+function formatNumber(value: string): string {
+  const stripped = value.replace(/[^\d.]/g, "");
+  const parts = stripped.split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+}
+function parseNumber(value: string): number {
+  return parseFloat(value.replace(/,/g, "")) || 0;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Page                                                               */
@@ -94,6 +112,13 @@ export default function NewComplianceReportPage() {
   const [taxYear, setTaxYear] = useState("");
   const [filingDeadline, setFilingDeadline] = useState("");
 
+  /* Source docs & missing-docs dialog */
+  const [files, setFiles] = useState<File[]>([]);
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+  const [showMissingDocs, setShowMissingDocs] = useState(false);
+  const [missingRequired, setMissingRequired] = useState<SourceDocDef[]>([]);
+  const [missingOptional, setMissingOptional] = useState<SourceDocDef[]>([]);
+
   /* ---------- Conditional visibility ---------- */
 
   const showPerformance = PERFORMANCE_TYPES.has(reportType);
@@ -103,95 +128,118 @@ export default function NewComplianceReportPage() {
 
   /* ---------- Submit ---------- */
 
+  const doGenerate = async (projectId: string) => {
+    const genRes = await fetch(`/api/compliance/${projectId}/generate`, {
+      method: "POST",
+    });
+    if (!genRes.ok) {
+      toast.error("Report created but generation failed to start. You can retry from the report page.");
+    } else {
+      toast.success("Report created! Document generation started.");
+    }
+    router.push(`/dashboard/compliance/${projectId}`);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim()) {
-      toast.error("Report name is required");
+    if (createdProjectId) {
+      setSubmitting(true);
+      try {
+        for (const file of files) {
+          const fd = new FormData();
+          fd.append("file", file);
+          fd.append("module", "compliance");
+          fd.append("projectId", createdProjectId);
+          await fetch("/api/source-documents/upload", { method: "POST", body: fd });
+        }
+        const result = await fetchMissingSourceDocs("compliance", createdProjectId);
+        if (result.missingRequired.length > 0 || result.missingOptional.length > 0) {
+          setMissingRequired(result.missingRequired);
+          setMissingOptional(result.missingOptional);
+          setShowMissingDocs(true);
+          setSubmitting(false);
+          return;
+        }
+        await doGenerate(createdProjectId);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+        setSubmitting(false);
+      }
       return;
     }
-    if (!reportType) {
-      toast.error("Please select a report type");
-      return;
-    }
-    if (!fundName.trim()) {
-      toast.error("Fund name is required");
-      return;
-    }
+
+    // Validation
+    if (!name.trim()) { toast.error("Report name is required"); return; }
+    if (!reportType) { toast.error("Please select a report type"); return; }
+    if (!fundName.trim()) { toast.error("Fund name is required"); return; }
 
     setSubmitting(true);
 
     try {
-      /* Build body -- only include fields relevant to reportType */
       const body: Record<string, unknown> = {
         name: name.trim(),
         reportType,
         fundName: fundName.trim(),
       };
-
       if (fundType) body.fundType = fundType;
       if (reportingQuarter.trim()) body.reportingQuarter = reportingQuarter.trim();
       if (periodStart) body.periodStart = periodStart;
       if (periodEnd) body.periodEnd = periodEnd;
 
       if (showPerformance) {
-        if (nav) body.nav = parseFloat(nav);
-        if (totalContributions) body.totalContributions = parseFloat(totalContributions);
-        if (totalDistributions) body.totalDistributions = parseFloat(totalDistributions);
+        if (nav) body.nav = parseNumber(nav);
+        if (totalContributions) body.totalContributions = parseNumber(totalContributions);
+        if (totalDistributions) body.totalDistributions = parseNumber(totalDistributions);
         if (netIrr) body.netIrr = parseFloat(netIrr) / 100;
         if (moic) body.moic = parseFloat(moic);
       }
-
       if (showCapitalCall) {
-        if (callAmount) body.callAmount = parseFloat(callAmount);
+        if (callAmount) body.callAmount = parseNumber(callAmount);
         if (callDueDate) body.callDueDate = callDueDate;
         if (callPurpose.trim()) body.callPurpose = callPurpose.trim();
       }
-
       if (showDistribution) {
-        if (distributionAmount) body.distributionAmount = parseFloat(distributionAmount);
+        if (distributionAmount) body.distributionAmount = parseNumber(distributionAmount);
         if (distributionType) body.distributionType = distributionType;
       }
-
       if (showK1) {
         if (taxYear) body.taxYear = parseInt(taxYear, 10);
         if (filingDeadline) body.filingDeadline = filingDeadline;
       }
 
-      /* 1. Create project */
       const createRes = await fetch("/api/compliance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
       if (!createRes.ok) {
         const err = await createRes.json().catch(() => ({}));
         throw new Error(err.error || "Failed to create report");
       }
-
       const { project } = await createRes.json();
+      setCreatedProjectId(project.id);
 
-      /* 2. Trigger generation */
-      const genRes = await fetch(
-        `/api/compliance/${project.id}/generate`,
-        { method: "POST" }
-      );
-
-      if (!genRes.ok) {
-        toast.error(
-          "Report created but document generation failed to start. You can retry from the report page."
-        );
-      } else {
-        toast.success("Report created! Document generation started.");
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("module", "compliance");
+        fd.append("projectId", project.id);
+        await fetch("/api/source-documents/upload", { method: "POST", body: fd });
       }
 
-      /* 3. Redirect */
-      router.push(`/dashboard/compliance/${project.id}`);
+      const result = await fetchMissingSourceDocs("compliance", project.id);
+      if (result.missingRequired.length > 0 || result.missingOptional.length > 0) {
+        setMissingRequired(result.missingRequired);
+        setMissingOptional(result.missingOptional);
+        setShowMissingDocs(true);
+        setSubmitting(false);
+        return;
+      }
+
+      await doGenerate(project.id);
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Something went wrong"
-      );
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
     }
   };
@@ -366,13 +414,12 @@ export default function NewComplianceReportPage() {
                       </span>
                       <Input
                         id="nav"
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={nav}
-                        onChange={(e) => setNav(e.target.value)}
-                        placeholder="150000000"
+                        onChange={(e) => setNav(formatNumber(e.target.value))}
+                        placeholder="150,000,000"
                         className="pl-7"
-                        min={0}
-                        step={1000}
                       />
                     </div>
                   </div>
@@ -388,13 +435,12 @@ export default function NewComplianceReportPage() {
                       </span>
                       <Input
                         id="totalContributions"
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={totalContributions}
-                        onChange={(e) => setTotalContributions(e.target.value)}
-                        placeholder="100000000"
+                        onChange={(e) => setTotalContributions(formatNumber(e.target.value))}
+                        placeholder="100,000,000"
                         className="pl-7"
-                        min={0}
-                        step={1000}
                       />
                     </div>
                   </div>
@@ -410,13 +456,12 @@ export default function NewComplianceReportPage() {
                       </span>
                       <Input
                         id="totalDistributions"
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={totalDistributions}
-                        onChange={(e) => setTotalDistributions(e.target.value)}
-                        placeholder="45000000"
+                        onChange={(e) => setTotalDistributions(formatNumber(e.target.value))}
+                        placeholder="45,000,000"
                         className="pl-7"
-                        min={0}
-                        step={1000}
                       />
                     </div>
                   </div>
@@ -491,13 +536,12 @@ export default function NewComplianceReportPage() {
                       </span>
                       <Input
                         id="callAmount"
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={callAmount}
-                        onChange={(e) => setCallAmount(e.target.value)}
-                        placeholder="5000000"
+                        onChange={(e) => setCallAmount(formatNumber(e.target.value))}
+                        placeholder="5,000,000"
                         className="pl-7"
-                        min={0}
-                        step={1000}
                       />
                     </div>
                   </div>
@@ -562,13 +606,12 @@ export default function NewComplianceReportPage() {
                       </span>
                       <Input
                         id="distributionAmount"
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={distributionAmount}
-                        onChange={(e) => setDistributionAmount(e.target.value)}
-                        placeholder="3000000"
+                        onChange={(e) => setDistributionAmount(formatNumber(e.target.value))}
+                        placeholder="3,000,000"
                         className="pl-7"
-                        min={0}
-                        step={1000}
                       />
                     </div>
                   </div>
@@ -651,6 +694,22 @@ export default function NewComplianceReportPage() {
         </div>
 
         {/* -------------------------------------------------------- */}
+        {/*  Source Documents                                          */}
+        {/* -------------------------------------------------------- */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Source Documents</CardTitle>
+            <CardDescription>
+              Upload supporting documents (prior financials, capital account data, etc.).
+              These will be scanned and used to fill in your generated documents.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DocumentUploader files={files} onFilesSelected={setFiles} />
+          </CardContent>
+        </Card>
+
+        {/* -------------------------------------------------------- */}
         {/*  Actions                                                  */}
         {/* -------------------------------------------------------- */}
         <div className="flex justify-end gap-3 pt-2">
@@ -674,6 +733,29 @@ export default function NewComplianceReportPage() {
           </Button>
         </div>
       </form>
+
+      <MissingDocsDialog
+        open={showMissingDocs}
+        onOpenChange={setShowMissingDocs}
+        missingRequired={missingRequired}
+        missingOptional={missingOptional}
+        module="compliance"
+        projectId={createdProjectId ?? undefined}
+        onUploadMissing={() => {
+          setShowMissingDocs(false);
+          setFiles([]);
+        }}
+        onContinueAnyway={() => {
+          if (createdProjectId) {
+            setSubmitting(true);
+            doGenerate(createdProjectId);
+          }
+        }}
+        onMissingUpdated={(req, opt) => {
+          setMissingRequired(req);
+          setMissingOptional(opt);
+        }}
+      />
     </div>
   );
 }

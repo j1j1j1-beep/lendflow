@@ -22,6 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DocumentUploader } from "@/components/DocumentUploader";
+import { MissingDocsDialog } from "@/components/missing-docs-dialog";
+import { fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+import type { SourceDocDef } from "@/lib/source-doc-types";
 
 /* ---------- Constants ---------- */
 
@@ -35,6 +39,18 @@ const TRANSACTION_TYPES = [
   { value: "TENDER_OFFER", label: "Tender Offer" },
   { value: "SECTION_363_SALE", label: "Section 363 Sale" },
 ];
+
+/* ---------- Helpers ---------- */
+
+function formatNumber(value: string): string {
+  const stripped = value.replace(/[^\d.]/g, "");
+  const parts = stripped.split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+}
+function parseNumber(value: string): number {
+  return parseFloat(value.replace(/,/g, "")) || 0;
+}
 
 /* ---------- Page ---------- */
 
@@ -61,6 +77,13 @@ export default function NewDealPage() {
   const [nonCompeteYears, setNonCompeteYears] = useState("");
   const [escrowPercent, setEscrowPercent] = useState("");
 
+  /* Source documents & missing-docs flow */
+  const [files, setFiles] = useState<File[]>([]);
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+  const [showMissingDocs, setShowMissingDocs] = useState(false);
+  const [missingRequired, setMissingRequired] = useState<SourceDocDef[]>([]);
+  const [missingOptional, setMissingOptional] = useState<SourceDocDef[]>([]);
+
   const canSubmit =
     name.trim() &&
     transactionType &&
@@ -68,34 +91,59 @@ export default function NewDealPage() {
     sellerName.trim() &&
     targetCompany.trim();
 
+  const doGenerate = async (projectId: string) => {
+    const genRes = await fetch(`/api/ma/${projectId}/generate`, {
+      method: "POST",
+    });
+    if (!genRes.ok) {
+      toast.error("Deal created but generation failed to start. You can retry from the deal page.");
+    } else {
+      toast.success("Deal created! Document generation started.");
+    }
+    router.push(`/dashboard/deals/${projectId}`);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim()) {
-      toast.error("Project name is required");
+    // If project already created (user came back from missing docs to add more files)
+    if (createdProjectId) {
+      setSubmitting(true);
+      try {
+        for (const file of files) {
+          const fd = new FormData();
+          fd.append("file", file);
+          fd.append("module", "ma");
+          fd.append("projectId", createdProjectId);
+          await fetch("/api/source-documents/upload", { method: "POST", body: fd });
+        }
+        const result = await fetchMissingSourceDocs("ma", createdProjectId);
+        if (result.missingRequired.length > 0 || result.missingOptional.length > 0) {
+          setMissingRequired(result.missingRequired);
+          setMissingOptional(result.missingOptional);
+          setShowMissingDocs(true);
+          setSubmitting(false);
+          return;
+        }
+        await doGenerate(createdProjectId);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+        setSubmitting(false);
+      }
       return;
     }
-    if (!transactionType) {
-      toast.error("Transaction type is required");
-      return;
-    }
-    if (!buyerName.trim()) {
-      toast.error("Buyer name is required");
-      return;
-    }
-    if (!sellerName.trim()) {
-      toast.error("Seller name is required");
-      return;
-    }
-    if (!targetCompany.trim()) {
-      toast.error("Target company is required");
-      return;
-    }
+
+    // Validation
+    if (!name.trim()) { toast.error("Project name is required"); return; }
+    if (!transactionType) { toast.error("Transaction type is required"); return; }
+    if (!buyerName.trim()) { toast.error("Buyer name is required"); return; }
+    if (!sellerName.trim()) { toast.error("Seller name is required"); return; }
+    if (!targetCompany.trim()) { toast.error("Target company is required"); return; }
 
     setSubmitting(true);
 
     try {
-      /* 1. Create the project */
+      // 1. Create project
       const createRes = await fetch("/api/ma", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -105,51 +153,48 @@ export default function NewDealPage() {
           buyerName: buyerName.trim(),
           sellerName: sellerName.trim(),
           targetCompany: targetCompany.trim(),
-          purchasePrice: purchasePrice ? parseFloat(purchasePrice) : null,
-          cashComponent: cashComponent ? parseFloat(cashComponent) : null,
-          stockComponent: stockComponent ? parseFloat(stockComponent) : null,
-          earnoutAmount: earnoutAmount ? parseFloat(earnoutAmount) : null,
-          exclusivityDays: exclusivityDays
-            ? parseInt(exclusivityDays, 10)
-            : null,
-          dueDiligenceDays: dueDiligenceDays
-            ? parseInt(dueDiligenceDays, 10)
-            : null,
+          purchasePrice: purchasePrice ? parseNumber(purchasePrice) : null,
+          cashComponent: cashComponent ? parseNumber(cashComponent) : null,
+          stockComponent: stockComponent ? parseNumber(stockComponent) : null,
+          earnoutAmount: earnoutAmount ? parseNumber(earnoutAmount) : null,
+          exclusivityDays: exclusivityDays ? parseInt(exclusivityDays, 10) : null,
+          dueDiligenceDays: dueDiligenceDays ? parseInt(dueDiligenceDays, 10) : null,
           targetIndustry: targetIndustry.trim() || null,
           governingLaw: governingLaw.trim() || "Delaware",
           nonCompeteYears: nonCompeteYears ? parseInt(nonCompeteYears, 10) : null,
-          escrowPercent: escrowPercent
-            ? parseFloat(escrowPercent) / 100
-            : null,
+          escrowPercent: escrowPercent ? parseFloat(escrowPercent) / 100 : null,
         }),
       });
-
       if (!createRes.ok) {
         const err = await createRes.json().catch(() => ({}));
         throw new Error(err.error || "Failed to create deal");
       }
-
       const { project } = await createRes.json();
+      setCreatedProjectId(project.id);
 
-      /* 2. Trigger document generation */
-      const genRes = await fetch(`/api/ma/${project.id}/generate`, {
-        method: "POST",
-      });
-
-      if (!genRes.ok) {
-        toast.error(
-          "Deal created but document generation failed to start. You can retry from the deal page."
-        );
-      } else {
-        toast.success("Deal created! Document generation started.");
+      // 2. Upload files
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("module", "ma");
+        fd.append("projectId", project.id);
+        await fetch("/api/source-documents/upload", { method: "POST", body: fd });
       }
 
-      /* 3. Redirect to detail page */
-      router.push(`/dashboard/deals/${project.id}`);
+      // 3. Classify and check
+      const result = await fetchMissingSourceDocs("ma", project.id);
+      if (result.missingRequired.length > 0 || result.missingOptional.length > 0) {
+        setMissingRequired(result.missingRequired);
+        setMissingOptional(result.missingOptional);
+        setShowMissingDocs(true);
+        setSubmitting(false);
+        return;
+      }
+
+      // 4. All present -> generate
+      await doGenerate(project.id);
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Something went wrong"
-      );
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
     }
   };
@@ -296,13 +341,12 @@ export default function NewDealPage() {
                   </span>
                   <Input
                     id="purchasePrice"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={purchasePrice}
-                    onChange={(e) => setPurchasePrice(e.target.value)}
-                    placeholder="25000000"
+                    onChange={(e) => setPurchasePrice(formatNumber(e.target.value))}
+                    placeholder="25,000,000"
                     className="pl-7 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                    min={0}
-                    step={1000}
                   />
                 </div>
               </div>
@@ -316,13 +360,12 @@ export default function NewDealPage() {
                   </span>
                   <Input
                     id="cashComponent"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={cashComponent}
-                    onChange={(e) => setCashComponent(e.target.value)}
-                    placeholder="15000000"
+                    onChange={(e) => setCashComponent(formatNumber(e.target.value))}
+                    placeholder="15,000,000"
                     className="pl-7 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                    min={0}
-                    step={1000}
                   />
                 </div>
               </div>
@@ -336,13 +379,12 @@ export default function NewDealPage() {
                   </span>
                   <Input
                     id="stockComponent"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={stockComponent}
-                    onChange={(e) => setStockComponent(e.target.value)}
-                    placeholder="10000000"
+                    onChange={(e) => setStockComponent(formatNumber(e.target.value))}
+                    placeholder="10,000,000"
                     className="pl-7 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                    min={0}
-                    step={1000}
                   />
                 </div>
               </div>
@@ -356,13 +398,12 @@ export default function NewDealPage() {
                   </span>
                   <Input
                     id="earnoutAmount"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={earnoutAmount}
-                    onChange={(e) => setEarnoutAmount(e.target.value)}
-                    placeholder="5000000"
+                    onChange={(e) => setEarnoutAmount(formatNumber(e.target.value))}
+                    placeholder="5,000,000"
                     className="pl-7 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                    min={0}
-                    step={1000}
                   />
                 </div>
               </div>
@@ -462,6 +503,20 @@ export default function NewDealPage() {
           </CardContent>
         </Card>
 
+        {/* Source Documents */}
+        <Card className="transition-shadow duration-200 hover:shadow-md">
+          <CardHeader>
+            <CardTitle>Source Documents</CardTitle>
+            <CardDescription>
+              Upload supporting documents (target financials, tax returns, contracts, etc.).
+              These will be scanned and used to fill in your generated documents.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DocumentUploader files={files} onFilesSelected={setFiles} />
+          </CardContent>
+        </Card>
+
         {/* Submit buttons */}
         <div className="flex justify-end gap-3 pt-2">
           <Button
@@ -492,6 +547,29 @@ export default function NewDealPage() {
           </Button>
         </div>
       </form>
+
+      <MissingDocsDialog
+        open={showMissingDocs}
+        onOpenChange={setShowMissingDocs}
+        missingRequired={missingRequired}
+        missingOptional={missingOptional}
+        module="ma"
+        projectId={createdProjectId ?? undefined}
+        onUploadMissing={() => {
+          setShowMissingDocs(false);
+          setFiles([]);
+        }}
+        onContinueAnyway={() => {
+          if (createdProjectId) {
+            setSubmitting(true);
+            doGenerate(createdProjectId);
+          }
+        }}
+        onMissingUpdated={(req, opt) => {
+          setMissingRequired(req);
+          setMissingOptional(opt);
+        }}
+      />
     </div>
   );
 }

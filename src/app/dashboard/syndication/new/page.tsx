@@ -29,6 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DocumentUploader } from "@/components/DocumentUploader";
+import { MissingDocsDialog } from "@/components/missing-docs-dialog";
+import { fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+import type { SourceDocDef } from "@/lib/source-doc-types";
 
 /* ---------- Constants ---------- */
 
@@ -46,6 +50,18 @@ const PROPERTY_TYPES = [
   { value: "STUDENT_HOUSING", label: "Student Housing" },
   { value: "BUILD_TO_RENT", label: "Build to Rent" },
 ];
+
+/* ---------- Helpers ---------- */
+
+function formatNumber(value: string): string {
+  const stripped = value.replace(/[^\d.]/g, "");
+  const parts = stripped.split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+}
+function parseNumber(value: string): number {
+  return parseFloat(value.replace(/,/g, "")) || 0;
+}
 
 /* ---------- Component ---------- */
 
@@ -74,34 +90,64 @@ export default function NewSyndicationPage() {
   const [units, setUnits] = useState("");
   const [yearBuilt, setYearBuilt] = useState("");
 
+  // Source documents & missing-docs dialog
+  const [files, setFiles] = useState<File[]>([]);
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+  const [showMissingDocs, setShowMissingDocs] = useState(false);
+  const [missingRequired, setMissingRequired] = useState<SourceDocDef[]>([]);
+  const [missingOptional, setMissingOptional] = useState<SourceDocDef[]>([]);
+
+  const doGenerate = async (projectId: string) => {
+    const genRes = await fetch(`/api/syndication/${projectId}/generate`, {
+      method: "POST",
+    });
+    if (!genRes.ok) {
+      toast.error("Project created but generation failed to start. You can retry from the deal page.");
+    } else {
+      toast.success("Syndication created! Document generation started.");
+    }
+    router.push(`/dashboard/syndication/${projectId}`);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim()) {
-      toast.error("Project name is required");
+    if (createdProjectId) {
+      setSubmitting(true);
+      try {
+        for (const file of files) {
+          const fd = new FormData();
+          fd.append("file", file);
+          fd.append("module", "syndication");
+          fd.append("projectId", createdProjectId);
+          await fetch("/api/source-documents/upload", { method: "POST", body: fd });
+        }
+        const result = await fetchMissingSourceDocs("syndication", createdProjectId);
+        if (result.missingRequired.length > 0 || result.missingOptional.length > 0) {
+          setMissingRequired(result.missingRequired);
+          setMissingOptional(result.missingOptional);
+          setShowMissingDocs(true);
+          setSubmitting(false);
+          return;
+        }
+        await doGenerate(createdProjectId);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+        setSubmitting(false);
+      }
       return;
     }
-    if (!entityName.trim()) {
-      toast.error("SPV entity name is required");
-      return;
-    }
-    if (!sponsorName.trim()) {
-      toast.error("Sponsor name is required");
-      return;
-    }
-    if (!propertyAddress.trim()) {
-      toast.error("Property address is required");
-      return;
-    }
-    if (!propertyType) {
-      toast.error("Property type is required");
-      return;
-    }
+
+    // Validation
+    if (!name.trim()) { toast.error("Project name is required"); return; }
+    if (!entityName.trim()) { toast.error("SPV entity name is required"); return; }
+    if (!sponsorName.trim()) { toast.error("Sponsor name is required"); return; }
+    if (!propertyAddress.trim()) { toast.error("Property address is required"); return; }
+    if (!propertyType) { toast.error("Property type is required"); return; }
 
     setSubmitting(true);
 
     try {
-      // 1. Create the syndication project
       const createRes = await fetch("/api/syndication", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -111,65 +157,47 @@ export default function NewSyndicationPage() {
           sponsorName: sponsorName.trim(),
           propertyAddress: propertyAddress.trim(),
           propertyType,
-          purchasePrice: purchasePrice ? parseFloat(purchasePrice) : null,
-          totalEquityRaise: totalEquityRaise
-            ? parseFloat(totalEquityRaise)
-            : null,
-          minInvestment: minInvestment ? parseFloat(minInvestment) : null,
-          loanAmount: loanAmount ? parseFloat(loanAmount) : null,
-          interestRate: interestRate
-            ? parseFloat(interestRate) / 100
-            : null,
-          preferredReturn: preferredReturn
-            ? parseFloat(preferredReturn) / 100
-            : null,
-          projectedIrr: projectedIrr
-            ? parseFloat(projectedIrr) / 100
-            : null,
-          projectedHoldYears: projectedHoldYears
-            ? parseInt(projectedHoldYears, 10)
-            : null,
-          acquisitionFee: acquisitionFee
-            ? parseFloat(acquisitionFee) / 100
-            : null,
-          assetMgmtFee: assetMgmtFee
-            ? parseFloat(assetMgmtFee) / 100
-            : null,
+          purchasePrice: purchasePrice ? parseNumber(purchasePrice) : null,
+          totalEquityRaise: totalEquityRaise ? parseNumber(totalEquityRaise) : null,
+          minInvestment: minInvestment ? parseNumber(minInvestment) : null,
+          loanAmount: loanAmount ? parseNumber(loanAmount) : null,
+          interestRate: interestRate ? parseFloat(interestRate) / 100 : null,
+          preferredReturn: preferredReturn ? parseFloat(preferredReturn) / 100 : null,
+          projectedIrr: projectedIrr ? parseFloat(projectedIrr) / 100 : null,
+          projectedHoldYears: projectedHoldYears ? parseInt(projectedHoldYears, 10) : null,
+          acquisitionFee: acquisitionFee ? parseFloat(acquisitionFee) / 100 : null,
+          assetMgmtFee: assetMgmtFee ? parseFloat(assetMgmtFee) / 100 : null,
           units: units ? parseInt(units, 10) : null,
           yearBuilt: yearBuilt ? parseInt(yearBuilt, 10) : null,
         }),
       });
-
       if (!createRes.ok) {
         const err = await createRes.json().catch(() => ({}));
         throw new Error(err.error || "Failed to create syndication project");
       }
-
       const { project } = await createRes.json();
-      const projectId = project.id;
+      setCreatedProjectId(project.id);
 
-      // 2. Trigger document generation
-      const genRes = await fetch(
-        `/api/syndication/${projectId}/generate`,
-        { method: "POST" }
-      );
-
-      if (!genRes.ok) {
-        toast.error(
-          "Project created but document generation failed to start. You can retry from the project page."
-        );
-      } else {
-        toast.success(
-          "Syndication project created! Document generation started."
-        );
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("module", "syndication");
+        fd.append("projectId", project.id);
+        await fetch("/api/source-documents/upload", { method: "POST", body: fd });
       }
 
-      // 3. Redirect to project detail
-      router.push(`/dashboard/syndication/${projectId}`);
+      const result = await fetchMissingSourceDocs("syndication", project.id);
+      if (result.missingRequired.length > 0 || result.missingOptional.length > 0) {
+        setMissingRequired(result.missingRequired);
+        setMissingOptional(result.missingOptional);
+        setShowMissingDocs(true);
+        setSubmitting(false);
+        return;
+      }
+
+      await doGenerate(project.id);
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Something went wrong"
-      );
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
     }
   };
@@ -315,13 +343,12 @@ export default function NewSyndicationPage() {
                   </span>
                   <Input
                     id="purchasePrice"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={purchasePrice}
-                    onChange={(e) => setPurchasePrice(e.target.value)}
-                    placeholder="12500000"
+                    onChange={(e) => setPurchasePrice(formatNumber(e.target.value))}
+                    placeholder="12,500,000"
                     className="pl-7 transition-shadow duration-150 focus:shadow-sm"
-                    min={0}
-                    step={1000}
                   />
                 </div>
               </div>
@@ -335,13 +362,12 @@ export default function NewSyndicationPage() {
                   </span>
                   <Input
                     id="totalEquityRaise"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={totalEquityRaise}
-                    onChange={(e) => setTotalEquityRaise(e.target.value)}
-                    placeholder="4000000"
+                    onChange={(e) => setTotalEquityRaise(formatNumber(e.target.value))}
+                    placeholder="4,000,000"
                     className="pl-7 transition-shadow duration-150 focus:shadow-sm"
-                    min={0}
-                    step={1000}
                   />
                 </div>
               </div>
@@ -355,13 +381,12 @@ export default function NewSyndicationPage() {
                   </span>
                   <Input
                     id="minInvestment"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={minInvestment}
-                    onChange={(e) => setMinInvestment(e.target.value)}
-                    placeholder="50000"
+                    onChange={(e) => setMinInvestment(formatNumber(e.target.value))}
+                    placeholder="50,000"
                     className="pl-7 transition-shadow duration-150 focus:shadow-sm"
-                    min={0}
-                    step={1000}
                   />
                 </div>
               </div>
@@ -375,13 +400,12 @@ export default function NewSyndicationPage() {
                   </span>
                   <Input
                     id="loanAmount"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={loanAmount}
-                    onChange={(e) => setLoanAmount(e.target.value)}
-                    placeholder="8500000"
+                    onChange={(e) => setLoanAmount(formatNumber(e.target.value))}
+                    placeholder="8,500,000"
                     className="pl-7 transition-shadow duration-150 focus:shadow-sm"
-                    min={0}
-                    step={1000}
                   />
                 </div>
               </div>
@@ -533,6 +557,20 @@ export default function NewSyndicationPage() {
           </CardContent>
         </Card>
 
+        {/* Source Documents */}
+        <Card className="transition-shadow duration-200 hover:shadow-md">
+          <CardHeader>
+            <CardTitle>Source Documents</CardTitle>
+            <CardDescription>
+              Upload supporting documents (appraisal, rent roll, property financials, etc.).
+              These will be scanned and used to fill in your generated documents.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DocumentUploader files={files} onFilesSelected={setFiles} />
+          </CardContent>
+        </Card>
+
         {/* Actions */}
         <div className="flex justify-end gap-3">
           <Button
@@ -560,6 +598,29 @@ export default function NewSyndicationPage() {
           </Button>
         </div>
       </form>
+
+      <MissingDocsDialog
+        open={showMissingDocs}
+        onOpenChange={setShowMissingDocs}
+        missingRequired={missingRequired}
+        missingOptional={missingOptional}
+        module="syndication"
+        projectId={createdProjectId ?? undefined}
+        onUploadMissing={() => {
+          setShowMissingDocs(false);
+          setFiles([]);
+        }}
+        onContinueAnyway={() => {
+          if (createdProjectId) {
+            setSubmitting(true);
+            doGenerate(createdProjectId);
+          }
+        }}
+        onMissingUpdated={(req, opt) => {
+          setMissingRequired(req);
+          setMissingOptional(opt);
+        }}
+      />
     </div>
   );
 }

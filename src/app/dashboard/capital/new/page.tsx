@@ -23,6 +23,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DocumentUploader } from "@/components/DocumentUploader";
+import { MissingDocsDialog } from "@/components/missing-docs-dialog";
+import { fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+import type { SourceDocDef } from "@/lib/source-doc-types";
 
 const FUND_TYPES = [
   { value: "PRIVATE_EQUITY", label: "Private Equity" },
@@ -40,6 +44,16 @@ const EXEMPTION_TYPES = [
   { value: "REG_A_TIER2", label: "Reg A Tier 2" },
   { value: "REG_CF", label: "Reg CF" },
 ];
+
+function formatNumber(value: string): string {
+  const stripped = value.replace(/[^\d.]/g, "");
+  const parts = stripped.split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+}
+function parseNumber(value: string): number {
+  return parseFloat(value.replace(/,/g, "")) || 0;
+}
 
 export default function NewCapitalPage() {
   const router = useRouter();
@@ -62,39 +76,78 @@ export default function NewCapitalPage() {
   const [investmentStrategy, setInvestmentStrategy] = useState("");
   const [geographicFocus, setGeographicFocus] = useState("");
 
+  const [files, setFiles] = useState<File[]>([]);
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+  const [showMissingDocs, setShowMissingDocs] = useState(false);
+  const [missingRequired, setMissingRequired] = useState<SourceDocDef[]>([]);
+  const [missingOptional, setMissingOptional] = useState<SourceDocDef[]>([]);
+
+  const doGenerate = async (projectId: string) => {
+    const genRes = await fetch(`/api/capital/${projectId}/generate`, {
+      method: "POST",
+    });
+    if (!genRes.ok) {
+      toast.error("Project created but generation failed to start. You can retry from the deal page.");
+    } else {
+      toast.success("Fund created! Document generation started.");
+    }
+    router.push(`/dashboard/capital/${projectId}`);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim()) {
-      toast.error("Project name is required");
+    // If we already created the project (user came back from missing docs dialog to add more files)
+    // just re-upload new files, re-classify, and check again
+    if (createdProjectId) {
+      setSubmitting(true);
+      try {
+        // Upload any new files
+        for (const file of files) {
+          const fd = new FormData();
+          fd.append("file", file);
+          fd.append("module", "capital");
+          fd.append("projectId", createdProjectId);
+          await fetch("/api/source-documents/upload", { method: "POST", body: fd });
+        }
+
+        // Re-classify and check
+        const result = await fetchMissingSourceDocs("capital", createdProjectId);
+        if (result.missingRequired.length > 0 || result.missingOptional.length > 0) {
+          setMissingRequired(result.missingRequired);
+          setMissingOptional(result.missingOptional);
+          setShowMissingDocs(true);
+          setSubmitting(false);
+          return;
+        }
+
+        await doGenerate(createdProjectId);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+        setSubmitting(false);
+      }
       return;
     }
-    if (!fundName.trim()) {
-      toast.error("Fund name is required");
-      return;
-    }
-    if (!fundType) {
-      toast.error("Fund type is required");
-      return;
-    }
-    if (!gpEntityName.trim()) {
-      toast.error("GP entity name is required");
-      return;
-    }
+
+    // Validation
+    if (!name.trim()) { toast.error("Project name is required"); return; }
+    if (!fundName.trim()) { toast.error("Fund name is required"); return; }
+    if (!fundType) { toast.error("Fund type is required"); return; }
+    if (!gpEntityName.trim()) { toast.error("GP entity name is required"); return; }
 
     setSubmitting(true);
 
     try {
+      // 1. Build body
       const body: Record<string, unknown> = {
         name: name.trim(),
         fundName: fundName.trim(),
         fundType,
         gpEntityName: gpEntityName.trim(),
       };
-
       if (exemptionType) body.exemptionType = exemptionType;
-      if (targetRaise) body.targetRaise = parseFloat(targetRaise);
-      if (minInvestment) body.minInvestment = parseFloat(minInvestment);
+      if (targetRaise) body.targetRaise = parseNumber(targetRaise);
+      if (minInvestment) body.minInvestment = parseNumber(minInvestment);
       if (managementFee) body.managementFee = parseFloat(managementFee) / 100;
       if (carriedInterest) body.carriedInterest = parseFloat(carriedInterest) / 100;
       if (preferredReturn) body.preferredReturn = parseFloat(preferredReturn) / 100;
@@ -102,33 +155,40 @@ export default function NewCapitalPage() {
       if (investmentStrategy.trim()) body.investmentStrategy = investmentStrategy.trim();
       if (geographicFocus.trim()) body.geographicFocus = geographicFocus.trim();
 
+      // 2. Create project
       const createRes = await fetch("/api/capital", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
       if (!createRes.ok) {
         const err = await createRes.json().catch(() => ({}));
         throw new Error(err.error || "Failed to create project");
       }
-
       const { project } = await createRes.json();
+      setCreatedProjectId(project.id);
 
-      // Trigger document generation pipeline
-      const genRes = await fetch(`/api/capital/${project.id}/generate`, {
-        method: "POST",
-      });
-
-      if (!genRes.ok) {
-        toast.error(
-          "Project created but document generation failed to start. You can retry from the project page."
-        );
-      } else {
-        toast.success("Fund project created! Document generation started.");
+      // 3. Upload files
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("module", "capital");
+        fd.append("projectId", project.id);
+        await fetch("/api/source-documents/upload", { method: "POST", body: fd });
       }
 
-      router.push(`/dashboard/capital/${project.id}`);
+      // 4. Classify and check for missing docs
+      const result = await fetchMissingSourceDocs("capital", project.id);
+      if (result.missingRequired.length > 0 || result.missingOptional.length > 0) {
+        setMissingRequired(result.missingRequired);
+        setMissingOptional(result.missingOptional);
+        setShowMissingDocs(true);
+        setSubmitting(false);
+        return;
+      }
+
+      // 5. All docs present → generate
+      await doGenerate(project.id);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
@@ -273,13 +333,12 @@ export default function NewCapitalPage() {
                   </span>
                   <Input
                     id="targetRaise"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={targetRaise}
-                    onChange={(e) => setTargetRaise(e.target.value)}
-                    placeholder="50000000"
+                    onChange={(e) => setTargetRaise(formatNumber(e.target.value))}
+                    placeholder="50,000,000"
                     className="pl-7 transition-all duration-200 focus:shadow-sm"
-                    min={0}
-                    step={1000}
                   />
                 </div>
               </div>
@@ -292,13 +351,12 @@ export default function NewCapitalPage() {
                   </span>
                   <Input
                     id="minInvestment"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={minInvestment}
-                    onChange={(e) => setMinInvestment(e.target.value)}
-                    placeholder="250000"
+                    onChange={(e) => setMinInvestment(formatNumber(e.target.value))}
+                    placeholder="250,000"
                     className="pl-7 transition-all duration-200 focus:shadow-sm"
-                    min={0}
-                    step={1000}
                   />
                 </div>
               </div>
@@ -389,6 +447,20 @@ export default function NewCapitalPage() {
           </CardContent>
         </Card>
 
+        {/* Source Documents */}
+        <Card className="transition-all duration-200 hover:shadow-sm">
+          <CardHeader>
+            <CardTitle>Source Documents</CardTitle>
+            <CardDescription>
+              Upload supporting documents (business plan, formation docs, etc.).
+              These will be scanned and used to fill in your generated documents.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DocumentUploader files={files} onFilesSelected={setFiles} />
+          </CardContent>
+        </Card>
+
         <div className="flex justify-end gap-3">
           <Button
             type="button"
@@ -415,6 +487,29 @@ export default function NewCapitalPage() {
           </Button>
         </div>
       </form>
+
+      <MissingDocsDialog
+        open={showMissingDocs}
+        onOpenChange={setShowMissingDocs}
+        missingRequired={missingRequired}
+        missingOptional={missingOptional}
+        module="capital"
+        projectId={createdProjectId ?? undefined}
+        onUploadMissing={() => {
+          setShowMissingDocs(false);
+          setFiles([]);
+        }}
+        onContinueAnyway={() => {
+          if (createdProjectId) {
+            setSubmitting(true);
+            doGenerate(createdProjectId);
+          }
+        }}
+        onMissingUpdated={(req, opt) => {
+          setMissingRequired(req);
+          setMissingOptional(opt);
+        }}
+      />
     </div>
   );
 }

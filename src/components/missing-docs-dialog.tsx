@@ -1,14 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useCallback, useRef, useState, useMemo } from "react";
+import { toast } from "sonner";
 import {
   AlertTriangle,
   ChevronDown,
   ChevronRight,
   XCircle,
   Circle,
-  Upload,
+  CloudUpload,
   FileWarning,
+  FileText,
+  X,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +26,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { SourceDocDef } from "@/lib/source-doc-types";
+import { fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
 
 export function MissingDocsDialog({
   open,
@@ -29,6 +41,9 @@ export function MissingDocsDialog({
   missingOptional,
   onUploadMissing,
   onContinueAnyway,
+  module,
+  projectId,
+  onMissingUpdated,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -36,8 +51,15 @@ export function MissingDocsDialog({
   missingOptional: SourceDocDef[];
   onUploadMissing: () => void;
   onContinueAnyway: () => void;
+  module?: string;
+  projectId?: string;
+  onMissingUpdated?: (required: SourceDocDef[], optional: SourceDocDef[]) => void;
 }) {
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+  const [dragOver, setDragOver] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; size: number }[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const toggleExpand = (key: string) => {
     setExpandedKeys((prev) => {
@@ -48,7 +70,6 @@ export function MissingDocsDialog({
     });
   };
 
-  // Compute unique affected output docs across all missing required
   const affectedOutputDocs = useMemo(() => {
     const docs = new Set<string>();
     for (const def of missingRequired) {
@@ -59,18 +80,94 @@ export function MissingDocsDialog({
     return Array.from(docs);
   }, [missingRequired]);
 
+  const canUpload = !!module && !!projectId;
+
+  const handleUploadFiles = useCallback(
+    async (fileList: FileList | File[]) => {
+      if (!module || !projectId) return;
+      const files = Array.from(fileList);
+      if (files.length === 0) return;
+
+      setUploading(true);
+      let successCount = 0;
+
+      for (const file of files) {
+        if (file.size > 50 * 1024 * 1024) {
+          toast.error(`${file.name} exceeds 50MB limit`);
+          continue;
+        }
+        try {
+          const fd = new FormData();
+          fd.append("file", file);
+          fd.append("module", module);
+          fd.append("projectId", projectId);
+          const res = await fetch("/api/source-documents/upload", {
+            method: "POST",
+            body: fd,
+          });
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body.error || "Upload failed");
+          }
+          successCount++;
+          setUploadedFiles((prev) => [...prev, { name: file.name, size: file.size }]);
+        } catch (err) {
+          toast.error(
+            err instanceof Error ? err.message : `Failed to upload ${file.name}`
+          );
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`Uploaded ${successCount} file${successCount !== 1 ? "s" : ""}`);
+
+        // Re-classify and update missing docs
+        try {
+          const result = await fetchMissingSourceDocs(module, projectId);
+          if (onMissingUpdated) {
+            onMissingUpdated(result.missingRequired, result.missingOptional);
+          }
+        } catch {
+          // Classification failed silently, user can still continue
+        }
+      }
+
+      setUploading(false);
+    },
+    [module, projectId, onMissingUpdated]
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragOver(false);
+      if (e.dataTransfer.files.length > 0) {
+        handleUploadFiles(e.dataTransfer.files);
+      }
+    },
+    [handleUploadFiles]
+  );
+
+  const allPresent = missingRequired.length === 0 && missingOptional.length === 0;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-amber-500" />
-            Missing Source Documents
+            {allPresent ? (
+              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+            ) : (
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+            )}
+            {allPresent ? "All Documents Uploaded" : "Missing Source Documents"}
           </DialogTitle>
           <DialogDescription>
-            {missingRequired.length > 0
-              ? `${missingRequired.length} required document${missingRequired.length !== 1 ? "s are" : " is"} missing.`
-              : "All required documents are uploaded. Some optional documents are missing."}
+            {allPresent
+              ? "All required documents are present. Ready to generate."
+              : missingRequired.length > 0
+                ? `${missingRequired.length} required document${missingRequired.length !== 1 ? "s are" : " is"} missing.`
+                : "All required documents are uploaded. Some optional documents are missing."}
           </DialogDescription>
         </DialogHeader>
 
@@ -111,7 +208,7 @@ export function MissingDocsDialog({
           {missingRequired.length > 0 && (
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-destructive mb-2">
-                Required — will produce placeholders
+                Required
               </p>
               <div className="space-y-1">
                 {missingRequired.map((def) => (
@@ -160,7 +257,7 @@ export function MissingDocsDialog({
           {missingOptional.length > 0 && (
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                Optional — recommended but not blocking
+                Optional
               </p>
               <div className="space-y-0.5">
                 {missingOptional.map((def) => (
@@ -177,30 +274,92 @@ export function MissingDocsDialog({
               </div>
             </div>
           )}
+
+          {/* Upload area inside the dialog */}
+          {canUpload && !allPresent && (
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-foreground mb-2">
+                Upload More
+              </p>
+              <div
+                onDrop={handleDrop}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={(e) => { e.preventDefault(); setDragOver(false); }}
+                onClick={() => inputRef.current?.click()}
+                className={`rounded-lg border-2 border-dashed p-4 text-center cursor-pointer transition-all duration-200 ease-out ${
+                  dragOver
+                    ? "border-primary/50 bg-primary/5 scale-[1.01]"
+                    : "border-border hover:border-foreground/20 hover:bg-muted/50 bg-muted/30"
+                }`}
+              >
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept=".pdf,.docx,.xlsx,.doc,.xls,.png,.jpg,.jpeg,.webp,.tiff"
+                  multiple
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      handleUploadFiles(e.target.files);
+                    }
+                    e.target.value = "";
+                  }}
+                  className="hidden"
+                />
+                {uploading ? (
+                  <Loader2 className="h-6 w-6 mx-auto text-muted-foreground mb-1.5 animate-spin" />
+                ) : (
+                  <CloudUpload className="h-6 w-6 mx-auto text-muted-foreground mb-1.5" />
+                )}
+                <p className="text-xs font-medium">
+                  {uploading ? "Uploading and classifying..." : "Drop files here, or click to browse"}
+                </p>
+              </div>
+
+              {/* Files uploaded in this dialog session */}
+              {uploadedFiles.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {uploadedFiles.map((f, i) => (
+                    <div
+                      key={`${f.name}-${i}`}
+                      className="flex items-center gap-2 rounded-md px-2 py-1 bg-muted/40"
+                    >
+                      <FileText className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                      <span className="text-xs font-medium truncate flex-1">{f.name}</span>
+                      <span className="text-[10px] text-muted-foreground">{formatFileSize(f.size)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
+          {!canUpload && !allPresent && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                onOpenChange(false);
+                onUploadMissing();
+              }}
+              className="gap-1.5"
+            >
+              <CloudUpload className="h-3.5 w-3.5" />
+              Upload Missing
+            </Button>
+          )}
           <Button
-            variant="outline"
-            onClick={() => {
-              onOpenChange(false);
-              onUploadMissing();
-            }}
-            className="gap-1.5"
-          >
-            <Upload className="h-3.5 w-3.5" />
-            Upload Missing
-          </Button>
-          <Button
-            variant={missingRequired.length > 0 ? "secondary" : "default"}
+            variant={allPresent ? "default" : missingRequired.length > 0 ? "secondary" : "default"}
             onClick={() => {
               onOpenChange(false);
               onContinueAnyway();
             }}
           >
-            {missingRequired.length > 0
-              ? "Continue with Placeholders"
-              : "Continue Anyway"}
+            {allPresent
+              ? "Generate Documents"
+              : missingRequired.length > 0
+                ? "Skip and Use Placeholders"
+                : "Continue Anyway"}
           </Button>
         </DialogFooter>
       </DialogContent>
