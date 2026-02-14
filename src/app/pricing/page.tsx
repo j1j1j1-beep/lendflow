@@ -240,7 +240,7 @@ export default function PricingPage() {
             </FadeIn>
             <FadeIn delay={0.15}>
               <p className="mt-8 text-center text-sm text-muted-foreground max-w-2xl mx-auto">
-                Year 2+ is just the monthly. A firm running all 5 modules pays $550,000 in year one, then $419,988/year after that. Compare that to $1.5M+ in outside counsel for the same work.
+                Year 2+ is just the monthly. A firm running all 5 modules pays $550,000 in year one, then $419,988/year after that.
               </p>
             </FadeIn>
           </div>

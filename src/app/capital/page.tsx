@@ -72,10 +72,9 @@ export default function CapitalPage() {
               <p className="mt-8 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
                 Before you can talk to your first investor, you need a PPM,
                 subscription agreement, operating agreement, investor
-                questionnaire, side letter template, and Form D. Most firms pay
-                $50K to $100K in outside counsel to get those drafted. OpenShut
-                generates them in minutes with consistent terms across every
-                document.
+                questionnaire, side letter template, and Form D. OpenShut
+                generates all six in minutes with consistent terms across
+                every document.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">

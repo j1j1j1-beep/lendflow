@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
-import { FadeIn, Stagger, StaggerItem, CountUp } from "@/components/motion";
+import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 
 const MODULES = [
   {
@@ -141,42 +141,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="w-full relative">
-        <div className="section-divider" />
-        <div className="bg-muted/30">
-          <div className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
-            <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
-              <FadeIn delay={0} className="text-center">
-                <div className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl tabular-nums">
-                  <CountUp to={59} />
-                </div>
-                <div className="mt-1.5 text-sm text-muted-foreground">document types</div>
-              </FadeIn>
-              <FadeIn delay={0.05} className="text-center">
-                <div className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl tabular-nums">
-                  <CountUp to={5} />
-                </div>
-                <div className="mt-1.5 text-sm text-muted-foreground">modules</div>
-              </FadeIn>
-              <FadeIn delay={0.1} className="text-center">
-                <div className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl tabular-nums">
-                  <CountUp to={50} />
-                </div>
-                <div className="mt-1.5 text-sm text-muted-foreground">states covered</div>
-              </FadeIn>
-              <FadeIn delay={0.15} className="text-center">
-                <div className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl tabular-nums">
-                  $1M+
-                </div>
-                <div className="mt-1.5 text-sm text-muted-foreground">saved per year vs. outside counsel</div>
-              </FadeIn>
-            </div>
-          </div>
-        </div>
-        <div className="section-divider" />
-      </section>
-
       {/* How It Works */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
@@ -271,64 +235,6 @@ export default async function Home() {
           </div>
         </div>
         <div className="section-divider" />
-      </section>
-
-      {/* Cost */}
-      <section className="w-full">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <FadeIn>
-            <div className="max-w-4xl mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-                <div>
-                  <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                    What this replaces
-                  </h2>
-                  <p className="mt-6 text-muted-foreground leading-relaxed">
-                    A mid-market PE firm typically spends $1.5 million or more
-                    per year on outside counsel for document preparation. Most of
-                    that is drafting work that follows the same regulatory
-                    rules every time.
-                  </p>
-                  <p className="mt-4 text-muted-foreground leading-relaxed">
-                    The full OpenShut suite costs $420K a year after year one.
-                    Your attorneys still review everything, but they start from
-                    a complete, compliant first draft.
-                  </p>
-                  <div className="mt-8">
-                    <Link href="/pricing" className="group inline-flex items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-primary/80">
-                      See full pricing breakdown
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                    </Link>
-                  </div>
-                </div>
-                <div className="rounded-2xl bg-card p-8 card-shine">
-                  <div className="space-y-6">
-                    <div>
-                      <div className="text-sm text-muted-foreground mb-2">Typical outside counsel spend</div>
-                      <div className="text-3xl font-bold text-foreground tabular-nums">$1,500,000+</div>
-                      <div className="mt-2 h-3 rounded-full bg-muted overflow-hidden">
-                        <div className="h-full w-full rounded-full bg-foreground/20" />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground mb-2">OpenShut full suite (year 2+)</div>
-                      <div className="text-3xl font-bold text-foreground tabular-nums">$419,988</div>
-                      <div className="mt-2 h-3 rounded-full bg-muted overflow-hidden">
-                        <div className="h-full w-[28%] rounded-full bg-foreground/40" />
-                      </div>
-                    </div>
-                    <div className="pt-4 border-t border-border/50">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-muted-foreground">Annual savings</span>
-                        <span className="text-xl font-bold text-foreground">$1,080,012+</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </FadeIn>
-        </div>
       </section>
 
       {/* Trust */}
