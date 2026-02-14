@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
+import { checkPaywall } from "@/lib/paywall";
 import { LOAN_PROGRAMS } from "@/config/loan-programs";
 import { DOC_TYPE_LABELS } from "@/documents/types";
 import { logAudit } from "@/lib/audit";
@@ -22,6 +23,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const { user, org } = await requireAuth();
+
+    const paywall = await checkPaywall(org.id);
+    if (!paywall.allowed) {
+      return NextResponse.json({ error: paywall.reason }, { status: 402 });
+    }
 
     const body = await request.json().catch(() => null);
     if (!body) {

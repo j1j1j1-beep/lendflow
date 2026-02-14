@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
-// import { checkPaywall } from "@/lib/paywall"; // TODO: Enable after launch
+import { checkPaywall } from "@/lib/paywall";
 import { inngest } from "@/inngest/client";
 import { logAudit } from "@/lib/audit";
 import { withRateLimit } from "@/lib/with-rate-limit";
@@ -16,11 +16,10 @@ export async function POST(request: NextRequest) {
   try {
     const { user, org } = await requireAuth();
 
-    // TODO: Enable paywall after launch
-    // const paywall = await checkPaywall(org.id);
-    // if (!paywall.allowed) {
-    //   return NextResponse.json({ error: paywall.reason }, { status: 402 });
-    // }
+    const paywall = await checkPaywall(org.id);
+    if (!paywall.allowed) {
+      return NextResponse.json({ error: paywall.reason }, { status: 402 });
+    }
 
     const body = await request.json();
     const { dealId } = body;

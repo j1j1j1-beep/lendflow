@@ -1,16 +1,30 @@
 import { prisma } from "./db";
 
-const TRIAL_DEAL_LIMIT = 1;
+const TRIAL_PROJECT_LIMIT = 1;
 
 export type PaywallResult =
   | { allowed: true }
   | { allowed: false; reason: string };
 
 /**
- * Check if an org can create a new deal.
+ * Count total projects across all 5 modules for an org.
+ */
+async function countAllProjects(orgId: string): Promise<number> {
+  const [deals, capital, ma, syndication, compliance] = await Promise.all([
+    prisma.deal.count({ where: { orgId } }),
+    prisma.capitalProject.count({ where: { orgId } }),
+    prisma.mAProject.count({ where: { orgId } }),
+    prisma.syndicationProject.count({ where: { orgId } }),
+    prisma.complianceProject.count({ where: { orgId } }),
+  ]);
+  return deals + capital + ma + syndication + compliance;
+}
+
+/**
+ * Check if an org can create a new project.
  * Rules:
  * - No subscription record -> auto-create trial, allow
- * - Trial plan -> allow up to TRIAL_DEAL_LIMIT deals
+ * - Trial plan -> allow up to TRIAL_PROJECT_LIMIT projects (across all modules)
  * - Active subscription -> allow
  * - Canceled/past_due -> block
  */
@@ -34,13 +48,13 @@ export async function checkPaywall(orgId: string): Promise<PaywallResult> {
     return { allowed: true };
   }
 
-  // Trial — check deal count
+  // Trial — check project count across all modules
   if (sub.plan === "trial" || sub.status === "trialing") {
-    const dealCount = await prisma.deal.count({ where: { orgId } });
-    if (dealCount >= TRIAL_DEAL_LIMIT) {
+    const totalProjects = await countAllProjects(orgId);
+    if (totalProjects >= TRIAL_PROJECT_LIMIT) {
       return {
         allowed: false,
-        reason: `Trial limit reached (${TRIAL_DEAL_LIMIT} deals). Please subscribe to continue.`,
+        reason: "Free project used. Subscribe to create more projects.",
       };
     }
     return { allowed: true };
@@ -50,7 +64,7 @@ export async function checkPaywall(orgId: string): Promise<PaywallResult> {
   if (sub.status === "canceled" || sub.plan === "canceled") {
     return {
       allowed: false,
-      reason: "Your subscription has been canceled. Please resubscribe to create new deals.",
+      reason: "Your subscription has been canceled. Please resubscribe to create new projects.",
     };
   }
 
@@ -64,3 +78,5 @@ export async function checkPaywall(orgId: string): Promise<PaywallResult> {
   // Default: allow (for edge cases)
   return { allowed: true };
 }
+
+export { countAllProjects, TRIAL_PROJECT_LIMIT };

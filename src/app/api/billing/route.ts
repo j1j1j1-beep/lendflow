@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
+import { countAllProjects, TRIAL_PROJECT_LIMIT } from "@/lib/paywall";
 
 // GET /api/billing — current subscription status for the authed org
 
@@ -24,11 +25,11 @@ export async function GET() {
       }),
     ]);
 
-    // Calculate trial deals remaining (null if not on trial)
-    let trialDealsRemaining: number | null = null;
+    // Calculate trial projects remaining (null if not on trial)
+    let trialProjectsRemaining: number | null = null;
     if (!subscription || subscription.plan === "trial" || subscription.status === "trialing") {
-      const dealCount = await prisma.deal.count({ where: { orgId: org.id } });
-      trialDealsRemaining = Math.max(0, 3 - dealCount);
+      const totalProjects = await countAllProjects(org.id);
+      trialProjectsRemaining = Math.max(0, TRIAL_PROJECT_LIMIT - totalProjects);
     }
 
     return NextResponse.json({
@@ -51,7 +52,7 @@ export async function GET() {
         count: memberCount,
         max: subscription?.maxSeats ?? 25,
       },
-      trialDealsRemaining,
+      trialProjectsRemaining,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
