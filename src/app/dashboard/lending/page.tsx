@@ -3,12 +3,13 @@
 import { Suspense, useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Search, X, Landmark, Loader2, Sparkles, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { Plus, Search, X, Landmark, Loader2, Sparkles, ChevronLeft, ChevronRight, Download, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DealCard } from "@/components/DealCard";
 import { toast } from "sonner";
 import { FadeIn, Stagger, StaggerItem, ScaleIn } from "@/components/motion";
+import { useGate } from "@/hooks/use-gate";
 
 type DealSummary = {
   id: string;
@@ -84,6 +85,7 @@ export default function LoanOriginationPageWrapper() {
 function LoanOriginationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isGated } = useGate();
 
   // M18: Read initial state from URL query params
   const initialFilter = searchParams.get("filter") || "all";
@@ -281,24 +283,35 @@ function LoanOriginationPage() {
               </button>
             )}
           </div>
-          {/* M15: CSV Export button */}
-          {hasDeals && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => downloadDealsCSV(deals)}
-              title="Export current filtered deals as CSV"
-            >
-              <Download className="h-4 w-4 mr-1.5" />
-              Export CSV
+          {isGated && hasDeals ? (
+            <Button asChild size="sm" variant="outline">
+              <Link href={`/dashboard/lending/${deals[0].id}`}>
+                <Eye className="h-4 w-4 mr-1.5" />
+                View Your Deal
+              </Link>
             </Button>
+          ) : (
+            <>
+              {/* M15: CSV Export button */}
+              {hasDeals && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadDealsCSV(deals)}
+                  title="Export current filtered deals as CSV"
+                >
+                  <Download className="h-4 w-4 mr-1.5" />
+                  Export CSV
+                </Button>
+              )}
+              <Button asChild size="sm">
+                <Link href="/dashboard/lending/new">
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  New Deal
+                </Link>
+              </Button>
+            </>
           )}
-          <Button asChild size="sm">
-            <Link href="/dashboard/lending/new">
-              <Plus className="h-4 w-4 mr-1.5" />
-              New Deal
-            </Link>
-          </Button>
         </div>
         </div>
       </FadeIn>

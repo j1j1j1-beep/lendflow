@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { Plus, Search, X, Building2, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Search, X, Building2, Loader2, Eye } from "lucide-react";
 import { FileText, Calendar, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { FadeIn, Stagger, StaggerItem, ScaleIn } from "@/components/motion";
+import { useGate } from "@/hooks/use-gate";
 
 type CapitalProject = {
   id: string;
@@ -71,6 +73,8 @@ function formatDate(dateStr: string): string {
 }
 
 export default function CapitalListPage() {
+  const router = useRouter();
+  const { isGated, isLoading: gateLoading } = useGate();
   const [projects, setProjects] = useState<CapitalProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -78,6 +82,13 @@ export default function CapitalListPage() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const isInitialLoad = useRef(true);
+
+  // Redirect gated users with no projects in this module
+  useEffect(() => {
+    if (!gateLoading && isGated && !loading && projects.length === 0) {
+      router.replace("/dashboard/upgrade");
+    }
+  }, [gateLoading, isGated, loading, projects.length, router]);
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -167,12 +178,21 @@ export default function CapitalListPage() {
                 </button>
               )}
             </div>
-            <Button asChild size="sm" className="transition-all duration-200 hover:shadow-md">
-              <Link href="/dashboard/capital/new">
-                <Plus className="h-4 w-4 mr-1.5" />
-                New Fund
-              </Link>
-            </Button>
+            {isGated && projects.length > 0 ? (
+              <Button asChild size="sm" variant="outline">
+                <Link href={`/dashboard/capital/${projects[0].id}`}>
+                  <Eye className="h-4 w-4 mr-1.5" />
+                  View Your Fund
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild size="sm" className="transition-all duration-200 hover:shadow-md">
+                <Link href="/dashboard/capital/new">
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  New Fund
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </FadeIn>

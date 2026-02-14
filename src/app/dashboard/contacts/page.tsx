@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Landmark,
   Building2,
@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useGate } from "@/hooks/use-gate";
 
 const DIRECTORIES = [
   {
@@ -57,8 +58,17 @@ type Counts = Record<string, number | null>;
 
 export default function ContactsPage() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { isGated, isLoading: gateLoading } = useGate();
   const [counts, setCounts] = useState<Counts>({});
   const [loading, setLoading] = useState(true);
+
+  // Redirect gated users
+  useEffect(() => {
+    if (!gateLoading && isGated) {
+      router.replace("/dashboard/upgrade");
+    }
+  }, [gateLoading, isGated, router]);
 
   useEffect(() => {
     let cancelled = false;

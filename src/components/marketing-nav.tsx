@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SignInButton } from "@clerk/nextjs";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { SignInButton, useUser } from "@clerk/nextjs";
+import { Menu, X, ChevronDown, LayoutDashboard } from "lucide-react";
 import {
   Landmark,
   Building2,
@@ -29,6 +29,7 @@ const NAV_LINKS = [
 
 export function MarketingNav() {
   const pathname = usePathname();
+  const { isSignedIn } = useUser();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -100,16 +101,28 @@ export function MarketingNav() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <SignInButton mode="modal">
-            <button className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              Sign In
-            </button>
-          </SignInButton>
-          <SignInButton mode="modal">
-            <button className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md">
-              Try It Free
-            </button>
-          </SignInButton>
+          {isSignedIn ? (
+            <Link
+              href="/dashboard"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <SignInButton mode="modal">
+                <button className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignInButton mode="modal">
+                <button className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md">
+                  Try It Free
+                </button>
+              </SignInButton>
+            </>
+          )}
         </div>
 
         <button
@@ -154,16 +167,29 @@ export function MarketingNav() {
             ))}
           </div>
           <div className="mt-3 flex flex-col gap-2">
-            <SignInButton mode="modal">
-              <button className="w-full rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted">
-                Sign In
-              </button>
-            </SignInButton>
-            <SignInButton mode="modal">
-              <button className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90">
-                Try It Free
-              </button>
-            </SignInButton>
+            {isSignedIn ? (
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileOpen(false)}
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <SignInButton mode="modal">
+                  <button className="w-full rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignInButton mode="modal">
+                  <button className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90">
+                    Try It Free
+                  </button>
+                </SignInButton>
+              </>
+            )}
           </div>
         </div>
       )}

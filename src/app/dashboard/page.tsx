@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useGate } from "@/hooks/use-gate";
 import {
   Landmark,
   Building2,
@@ -116,8 +118,16 @@ function daysUntil(dateStr: string): { text: string; urgent: boolean } {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const { isGated, isLoading: gateLoading } = useGate();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!gateLoading && isGated) {
+      router.replace("/dashboard/upgrade");
+    }
+  }, [gateLoading, isGated, router]);
 
   useEffect(() => {
     fetch("/api/dashboard")
@@ -126,7 +136,8 @@ export default function DashboardPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  if (loading) return <DashboardSkeleton />;
+  if (gateLoading || loading) return <DashboardSkeleton />;
+  if (isGated) return <DashboardSkeleton />;
   if (!data) return <DashboardEmpty />;
 
   const { stats, recent, deadlines, flagged } = data;

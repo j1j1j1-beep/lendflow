@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Building,
   Plus,
@@ -13,6 +14,7 @@ import {
   DollarSign,
   MapPin,
   Users,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { FadeIn, Stagger, StaggerItem, ScaleIn } from "@/components/motion";
+import { useGate } from "@/hooks/use-gate";
 
 /* ---------- Types ---------- */
 
@@ -105,6 +108,8 @@ function formatDate(dateStr: string): string {
 /* ---------- Component ---------- */
 
 export default function SyndicationPage() {
+  const router = useRouter();
+  const { isGated, isLoading: gateLoading } = useGate();
   const [projects, setProjects] = useState<SyndicationProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -112,6 +117,13 @@ export default function SyndicationPage() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const isInitialLoad = useRef(true);
+
+  // Redirect gated users with no projects in this module
+  useEffect(() => {
+    if (!gateLoading && isGated && !loading && projects.length === 0) {
+      router.replace("/dashboard/upgrade");
+    }
+  }, [gateLoading, isGated, loading, projects.length, router]);
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -200,12 +212,21 @@ export default function SyndicationPage() {
                 </button>
               )}
             </div>
-            <Button asChild size="sm" className="shadow-sm">
-              <Link href="/dashboard/syndication/new">
-                <Plus className="h-4 w-4 mr-1.5" />
-                New Syndication
-              </Link>
-            </Button>
+            {isGated && projects.length > 0 ? (
+              <Button asChild size="sm" variant="outline" className="shadow-sm">
+                <Link href={`/dashboard/syndication/${projects[0].id}`}>
+                  <Eye className="h-4 w-4 mr-1.5" />
+                  View Your Project
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild size="sm" className="shadow-sm">
+                <Link href="/dashboard/syndication/new">
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  New Syndication
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </FadeIn>

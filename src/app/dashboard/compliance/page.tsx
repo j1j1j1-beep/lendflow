@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Plus,
   Search,
@@ -10,6 +11,7 @@ import {
   Loader2,
   FileText,
   Calendar,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { FadeIn, Stagger, StaggerItem, ScaleIn } from "@/components/motion";
+import { useGate } from "@/hooks/use-gate";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -91,6 +94,8 @@ function formatDate(dateStr: string): string {
 /* ------------------------------------------------------------------ */
 
 export default function CompliancePage() {
+  const router = useRouter();
+  const { isGated, isLoading: gateLoading } = useGate();
   const [projects, setProjects] = useState<ComplianceProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -98,6 +103,13 @@ export default function CompliancePage() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const isInitialLoad = useRef(true);
+
+  // Redirect gated users with no projects in this module
+  useEffect(() => {
+    if (!gateLoading && isGated && !loading && projects.length === 0) {
+      router.replace("/dashboard/upgrade");
+    }
+  }, [gateLoading, isGated, loading, projects.length, router]);
 
   /* ---------- Fetch ---------- */
 
@@ -193,12 +205,21 @@ export default function CompliancePage() {
                 </button>
               )}
             </div>
-            <Button asChild size="sm" className="shadow-sm">
-              <Link href="/dashboard/compliance/new">
-                <Plus className="h-4 w-4 mr-1.5" />
-                New Report
-              </Link>
-            </Button>
+            {isGated && projects.length > 0 ? (
+              <Button asChild size="sm" variant="outline" className="shadow-sm">
+                <Link href={`/dashboard/compliance/${projects[0].id}`}>
+                  <Eye className="h-4 w-4 mr-1.5" />
+                  View Your Report
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild size="sm" className="shadow-sm">
+                <Link href="/dashboard/compliance/new">
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  New Report
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </FadeIn>

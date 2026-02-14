@@ -16,6 +16,7 @@ import {
   Building,
   ShieldCheck,
   Users,
+  Sparkles,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,16 +33,17 @@ import {
 } from "@/components/ui/sidebar";
 import { Switch } from "@/components/ui/switch";
 import { ProductSwitcher } from "@/components/product-switcher";
+import { useGate } from "@/hooks/use-gate";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Lending", href: "/dashboard/lending", icon: Landmark },
-  { label: "Capital", href: "/dashboard/capital", icon: Building2 },
-  { label: "Deals", href: "/dashboard/deals", icon: Handshake },
-  { label: "Syndication", href: "/dashboard/syndication", icon: Building },
-  { label: "Compliance", href: "/dashboard/compliance", icon: ShieldCheck },
-  { label: "Contacts", href: "/dashboard/contacts", icon: Users },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, gated: true },
+  { label: "Lending", href: "/dashboard/lending", icon: Landmark, gated: true },
+  { label: "Capital", href: "/dashboard/capital", icon: Building2, gated: true },
+  { label: "Deals", href: "/dashboard/deals", icon: Handshake, gated: true },
+  { label: "Syndication", href: "/dashboard/syndication", icon: Building, gated: true },
+  { label: "Compliance", href: "/dashboard/compliance", icon: ShieldCheck, gated: true },
+  { label: "Contacts", href: "/dashboard/contacts", icon: Users, gated: true },
+  { label: "Settings", href: "/dashboard/settings", icon: Settings, gated: false },
 ];
 
 export function AppSidebar() {
@@ -49,6 +51,7 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const { state, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const { isGated } = useGate();
 
   // Close mobile nav on route change
   useEffect(() => {
@@ -71,6 +74,8 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {NAV_ITEMS.map((item) => {
+                const resolvedHref =
+                  isGated && item.gated ? "/dashboard/upgrade" : item.href;
                 const isActive =
                   item.href === "/dashboard"
                     ? pathname === "/dashboard"
@@ -83,7 +88,7 @@ export function AppSidebar() {
                       isActive={isActive}
                       tooltip={item.label}
                     >
-                      <Link href={item.href}>
+                      <Link href={resolvedHref}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
                       </Link>
@@ -98,6 +103,28 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
+          {isGated && !isCollapsed && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Upgrade">
+                <Link
+                  href="/dashboard/upgrade"
+                  className="flex items-center gap-2 text-sm font-medium text-primary"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>Upgrade</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+          {isGated && isCollapsed && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Upgrade">
+                <Link href="/dashboard/upgrade">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           {!isCollapsed && (
             <SidebarMenuItem>
               <div className="flex items-center justify-between px-2 py-1.5">

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Plus,
   Search,
@@ -12,6 +13,7 @@ import {
   DollarSign,
   Users,
   Loader2,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { FadeIn, Stagger, StaggerItem, ScaleIn } from "@/components/motion";
+import { useGate } from "@/hooks/use-gate";
 
 /* ---------- Types ---------- */
 
@@ -93,6 +96,8 @@ function formatDate(dateStr: string): string {
 /* ---------- Page ---------- */
 
 export default function DealsPage() {
+  const router = useRouter();
+  const { isGated, isLoading: gateLoading } = useGate();
   const [projects, setProjects] = useState<MAProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -100,6 +105,13 @@ export default function DealsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const isInitialLoad = useRef(true);
+
+  // Redirect gated users with no projects in this module
+  useEffect(() => {
+    if (!gateLoading && isGated && !loading && projects.length === 0) {
+      router.replace("/dashboard/upgrade");
+    }
+  }, [gateLoading, isGated, loading, projects.length, router]);
 
   /* Debounce search */
   useEffect(() => {
@@ -188,12 +200,21 @@ export default function DealsPage() {
                 </button>
               )}
             </div>
-            <Button asChild size="sm" className="gap-1.5 shadow-sm">
-              <Link href="/dashboard/deals/new">
-                <Plus className="h-4 w-4" />
-                New Deal
-              </Link>
-            </Button>
+            {isGated && projects.length > 0 ? (
+              <Button asChild size="sm" variant="outline" className="gap-1.5">
+                <Link href={`/dashboard/deals/${projects[0].id}`}>
+                  <Eye className="h-4 w-4" />
+                  View Your Deal
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild size="sm" className="gap-1.5 shadow-sm">
+                <Link href="/dashboard/deals/new">
+                  <Plus className="h-4 w-4" />
+                  New Deal
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </FadeIn>
