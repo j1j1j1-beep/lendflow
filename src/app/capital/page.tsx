@@ -126,7 +126,7 @@ export default function CapitalPage() {
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-2">The consistency problem</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed max-w-4xl">
-                    When your PPM says a 2% management fee and your operating agreement says 2.5%, that&apos;s a securities issue. When the subscription agreement references a provision that doesn&apos;t exist in the OA, your counsel catches it at $800/hour. OpenShut generates all six documents from one set of inputs so terms, defined terms, and cross-references stay aligned across every document.
+                    When your PPM says a 2% management fee and your operating agreement says 2.5%, that&apos;s a securities issue. When the subscription agreement references a provision that doesn&apos;t exist in the OA, someone has to find it. OpenShut generates all six documents from one set of inputs so terms, defined terms, and cross-references stay aligned across every document.
                   </p>
                 </div>
               </div>
@@ -359,8 +359,8 @@ export default function CapitalPage() {
                   Generate your fund docs tonight.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  Hand your attorney a complete first draft instead of a blank
-                  engagement letter. First fund is free.
+                  Six documents, consistent terms, ready to send.
+                  First fund is free.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">

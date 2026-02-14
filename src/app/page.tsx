@@ -172,7 +172,7 @@ export default async function Home() {
               {
                 n: "03",
                 title: "Review and close",
-                desc: "Read through everything in the editor. Make changes inline. Download as Word or PDF and hand it to your attorney. They review a complete first draft instead of starting from scratch.",
+                desc: "Read through everything in the editor. Make changes inline. Download as Word or PDF. Your loan officer or deal lead reviews the final output before it goes out.",
               },
             ].map((step) => (
               <StaggerItem key={step.n}>
