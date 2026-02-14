@@ -41,7 +41,7 @@ const PROPERTY_TYPES = [
 
 export default function SyndicationPage() {
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
+    <div className="flex min-h-[100dvh] flex-col bg-background bg-ambient relative overflow-x-hidden">
       <MarketingNav />
 
       {/* Hero */}
