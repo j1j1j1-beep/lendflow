@@ -61,14 +61,14 @@ const MODULES = [
     icon: Building,
     color: "text-emerald-500",
     docs: 5,
-    desc: "Real estate syndication. PPM, investor docs, deterministic pro forma with IRR and waterfall distributions.",
+    desc: "Real estate syndication. PPM, investor docs, and a year-by-year financial model with waterfall distributions.",
   },
   {
     name: "Compliance",
     icon: ShieldCheck,
     color: "text-cyan-500",
     docs: 6,
-    desc: "Fund admin. ILPA v2.0 quarterly reports, K-1 summaries, capital calls, Form ADV.",
+    desc: "Fund admin. Quarterly LP reports, K-1 summaries, capital calls, Form ADV.",
   },
 ];
 
@@ -81,7 +81,7 @@ const ENTERPRISE_FEATURES = [
   {
     icon: Plug,
     title: "Custom integrations",
-    desc: "Connect to your fund admin (Juniper Square, Allvue, eFront), CRM (Salesforce, DealCloud), or document management system.",
+    desc: "We connect OpenShut to your CRM (Salesforce, DealCloud), fund admin (Juniper Square, Allvue, eFront), and document management (NetDocuments, iManage). Built as part of your engagement.",
   },
   {
     icon: Headphones,
@@ -338,7 +338,7 @@ export default function PricingPage() {
                   {[
                     "Everything in Per-Module",
                     "Unlimited seats",
-                    "Custom integrations (CRM, fund admin, DMS)",
+                    "Integrations: Salesforce, DealCloud, Juniper Square, and more",
                     "Dedicated account manager",
                     "Custom SLAs and uptime guarantees",
                     "SSO / SCIM provisioning",
@@ -480,7 +480,7 @@ export default function PricingPage() {
           <FadeIn delay={0.2}>
             <div className="mt-8 text-center">
               <Link
-                href="/#suite"
+                href="/lending"
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
               >
                 See full module details on the homepage

@@ -23,20 +23,20 @@ export function MarketingFooter() {
               </span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-xs">
-              Document automation for private equity, lending, and fund administration.
+              Legal document automation for private equity, lending, and fund administration.
             </p>
           </div>
 
-          {/* Modules */}
+          {/* Products */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3">Modules</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-3">Products</h4>
             <ul className="space-y-2">
               {[
-                { label: "Lending", icon: Landmark, href: "/#suite" },
-                { label: "Capital", icon: Building2, href: "/#suite" },
-                { label: "Deals / M&A", icon: Handshake, href: "/#suite" },
-                { label: "Syndication", icon: Building, href: "/#suite" },
-                { label: "Compliance", icon: ShieldCheck, href: "/#suite" },
+                { label: "Lending", icon: Landmark, href: "/lending" },
+                { label: "Capital", icon: Building2, href: "/capital" },
+                { label: "Deals / M&A", icon: Handshake, href: "/deals" },
+                { label: "Syndication", icon: Building, href: "/syndication" },
+                { label: "Compliance", icon: ShieldCheck, href: "/compliance" },
               ].map((mod) => (
                 <li key={mod.label}>
                   <Link
@@ -56,23 +56,13 @@ export function MarketingFooter() {
             <h4 className="text-sm font-semibold text-foreground mb-3">Platform</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/#how-it-works" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
-                  How It Works
+                <Link href="/platform" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                  Security & Compliance
                 </Link>
               </li>
               <li>
                 <Link href="/pricing" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                   Pricing
-                </Link>
-              </li>
-              <li>
-                <Link href="/#security" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
-                  Security
-                </Link>
-              </li>
-              <li>
-                <Link href="/#regulations" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
-                  Regulations
                 </Link>
               </li>
             </ul>
