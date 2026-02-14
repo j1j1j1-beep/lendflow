@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, Sparkles } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,11 @@ import {
 import { DocumentUploader } from "@/components/DocumentUploader";
 import { DocumentChecklist } from "@/components/DocumentChecklist";
 import { DocumentSelector } from "@/components/DocumentSelector";
+import { SampleDealPicker } from "@/components/sample-deal-picker";
+import { LendingSampleDocsPreview } from "@/components/sample-source-docs-preview";
 import { LOAN_PROGRAM_LIST, getLoanProgram } from "@/config/loan-programs";
+import { SAMPLE_LENDING_DEALS } from "@/config/sample-deals/lending";
+import { getLendingExtractions } from "@/config/sample-deals/lending-extractions";
 
 const LOAN_PURPOSES = [
   { value: "purchase", label: "Purchase" },
@@ -48,24 +52,39 @@ export default function NewDealPage() {
   const [proposedRate, setProposedRate] = useState("");
   const [proposedTerm, setProposedTerm] = useState("");
   const [selectedOutputDocs, setSelectedOutputDocs] = useState<string[]>([]);
+  const [sampleDealId, setSampleDealId] = useState<string | null>(null);
 
   const selectedProgram = loanProgramId ? getLoanProgram(loanProgramId) : null;
 
-  const handleSampleDeal = async () => {
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/deals/sample", { method: "POST" });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Failed to create sample deal");
-      }
-      const { deal } = await res.json();
-      toast.success("Sample deal created! Watch the pipeline process it.");
-      router.push(`/dashboard/lending/${deal.id}`);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong", { duration: 8000 });
-      setSubmitting(false);
-    }
+  const sampleExtractions = sampleDealId
+    ? getLendingExtractions(sampleDealId)
+    : null;
+
+  const handleLoadSample = (dealId: string) => {
+    const sample = SAMPLE_LENDING_DEALS.find((d) => d.id === dealId);
+    if (!sample) return;
+    setSampleDealId(dealId);
+    setBorrowerName(sample.borrowerName);
+    setLoanAmount(String(sample.loanAmount));
+    setLoanPurpose(sample.loanPurpose);
+    setLoanProgramId(sample.loanProgramId);
+    setPropertyAddress(sample.propertyAddress);
+    setProposedRate(String(sample.proposedRate));
+    setProposedTerm(String(sample.proposedTerm));
+    toast.success("Sample deal loaded. Review the details, then submit.");
+  };
+
+  const handleClearSample = () => {
+    setSampleDealId(null);
+    setBorrowerName("");
+    setLoanAmount("");
+    setLoanPurpose("");
+    setLoanProgramId("");
+    setPropertyAddress("");
+    setProposedRate("");
+    setProposedTerm("");
+    setFiles([]);
+    setSelectedOutputDocs([]);
   };
 
   useEffect(() => {
@@ -87,6 +106,30 @@ export default function NewDealPage() {
       return;
     }
 
+    // Sample mode: call /api/deals/sample
+    if (sampleDealId) {
+      setSubmitting(true);
+      try {
+        const res = await fetch("/api/deals/sample", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dealId: sampleDealId }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Failed to create sample deal");
+        }
+        const { deal } = await res.json();
+        toast.success("Sample deal created! Analysis pipeline started.");
+        router.push(`/dashboard/lending/${deal.id}`);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong", { duration: 8000 });
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    // Normal mode: upload files
     if (files.length === 0) {
       toast.error("Please upload at least one document", { duration: 8000 });
       return;
@@ -117,12 +160,12 @@ export default function NewDealPage() {
       }
 
       const { deal } = await dealRes.json();
-      const dealId = deal.id;
+      const createdDealId = deal.id;
 
       for (const file of files) {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("dealId", dealId);
+        formData.append("dealId", createdDealId);
 
         const uploadRes = await fetch("/api/documents/upload", {
           method: "POST",
@@ -138,7 +181,7 @@ export default function NewDealPage() {
       const analyzeRes = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dealId }),
+        body: JSON.stringify({ dealId: createdDealId }),
       });
 
       if (!analyzeRes.ok) {
@@ -150,7 +193,7 @@ export default function NewDealPage() {
         toast.success("Deal created! Analysis pipeline started.");
       }
 
-      router.push(`/dashboard/lending/${dealId}`);
+      router.push(`/dashboard/lending/${createdDealId}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong", { duration: 8000 });
       setSubmitting(false);
@@ -173,37 +216,11 @@ export default function NewDealPage() {
         </p>
       </div>
 
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="flex items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-              <Sparkles className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">New to OpenShut?</p>
-              <p className="text-xs text-muted-foreground">
-                Try a complete loan origination with our sample borrower — no documents needed
-              </p>
-            </div>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => handleSampleDeal()}
-            disabled={submitting}
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              "Try Sample Deal"
-            )}
-          </Button>
-        </CardContent>
-      </Card>
+      <SampleDealPicker
+        deals={SAMPLE_LENDING_DEALS}
+        onSelect={handleLoadSample}
+        moduleName="lending"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
@@ -328,33 +345,40 @@ export default function NewDealPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Document Upload</CardTitle>
-            <CardDescription>
-              Upload borrower financial documents for AI-powered extraction and
-              analysis
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <DocumentUploader files={files} onFilesSelected={setFiles} />
+        {sampleDealId && sampleExtractions ? (
+          <LendingSampleDocsPreview
+            documents={sampleExtractions.documents}
+            onClear={handleClearSample}
+          />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Document Upload</CardTitle>
+              <CardDescription>
+                Upload borrower financial documents for AI-powered extraction and
+                analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <DocumentUploader files={files} onFilesSelected={setFiles} />
+                </div>
+                <div className="lg:col-span-1 space-y-6">
+                  <DocumentChecklist
+                    loanProgramId={loanProgramId}
+                    uploadedDocTypes={[]}
+                  />
+                  <DocumentSelector
+                    loanProgramId={loanProgramId}
+                    selectedDocs={selectedOutputDocs}
+                    onSelectionChange={setSelectedOutputDocs}
+                  />
+                </div>
               </div>
-              <div className="lg:col-span-1 space-y-6">
-                <DocumentChecklist
-                  loanProgramId={loanProgramId}
-                  uploadedDocTypes={[]}
-                />
-                <DocumentSelector
-                  loanProgramId={loanProgramId}
-                  selectedDocs={selectedOutputDocs}
-                  onSelectionChange={setSelectedOutputDocs}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="flex justify-end gap-3">
           <Button

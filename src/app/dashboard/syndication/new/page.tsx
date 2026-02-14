@@ -32,6 +32,10 @@ import {
 import { DocumentUploader } from "@/components/DocumentUploader";
 import { MissingDocsDialog } from "@/components/missing-docs-dialog";
 import { fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+import { SampleDealPicker } from "@/components/sample-deal-picker";
+import { SampleSourceDocsPreview } from "@/components/sample-source-docs-preview";
+import { SAMPLE_SYNDICATION_DEALS } from "@/config/sample-deals/syndication";
+import { getSyndicationSourceDocs } from "@/config/sample-deals/source-docs/syndication-source-docs";
 import type { SourceDocDef } from "@/lib/source-doc-types";
 
 /* ---------- Constants ---------- */
@@ -93,6 +97,57 @@ export default function NewSyndicationPage() {
   // Source documents & missing-docs dialog
   const [files, setFiles] = useState<File[]>([]);
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+  const [sampleDealId, setSampleDealId] = useState<string | null>(null);
+
+  const sampleSourceDocs = sampleDealId
+    ? getSyndicationSourceDocs(sampleDealId)
+    : null;
+
+  const handleLoadSample = (dealId: string) => {
+    const sample = SAMPLE_SYNDICATION_DEALS.find((d) => d.id === dealId);
+    if (!sample) return;
+    setSampleDealId(dealId);
+    setName(sample.name);
+    setEntityName(sample.entityName);
+    setSponsorName(sample.sponsorName);
+    setPropertyAddress(sample.propertyAddress);
+    setPropertyType(sample.propertyType);
+    setPurchasePrice(formatNumber(String(sample.purchasePrice)));
+    setTotalEquityRaise(formatNumber(String(sample.totalEquityRaise)));
+    setMinInvestment(formatNumber(String(sample.minInvestment)));
+    setLoanAmount(formatNumber(String(sample.loanAmount)));
+    setInterestRate(String(sample.interestRate));
+    setPreferredReturn(String(sample.preferredReturn));
+    setProjectedIrr(String(sample.projectedIrr));
+    setProjectedHoldYears(String(sample.projectedHoldYears));
+    setAcquisitionFee(String(sample.acquisitionFee));
+    setAssetMgmtFee(String(sample.assetMgmtFee));
+    setUnits(String(sample.units));
+    setYearBuilt(String(sample.yearBuilt));
+    toast.success("Sample deal loaded. Review the details, then submit.");
+  };
+
+  const handleClearSample = () => {
+    setSampleDealId(null);
+    setName("");
+    setEntityName("");
+    setSponsorName("");
+    setPropertyAddress("");
+    setPropertyType("");
+    setPurchasePrice("");
+    setTotalEquityRaise("");
+    setMinInvestment("");
+    setLoanAmount("");
+    setInterestRate("");
+    setPreferredReturn("");
+    setProjectedIrr("");
+    setProjectedHoldYears("");
+    setAcquisitionFee("");
+    setAssetMgmtFee("");
+    setUnits("");
+    setYearBuilt("");
+    setFiles([]);
+  };
   const [showMissingDocs, setShowMissingDocs] = useState(false);
   const [missingRequired, setMissingRequired] = useState<SourceDocDef[]>([]);
   const [missingOptional, setMissingOptional] = useState<SourceDocDef[]>([]);
@@ -111,6 +166,35 @@ export default function NewSyndicationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Sample mode: call /api/syndication/sample
+    if (sampleDealId) {
+      if (!name.trim()) { toast.error("Project name is required"); return; }
+      if (!entityName.trim()) { toast.error("SPV entity name is required"); return; }
+      if (!sponsorName.trim()) { toast.error("Sponsor name is required"); return; }
+      if (!propertyAddress.trim()) { toast.error("Property address is required"); return; }
+      if (!propertyType) { toast.error("Property type is required"); return; }
+
+      setSubmitting(true);
+      try {
+        const res = await fetch("/api/syndication/sample", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dealId: sampleDealId }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Failed to create sample project");
+        }
+        const { project } = await res.json();
+        toast.success("Sample syndication created! Generating documents...");
+        router.push(`/dashboard/syndication/${project.id}`);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+        setSubmitting(false);
+      }
+      return;
+    }
 
     if (createdProjectId) {
       setSubmitting(true);
@@ -221,6 +305,12 @@ export default function NewSyndicationPage() {
           package
         </p>
       </div>
+
+      <SampleDealPicker
+        deals={SAMPLE_SYNDICATION_DEALS}
+        onSelect={handleLoadSample}
+        moduleName="syndication"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Card 1: Property & Entity Details */}
@@ -558,18 +648,25 @@ export default function NewSyndicationPage() {
         </Card>
 
         {/* Source Documents */}
-        <Card className="transition-shadow duration-200 hover:shadow-md">
-          <CardHeader>
-            <CardTitle>Source Documents</CardTitle>
-            <CardDescription>
-              Upload supporting documents (appraisal, rent roll, property financials, etc.).
-              These will be scanned and used to fill in your generated documents.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DocumentUploader files={files} onFilesSelected={setFiles} />
-          </CardContent>
-        </Card>
+        {sampleDealId && sampleSourceDocs ? (
+          <SampleSourceDocsPreview
+            docs={sampleSourceDocs}
+            onClear={handleClearSample}
+          />
+        ) : (
+          <Card className="transition-shadow duration-200 hover:shadow-md">
+            <CardHeader>
+              <CardTitle>Source Documents</CardTitle>
+              <CardDescription>
+                Upload supporting documents (appraisal, rent roll, property financials, etc.).
+                These will be scanned and used to fill in your generated documents.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DocumentUploader files={files} onFilesSelected={setFiles} />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-3">

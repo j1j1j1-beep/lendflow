@@ -26,6 +26,10 @@ import {
 import { DocumentUploader } from "@/components/DocumentUploader";
 import { MissingDocsDialog } from "@/components/missing-docs-dialog";
 import { fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+import { SampleDealPicker } from "@/components/sample-deal-picker";
+import { SampleSourceDocsPreview } from "@/components/sample-source-docs-preview";
+import { SAMPLE_CAPITAL_DEALS } from "@/config/sample-deals/capital";
+import { getCapitalSourceDocs } from "@/config/sample-deals/source-docs/capital-source-docs";
 import type { SourceDocDef } from "@/lib/source-doc-types";
 
 const FUND_TYPES = [
@@ -78,6 +82,49 @@ export default function NewCapitalPage() {
 
   const [files, setFiles] = useState<File[]>([]);
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+  const [sampleDealId, setSampleDealId] = useState<string | null>(null);
+
+  const sampleSourceDocs = sampleDealId
+    ? getCapitalSourceDocs(sampleDealId)
+    : null;
+
+  const handleLoadSample = (dealId: string) => {
+    const sample = SAMPLE_CAPITAL_DEALS.find((d) => d.id === dealId);
+    if (!sample) return;
+    setSampleDealId(dealId);
+    setName(sample.name);
+    setFundName(sample.fundName);
+    setFundType(sample.fundType);
+    setGpEntityName(sample.gpEntityName);
+    setExemptionType(sample.exemptionType);
+    setTargetRaise(formatNumber(String(sample.targetRaise)));
+    setMinInvestment(formatNumber(String(sample.minInvestment)));
+    setManagementFee(String(sample.managementFee));
+    setCarriedInterest(String(sample.carriedInterest));
+    setPreferredReturn(String(sample.preferredReturn));
+    setFundTermYears(String(sample.fundTermYears));
+    setInvestmentStrategy(sample.investmentStrategy);
+    setGeographicFocus(sample.geographicFocus);
+    toast.success("Sample deal loaded. Review the details, then submit.");
+  };
+
+  const handleClearSample = () => {
+    setSampleDealId(null);
+    setName("");
+    setFundName("");
+    setFundType("");
+    setGpEntityName("");
+    setExemptionType("");
+    setTargetRaise("");
+    setMinInvestment("");
+    setManagementFee("");
+    setCarriedInterest("");
+    setPreferredReturn("");
+    setFundTermYears("");
+    setInvestmentStrategy("");
+    setGeographicFocus("");
+    setFiles([]);
+  };
   const [showMissingDocs, setShowMissingDocs] = useState(false);
   const [missingRequired, setMissingRequired] = useState<SourceDocDef[]>([]);
   const [missingOptional, setMissingOptional] = useState<SourceDocDef[]>([]);
@@ -96,6 +143,34 @@ export default function NewCapitalPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Sample mode: call /api/capital/sample
+    if (sampleDealId) {
+      if (!name.trim()) { toast.error("Project name is required"); return; }
+      if (!fundName.trim()) { toast.error("Fund name is required"); return; }
+      if (!fundType) { toast.error("Fund type is required"); return; }
+      if (!gpEntityName.trim()) { toast.error("GP entity name is required"); return; }
+
+      setSubmitting(true);
+      try {
+        const res = await fetch("/api/capital/sample", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dealId: sampleDealId }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Failed to create sample project");
+        }
+        const { project } = await res.json();
+        toast.success("Sample fund created! Generating documents...");
+        router.push(`/dashboard/capital/${project.id}`);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+        setSubmitting(false);
+      }
+      return;
+    }
 
     // If we already created the project (user came back from missing docs dialog to add more files)
     // just re-upload new files, re-classify, and check again
@@ -210,6 +285,12 @@ export default function NewCapitalPage() {
           Enter fund details to generate your complete capital formation package
         </p>
       </div>
+
+      <SampleDealPicker
+        deals={SAMPLE_CAPITAL_DEALS}
+        onSelect={handleLoadSample}
+        moduleName="fund formation"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Required Fields */}
@@ -448,18 +529,25 @@ export default function NewCapitalPage() {
         </Card>
 
         {/* Source Documents */}
-        <Card className="transition-all duration-200 hover:shadow-sm">
-          <CardHeader>
-            <CardTitle>Source Documents</CardTitle>
-            <CardDescription>
-              Upload supporting documents (business plan, formation docs, etc.).
-              These will be scanned and used to fill in your generated documents.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DocumentUploader files={files} onFilesSelected={setFiles} />
-          </CardContent>
-        </Card>
+        {sampleDealId && sampleSourceDocs ? (
+          <SampleSourceDocsPreview
+            docs={sampleSourceDocs}
+            onClear={handleClearSample}
+          />
+        ) : (
+          <Card className="transition-all duration-200 hover:shadow-sm">
+            <CardHeader>
+              <CardTitle>Source Documents</CardTitle>
+              <CardDescription>
+                Upload supporting documents (business plan, formation docs, etc.).
+                These will be scanned and used to fill in your generated documents.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DocumentUploader files={files} onFilesSelected={setFiles} />
+            </CardContent>
+          </Card>
+        )}
 
         <div className="flex justify-end gap-3">
           <Button

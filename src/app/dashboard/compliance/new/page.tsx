@@ -26,6 +26,10 @@ import {
 import { DocumentUploader } from "@/components/DocumentUploader";
 import { MissingDocsDialog } from "@/components/missing-docs-dialog";
 import { fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+import { SampleDealPicker } from "@/components/sample-deal-picker";
+import { SampleSourceDocsPreview } from "@/components/sample-source-docs-preview";
+import { SAMPLE_COMPLIANCE_DEALS } from "@/config/sample-deals/compliance";
+import { getComplianceSourceDocs } from "@/config/sample-deals/source-docs/compliance-source-docs";
 import type { SourceDocDef } from "@/lib/source-doc-types";
 
 /* ------------------------------------------------------------------ */
@@ -115,6 +119,65 @@ export default function NewComplianceReportPage() {
   /* Source docs & missing-docs dialog */
   const [files, setFiles] = useState<File[]>([]);
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+  const [sampleDealId, setSampleDealId] = useState<string | null>(null);
+
+  const sampleSourceDocs = sampleDealId
+    ? getComplianceSourceDocs(sampleDealId)
+    : null;
+
+  const handleLoadSample = (dealId: string) => {
+    const sample = SAMPLE_COMPLIANCE_DEALS.find((d) => d.id === dealId);
+    if (!sample) return;
+    setSampleDealId(dealId);
+    setName(sample.name);
+    setReportType(sample.reportType);
+    setFundName(sample.fundName);
+    setFundType(sample.fundType);
+    setReportingQuarter(sample.reportingQuarter);
+    setPeriodStart(sample.periodStart);
+    setPeriodEnd(sample.periodEnd);
+    // Performance fields
+    if (sample.nav) setNav(formatNumber(String(sample.nav)));
+    if (sample.totalContributions) setTotalContributions(formatNumber(String(sample.totalContributions)));
+    if (sample.totalDistributions) setTotalDistributions(formatNumber(String(sample.totalDistributions)));
+    if (sample.netIrr) setNetIrr(String(sample.netIrr));
+    if (sample.moic) setMoic(String(sample.moic));
+    // Capital call fields
+    if (sample.callAmount) setCallAmount(formatNumber(String(sample.callAmount)));
+    if (sample.callDueDate) setCallDueDate(sample.callDueDate);
+    if (sample.callPurpose) setCallPurpose(sample.callPurpose);
+    // Distribution fields
+    if (sample.distributionAmount) setDistributionAmount(formatNumber(String(sample.distributionAmount)));
+    if (sample.distributionType) setDistributionType(sample.distributionType);
+    // K-1 fields
+    if (sample.taxYear) setTaxYear(String(sample.taxYear));
+    if (sample.filingDeadline) setFilingDeadline(sample.filingDeadline);
+    toast.success("Sample report loaded. Review the details, then submit.");
+  };
+
+  const handleClearSample = () => {
+    setSampleDealId(null);
+    setName("");
+    setReportType("");
+    setFundName("");
+    setFundType("");
+    setReportingQuarter("");
+    setPeriodStart("");
+    setPeriodEnd("");
+    setNav("");
+    setTotalContributions("");
+    setTotalDistributions("");
+    setNetIrr("");
+    setMoic("");
+    setCallAmount("");
+    setCallDueDate("");
+    setCallPurpose("");
+    setDistributionAmount("");
+    setDistributionType("");
+    setTaxYear("");
+    setFilingDeadline("");
+    setFiles([]);
+  };
   const [showMissingDocs, setShowMissingDocs] = useState(false);
   const [missingRequired, setMissingRequired] = useState<SourceDocDef[]>([]);
   const [missingOptional, setMissingOptional] = useState<SourceDocDef[]>([]);
@@ -142,6 +205,33 @@ export default function NewComplianceReportPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Sample mode: call /api/compliance/sample
+    if (sampleDealId) {
+      if (!name.trim()) { toast.error("Report name is required"); return; }
+      if (!reportType) { toast.error("Please select a report type"); return; }
+      if (!fundName.trim()) { toast.error("Fund name is required"); return; }
+
+      setSubmitting(true);
+      try {
+        const res = await fetch("/api/compliance/sample", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dealId: sampleDealId }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Failed to create sample report");
+        }
+        const { project } = await res.json();
+        toast.success("Sample report created! Generating documents...");
+        router.push(`/dashboard/compliance/${project.id}`);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+        setSubmitting(false);
+      }
+      return;
+    }
 
     if (createdProjectId) {
       setSubmitting(true);
@@ -263,6 +353,12 @@ export default function NewComplianceReportPage() {
           documentation
         </p>
       </div>
+
+      <SampleDealPicker
+        deals={SAMPLE_COMPLIANCE_DEALS}
+        onSelect={handleLoadSample}
+        moduleName="compliance"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* -------------------------------------------------------- */}
@@ -696,18 +792,25 @@ export default function NewComplianceReportPage() {
         {/* -------------------------------------------------------- */}
         {/*  Source Documents                                          */}
         {/* -------------------------------------------------------- */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Source Documents</CardTitle>
-            <CardDescription>
-              Upload supporting documents (prior financials, capital account data, etc.).
-              These will be scanned and used to fill in your generated documents.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DocumentUploader files={files} onFilesSelected={setFiles} />
-          </CardContent>
-        </Card>
+        {sampleDealId && sampleSourceDocs ? (
+          <SampleSourceDocsPreview
+            docs={sampleSourceDocs}
+            onClear={handleClearSample}
+          />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Source Documents</CardTitle>
+              <CardDescription>
+                Upload supporting documents (prior financials, capital account data, etc.).
+                These will be scanned and used to fill in your generated documents.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DocumentUploader files={files} onFilesSelected={setFiles} />
+            </CardContent>
+          </Card>
+        )}
 
         {/* -------------------------------------------------------- */}
         {/*  Actions                                                  */}

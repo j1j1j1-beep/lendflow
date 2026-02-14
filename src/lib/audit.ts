@@ -59,6 +59,7 @@ export type AuditAction =
   | "capital.doc.regenerated"
   | "capital.doc.downloaded"
   | "capital.doc.package_downloaded"
+  | "capital.sample_created"
   // M&A Deals
   | "ma.project_created"
   | "ma.project_updated"
@@ -72,6 +73,7 @@ export type AuditAction =
   | "ma.doc.regenerated"
   | "ma.doc.downloaded"
   | "ma.doc.package_downloaded"
+  | "ma.sample_created"
   // Syndication
   | "syndication.project_created"
   | "syndication.project_updated"
@@ -85,6 +87,7 @@ export type AuditAction =
   | "syndication.doc.regenerated"
   | "syndication.doc.downloaded"
   | "syndication.doc.package_downloaded"
+  | "syndication.sample_created"
   // Compliance (LP Reporting)
   | "compliance.project_created"
   | "compliance.project_updated"
@@ -97,7 +100,8 @@ export type AuditAction =
   | "compliance.doc.saved"
   | "compliance.doc.regenerated"
   | "compliance.doc.downloaded"
-  | "compliance.doc.package_downloaded";
+  | "compliance.doc.package_downloaded"
+  | "compliance.sample_created";
 
 /**
  * Extract client IP address from request headers.

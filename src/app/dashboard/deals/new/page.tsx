@@ -25,6 +25,10 @@ import {
 import { DocumentUploader } from "@/components/DocumentUploader";
 import { MissingDocsDialog } from "@/components/missing-docs-dialog";
 import { fetchMissingSourceDocs } from "@/components/source-doc-checklist";
+import { SampleDealPicker } from "@/components/sample-deal-picker";
+import { SampleSourceDocsPreview } from "@/components/sample-source-docs-preview";
+import { SAMPLE_MA_DEALS } from "@/config/sample-deals/deals";
+import { getMASourceDocs } from "@/config/sample-deals/source-docs/ma-source-docs";
 import type { SourceDocDef } from "@/lib/source-doc-types";
 
 /* ---------- Constants ---------- */
@@ -80,6 +84,53 @@ export default function NewDealPage() {
   /* Source documents & missing-docs flow */
   const [files, setFiles] = useState<File[]>([]);
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+  const [sampleDealId, setSampleDealId] = useState<string | null>(null);
+
+  const sampleSourceDocs = sampleDealId
+    ? getMASourceDocs(sampleDealId)
+    : null;
+
+  const handleLoadSample = (dealId: string) => {
+    const sample = SAMPLE_MA_DEALS.find((d) => d.id === dealId);
+    if (!sample) return;
+    setSampleDealId(dealId);
+    setName(sample.name);
+    setTransactionType(sample.transactionType);
+    setBuyerName(sample.buyerName);
+    setSellerName(sample.sellerName);
+    setTargetCompany(sample.targetCompany);
+    setPurchasePrice(formatNumber(String(sample.purchasePrice)));
+    setCashComponent(formatNumber(String(sample.cashComponent)));
+    setStockComponent(formatNumber(String(sample.stockComponent)));
+    setEarnoutAmount(formatNumber(String(sample.earnoutAmount)));
+    setExclusivityDays(String(sample.exclusivityDays));
+    setDueDiligenceDays(String(sample.dueDiligenceDays));
+    setTargetIndustry(sample.targetIndustry);
+    setGoverningLaw(sample.governingLaw);
+    setNonCompeteYears(String(sample.nonCompeteYears));
+    setEscrowPercent(String(sample.escrowPercent));
+    toast.success("Sample deal loaded. Review the details, then submit.");
+  };
+
+  const handleClearSample = () => {
+    setSampleDealId(null);
+    setName("");
+    setTransactionType("");
+    setBuyerName("");
+    setSellerName("");
+    setTargetCompany("");
+    setPurchasePrice("");
+    setCashComponent("");
+    setStockComponent("");
+    setEarnoutAmount("");
+    setExclusivityDays("");
+    setDueDiligenceDays("");
+    setTargetIndustry("");
+    setGoverningLaw("Delaware");
+    setNonCompeteYears("");
+    setEscrowPercent("");
+    setFiles([]);
+  };
   const [showMissingDocs, setShowMissingDocs] = useState(false);
   const [missingRequired, setMissingRequired] = useState<SourceDocDef[]>([]);
   const [missingOptional, setMissingOptional] = useState<SourceDocDef[]>([]);
@@ -105,6 +156,35 @@ export default function NewDealPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Sample mode: call /api/ma/sample
+    if (sampleDealId) {
+      if (!name.trim()) { toast.error("Project name is required"); return; }
+      if (!transactionType) { toast.error("Transaction type is required"); return; }
+      if (!buyerName.trim()) { toast.error("Buyer name is required"); return; }
+      if (!sellerName.trim()) { toast.error("Seller name is required"); return; }
+      if (!targetCompany.trim()) { toast.error("Target company is required"); return; }
+
+      setSubmitting(true);
+      try {
+        const res = await fetch("/api/ma/sample", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dealId: sampleDealId }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Failed to create sample deal");
+        }
+        const { project } = await res.json();
+        toast.success("Sample deal created! Generating documents...");
+        router.push(`/dashboard/deals/${project.id}`);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+        setSubmitting(false);
+      }
+      return;
+    }
 
     // If project already created (user came back from missing docs to add more files)
     if (createdProjectId) {
@@ -223,6 +303,12 @@ export default function NewDealPage() {
           </div>
         </div>
       </div>
+
+      <SampleDealPicker
+        deals={SAMPLE_MA_DEALS}
+        onSelect={handleLoadSample}
+        moduleName="M&A"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Required fields */}
@@ -504,18 +590,25 @@ export default function NewDealPage() {
         </Card>
 
         {/* Source Documents */}
-        <Card className="transition-shadow duration-200 hover:shadow-md">
-          <CardHeader>
-            <CardTitle>Source Documents</CardTitle>
-            <CardDescription>
-              Upload supporting documents (target financials, tax returns, contracts, etc.).
-              These will be scanned and used to fill in your generated documents.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DocumentUploader files={files} onFilesSelected={setFiles} />
-          </CardContent>
-        </Card>
+        {sampleDealId && sampleSourceDocs ? (
+          <SampleSourceDocsPreview
+            docs={sampleSourceDocs}
+            onClear={handleClearSample}
+          />
+        ) : (
+          <Card className="transition-shadow duration-200 hover:shadow-md">
+            <CardHeader>
+              <CardTitle>Source Documents</CardTitle>
+              <CardDescription>
+                Upload supporting documents (target financials, tax returns, contracts, etc.).
+                These will be scanned and used to fill in your generated documents.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DocumentUploader files={files} onFilesSelected={setFiles} />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Submit buttons */}
         <div className="flex justify-end gap-3 pt-2">

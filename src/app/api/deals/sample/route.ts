@@ -12,10 +12,16 @@ import {
   SAMPLE_EXTRACTIONS,
 } from "@/lib/sample-data";
 import { Prisma } from "@/generated/prisma/client";
+import { SAMPLE_LENDING_DEALS } from "@/config/sample-deals/lending";
+import { getLendingExtractions } from "@/config/sample-deals/lending-extractions";
 
 // POST /api/deals/sample — Create a pre-populated sample deal
 // Skips OCR/extraction. Inserts verified documents + extractions, then
 // triggers the analysis pipeline via Inngest.
+//
+// Body: { dealId?: string }
+//   - If dealId is provided, creates a per-program sample from SAMPLE_LENDING_DEALS
+//   - If dealId is omitted, falls back to the legacy SAMPLE_BORROWER (DSCR deal)
 
 export async function POST(request: NextRequest) {
   const limited = await withRateLimit(request, pipelineLimit);
@@ -29,6 +35,144 @@ export async function POST(request: NextRequest) {
     if (!paywall.allowed) {
       return NextResponse.json({ error: paywall.reason }, { status: 402 });
     }
+
+    const body = await request.json().catch(() => null);
+    const dealId = body?.dealId as string | undefined;
+
+    // ── Per-program path (dealId provided) ──────────────────────────────
+    if (dealId) {
+      const sampleDeal = SAMPLE_LENDING_DEALS.find((d) => d.id === dealId);
+      if (!sampleDeal) {
+        return NextResponse.json({ error: "Unknown sample deal" }, { status: 400 });
+      }
+
+      const extractionSet = getLendingExtractions(dealId);
+      if (!extractionSet) {
+        return NextResponse.json({ error: "No extraction data for this deal" }, { status: 400 });
+      }
+
+      // Prevent duplicate
+      const existing = await prisma.deal.findFirst({
+        where: { orgId: org.id, borrowerName: sampleDeal.borrowerName },
+      });
+      if (existing) {
+        return NextResponse.json(
+          { error: "Sample project already exists. Delete it first or choose a different sample." },
+          { status: 400 },
+        );
+      }
+
+      // Create Deal
+      const rateDecimal = sampleDeal.proposedRate / 100;
+      const deal = await prisma.deal.create({
+        data: {
+          borrowerName: sampleDeal.borrowerName,
+          loanAmount: sampleDeal.loanAmount,
+          loanPurpose: sampleDeal.loanPurpose,
+          loanType: sampleDeal.loanProgramId,
+          loanProgramId: sampleDeal.loanProgramId,
+          proposedRate: rateDecimal,
+          proposedTerm: sampleDeal.proposedTerm,
+          propertyAddress: sampleDeal.propertyAddress,
+          orgId: org.id,
+          userId: user.id,
+        },
+      });
+
+      // Create Document + Extraction records from the extraction set
+      for (const doc of extractionSet.documents) {
+        const s3Key = `${org.id}/${deal.id}/sample/${doc.fileName}`;
+
+        const document = await prisma.document.create({
+          data: {
+            dealId: deal.id,
+            fileName: doc.fileName,
+            s3Key,
+            fileSize: 0,
+            docType: doc.docType as any,
+            docYear: doc.year ?? null,
+            status: "VERIFIED",
+          },
+        });
+
+        // Find matching extraction by docType + year
+        const ext = extractionSet.extractions.find(
+          (e) => e.docType === doc.docType && (e.year ?? null) === (doc.year ?? null),
+        );
+
+        if (ext) {
+          await prisma.extraction.create({
+            data: {
+              documentId: document.id,
+              dealId: deal.id,
+              model: "sample-data",
+              promptVersion: "sample-v1",
+              structuredData: ext.data as Prisma.InputJsonValue,
+              rawResponse: {} as Prisma.InputJsonValue,
+              validationErrors: [] as Prisma.InputJsonValue,
+              tokensUsed: 0,
+              costUsd: 0,
+            },
+          });
+        }
+      }
+
+      // Create VerificationReport from the extraction set
+      await prisma.verificationReport.create({
+        data: {
+          dealId: deal.id,
+          mathChecks: extractionSet.verification.mathChecks as Prisma.InputJsonValue,
+          mathPassed: extractionSet.verification.mathPassed,
+          mathFailed: extractionSet.verification.mathFailed,
+          crossDocChecks: extractionSet.verification.crossDocChecks as Prisma.InputJsonValue,
+          crossDocPassed: extractionSet.verification.crossDocPassed,
+          crossDocFailed: extractionSet.verification.crossDocFailed,
+          crossDocWarnings: extractionSet.verification.crossDocWarnings,
+          textractChecks: [] as Prisma.InputJsonValue,
+          textractAgreed: 0,
+          textractDisagreed: 0,
+          fieldVerification: {
+            totalFields: extractionSet.verification.mathPassed + extractionSet.verification.crossDocPassed,
+            verifiedFields: extractionSet.verification.mathPassed + extractionSet.verification.crossDocPassed,
+            unverifiedFields: 0,
+            confidence: 1.0,
+          } as Prisma.InputJsonValue,
+          overallStatus: "PASS",
+        },
+      });
+
+      // Update deal status and trigger pipeline
+      await prisma.deal.update({
+        where: { id: deal.id },
+        data: { status: "ANALYZING" },
+      });
+
+      await inngest.send({
+        name: "deal/sample-process",
+        data: { dealId: deal.id, triggeredAt: Date.now() },
+      });
+
+      void logAudit({
+        orgId: org.id,
+        userId: user.id,
+        userEmail: user.email,
+        dealId: deal.id,
+        action: "deal.sample_created",
+        metadata: {
+          dealId,
+          borrowerName: sampleDeal.borrowerName,
+          loanAmount: sampleDeal.loanAmount,
+          loanProgramId: sampleDeal.loanProgramId,
+        },
+      });
+
+      return NextResponse.json(
+        { deal, message: "Sample deal created. Processing..." },
+        { status: 201 },
+      );
+    }
+
+    // ── Legacy path (no dealId — original DSCR sample) ──────────────────
 
     // Prevent duplicate sample deals
     const existingSample = await prisma.deal.findFirst({
