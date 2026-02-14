@@ -8,7 +8,7 @@ import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 const DOCUMENTS = [
   {
     name: "Letter of Intent",
-    desc: "Your opening offer. Purchase price, deal structure, exclusivity period, and the conditions before definitive agreement.",
+    desc: "Your opening offer. Purchase price, deal structure, exclusivity period, and the conditions before you move to a definitive agreement.",
   },
   {
     name: "Non-Disclosure Agreement",
@@ -16,11 +16,11 @@ const DOCUMENTS = [
   },
   {
     name: "Purchase Agreement",
-    desc: "The binding contract. 25 to 40 seller reps, working capital adjustment, escrow mechanics, indemnification caps, and a MAC clause with 9 standard carveouts. Changes shape based on deal type.",
+    desc: "The binding contract. 25 to 40 seller reps, working capital adjustment, escrow mechanics, indemnification caps, and a MAC clause with 9 standard carveouts. Adapts to your deal structure.",
   },
   {
     name: "Due Diligence Checklist",
-    desc: "Structured list of everything your team reviews before close. Financial, legal, tax, environmental, IP, employment. Pure checklist, no AI language.",
+    desc: "Structured list of everything your team reviews before close. Financial, legal, tax, environmental, IP, employment.",
   },
   {
     name: "Disclosure Schedules",
@@ -28,7 +28,7 @@ const DOCUMENTS = [
   },
   {
     name: "Closing Checklist",
-    desc: "Every deliverable, signature, and filing at close. Tracks status. No AI, just organized task tracking.",
+    desc: "Every deliverable, signature, and filing at close. Tracks status across workstreams.",
   },
 ];
 
@@ -47,24 +47,20 @@ export default function DealsPage() {
       <MarketingNav />
 
       {/* Hero */}
-      <section className="relative w-full hero-glow hero-glow-amber">
-        <div className="absolute inset-0 bg-grid-pattern opacity-50" />
+      <section className="relative w-full hero-light bg-noise">
+        <div className="absolute inset-0 bg-grid-pattern opacity-40" />
         <div className="mx-auto max-w-6xl px-6 pt-28 pb-20 sm:pt-36 sm:pb-28 lg:pt-44 lg:pb-32 relative z-10">
           <FadeIn>
             <div className="max-w-3xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
-                  <Handshake className="h-5 w-5" />
-                </div>
-                <span className="text-sm font-semibold uppercase tracking-widest text-amber-400">
-                  Deals / M&A
-                </span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3.5 py-1.5 text-sm text-muted-foreground mb-6">
+                <Handshake className="h-3.5 w-3.5" />
+                Deals / M&A
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem] leading-[1.1]">
-                You found a target.
+                Six acquisition documents
                 <br />
-                <span className="text-gradient-amber">
-                  Get the docs done before the deal slips.
+                <span className="text-muted-foreground">
+                  from one set of deal terms.
                 </span>
               </h1>
               <p className="mt-8 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
@@ -98,7 +94,7 @@ export default function DealsPage() {
 
       {/* Documents */}
       <section className="w-full relative">
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
         <div className="bg-muted/20 bg-dot-pattern">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
@@ -107,9 +103,9 @@ export default function DealsPage() {
                   Six documents, from offer to close
                 </h2>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
-                  Four are legal documents with real language. Two are pure
-                  checklists. All six are generated from the same deal terms so
-                  nothing contradicts.
+                  All six are generated from the same deal terms so nothing
+                  contradicts. Four are legal documents with real language, two
+                  are structured checklists.
                 </p>
               </div>
             </FadeIn>
@@ -117,9 +113,9 @@ export default function DealsPage() {
             <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
               {DOCUMENTS.map((doc) => (
                 <StaggerItem key={doc.name}>
-                  <div className="rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-amber-500/20 card-glow-border h-full">
+                  <div className="rounded-xl bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
                     <div className="flex items-center gap-2.5 mb-3">
-                      <CheckCircle2 className="h-4 w-4 text-amber-500 shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-foreground/40 shrink-0" />
                       <h3 className="text-sm font-semibold text-card-foreground">{doc.name}</h3>
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed">{doc.desc}</p>
@@ -129,7 +125,7 @@ export default function DealsPage() {
             </Stagger>
           </div>
         </div>
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
       </section>
 
       {/* Transaction Types */}
@@ -152,9 +148,9 @@ export default function DealsPage() {
           <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
             {TRANSACTION_TYPES.map((type) => (
               <StaggerItem key={type.name}>
-                <div className="rounded-xl border bg-card p-5 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 card-glow-border h-full">
+                <div className="rounded-xl bg-card p-5 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
                   <div className="flex items-center gap-2.5 mb-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-foreground/40" />
                     <h3 className="text-sm font-semibold text-card-foreground">{type.name}</h3>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed pl-4">{type.desc}</p>
@@ -167,13 +163,13 @@ export default function DealsPage() {
 
       {/* Regulatory */}
       <section className="w-full relative">
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
         <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="max-w-3xl mx-auto">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
-                  Regulatory thresholds calculated, not guessed
+                  Regulatory thresholds calculated at current rates
                 </h2>
                 <p className="text-muted-foreground leading-relaxed mb-10">
                   M&A deals trigger filing requirements, tax elections, and
@@ -211,12 +207,12 @@ export default function DealsPage() {
                       ],
                     },
                   ].map((col) => (
-                    <div key={col.title} className="rounded-xl border bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 card-glow-border">
-                      <h3 className="text-sm font-semibold text-amber-400 mb-4">{col.title}</h3>
+                    <div key={col.title} className="rounded-xl bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine">
+                      <h3 className="text-sm font-semibold text-foreground mb-4">{col.title}</h3>
                       <ul className="space-y-2.5">
                         {col.items.map((item) => (
                           <li key={item} className="flex items-start gap-2">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-amber-500 mt-0.5 shrink-0" />
+                            <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
                             <span className="text-xs text-muted-foreground leading-relaxed">{item}</span>
                           </li>
                         ))}
@@ -228,20 +224,12 @@ export default function DealsPage() {
             </FadeIn>
           </div>
         </div>
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
       </section>
 
       {/* How It Works */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <FadeIn>
-            <div className="max-w-2xl mx-auto text-center mb-14">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Describe the deal. Get the docs.
-              </h2>
-            </div>
-          </FadeIn>
-
           <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-3" staggerDelay={0.08} initialDelay={0.1}>
             {[
               { n: "01", title: "Enter the deal terms", desc: "Target, price, structure, tax elections, and key terms. A few minutes." },
@@ -250,7 +238,7 @@ export default function DealsPage() {
             ].map((step) => (
               <StaggerItem key={step.n}>
                 <div className="text-center">
-                  <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-amber-500/15 text-amber-400 text-sm font-bold font-mono">
+                  <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-muted text-foreground text-sm font-bold font-mono inset-shine">
                     {step.n}
                   </div>
                   <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
@@ -264,11 +252,11 @@ export default function DealsPage() {
 
       {/* Bottom CTA */}
       <section className="w-full relative">
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
         <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
-              <div className="relative rounded-2xl border bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 hover:border-foreground/15 hover:shadow-xl hero-glow hero-glow-amber">
+              <div className="relative rounded-2xl bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 card-shine hero-light bg-noise">
                 <div className="absolute inset-0 bg-grid-pattern opacity-30" />
                 <div className="relative z-10">
                   <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">

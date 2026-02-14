@@ -20,11 +20,12 @@ const DOCUMENTS = [
   },
   {
     name: "Investor Questionnaire",
-    desc: "Accreditation status, tax ID, entity type. Collected for every investor before accepting capital. No AI involved.",
+    desc: "Accreditation status, tax ID, entity type. Collected for every investor before accepting capital.",
   },
   {
     name: "Pro Forma Financial Projections",
     desc: "Year-by-year model from your inputs. Revenue, expenses, debt service, waterfall distributions, exit proceeds. IRR calculated with Newton-Raphson iteration. 100% math, zero AI.",
+    highlight: true,
   },
 ];
 
@@ -49,24 +50,20 @@ export default function SyndicationPage() {
       <MarketingNav />
 
       {/* Hero */}
-      <section className="relative w-full hero-glow hero-glow-emerald">
-        <div className="absolute inset-0 bg-grid-pattern opacity-50" />
+      <section className="relative w-full hero-light bg-noise">
+        <div className="absolute inset-0 bg-grid-pattern opacity-40" />
         <div className="mx-auto max-w-6xl px-6 pt-28 pb-20 sm:pt-36 sm:pb-28 lg:pt-44 lg:pb-32 relative z-10">
           <FadeIn>
             <div className="max-w-3xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
-                  <Building className="h-5 w-5" />
-                </div>
-                <span className="text-sm font-semibold uppercase tracking-widest text-emerald-400">
-                  Syndication
-                </span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3.5 py-1.5 text-sm text-muted-foreground mb-6">
+                <Building className="h-3.5 w-3.5" />
+                Syndication
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem] leading-[1.1]">
-                You have a property under contract.
+                Five investor-ready documents
                 <br />
-                <span className="text-gradient-emerald">
-                  Your investors want to see numbers.
+                <span className="text-muted-foreground">
+                  and a year-by-year pro forma.
                 </span>
               </h1>
               <p className="mt-8 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
@@ -74,7 +71,7 @@ export default function SyndicationPage() {
                 waterfall structured. Get back 5 investor-ready documents and a
                 year-by-year pro forma with IRR, equity multiples, waterfall
                 distributions, and sensitivity analysis. The financial model
-                is pure math. No AI touches the numbers.
+                is pure math across 12 property types.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -100,7 +97,7 @@ export default function SyndicationPage() {
 
       {/* Documents */}
       <section className="w-full relative">
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
         <div className="bg-muted/20 bg-dot-pattern">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
@@ -114,12 +111,12 @@ export default function SyndicationPage() {
             <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
               {DOCUMENTS.map((doc) => (
                 <StaggerItem key={doc.name}>
-                  <div className={`rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-emerald-500/20 card-glow-border h-full ${doc.name.includes("Pro Forma") ? "sm:col-span-2 lg:col-span-1 ring-1 ring-emerald-500/20" : ""}`}>
+                  <div className={`rounded-xl bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full ${doc.highlight ? "sm:col-span-2 lg:col-span-1 ring-1 ring-border" : ""}`}>
                     <div className="flex items-center gap-2.5 mb-3">
-                      {doc.name.includes("Pro Forma") ? (
-                        <Calculator className="h-4 w-4 text-emerald-500 shrink-0" />
+                      {doc.highlight ? (
+                        <Calculator className="h-4 w-4 text-foreground/50 shrink-0" />
                       ) : (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 text-foreground/40 shrink-0" />
                       )}
                       <h3 className="text-sm font-semibold text-card-foreground">{doc.name}</h3>
                     </div>
@@ -130,10 +127,10 @@ export default function SyndicationPage() {
             </Stagger>
           </div>
         </div>
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
       </section>
 
-      {/* Financial Model Deep Dive */}
+      {/* Financial Model */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <FadeIn>
@@ -142,9 +139,9 @@ export default function SyndicationPage() {
                 The pro forma is 100% math
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                This is the part most sponsors ask about first. The financial
-                model does not use AI at all. Every line is calculated from your
-                inputs using the same methods your Excel model uses.
+                The financial model doesn't use AI at all. Every line is
+                calculated from your inputs using the same methods your Excel
+                model uses.
               </p>
             </div>
           </FadeIn>
@@ -165,12 +162,12 @@ export default function SyndicationPage() {
               },
             ].map((col) => (
               <StaggerItem key={col.title}>
-                <div className="rounded-xl border bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 card-glow-border h-full">
-                  <h3 className="text-sm font-semibold text-emerald-400 mb-4">{col.title}</h3>
+                <div className="rounded-xl bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine h-full">
+                  <h3 className="text-sm font-semibold text-foreground mb-4">{col.title}</h3>
                   <ul className="space-y-2">
                     {col.items.map((item) => (
                       <li key={item} className="flex items-start gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500/70 mt-0.5 shrink-0" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
                         <span className="text-sm text-muted-foreground">{item}</span>
                       </li>
                     ))}
@@ -184,7 +181,7 @@ export default function SyndicationPage() {
 
       {/* Property Types */}
       <section className="w-full relative">
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
         <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
@@ -195,7 +192,7 @@ export default function SyndicationPage() {
                 <p className="mt-4 text-muted-foreground leading-relaxed">
                   A hotel runs at 55-75% expenses. Industrial runs at 25-35%.
                   Residential depreciates over 27.5 years, commercial over 39.
-                  The model adjusts all of this based on what you are buying.
+                  The model adjusts based on what you are buying.
                 </p>
               </div>
             </FadeIn>
@@ -203,7 +200,7 @@ export default function SyndicationPage() {
             <Stagger className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3" staggerDelay={0.03} initialDelay={0.1}>
               {PROPERTY_TYPES.map((type) => (
                 <StaggerItem key={type.name}>
-                  <div className="rounded-xl border bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/20 h-full">
+                  <div className="rounded-xl bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 card-shine h-full">
                     <h3 className="text-sm font-semibold text-card-foreground mb-2">{type.name}</h3>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="tabular-nums">{type.expense}</span>
@@ -224,7 +221,7 @@ export default function SyndicationPage() {
             </FadeIn>
           </div>
         </div>
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
       </section>
 
       {/* How It Works */}
@@ -238,7 +235,7 @@ export default function SyndicationPage() {
             ].map((step) => (
               <StaggerItem key={step.n}>
                 <div className="text-center">
-                  <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 text-sm font-bold font-mono">
+                  <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-muted text-foreground text-sm font-bold font-mono inset-shine">
                     {step.n}
                   </div>
                   <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
@@ -252,19 +249,19 @@ export default function SyndicationPage() {
 
       {/* Bottom CTA */}
       <section className="w-full relative">
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
         <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
-              <div className="relative rounded-2xl border bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 hover:border-foreground/15 hover:shadow-xl hero-glow hero-glow-emerald">
+              <div className="relative rounded-2xl bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 card-shine hero-light bg-noise">
                 <div className="absolute inset-0 bg-grid-pattern opacity-30" />
                 <div className="relative z-10">
                   <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                     Model a deal for free. Check every number.
                   </h2>
                   <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                    One deal, no credit card. All 5 documents and the full
-                    financial model. Download everything and verify it yourself.
+                    One deal. All 5 documents and the full financial model.
+                    Download everything and verify it yourself.
                   </p>
                   <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                     <SignInButton mode="modal">

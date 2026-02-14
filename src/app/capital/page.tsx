@@ -9,7 +9,7 @@ const DOCUMENTS = [
   {
     name: "Private Placement Memorandum",
     tag: "PPM",
-    description: "Fund strategy, fee structure, risk factors, and every disclosure your investors need. This is the document they actually read before writing a check.",
+    description: "Fund strategy, fee structure, risk factors, and every disclosure your investors need before they write a check.",
   },
   {
     name: "Subscription Agreement",
@@ -24,12 +24,12 @@ const DOCUMENTS = [
   {
     name: "Investor Questionnaire",
     tag: "IQ",
-    description: "Accreditation status, tax ID, entity type, identity verification. Collects everything you need before accepting capital. No AI involved.",
+    description: "Accreditation status, tax ID, entity type, identity verification. Collects everything you need before accepting capital.",
   },
   {
     name: "Side Letter Template",
     tag: "SL",
-    description: "Fee discounts, co-investment rights, information rights, MFN clauses. Custom terms for specific investors, templated so you can issue them quickly.",
+    description: "Fee discounts, co-investment rights, information rights, MFN clauses. Custom terms for specific investors, templated for quick issuance.",
   },
   {
     name: "Form D Draft",
@@ -39,7 +39,7 @@ const DOCUMENTS = [
 ];
 
 const FUND_TYPES = [
-  { name: "Private Equity", desc: "Buyouts, growth, turnarounds. Hold period and carry waterfall reflected." },
+  { name: "Private Equity", desc: "Buyouts, growth, turnarounds. Hold period and carry waterfall reflected in every doc." },
   { name: "Venture Capital", desc: "Seed through growth. Pro rata, follow-on reserves, longer fund life." },
   { name: "Real Estate", desc: "Acquisition, development, value-add. Property risk factors and capital calls." },
   { name: "Hedge Fund", desc: "Long/short, macro, multi-strat. Redemptions, lockups, gates, high-water marks." },
@@ -53,29 +53,29 @@ export default function CapitalPage() {
       <MarketingNav />
 
       {/* Hero */}
-      <section className="relative w-full hero-glow hero-glow-violet">
-        <div className="absolute inset-0 bg-grid-pattern opacity-50" />
+      <section className="relative w-full hero-light bg-noise">
+        <div className="absolute inset-0 bg-grid-pattern opacity-40" />
         <div className="mx-auto max-w-6xl px-6 pt-28 pb-20 sm:pt-36 sm:pb-28 lg:pt-44 lg:pb-32 relative z-10">
           <FadeIn>
             <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3.5 py-1.5 text-sm text-violet-400 mb-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3.5 py-1.5 text-sm text-muted-foreground mb-6">
                 <Building2 className="h-3.5 w-3.5" />
                 Capital
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem] leading-[1.1]">
-                Raising a fund?
+                Six fund formation documents
                 <br />
-                <span className="text-gradient-violet">
-                  Get all six documents in one generation.
+                <span className="text-muted-foreground">
+                  from one set of terms.
                 </span>
               </h1>
               <p className="mt-8 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
                 Before you can talk to your first investor, you need a PPM,
                 subscription agreement, operating agreement, investor
-                questionnaire, side letter template, and Form D. Most firms
-                pay $50K to $100K in outside counsel to get those drafted.
-                OpenShut generates them in minutes with consistent terms across
-                every document.
+                questionnaire, side letter template, and Form D. Most firms pay
+                $50K to $100K in outside counsel to get those drafted. OpenShut
+                generates them in minutes with consistent terms across every
+                document.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -101,7 +101,7 @@ export default function CapitalPage() {
 
       {/* Documents */}
       <section className="w-full relative">
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
         <div className="bg-muted/20 bg-dot-pattern">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
@@ -120,9 +120,9 @@ export default function CapitalPage() {
             <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
               {DOCUMENTS.map((doc) => (
                 <StaggerItem key={doc.name}>
-                  <div className="rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-violet-500/20 card-glow-border h-full">
+                  <div className="rounded-xl bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="inline-flex items-center justify-center rounded-md bg-violet-500/10 px-2 py-0.5 text-xs font-bold text-violet-400 tracking-wide">
+                      <span className="inline-flex items-center justify-center rounded-md bg-muted px-2 py-0.5 text-xs font-bold text-foreground/70 tracking-wide inset-shine">
                         {doc.tag}
                       </span>
                       <h3 className="text-sm font-semibold text-card-foreground">{doc.name}</h3>
@@ -134,7 +134,7 @@ export default function CapitalPage() {
             </Stagger>
           </div>
         </div>
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
       </section>
 
       {/* Fund Types */}
@@ -148,7 +148,7 @@ export default function CapitalPage() {
               <p className="mt-4 text-muted-foreground leading-relaxed">
                 A venture fund has different risk factors, redemption terms, and
                 disclosure requirements than a hedge fund or credit fund. Pick
-                your type and the documents change to match.
+                your type and the documents adapt to match.
               </p>
             </div>
           </FadeIn>
@@ -156,9 +156,9 @@ export default function CapitalPage() {
           <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
             {FUND_TYPES.map((fund) => (
               <StaggerItem key={fund.name}>
-                <div className="rounded-xl border bg-card p-5 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 card-glow-border h-full">
+                <div className="rounded-xl bg-card p-5 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
                   <div className="flex items-center gap-2.5 mb-2">
-                    <Building2 className="h-4 w-4 text-violet-500 shrink-0" />
+                    <Building2 className="h-4 w-4 text-foreground/50 shrink-0" />
                     <h3 className="text-sm font-semibold text-card-foreground">{fund.name}</h3>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">{fund.desc}</p>
@@ -171,18 +171,20 @@ export default function CapitalPage() {
 
       {/* Compliance */}
       <section className="w-full relative">
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
         <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="max-w-3xl mx-auto">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
-                  Securities compliance handled
+                  Securities compliance checks
                 </h2>
                 <p className="text-muted-foreground leading-relaxed mb-10">
-                  Fund formation lives at the intersection of securities law,
-                  tax law, and state regulations. The system checks your documents
-                  against the rules that apply to your specific fund structure.
+                  About 30 checks run across your documents before you download
+                  them. The right exemption type is applied, accreditation
+                  requirements match the offering, and investor limits are
+                  enforced. You still verify everything, but you start from a
+                  clean baseline.
                 </p>
 
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -197,7 +199,7 @@ export default function CapitalPage() {
                     "Form D pre-filled and ready to file within the 15-day window",
                   ].map((item) => (
                     <div key={item} className="flex items-start gap-2.5 p-3 rounded-lg transition-colors hover:bg-muted/50">
-                      <CheckCircle2 className="h-4 w-4 text-violet-500 mt-0.5 shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-foreground/40 mt-0.5 shrink-0" />
                       <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
                     </div>
                   ))}
@@ -206,7 +208,7 @@ export default function CapitalPage() {
             </FadeIn>
           </div>
         </div>
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
       </section>
 
       {/* How It Works */}
@@ -215,7 +217,7 @@ export default function CapitalPage() {
           <FadeIn>
             <div className="max-w-2xl mb-14">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Five minutes of input. Six documents out.
+                Five minutes of input, six documents out
               </h2>
             </div>
           </FadeIn>
@@ -227,8 +229,8 @@ export default function CapitalPage() {
               { n: "03", title: "Edit, download, send to counsel", desc: "Make changes inline. Export as Word or PDF. Your attorney reviews a first draft instead of starting from a blank engagement letter." },
             ].map((step) => (
               <StaggerItem key={step.n}>
-                <div className="rounded-xl border bg-card p-6 sm:p-8 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 card-glow-border h-full">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold mb-5 font-mono">
+                <div className="rounded-xl bg-card p-6 sm:p-8 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-foreground text-sm font-bold mb-5 font-mono inset-shine">
                     {step.n}
                   </div>
                   <h3 className="text-base font-semibold text-card-foreground">{step.title}</h3>
@@ -242,11 +244,11 @@ export default function CapitalPage() {
 
       {/* Bottom CTA */}
       <section className="w-full relative">
-        <div className="section-glow-divider" />
+        <div className="section-divider" />
         <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
-              <div className="relative rounded-2xl border bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 hover:border-foreground/15 hover:shadow-xl hero-glow hero-glow-violet">
+              <div className="relative rounded-2xl bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 card-shine hero-light bg-noise">
                 <div className="absolute inset-0 bg-grid-pattern opacity-30" />
                 <div className="relative z-10">
                   <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">

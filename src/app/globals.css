@@ -242,71 +242,59 @@
      MARKETING PAGE VISUAL EFFECTS
      ═══════════════════════════════════════════════════ */
 
-  /* Animated aurora gradient for hero backgrounds */
-  @keyframes aurora-drift {
-    0%, 100% {
-      transform: translateX(0) translateY(0) scale(1);
-      opacity: 0.18;
-    }
-    33% {
-      transform: translateX(3%) translateY(-2%) scale(1.03);
-      opacity: 0.22;
-    }
-    66% {
-      transform: translateX(-2%) translateY(1%) scale(0.97);
-      opacity: 0.14;
-    }
+  /* Noise texture overlay */
+  .bg-noise {
+    position: relative;
+  }
+  .bg-noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+    pointer-events: none;
+    z-index: 1;
   }
 
-  .hero-glow {
+  /* Frosted glass card */
+  .glass-card {
+    background: oklch(1 0 0 / 4%);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    border: 1px solid oklch(1 0 0 / 8%);
+  }
+  .glass-card:hover {
+    background: oklch(1 0 0 / 6%);
+    border-color: oklch(1 0 0 / 14%);
+  }
+
+  /* Metallic sheen on hover */
+  @keyframes sheen-slide {
+    0% { transform: translateX(-100%) skewX(-15deg); }
+    100% { transform: translateX(200%) skewX(-15deg); }
+  }
+  .metallic-sheen {
     position: relative;
     overflow: hidden;
   }
-  .hero-glow::before {
+  .metallic-sheen::after {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -25%;
-    width: 150%;
-    height: 200%;
-    background:
-      radial-gradient(ellipse 600px 400px at 30% 25%, oklch(0.55 0.22 260 / 22%), transparent),
-      radial-gradient(ellipse 500px 350px at 70% 55%, oklch(0.6 0.2 290 / 16%), transparent),
-      radial-gradient(ellipse 450px 300px at 50% 40%, oklch(0.5 0.18 230 / 12%), transparent);
-    filter: blur(60px);
-    animation: aurora-drift 20s ease-in-out infinite;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 6%), transparent);
+    transform: translateX(-100%) skewX(-15deg);
     pointer-events: none;
-    z-index: 0;
+    transition: none;
+  }
+  .metallic-sheen:hover::after {
+    animation: sheen-slide 0.6s ease-out;
   }
 
-  /* Module-specific hero glows */
-  .hero-glow-blue::before {
-    background:
-      radial-gradient(ellipse 600px 400px at 25% 20%, oklch(0.55 0.2 240 / 24%), transparent),
-      radial-gradient(ellipse 450px 350px at 65% 55%, oklch(0.6 0.18 260 / 16%), transparent);
-  }
-  .hero-glow-violet::before {
-    background:
-      radial-gradient(ellipse 600px 400px at 25% 20%, oklch(0.5 0.25 290 / 24%), transparent),
-      radial-gradient(ellipse 450px 350px at 65% 55%, oklch(0.55 0.2 310 / 16%), transparent);
-  }
-  .hero-glow-amber::before {
-    background:
-      radial-gradient(ellipse 600px 400px at 25% 20%, oklch(0.7 0.18 70 / 22%), transparent),
-      radial-gradient(ellipse 450px 350px at 65% 55%, oklch(0.75 0.15 85 / 14%), transparent);
-  }
-  .hero-glow-emerald::before {
-    background:
-      radial-gradient(ellipse 600px 400px at 25% 20%, oklch(0.6 0.18 155 / 24%), transparent),
-      radial-gradient(ellipse 450px 350px at 65% 55%, oklch(0.65 0.15 170 / 16%), transparent);
-  }
-  .hero-glow-cyan::before {
-    background:
-      radial-gradient(ellipse 600px 400px at 25% 20%, oklch(0.6 0.15 200 / 24%), transparent),
-      radial-gradient(ellipse 450px 350px at 65% 55%, oklch(0.65 0.12 220 / 16%), transparent);
-  }
-
-  /* Subtle grid pattern overlay */
+  /* Subtle grid pattern overlay - monochrome */
   .bg-grid-pattern {
     background-image:
       linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
@@ -314,95 +302,49 @@
     background-size: 64px 64px;
   }
 
-  /* Dot pattern overlay */
+  /* Dot pattern overlay - monochrome */
   .bg-dot-pattern {
-    background-image: radial-gradient(circle, oklch(1 0 0 / 6%) 1px, transparent 1px);
+    background-image: radial-gradient(circle, oklch(1 0 0 / 5%) 1px, transparent 1px);
     background-size: 24px 24px;
   }
 
-  /* Number glow effects */
-  .number-glow { text-shadow: 0 0 40px oklch(0.9 0 0 / 30%), 0 0 80px oklch(0.9 0 0 / 15%); }
-  .number-glow-blue { text-shadow: 0 0 40px oklch(0.6 0.2 250 / 45%), 0 0 80px oklch(0.6 0.2 250 / 20%); }
-  .number-glow-violet { text-shadow: 0 0 40px oklch(0.6 0.25 290 / 45%), 0 0 80px oklch(0.6 0.25 290 / 20%); }
-  .number-glow-amber { text-shadow: 0 0 40px oklch(0.7 0.2 70 / 45%), 0 0 80px oklch(0.7 0.2 70 / 20%); }
-  .number-glow-emerald { text-shadow: 0 0 40px oklch(0.6 0.2 160 / 45%), 0 0 80px oklch(0.6 0.2 160 / 20%); }
-  .number-glow-cyan { text-shadow: 0 0 40px oklch(0.6 0.15 200 / 45%), 0 0 80px oklch(0.6 0.15 200 / 20%); }
-
-  /* Gradient text per module color */
-  .text-gradient-blue {
-    background: linear-gradient(135deg, oklch(0.65 0.2 240), oklch(0.72 0.17 265));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .text-gradient-violet {
-    background: linear-gradient(135deg, oklch(0.6 0.25 285), oklch(0.68 0.22 310));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .text-gradient-amber {
-    background: linear-gradient(135deg, oklch(0.75 0.18 60), oklch(0.82 0.15 80));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .text-gradient-emerald {
-    background: linear-gradient(135deg, oklch(0.65 0.18 155), oklch(0.72 0.15 175));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .text-gradient-cyan {
-    background: linear-gradient(135deg, oklch(0.65 0.15 200), oklch(0.72 0.12 225));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Gradient section divider */
-  .section-glow-divider {
+  /* Soft divider between sections */
+  .section-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 6%) 10%, oklch(0.6 0.15 260 / 30%) 50%, oklch(1 0 0 / 6%) 90%, transparent);
+    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 10%) 20%, oklch(1 0 0 / 10%) 80%, transparent);
   }
 
-  /* Card with animated gradient border on hover */
-  .card-glow-border {
+  /* Card with subtle white border that brightens on hover */
+  .card-shine {
+    border: 1px solid oklch(1 0 0 / 7%);
+    transition: all 0.25s ease;
+  }
+  .card-shine:hover {
+    border-color: oklch(1 0 0 / 16%);
+    box-shadow: 0 8px 32px oklch(0 0 0 / 40%), inset 0 1px 0 oklch(1 0 0 / 6%);
+  }
+
+  /* Inset glow - top edge highlight like brushed metal */
+  .inset-shine {
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 8%), inset 0 -1px 0 oklch(0 0 0 / 20%);
+  }
+
+  /* Hero section with subtle radial light */
+  .hero-light {
     position: relative;
     overflow: hidden;
   }
-  .card-glow-border::before {
+  .hero-light::before {
     content: '';
     position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, oklch(1 0 0 / 12%), oklch(1 0 0 / 4%) 40%, oklch(0.6 0.15 260 / 20%) 60%, oklch(1 0 0 / 8%));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    -webkit-mask-composite: xor;
+    top: -40%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 600px;
+    background: radial-gradient(ellipse, oklch(1 0 0 / 4%) 0%, transparent 70%);
     pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  .card-glow-border:hover::before {
-    opacity: 1;
-  }
-
-  /* Floating accent orb */
-  @keyframes float-orb {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-15px) scale(1.05); }
-  }
-  .float-orb {
-    animation: float-orb 6s ease-in-out infinite;
-  }
-
-  /* Accent line that runs across sections */
-  .accent-line {
-    height: 2px;
-    background: linear-gradient(90deg, transparent, oklch(0.6 0.2 260 / 50%) 20%, oklch(0.6 0.2 290 / 60%) 50%, oklch(0.6 0.2 260 / 50%) 80%, transparent);
-    border-radius: 1px;
+    z-index: 0;
   }
 }
 
