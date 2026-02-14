@@ -46,7 +46,7 @@ export function MarketingNav() {
 
   return (
     <nav className="w-full border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="mx-auto max-w-6xl flex items-center justify-between px-6 py-4">
+      <div className="mx-auto max-w-7xl flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-8">
           <MarketingLogo />
           <div className="hidden md:flex items-center gap-1">
@@ -104,7 +104,7 @@ export function MarketingNav() {
           {isSignedIn ? (
             <Link
               href="/dashboard"
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
             >
               <LayoutDashboard className="h-4 w-4" />
               Dashboard
@@ -117,7 +117,7 @@ export function MarketingNav() {
                 </button>
               </SignInButton>
               <SignInButton mode="modal">
-                <button className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md">
+                <button className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md">
                   See a Demo
                 </button>
               </SignInButton>
@@ -171,7 +171,7 @@ export function MarketingNav() {
               <Link
                 href="/dashboard"
                 onClick={() => setMobileOpen(false)}
-                className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90"
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
               >
                 <LayoutDashboard className="h-4 w-4" />
                 Dashboard
@@ -184,7 +184,7 @@ export function MarketingNav() {
                   </button>
                 </SignInButton>
                 <SignInButton mode="modal">
-                  <button className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90">
+                  <button className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90">
                     See a Demo
                   </button>
                 </SignInButton>

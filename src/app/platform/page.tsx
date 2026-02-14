@@ -134,7 +134,6 @@ export default function PlatformPage() {
 
       {/* Hero */}
       <section className="relative w-full hero-light bg-noise">
-        <div className="absolute inset-0 bg-grid-pattern opacity-40" />
         <div className="mx-auto max-w-6xl px-6 pt-28 pb-20 sm:pt-36 sm:pb-24 lg:pt-44 lg:pb-28 relative z-10">
           <FadeIn>
             <div className="max-w-3xl">
@@ -359,7 +358,6 @@ export default function PlatformPage() {
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <FadeIn>
             <div className="relative rounded-2xl bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 card-shine hero-light bg-noise">
-              <div className="absolute inset-0 bg-grid-pattern opacity-30" />
               <div className="relative z-10">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                   See it yourself.

@@ -65,7 +65,6 @@ export default function PricingPage() {
 
       {/* Hero */}
       <section className="relative w-full hero-light bg-noise">
-        <div className="absolute inset-0 bg-grid-pattern opacity-40" />
         <div className="mx-auto max-w-6xl px-6 pt-28 pb-16 sm:pt-36 sm:pb-20 text-center relative z-10">
           <FadeIn>
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem] leading-[1.1]">
@@ -345,8 +344,7 @@ export default function PricingPage() {
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="relative rounded-2xl bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 card-shine hero-light bg-noise">
-                <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-                <div className="relative z-10">
+                  <div className="relative z-10">
                   <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                     See the output before you buy.
                   </h2>
