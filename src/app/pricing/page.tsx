@@ -132,7 +132,7 @@ const FAQ = [
   },
   {
     q: "Is my data secure?",
-    a: "AES-256 encryption at rest. HTTPS in transit. Expiring document links. Organization-level data isolation. Full audit trail on every action. No data used for AI training.",
+    a: "All uploads are encrypted at rest and in transit. Expiring document links. Organization-level data isolation. Full audit trail on every action. We do not use your data for training.",
   },
   {
     q: "How does payment work?",

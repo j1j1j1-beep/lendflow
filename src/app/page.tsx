@@ -88,7 +88,9 @@ export default async function Home() {
               <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
                 OpenShut generates the legal documents that PE firms, lenders, and fund managers
                 produce for every deal. You fill in the details. We give you the docs. Every number
-                verified, every clause compliant. No hallucination, guaranteed.
+                verified, every clause checked against the actual laws for your deal and your state.
+                Then a second pass reviews everything the AI wrote for accuracy and compliance.
+                No hallucination, guaranteed.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -228,11 +230,12 @@ export default async function Home() {
           <Stagger className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
             {[
               { title: "Your data is encrypted", desc: "Every file uploaded is encrypted at rest and in transit. Download links expire automatically." },
-              { title: "Your data is never used for training", desc: "Files are deleted from the AI provider immediately after processing. Nothing is retained or used to train models." },
+              { title: "Your uploads are encrypted and private", desc: "We do not use your data for training. Your documents are processed, generated, and stored for your organization only." },
               { title: "Your firm's data is isolated", desc: "Every query is scoped to your organization. No other firm can see your deals, documents, or data." },
               { title: "Full audit trail", desc: "Every action is logged with timestamps and user identity. You can see who generated what, when." },
               { title: "50-state regulatory compliance", desc: "Documents are checked against the actual federal and state laws that apply to your deal." },
               { title: "Every number is verified twice", desc: "Two independent systems check every figure in your documents. If they disagree, the system flags it." },
+              { title: "AI output is reviewed for compliance", desc: "After the AI writes, a second pass checks every clause against the regulations for your specific deal and state. Nothing goes out unchecked." },
             ].map((item) => (
               <StaggerItem key={item.title}>
                 <div className="rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 h-full">

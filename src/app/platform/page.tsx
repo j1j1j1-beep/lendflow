@@ -45,8 +45,8 @@ const SECURITY_ITEMS = [
     icon: FileText,
   },
   {
-    title: "No AI training on your data",
-    desc: "Files are deleted from the AI provider immediately after processing. Nothing is retained. No model is trained on your documents. Your data goes in, your documents come out, and that is the end of it.",
+    title: "We do not train on your data",
+    desc: "Your uploads are encrypted and processed only for your organization. We do not use your documents, deal data, or any uploaded files for model training.",
     icon: Scale,
   },
 ];
@@ -445,9 +445,9 @@ export default function PlatformPage() {
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     When the system generates a document, relevant data is sent to
                     the AI provider over an encrypted connection. The AI provider
-                    processes the request and returns the result. Your data is
-                    deleted from their systems immediately after processing. The AI
-                    provider does not store, log, or train on your data.
+                    processes the request and returns the result. We do not use
+                    your data for training. Your documents are generated for your
+                    organization only.
                   </p>
                 </div>
                 <div className="rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15">
