@@ -98,7 +98,7 @@ export default async function Home() {
   if (userId) redirect("/dashboard");
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background bg-ambient relative overflow-x-hidden">
+    <div className="flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
       <MarketingNav />
 
       {/* Hero */}
@@ -194,7 +194,7 @@ export default async function Home() {
       {/* Products */}
       <section className="w-full relative">
         <div className="section-divider" />
-        <div className="bg-muted/20 bg-dot-pattern">
+        <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="max-w-2xl mb-16">
@@ -243,7 +243,7 @@ export default async function Home() {
       {/* Trust */}
       <section className="w-full relative">
         <div className="section-divider" />
-        <div className="bg-muted/20 scan-lines">
+        <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="max-w-2xl mx-auto text-center mb-14">
@@ -356,7 +356,7 @@ export default async function Home() {
       {/* Comparison */}
       <section className="w-full relative">
         <div className="section-divider" />
-        <div className="bg-muted/20 scan-lines">
+        <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="max-w-2xl mx-auto text-center mb-14">

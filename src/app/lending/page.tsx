@@ -219,7 +219,7 @@ export default function LendingPage() {
       {/* 14 Loan Programs - Collapsible */}
       <section className="w-full relative">
         <div className="section-divider" />
-        <div className="bg-muted/20 bg-dot-pattern">
+        <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="max-w-2xl mb-14">
@@ -459,7 +459,7 @@ export default function LendingPage() {
       {/* How It Works - Horizontal flow */}
       <section className="w-full relative">
         <div className="section-divider" />
-        <div className="bg-muted/20 bg-dot-pattern">
+        <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8 sm:gap-0">

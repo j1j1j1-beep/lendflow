@@ -285,7 +285,7 @@ export default function PricingPage() {
       {/* Enterprise Details */}
       <section className="w-full relative">
         <div className="section-divider" />
-        <div className="bg-muted/20 bg-dot-pattern">
+        <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="text-center max-w-2xl mx-auto mb-14">

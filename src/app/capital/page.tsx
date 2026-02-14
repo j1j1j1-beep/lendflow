@@ -182,7 +182,7 @@ export default function CapitalPage() {
       {/* 506(b) vs 506(c) - Full width split */}
       <section className="w-full relative">
         <div className="section-divider" />
-        <div className="bg-muted/20 bg-dot-pattern">
+        <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="max-w-2xl mb-14">

@@ -91,7 +91,7 @@ export default function SyndicationPage() {
       {/* Pro Forma - Featured section */}
       <section className="w-full relative">
         <div className="section-divider" />
-        <div className="bg-muted/20 bg-dot-pattern">
+        <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="rounded-2xl bg-card p-8 sm:p-12 card-shine metallic-sheen ring-1 ring-border">
@@ -262,7 +262,7 @@ export default function SyndicationPage() {
       {/* Tax + Risk - Side by side */}
       <section className="w-full relative">
         <div className="section-divider" />
-        <div className="bg-muted/20 bg-dot-pattern">
+        <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <FadeIn delay={0.05}>
