@@ -75,8 +75,8 @@ const TRUST_ITEMS = [
   },
   {
     icon: Calculator,
-    title: "Numbers from rules, not AI",
-    desc: "Interest rates, fees, LTV ratios, tax withholding, HSR thresholds, K-1 allocations. Every number comes from the program rules and regulatory requirements for your specific deal.",
+    title: "Every number is calculated, not generated",
+    desc: "Interest rates, fees, LTV ratios, K-1 allocations, HSR thresholds. Every figure comes from your deal documents and is calculated with hardcoded math that cannot get an answer wrong. AI writes the legal language. It never picks a number.",
   },
   {
     icon: FileCheck,
@@ -95,21 +95,21 @@ export default async function Home() {
   if (userId) redirect("/dashboard");
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
+    <div className="flex min-h-[100dvh] flex-col bg-background bg-ambient relative overflow-x-hidden">
       <MarketingNav />
 
       {/* Hero */}
-      <section className="relative w-full hero-light bg-noise">
+      <section className="relative w-full hero-light hero-glow bg-noise">
         <div className="absolute inset-0 bg-grid-pattern opacity-40" />
         <div className="mx-auto max-w-6xl px-6 pt-28 pb-20 sm:pt-36 sm:pb-28 lg:pt-44 lg:pb-32 relative z-10">
           <FadeIn>
             <div className="max-w-3xl">
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem] leading-[1.1]">
-                Legal documents for your
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.5rem] leading-[1.1]">
+                <span className="text-silver">Legal documents for your</span>
                 <br />
-                next deal.
+                <span className="text-silver">next deal.</span>
                 <br />
-                <span className="text-muted-foreground">
+                <span className="text-silver-shimmer">
                   Ready in minutes.
                 </span>
               </h1>
@@ -118,18 +118,18 @@ export default async function Home() {
                 document your deal requires. Every output runs through a
                 compliance check covering legal language, financial accuracy,
                 and regulatory requirements for your state.
-                Zero hallucination, guaranteed.
+                Hallucination-free, guaranteed.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
-                  <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
+                  <button className="btn-glow group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-300 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-1 active:scale-[0.97]">
                     Start a Deal Free
-                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                   </button>
                 </SignInButton>
                 <Link
                   href="/pricing"
-                  className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted hover:border-foreground/15"
+                  className="inline-flex h-12 items-center justify-center rounded-lg border border-border/60 px-8 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:border-foreground/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20"
                 >
                   See Pricing
                 </Link>
@@ -143,7 +143,7 @@ export default async function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="w-full">
+      <section className="w-full silver-line">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <FadeIn>
             <div className="max-w-2xl mb-16">
@@ -167,7 +167,7 @@ export default async function Home() {
               {
                 n: "02",
                 title: "Generate the package",
-                desc: "Every document your deal requires is generated as a set. Numbers come from program rules. Legal language is written around those numbers, then checked against the regulations for your deal and state.",
+                desc: "Every document your deal requires is generated as a set. Financial figures are calculated exactly to the specification of each document type. Interest rates, fees, allocations, and thresholds are all hardcoded math. AI writes the legal language around those figures, not the other way around.",
               },
               {
                 n: "03",
@@ -176,8 +176,8 @@ export default async function Home() {
               },
             ].map((step) => (
               <StaggerItem key={step.n}>
-                <div className="rounded-xl bg-card p-6 sm:p-8 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-foreground text-sm font-bold mb-5 font-mono inset-shine">
+                <div className="rounded-xl bg-card p-6 sm:p-8 card-glow metallic-sheen h-full">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg badge-metallic text-foreground text-sm font-bold mb-5 font-mono">
                     {step.n}
                   </div>
                   <h3 className="text-base font-semibold text-card-foreground">{step.title}</h3>
@@ -211,10 +211,10 @@ export default async function Home() {
               {MODULES.map((mod) => (
                 <StaggerItem key={mod.name}>
                   <Link href={mod.href} className="block group">
-                    <div className="rounded-xl bg-card p-6 sm:p-8 transition-all duration-300 ease-out hover:-translate-y-0.5 card-shine metallic-sheen">
+                    <div className="rounded-xl bg-card p-6 sm:p-8 card-glow metallic-sheen">
                       <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
                         <div className="flex items-center gap-3 sm:min-w-[200px]">
-                          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-muted text-foreground transition-all duration-300 group-hover:scale-110 inset-shine">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-xl badge-metallic text-foreground transition-all duration-300 group-hover:scale-110">
                             <mod.icon className="h-5 w-5" />
                           </div>
                           <div>
@@ -241,7 +241,7 @@ export default async function Home() {
       {/* Trust */}
       <section className="w-full relative">
         <div className="section-divider" />
-        <div className="bg-muted/20">
+        <div className="bg-muted/20 scan-lines">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="max-w-2xl mx-auto text-center mb-14">
@@ -254,9 +254,9 @@ export default async function Home() {
             <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2" staggerDelay={0.06} initialDelay={0.1}>
               {TRUST_ITEMS.map((item) => (
                 <StaggerItem key={item.title}>
-                  <div className="rounded-xl bg-card p-6 sm:p-7 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
+                  <div className="rounded-xl bg-card p-6 sm:p-7 card-glow metallic-sheen h-full">
                     <div className="flex items-start gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted inset-shine">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg badge-metallic">
                         <item.icon className="h-5 w-5 text-foreground" />
                       </div>
                       <div>
@@ -282,6 +282,75 @@ export default async function Home() {
         <div className="section-divider" />
       </section>
 
+      {/* How Accuracy Works */}
+      <section className="w-full silver-line">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <FadeIn>
+            <div className="max-w-2xl mb-14">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                How accuracy works
+              </h2>
+              <p className="mt-4 text-muted-foreground leading-relaxed">
+                AI writes the legal language. It never picks a number.
+              </p>
+            </div>
+          </FadeIn>
+
+          <Stagger className="grid grid-cols-1 gap-5" staggerDelay={0.08} initialDelay={0.1}>
+            {[
+              {
+                n: "01",
+                title: "Numbers come from your documents",
+                desc: "Every financial figure in your output is pulled directly from what you upload or enter. Loan amounts, purchase prices, investor commitments, fund sizes. The system calculates rates, fees, and allocations using hardcoded math specific to that document type. It cannot get an answer wrong.",
+              },
+              {
+                n: "02",
+                title: "Legal language is checked against real statutes",
+                desc: "After AI writes default provisions, risk factors, and indemnification clauses, every clause is checked against the specific federal and state regulations for your deal. Citations point to actual statute sections you can look up.",
+              },
+              {
+                n: "03",
+                title: "Uploaded financials are cross-checked automatically",
+                desc: "When you upload financials, two independent systems extract every figure. If they disagree by more than $1, the system flags it for your review. You always have your original documents to check against.",
+              },
+            ].map((point) => (
+              <StaggerItem key={point.n}>
+                <div className="rounded-xl bg-card p-6 sm:p-8 card-glow metallic-sheen">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg badge-metallic text-foreground text-sm font-bold tabular-nums font-mono">
+                      {point.n}
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-card-foreground mb-2">{point.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{point.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </Stagger>
+
+          <FadeIn delay={0.3}>
+            <div className="mt-8 rounded-xl border border-border bg-muted/30 p-6 sm:p-8">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-foreground/50 mt-0.5 shrink-0" />
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-1">
+                    Hallucination-free, guaranteed
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Financial figures are calculated, not generated. Extracted
+                    numbers are cross-checked and flagged if anything is off. AI
+                    handles legal language. Math is handled separately. You always
+                    have your original uploads to verify against.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
       {/* Bottom CTA */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
@@ -298,14 +367,14 @@ export default async function Home() {
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">
-                    <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
+                    <button className="btn-glow group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-300 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-1 active:scale-[0.97]">
                       Start a Deal Free
-                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </button>
                   </SignInButton>
                   <Link
                     href="/pricing"
-                    className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted hover:border-foreground/15"
+                    className="inline-flex h-12 items-center justify-center rounded-lg border border-border/60 px-8 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:border-foreground/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20"
                   >
                     See Pricing
                   </Link>
