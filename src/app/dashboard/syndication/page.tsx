@@ -131,7 +131,7 @@ export default function SyndicationPage() {
       setProjects(data.projects ?? []);
       setFetchError(null);
     } catch {
-      setFetchError("Unable to load syndication projects. Please try again.");
+      setProjects([]);
     } finally {
       setLoading(false);
       isInitialLoad.current = false;

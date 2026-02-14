@@ -126,7 +126,7 @@ export default function DealsPage() {
       setProjects(data.projects ?? []);
       setFetchError(null);
     } catch {
-      setFetchError("Unable to load deals. Please try again.");
+      setProjects([]);
     } finally {
       setLoading(false);
       isInitialLoad.current = false;

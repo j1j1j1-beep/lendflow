@@ -259,7 +259,7 @@ export default function DealsPage() {
                   title: "HSR Act and antitrust",
                   icon: ShieldCheck,
                   items: [
-                    "$119.5M minimum transaction size threshold (2025)",
+                    "$119.5M minimum transaction size threshold (2026)",
                     "6 filing fee tiers: $30K / $105K / $260K / $415K / $830K / $2.335M",
                     "30-day waiting period flagged in timeline",
                     "$54,540/day penalty for gun-jumping violations",

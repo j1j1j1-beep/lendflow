@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OpenShut | Legal Document Automation for PE, Lending & Fund Management",
+  title: "OpenShut | Legal Document Automation",
   description:
-    "Generate complete legal document packages for lending, fund formation, M&A, syndication, and compliance. 59 document types. Numbers from program rules. 50-state regulatory coverage.",
+    "59 document types across lending, fund formation, M&A, real estate syndication, and fund compliance. Zero hallucination on financials. 50-state regulatory coverage.",
 };
 
 export const viewport: Viewport = {

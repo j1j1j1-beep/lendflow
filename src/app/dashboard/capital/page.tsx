@@ -100,7 +100,7 @@ export default function CapitalListPage() {
       setProjects(items);
       setFetchError(null);
     } catch {
-      setFetchError("Unable to load projects. Please try again.");
+      setProjects([]);
     } finally {
       setLoading(false);
       isInitialLoad.current = false;
