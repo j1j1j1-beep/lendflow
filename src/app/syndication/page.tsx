@@ -1,6 +1,6 @@
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Building, Calculator, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, Building, Calculator, ShieldCheck, AlertTriangle, TrendingUp } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
@@ -8,40 +8,35 @@ import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 const DOCUMENTS = [
   {
     name: "Private Placement Memorandum",
-    desc: "Property details, deal structure, projected returns, 19 sections of risk factors, sponsor track record, fee disclosure, tax considerations, and legal disclosures. What your investors read before committing.",
+    desc: "19 sections covering property details, deal structure, projected returns, sponsor track record, risk factors, fee disclosure, tax treatment, and legal disclosures.",
   },
   {
     name: "LLC Operating Agreement",
-    desc: "The syndication entity. Management authority, capital contributions, distribution waterfall with preferred return and promote tiers, transfer restrictions, and dissolution provisions.",
+    desc: "Management authority, capital contributions, distribution waterfall with preferred return and promote tiers, transfer restrictions, dissolution.",
   },
   {
     name: "Subscription Agreement",
-    desc: "Each investor signs this to commit capital. Investment amount, accreditation representations, suitability confirmations, and the terms they agree to. Adjusts for 506(b) or 506(c).",
+    desc: "Capital commitment, accreditation representations, suitability confirmations. Adjusts for 506(b) or 506(c).",
   },
   {
     name: "Investor Questionnaire",
-    desc: "Accreditation status, tax ID, entity type, identity verification. Collected for every investor before accepting capital. Pure template, no AI.",
-  },
-  {
-    name: "Pro Forma Financial Projections",
-    highlight: true,
-    desc: "Year-by-year model from your inputs. Revenue, expenses by category, debt service, NOI, waterfall distributions, exit proceeds, and sensitivity analysis. IRR calculated with Newton-Raphson iteration. 100% math, zero AI.",
+    desc: "Accreditation, tax ID, entity type. Collected for every investor. Pure template.",
   },
 ];
 
 const PROPERTY_TYPES = [
-  { name: "Multifamily", expense: "35-45%", depreciation: "27.5yr" },
-  { name: "Office", expense: "40-50%", depreciation: "39yr" },
-  { name: "Retail", expense: "30-40%", depreciation: "39yr" },
-  { name: "Industrial", expense: "25-35%", depreciation: "39yr" },
-  { name: "Mixed Use", expense: "35-50%", depreciation: "39yr" },
-  { name: "Self Storage", expense: "25-40%", depreciation: "39yr" },
-  { name: "Manufactured Housing", expense: "30-40%", depreciation: "27.5yr" },
-  { name: "Hotel", expense: "55-75%", depreciation: "39yr" },
-  { name: "Triple Net (NNN)", expense: "10-20%", depreciation: "39yr" },
-  { name: "Senior Living", expense: "55-70%", depreciation: "27.5yr" },
-  { name: "Student Housing", expense: "40-50%", depreciation: "27.5yr" },
-  { name: "Build-to-Rent", expense: "30-40%", depreciation: "27.5yr" },
+  { name: "Multifamily", expense: "35-45%", dep: "27.5yr" },
+  { name: "Office", expense: "40-50%", dep: "39yr" },
+  { name: "Retail", expense: "30-40%", dep: "39yr" },
+  { name: "Industrial", expense: "25-35%", dep: "39yr" },
+  { name: "Mixed Use", expense: "35-50%", dep: "39yr" },
+  { name: "Self Storage", expense: "25-40%", dep: "39yr" },
+  { name: "Manufactured Housing", expense: "30-40%", dep: "27.5yr" },
+  { name: "Hotel", expense: "55-75%", dep: "39yr" },
+  { name: "Triple Net (NNN)", expense: "10-20%", dep: "39yr" },
+  { name: "Senior Living", expense: "55-70%", dep: "27.5yr" },
+  { name: "Student Housing", expense: "40-50%", dep: "27.5yr" },
+  { name: "Build-to-Rent", expense: "30-40%", dep: "27.5yr" },
 ];
 
 export default function SyndicationPage() {
@@ -60,18 +55,17 @@ export default function SyndicationPage() {
                 Syndication
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem] leading-[1.1]">
-                Five investor-ready documents
+                Investor docs and a
                 <br />
                 <span className="text-muted-foreground">
-                  and a year-by-year pro forma.
+                  pure-math financial model.
                 </span>
               </h1>
               <p className="mt-8 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
-                Enter the property, the financing, and how you want the
-                waterfall structured. Get back 5 investor-ready documents and a
-                year-by-year pro forma with IRR, equity multiples, waterfall
-                distributions, and sensitivity analysis. The financial model
-                is pure math across 12 property types.
+                Enter the property, financing, and waterfall structure. Get
+                back 5 investor-ready documents and a year-by-year pro forma
+                with IRR, equity multiples, waterfall distributions, and
+                sensitivity analysis across 12 property types.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -95,29 +89,126 @@ export default function SyndicationPage() {
         </div>
       </section>
 
-      {/* Documents */}
+      {/* Pro Forma - Featured section */}
       <section className="w-full relative">
         <div className="section-divider" />
         <div className="bg-muted/20 bg-dot-pattern">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
+              <div className="rounded-2xl bg-card p-8 sm:p-12 card-shine metallic-sheen ring-1 ring-border">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground text-background inset-shine">
+                    <Calculator className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground sm:text-2xl">Pro Forma Financial Projections</h2>
+                    <p className="text-sm text-muted-foreground">100% math. Zero AI. The same methods your Excel model uses.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
+                  <div>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Year-by-year projections</h3>
+                    <ul className="space-y-2">
+                      {["Gross potential rent with vacancy", "Operating expenses by category", "NOI and debt service coverage", "Depreciation (27.5yr or 39yr)", "Free cash flow per year"].map((item) => (
+                        <li key={item} className="flex items-start gap-2">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
+                          <span className="text-sm text-muted-foreground">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Return metrics</h3>
+                    <ul className="space-y-2">
+                      {["IRR (Newton-Raphson iteration)", "Equity multiple / MOIC", "Cash-on-cash return by year", "DPI, RVPI, and TVPI", "Sensitivity on exit cap + occupancy"].map((item) => (
+                        <li key={item} className="flex items-start gap-2">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
+                          <span className="text-sm text-muted-foreground">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Exit analysis</h3>
+                    <ul className="space-y-2">
+                      {["Exit cap rate vs. going-in", "Sale proceeds and costs", "Waterfall at exit", "LP and GP distributions", "Total return over hold period"].map((item) => (
+                        <li key={item} className="flex items-start gap-2">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
+                          <span className="text-sm text-muted-foreground">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+        <div className="section-divider" />
+      </section>
+
+      {/* Waterfall - Stepped visual */}
+      <section className="w-full">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <FadeIn>
+            <div className="max-w-2xl mb-14">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                Waterfall distributions calculated, not estimated
+              </h2>
+              <p className="mt-4 text-muted-foreground leading-relaxed">
+                You define the tiers. The system calculates cumulative returns
+                at every level across the full hold period.
+              </p>
+            </div>
+          </FadeIn>
+
+          <Stagger className="space-y-3" staggerDelay={0.06} initialDelay={0.1}>
+            {[
+              { step: "1", title: "Return of capital", desc: "LPs get their invested capital back first before any profits are split.", color: "bg-muted" },
+              { step: "2", title: "Preferred return", desc: "LPs receive their preferred return hurdle (typically 6-8% annual). Cumulative, not reset each year.", color: "bg-muted" },
+              { step: "3", title: "GP catch-up", desc: "100% of distributions go to the GP until the GP has received their promote share of all profits distributed so far.", color: "bg-foreground/10" },
+              { step: "4", title: "Promote tiers", desc: "Remaining profits split according to tiers you define. Common structures: 70/30, then 60/40, then 50/50 at higher return thresholds.", color: "bg-foreground/10" },
+            ].map((tier) => (
+              <StaggerItem key={tier.step}>
+                <div className="flex gap-4 items-start">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${tier.color} text-foreground text-sm font-bold font-mono inset-shine`}>
+                    {tier.step}
+                  </div>
+                  <div className="flex-1 rounded-xl bg-card p-5 sm:p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine metallic-sheen">
+                    <h3 className="text-sm font-semibold text-card-foreground mb-1">{tier.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{tier.desc}</p>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </div>
+      </section>
+
+      {/* Investor Documents */}
+      <section className="w-full relative">
+        <div className="section-divider" />
+        <div className="bg-muted/20">
+          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+            <FadeIn>
               <div className="max-w-2xl mb-14">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Everything you need before you talk to investors
+                  Four investor documents
                 </h2>
+                <p className="mt-4 text-muted-foreground leading-relaxed">
+                  Plus the pro forma above. Five documents total, generated
+                  from the same deal inputs.
+                </p>
               </div>
             </FadeIn>
 
-            <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
+            <Stagger className="grid grid-cols-1 sm:grid-cols-2 gap-4" staggerDelay={0.06} initialDelay={0.1}>
               {DOCUMENTS.map((doc) => (
                 <StaggerItem key={doc.name}>
-                  <div className={`rounded-xl bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full ${doc.highlight ? "sm:col-span-2 lg:col-span-1 ring-1 ring-border" : ""}`}>
+                  <div className="rounded-xl bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
                     <div className="flex items-center gap-2.5 mb-3">
-                      {doc.highlight ? (
-                        <Calculator className="h-4 w-4 text-foreground/50 shrink-0" />
-                      ) : (
-                        <CheckCircle2 className="h-4 w-4 text-foreground/40 shrink-0" />
-                      )}
+                      <CheckCircle2 className="h-4 w-4 text-foreground/40 shrink-0" />
                       <h3 className="text-sm font-semibold text-card-foreground">{doc.name}</h3>
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed">{doc.desc}</p>
@@ -130,254 +221,146 @@ export default function SyndicationPage() {
         <div className="section-divider" />
       </section>
 
-      {/* Financial Model */}
+      {/* Property Types */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <FadeIn>
-            <div className="max-w-3xl mx-auto text-center mb-14">
+            <div className="max-w-2xl mb-14">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                The pro forma is 100% math
+                12 property types, each modeled differently
               </h2>
-              <p className="mt-4 text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                The financial model does not use AI at all. Every line is
-                calculated from your inputs using the same methods your
-                Excel model uses.
+              <p className="mt-4 text-muted-foreground leading-relaxed">
+                A hotel runs at 55-75% expenses. Industrial runs at 25-35%.
+                Residential depreciates over 27.5 years, commercial over 39.
               </p>
             </div>
           </FadeIn>
 
-          <Stagger className="grid grid-cols-1 gap-5 sm:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
-            {[
-              {
-                title: "Year-by-year projections",
-                items: ["Gross potential rent with vacancy and concessions", "Operating expenses broken out by category", "Net operating income and debt service coverage", "Depreciation (27.5yr residential or 39yr commercial)", "Free cash flow per year through the hold"],
-              },
-              {
-                title: "Waterfall distributions",
-                items: ["Preferred return hurdle (6-8% typical)", "GP catch-up phase (100% to GP until caught up)", "Promote tiers you define (70/30, 60/40, 50/50)", "Cumulative return tracking across the full hold", "LP and GP split calculated at every level"],
-              },
-              {
-                title: "Return metrics",
-                items: ["IRR calculated with Newton-Raphson iteration", "Equity multiple / MOIC", "Cash-on-cash return by year", "DPI, RVPI, and TVPI", "Sensitivity tables on exit cap rate and occupancy"],
-              },
-            ].map((col) => (
-              <StaggerItem key={col.title}>
-                <div className="rounded-xl bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine metallic-sheen h-full">
-                  <h3 className="text-sm font-semibold text-foreground mb-4">{col.title}</h3>
-                  <ul className="space-y-2.5">
-                    {col.items.map((item) => (
-                      <li key={item} className="flex items-start gap-2">
+          <Stagger className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3" staggerDelay={0.03} initialDelay={0.1}>
+            {PROPERTY_TYPES.map((type) => (
+              <StaggerItem key={type.name}>
+                <div className="rounded-xl bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 card-shine h-full">
+                  <h3 className="text-sm font-semibold text-card-foreground mb-2">{type.name}</h3>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="tabular-nums">{type.expense}</span>
+                    <span className="text-border">|</span>
+                    <span className="tabular-nums">{type.dep}</span>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </Stagger>
+          <FadeIn delay={0.2}>
+            <div className="mt-4 flex items-center justify-center gap-6 text-xs text-muted-foreground/60">
+              <span>Expense ratio</span>
+              <span>|</span>
+              <span>Depreciation</span>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Tax + Risk - Side by side */}
+      <section className="w-full relative">
+        <div className="section-divider" />
+        <div className="bg-muted/20 bg-dot-pattern">
+          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <FadeIn delay={0.05}>
+                <div className="rounded-xl bg-card p-6 sm:p-8 card-shine metallic-sheen h-full">
+                  <div className="flex items-center gap-2 mb-5">
+                    <TrendingUp className="h-4 w-4 text-foreground/50" />
+                    <h3 className="text-base font-semibold text-foreground">Tax structures in the documents</h3>
+                  </div>
+                  <ul className="space-y-3">
+                    {[
+                      "Bonus depreciation tracked at current TCJA phase-down rates",
+                      "Cost segregation assumptions by property type",
+                      "1031 exchange: 45-day ID, 180-day close, QI requirements",
+                      "Qualified Opportunity Zone: 10-year hold, 90% asset test",
+                      "Passive loss rules: $100K/$150K phase-out (Section 469)",
+                      "Real Estate Professional Status: 750+ hours noted in PPM",
+                      "UBTI threshold ($1K) flagged for IRA and trust investors",
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-2.5">
                         <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
                         <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </div>
-      </section>
+              </FadeIn>
 
-      {/* Property Types */}
-      <section className="w-full relative">
-        <div className="section-divider" />
-        <div className="bg-muted/20">
-          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-            <FadeIn>
-              <div className="max-w-2xl mb-14">
-                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  12 property types, each modeled differently
-                </h2>
-                <p className="mt-4 text-muted-foreground leading-relaxed">
-                  A hotel runs at 55-75% expenses. Industrial runs at 25-35%.
-                  Residential depreciates over 27.5 years, commercial over 39.
-                  The model adjusts based on what you are buying.
-                </p>
-              </div>
-            </FadeIn>
-
-            <Stagger className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3" staggerDelay={0.03} initialDelay={0.1}>
-              {PROPERTY_TYPES.map((type) => (
-                <StaggerItem key={type.name}>
-                  <div className="rounded-xl bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 card-shine h-full">
-                    <h3 className="text-sm font-semibold text-card-foreground mb-2">{type.name}</h3>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="tabular-nums">{type.expense}</span>
-                      <span className="text-border">|</span>
-                      <span className="tabular-nums">{type.depreciation}</span>
-                    </div>
+              <FadeIn delay={0.1}>
+                <div className="rounded-xl bg-card p-6 sm:p-8 card-shine metallic-sheen h-full">
+                  <div className="flex items-center gap-2 mb-5">
+                    <ShieldCheck className="h-4 w-4 text-foreground/50" />
+                    <h3 className="text-base font-semibold text-foreground">Deal feasibility checks</h3>
                   </div>
-                </StaggerItem>
-              ))}
-            </Stagger>
-
-            <FadeIn delay={0.2}>
-              <div className="mt-6 flex items-center justify-center gap-6 text-xs text-muted-foreground/60">
-                <span>Expense ratio range</span>
-                <span>|</span>
-                <span>Depreciation schedule</span>
-              </div>
-            </FadeIn>
-          </div>
-        </div>
-        <div className="section-divider" />
-      </section>
-
-      {/* Tax Considerations */}
-      <section className="w-full">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <FadeIn>
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
-                Tax structures reflected in the documents
-              </h2>
-              <p className="text-muted-foreground leading-relaxed mb-10">
-                Real estate syndications have specific tax treatment that
-                changes the PPM disclosures, operating agreement provisions,
-                and pro forma projections. The system accounts for all of these.
-              </p>
-
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {[
-                  {
-                    title: "Depreciation and deductions",
-                    icon: Calculator,
-                    items: [
-                      "Bonus depreciation tracked at current rates (TCJA phase-down schedule)",
-                      "Cost segregation study assumptions by property type",
-                      "Passive loss rules: $100K/$150K phase-out (Section 469)",
-                      "Real Estate Professional Status: 750+ hours qualification noted in PPM",
-                    ],
-                  },
-                  {
-                    title: "Exchange and deferral",
-                    icon: Building,
-                    items: [
-                      "1031 exchange: 45-day identification, 180-day close, QI requirements",
-                      "Qualified Opportunity Zone: 10-year hold, 90% asset test, substantial improvement",
-                      "UBTI threshold ($1K) flagged for IRA and trust investors",
-                      "FIRPTA withholding noted for foreign investors",
-                    ],
-                  },
-                ].map((col) => (
-                  <div key={col.title} className="rounded-xl bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine metallic-sheen h-full">
-                    <div className="flex items-center gap-2 mb-4">
-                      <col.icon className="h-4 w-4 text-foreground/50" />
-                      <h3 className="text-sm font-semibold text-foreground">{col.title}</h3>
-                    </div>
-                    <ul className="space-y-2.5">
-                      {col.items.map((item) => (
-                        <li key={item} className="flex items-start gap-2">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
-                          <span className="text-xs text-muted-foreground leading-relaxed">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
+                  <ul className="space-y-3">
+                    {[
+                      "DSCR minimum 1.25x on the senior debt",
+                      "LTV maximum 75% against appraised value",
+                      "Exit cap rate vs. going-in cap rate sanity check",
+                      "Breakeven occupancy flagged if above 85%",
+                      "Capital stack balance verified",
+                      "IRR plausibility check against the property type",
+                      "Waterfall distributions verified against OA terms",
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-2.5">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
+                        <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </FadeIn>
             </div>
-          </FadeIn>
-        </div>
-      </section>
 
-      {/* Compliance Checks */}
-      <section className="w-full relative">
-        <div className="section-divider" />
-        <div className="bg-muted/20 bg-dot-pattern">
-          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-            <FadeIn>
-              <div className="max-w-3xl mx-auto">
-                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
-                  Deal feasibility checks
-                </h2>
-                <p className="text-muted-foreground leading-relaxed mb-10">
-                  Before you send anything to investors, the system checks
-                  your deal against standard underwriting thresholds.
+            <FadeIn delay={0.15}>
+              <div className="mt-6 rounded-xl bg-card p-5 card-shine flex items-start gap-4">
+                <AlertTriangle className="h-5 w-5 text-foreground/50 mt-0.5 shrink-0" />
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  An IRR that doesn&apos;t match the waterfall. A depreciation schedule using the wrong useful life. A pro forma that shows Year 3 distributions from an exit that happens in Year 5. These mistakes show up in investor decks all the time. The model catches them because every line connects to every other line.
                 </p>
-
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {[
-                    "DSCR minimum 1.25x on the senior debt",
-                    "LTV maximum 75% against appraised value",
-                    "Exit cap rate vs. going-in cap rate sanity check",
-                    "Breakeven occupancy calculated and flagged if above 85%",
-                    "Capital stack balance (equity + debt = total capitalization)",
-                    "IRR plausibility check against the property type",
-                    "Reg D 506(b) vs. 506(c) requirements applied to all investor docs",
-                    "Waterfall distributions verified against operating agreement terms",
-                  ].map((item) => (
-                    <div key={item} className="flex items-start gap-2.5 p-3 rounded-lg transition-colors hover:bg-muted/50">
-                      <ShieldCheck className="h-4 w-4 text-foreground/40 mt-0.5 shrink-0" />
-                      <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             </FadeIn>
           </div>
         </div>
         <div className="section-divider" />
-      </section>
-
-      {/* How It Works */}
-      <section className="w-full">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-3" staggerDelay={0.08} initialDelay={0.1}>
-            {[
-              { n: "01", title: "Enter the deal", desc: "Property type, purchase price, financing terms, hold period, rent growth assumptions, and waterfall structure. About 10 minutes." },
-              { n: "02", title: "Get 5 docs and a full model", desc: "PPM, operating agreement, subscription agreement, investor questionnaire, and year-by-year pro forma with sensitivity analysis." },
-              { n: "03", title: "Review, edit, download", desc: "Read everything in the editor. Make changes. Download individually or as a ZIP. Send to your attorney, then to investors." },
-            ].map((step) => (
-              <StaggerItem key={step.n}>
-                <div className="text-center">
-                  <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-muted text-foreground text-sm font-bold font-mono inset-shine">
-                    {step.n}
-                  </div>
-                  <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </div>
       </section>
 
       {/* Bottom CTA */}
-      <section className="w-full relative">
-        <div className="section-divider" />
-        <div className="bg-muted/20">
-          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-            <FadeIn>
-              <div className="relative rounded-2xl bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 card-shine hero-light bg-noise">
-                <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-                <div className="relative z-10">
-                  <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                    Model a deal for free. Check every number.
-                  </h2>
-                  <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                    One deal. All 5 documents and the full financial model.
-                    Download everything and verify it yourself.
-                  </p>
-                  <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                    <SignInButton mode="modal">
-                      <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                        Model a Deal Free
-                        <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                      </button>
-                    </SignInButton>
-                    <Link
-                      href="/pricing"
-                      className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted hover:border-foreground/15"
-                    >
-                      See Pricing
-                    </Link>
-                  </div>
+      <section className="w-full">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <FadeIn>
+            <div className="relative rounded-2xl bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 card-shine hero-light bg-noise">
+              <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+              <div className="relative z-10">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  Model a deal for free. Check every number.
+                </h2>
+                <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
+                  One deal. All 5 documents and the full financial model.
+                  Download everything and verify it yourself.
+                </p>
+                <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+                  <SignInButton mode="modal">
+                    <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
+                      Model a Deal Free
+                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                    </button>
+                  </SignInButton>
+                  <Link
+                    href="/pricing"
+                    className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted hover:border-foreground/15"
+                  >
+                    See Pricing
+                  </Link>
                 </div>
               </div>
-            </FadeIn>
-          </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
 

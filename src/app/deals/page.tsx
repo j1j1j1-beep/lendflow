@@ -1,46 +1,53 @@
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Handshake, ShieldCheck, Calculator } from "lucide-react";
+import { ArrowRight, CheckCircle2, Handshake, ShieldCheck, Calculator, AlertTriangle, ChevronDown } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 
-const DOCUMENTS = [
+const TIMELINE_DOCS = [
   {
+    phase: "Offer",
     name: "Letter of Intent",
-    desc: "Your opening offer. Purchase price, deal structure, exclusivity period, key conditions, and the terms that must be met before you move to a definitive agreement.",
+    desc: "Purchase price, deal structure, exclusivity period, key conditions, and the terms that must be met before you move to a definitive agreement.",
   },
   {
+    phase: "Diligence",
     name: "Non-Disclosure Agreement",
-    desc: "Protects what gets shared during diligence. Financials, customer lists, trade secrets, employee information, and any other seller disclosures. Rule 10b-5 MNPI provisions included.",
+    desc: "Protects what gets shared. Financials, customer lists, trade secrets, employee information. Rule 10b-5 MNPI provisions included.",
   },
   {
-    name: "Purchase Agreement",
-    desc: "The binding contract. 25 to 40 seller representations, working capital adjustment mechanics, escrow structure, indemnification with caps and baskets, MAC clause with 9 standard carveouts, and termination provisions. Adapts to your transaction structure.",
-  },
-  {
+    phase: "Diligence",
     name: "Due Diligence Checklist",
-    desc: "25 categories, 200+ items across financial, legal, tax, environmental, IP, employment, real property, insurance, regulatory, and technology. Structured so your team can assign and track completion.",
+    desc: "25 categories, 200+ items. Financial, legal, tax, environmental, IP, employment, real property, insurance, regulatory, and technology.",
   },
   {
+    phase: "Negotiation",
+    name: "Purchase Agreement",
+    desc: "The definitive agreement. 25 to 40 seller reps, working capital adjustment, escrow, indemnification caps and baskets, MAC clause with 9 carveouts, and termination provisions.",
+    highlight: true,
+  },
+  {
+    phase: "Negotiation",
     name: "Disclosure Schedules",
-    desc: "10 standard schedules: cap table, subsidiaries, material contracts, pending litigation, intellectual property, real property, environmental matters, tax returns, insurance policies, and employee benefit plans.",
+    desc: "10 schedules: cap table, subsidiaries, material contracts, litigation, IP, real property, environmental, tax, insurance, employee benefits.",
   },
   {
+    phase: "Close",
     name: "Closing Checklist",
-    desc: "Every deliverable, signature, filing, and payoff at close. 11 categories covering corporate approvals, third-party consents, regulatory filings, employment matters, and post-closing obligations.",
+    desc: "Every deliverable, signature, filing, and payoff. 11 categories covering corporate approvals, consents, regulatory filings, employment, and post-closing items.",
   },
 ];
 
 const TRANSACTION_TYPES = [
-  { name: "Stock Purchase", desc: "Buy the entity. Simpler execution, but you inherit all liabilities including unknown ones. Most common for private company acquisitions." },
-  { name: "Asset Purchase", desc: "Pick which assets and liabilities you take on. More complex closing with individual transfer documents, but you control what you inherit." },
-  { name: "Forward Merger", desc: "Target merges into your entity. Target ceases to exist. Contracts transfer by operation of law. Requires target shareholder approval." },
-  { name: "Reverse Triangular Merger", desc: "Your subsidiary merges into the target. Target survives with its contracts, licenses, and permits intact. Most common for strategic acquisitions." },
-  { name: "Forward Triangular Merger", desc: "Target merges into your subsidiary. Keeps liability contained in the subsidiary. Good when you want the target's assets but not its entity." },
-  { name: "Reverse Merger", desc: "Your company merges into the target. Used when the target has licenses, permits, or contracts that cannot be transferred. Less common." },
-  { name: "Tender Offer", desc: "Go directly to shareholders. Bypasses the board. Faster timeline than a merger vote. Can be hostile or friendly. Subject to Williams Act disclosure rules." },
-  { name: "Section 363 Sale", desc: "Assets out of bankruptcy, court-supervised. Free and clear of most claims and encumbrances. Competitive bidding process. Stalking horse protections." },
+  { name: "Stock Purchase", desc: "Buy the entity. Inherit all liabilities." },
+  { name: "Asset Purchase", desc: "Pick which assets and liabilities you take." },
+  { name: "Forward Merger", desc: "Target merges into acquirer. Target ceases to exist." },
+  { name: "Reverse Triangular", desc: "Sub merges into target. Target survives with contracts." },
+  { name: "Forward Triangular", desc: "Target merges into sub. Liability stays contained." },
+  { name: "Reverse Merger", desc: "Acquirer merges into target. Target's licenses preserved." },
+  { name: "Tender Offer", desc: "Go directly to shareholders. Can bypass the board." },
+  { name: "Section 363 Sale", desc: "Assets out of bankruptcy, free and clear." },
 ];
 
 export default function DealsPage() {
@@ -59,18 +66,18 @@ export default function DealsPage() {
                 Deals / M&A
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem] leading-[1.1]">
-                Six acquisition documents
+                From LOI to close.
                 <br />
                 <span className="text-muted-foreground">
-                  from one set of deal terms.
+                  Six documents, one set of terms.
                 </span>
               </h1>
               <p className="mt-8 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
-                Speed matters in M&A. The longer it takes to produce an LOI,
-                the longer someone else has to outbid you. OpenShut generates
-                all six acquisition documents from one set of deal terms, with
-                regulatory thresholds calculated at current rates and the
-                purchase agreement tailored to your transaction structure.
+                The longer it takes to produce an LOI, the longer someone
+                else has to outbid you. OpenShut generates all six acquisition
+                documents from one set of deal terms. Regulatory thresholds
+                calculated at current rates. Purchase agreement tailored to
+                your transaction structure.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -87,14 +94,80 @@ export default function DealsPage() {
                 </Link>
               </div>
               <p className="mt-5 text-sm text-muted-foreground/70">
-                First acquisition free. All 6 documents. 8 transaction types.
+                First deal free. All 6 documents. 8 transaction structures.
               </p>
             </div>
           </FadeIn>
         </div>
       </section>
 
-      {/* Documents */}
+      {/* Risk callout */}
+      <section className="w-full relative">
+        <div className="section-divider" />
+        <div className="bg-muted/30">
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            <FadeIn>
+              <div className="flex items-start gap-4">
+                <AlertTriangle className="h-5 w-5 text-foreground/50 mt-0.5 shrink-0" />
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-2">Where M&A deals go wrong</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-4xl">
+                    A miscalculated HSR threshold is $54,540 per day in penalties. A missed WARN Act notice triggers employee litigation. A non-compete that violates California law is unenforceable. These are the kinds of things that get caught in review when someone remembers to check. OpenShut checks them automatically against current thresholds before you download.
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+        <div className="section-divider" />
+      </section>
+
+      {/* Documents - Timeline layout */}
+      <section className="w-full">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <FadeIn>
+            <div className="max-w-2xl mb-14">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                Six documents across the deal timeline
+              </h2>
+              <p className="mt-4 text-muted-foreground leading-relaxed">
+                From first offer through closing. Generated from the same
+                deal terms so nothing contradicts.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="relative">
+            {/* Timeline line */}
+            <div className="absolute left-[19px] top-4 bottom-4 w-px bg-border hidden sm:block" />
+
+            <Stagger className="space-y-4" staggerDelay={0.06} initialDelay={0.1}>
+              {TIMELINE_DOCS.map((doc, i) => (
+                <StaggerItem key={doc.name}>
+                  <div className={`flex gap-5 ${doc.highlight ? "" : ""}`}>
+                    {/* Timeline dot */}
+                    <div className="hidden sm:flex flex-col items-center">
+                      <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${doc.highlight ? "bg-foreground text-background" : "bg-muted"} inset-shine`}>
+                        <span className="text-xs font-bold font-mono">{String(i + 1).padStart(2, "0")}</span>
+                      </div>
+                    </div>
+
+                    <div className={`flex-1 rounded-xl bg-card p-5 sm:p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine metallic-sheen ${doc.highlight ? "ring-1 ring-border" : ""}`}>
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">{doc.phase}</span>
+                      </div>
+                      <h3 className="text-sm font-semibold text-card-foreground mb-1.5">{doc.name}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{doc.desc}</p>
+                    </div>
+                  </div>
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </div>
+        </div>
+      </section>
+
+      {/* Purchase Agreement Deep Dive */}
       <section className="w-full relative">
         <div className="section-divider" />
         <div className="bg-muted/20 bg-dot-pattern">
@@ -102,35 +175,44 @@ export default function DealsPage() {
             <FadeIn>
               <div className="max-w-2xl mb-14">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Six documents, from offer to close
+                  Inside the purchase agreement
                 </h2>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
-                  All six are generated from the same deal terms so nothing
-                  contradicts. Four are legal documents with real language, two
-                  are structured checklists.
+                  The purchase agreement adapts to your transaction structure.
+                  Stock purchases, asset deals, and mergers each get different
+                  reps, conditions, and tax treatment.
                 </p>
               </div>
             </FadeIn>
 
-            <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
-              {DOCUMENTS.map((doc) => (
-                <StaggerItem key={doc.name}>
-                  <div className="rounded-xl bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
-                    <div className="flex items-center gap-2.5 mb-3">
-                      <CheckCircle2 className="h-4 w-4 text-foreground/40 shrink-0" />
-                      <h3 className="text-sm font-semibold text-card-foreground">{doc.name}</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{doc.desc}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {[
+                { article: "I", title: "Definitions", desc: "Defined terms used throughout" },
+                { article: "II", title: "Purchase & Sale", desc: "What's being bought and sold" },
+                { article: "III", title: "Consideration", desc: "Price, adjustments, earnouts" },
+                { article: "IV", title: "Seller Reps", desc: "25-40 representations and warranties" },
+                { article: "V", title: "Buyer Reps", desc: "Buyer's representations" },
+                { article: "VI", title: "Covenants", desc: "Pre-closing conduct, access, filings" },
+                { article: "VII", title: "Conditions", desc: "What must happen before close" },
+                { article: "VIII", title: "Indemnification", desc: "Caps, baskets, survival periods" },
+                { article: "IX", title: "Termination", desc: "Breakup fees, walk-away rights" },
+                { article: "X", title: "Miscellaneous", desc: "Governing law, notices, amendments" },
+              ].map((item) => (
+                <FadeIn key={item.article} delay={0.03}>
+                  <div className="rounded-xl bg-card p-4 card-shine h-full">
+                    <div className="text-xs font-bold text-muted-foreground/50 font-mono mb-2">Art. {item.article}</div>
+                    <h4 className="text-xs font-semibold text-card-foreground mb-1">{item.title}</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
                   </div>
-                </StaggerItem>
+                </FadeIn>
               ))}
-            </Stagger>
+            </div>
           </div>
         </div>
         <div className="section-divider" />
       </section>
 
-      {/* Transaction Types */}
+      {/* Transaction Types - Compact grid */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <FadeIn>
@@ -139,23 +221,18 @@ export default function DealsPage() {
                 8 transaction structures
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                Reps, closing conditions, indemnification, and tax treatment
-                all change depending on whether you are buying stock, buying
-                assets, or running a merger. Pick the structure and the
-                documents adapt.
+                The reps, closing conditions, indemnification, and tax
+                treatment all change based on the structure you pick.
               </p>
             </div>
           </FadeIn>
 
-          <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2" staggerDelay={0.04} initialDelay={0.1}>
+          <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" staggerDelay={0.03} initialDelay={0.1}>
             {TRANSACTION_TYPES.map((type) => (
               <StaggerItem key={type.name}>
-                <div className="rounded-xl bg-card p-5 sm:p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-foreground/40" />
-                    <h3 className="text-sm font-semibold text-card-foreground">{type.name}</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed pl-4">{type.desc}</p>
+                <div className="rounded-xl bg-card p-4 sm:p-5 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
+                  <h3 className="text-sm font-semibold text-card-foreground mb-1.5">{type.name}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{type.desc}</p>
                 </div>
               </StaggerItem>
             ))}
@@ -163,140 +240,114 @@ export default function DealsPage() {
         </div>
       </section>
 
-      {/* Regulatory */}
+      {/* Regulatory - Collapsible deep dives */}
       <section className="w-full relative">
         <div className="section-divider" />
         <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
-              <div className="max-w-3xl mx-auto">
-                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
-                  Regulatory thresholds calculated at current rates
+              <div className="max-w-2xl mb-14">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  Regulatory thresholds at current rates
                 </h2>
-                <p className="text-muted-foreground leading-relaxed mb-10">
-                  M&A deals trigger filing requirements, tax elections, and
-                  state law considerations that change based on deal size,
-                  structure, and jurisdiction. The system surfaces these
-                  before you sign.
-                </p>
+              </div>
+            </FadeIn>
 
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                  {[
-                    {
-                      title: "HSR and antitrust",
-                      icon: ShieldCheck,
-                      items: [
-                        "$119.5M minimum transaction size threshold (2025)",
-                        "6 filing fee tiers: $30K, $105K, $260K, $415K, $830K, $2.335M",
-                        "30-day waiting period flagged in timeline",
-                        "$54,540/day penalty for gun-jumping",
-                        "CFIUS mandatory filing for TID US businesses",
-                      ],
-                    },
-                    {
-                      title: "Tax structure",
-                      icon: Calculator,
-                      items: [
-                        "Section 338(h)(10) stock-to-asset election mechanics",
-                        "Section 453 installment sale treatment",
-                        "Section 280G golden parachute (3x base amount)",
-                        "Section 368 tax-free reorganization continuity requirements",
-                        "Section 197 goodwill amortization (15-year schedule)",
-                        "QSBS Section 1202 exclusion where applicable",
-                      ],
-                    },
-                    {
-                      title: "Deal mechanics",
-                      icon: Handshake,
-                      items: [
-                        "MAC clause with 9 standard carveouts (pandemics, cyber, credit markets)",
-                        "Indemnification: 10-20% caps, 0.5-1.5% baskets, 12-18mo survival",
-                        "Non-compete: sale-of-business exception + state bans (CA, MN, ND, OK)",
-                        "WARN Act (100 employees, 60 days) + state mini-WARNs",
-                        "Working capital adjustment and earnout mechanics",
-                      ],
-                    },
-                  ].map((col) => (
-                    <div key={col.title} className="rounded-xl bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine">
-                      <div className="flex items-center gap-2 mb-4">
-                        <col.icon className="h-4 w-4 text-foreground/50" />
-                        <h3 className="text-sm font-semibold text-foreground">{col.title}</h3>
-                      </div>
+            <div className="space-y-3">
+              {[
+                {
+                  title: "HSR Act and antitrust",
+                  icon: ShieldCheck,
+                  items: [
+                    "$119.5M minimum transaction size threshold (2025)",
+                    "6 filing fee tiers: $30K / $105K / $260K / $415K / $830K / $2.335M",
+                    "30-day waiting period flagged in timeline",
+                    "$54,540/day penalty for gun-jumping violations",
+                    "CFIUS mandatory filing for TID US businesses (FIRRMA, Feb 2020)",
+                  ],
+                },
+                {
+                  title: "Tax elections and treatment",
+                  icon: Calculator,
+                  items: [
+                    "Section 338(h)(10) stock-to-asset election mechanics",
+                    "Section 453 installment sale treatment",
+                    "Section 280G golden parachute calculations (3x base amount)",
+                    "Section 368 tax-free reorganization continuity requirements",
+                    "Section 197 goodwill amortization (15-year schedule)",
+                    "QSBS Section 1202 exclusion where applicable",
+                  ],
+                },
+                {
+                  title: "Employment and state law",
+                  icon: Handshake,
+                  items: [
+                    "WARN Act: 100+ employees, 60-day notice required",
+                    "State mini-WARNs: CA (75 employees), NY (50), NJ (90-day notice)",
+                    "Non-compete: sale-of-business exception + state bans (CA, MN, ND, OK)",
+                    "FIRPTA Section 1445 (15%) for real property interests",
+                  ],
+                },
+              ].map((section) => (
+                <details key={section.title} className="group rounded-xl bg-card transition-all duration-200 hover:-translate-y-0.5 card-shine metallic-sheen">
+                  <summary className="flex items-center justify-between cursor-pointer p-5 sm:p-6 list-none [&::-webkit-details-marker]:hidden">
+                    <div className="flex items-center gap-3">
+                      <section.icon className="h-4 w-4 text-foreground/50" />
+                      <h3 className="text-sm font-semibold text-card-foreground">{section.title}</h3>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180 shrink-0" />
+                  </summary>
+                  <div className="px-5 sm:px-6 pb-5 sm:pb-6 pt-0">
+                    <div className="border-t border-border pt-4">
                       <ul className="space-y-2.5">
-                        {col.items.map((item) => (
+                        {section.items.map((item) => (
                           <li key={item} className="flex items-start gap-2">
                             <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
-                            <span className="text-xs text-muted-foreground leading-relaxed">{item}</span>
+                            <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </FadeIn>
+                  </div>
+                </details>
+              ))}
+            </div>
           </div>
         </div>
         <div className="section-divider" />
-      </section>
-
-      {/* How It Works */}
-      <section className="w-full">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-3" staggerDelay={0.08} initialDelay={0.1}>
-            {[
-              { n: "01", title: "Enter the deal terms", desc: "Target company, purchase price, structure, tax elections, and key terms. Upload the target's financials, tax returns, and material contracts." },
-              { n: "02", title: "Get all 6 documents", desc: "LOI, NDA, purchase agreement, due diligence checklist, disclosure schedules, and closing checklist. All generated from the same terms." },
-              { n: "03", title: "Edit, export, close", desc: "Make changes inline. Download as Word or PDF. Your attorney reviews a complete first draft instead of starting from scratch." },
-            ].map((step) => (
-              <StaggerItem key={step.n}>
-                <div className="text-center">
-                  <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-muted text-foreground text-sm font-bold font-mono inset-shine">
-                    {step.n}
-                  </div>
-                  <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </div>
       </section>
 
       {/* Bottom CTA */}
-      <section className="w-full relative">
-        <div className="section-divider" />
-        <div className="bg-muted/20">
-          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-            <FadeIn>
-              <div className="relative rounded-2xl bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 card-shine hero-light bg-noise">
-                <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-                <div className="relative z-10">
-                  <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                    Your next acquisition starts here.
-                  </h2>
-                  <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                    Run a real deal through it. All 6 documents, all 8
-                    transaction types. First deal free.
-                  </p>
-                  <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                    <SignInButton mode="modal">
-                      <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                        Start a Deal Free
-                        <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                      </button>
-                    </SignInButton>
-                    <Link
-                      href="/pricing"
-                      className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted hover:border-foreground/15"
-                    >
-                      See Pricing
-                    </Link>
-                  </div>
+      <section className="w-full">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <FadeIn>
+            <div className="relative rounded-2xl bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 card-shine hero-light bg-noise">
+              <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+              <div className="relative z-10">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  Your next acquisition starts here.
+                </h2>
+                <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
+                  Run a real deal through it. All 6 documents, all 8
+                  structures. First deal free.
+                </p>
+                <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+                  <SignInButton mode="modal">
+                    <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
+                      Start a Deal Free
+                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                    </button>
+                  </SignInButton>
+                  <Link
+                    href="/pricing"
+                    className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted hover:border-foreground/15"
+                  >
+                    See Pricing
+                  </Link>
                 </div>
               </div>
-            </FadeIn>
-          </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
