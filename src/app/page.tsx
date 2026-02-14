@@ -115,9 +115,9 @@ export default async function Home() {
               </h1>
               <p className="mt-8 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
                 Enter your deal terms, upload financials, and get back every
-                document your deal requires. Every output is checked three
-                times: once for legal language and clauses, once for financial
-                accuracy, and once for regulatory compliance in your state.
+                document your deal requires. Every output runs through a
+                compliance check covering legal language, financial accuracy,
+                and regulatory requirements for your state.
                 Zero hallucination, guaranteed.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">

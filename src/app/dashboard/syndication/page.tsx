@@ -263,7 +263,7 @@ export default function SyndicationPage() {
             return (
               <StaggerItem key={project.id}>
                 <Link href={`/dashboard/syndication/${project.id}`}>
-                  <Card className="group transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full">
+                  <Card className="group transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full card-shine metallic-sheen">
                     <CardContent className="pt-0">
                       {/* Header row */}
                       <div className="flex items-start justify-between mb-3">

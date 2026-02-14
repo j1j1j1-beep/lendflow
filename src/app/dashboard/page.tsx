@@ -178,9 +178,9 @@ export default function DashboardPage() {
           return (
             <StaggerItem key={mod}>
               <Link href={config.href}>
-                <Card className="group cursor-pointer transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm">
+                <Card className="group cursor-pointer transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm card-shine metallic-sheen">
                   <CardContent className="p-4 flex items-center gap-3">
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110 ${config.color} ${config.bg}`}>
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110 inset-shine ${config.color} ${config.bg}`}>
                       <Icon className="h-4.5 w-4.5" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -199,7 +199,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent projects */}
         <FadeIn delay={0.4} className="lg:col-span-2">
-          <Card>
+          <Card className="card-shine">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
@@ -248,7 +248,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
           {/* Deadlines */}
           <FadeIn delay={0.5}>
-            <Card>
+            <Card className="card-shine">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -327,7 +327,7 @@ export default function DashboardPage() {
 
       {/* Quick actions */}
       <FadeIn delay={0.7}>
-        <Card>
+        <Card className="card-shine">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Quick Start</CardTitle>
           </CardHeader>
@@ -368,7 +368,7 @@ function StatCard({
   className?: string;
 }) {
   return (
-    <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${className ?? ""}`}>
+    <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 card-shine metallic-sheen ${className ?? ""}`}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-1">
           <p className="text-xs font-medium text-muted-foreground">{label}</p>

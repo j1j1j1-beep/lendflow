@@ -91,7 +91,7 @@ export function DealCard({ deal }: DealCardProps) {
   const isProcessing = PROCESSING_STATUSES.includes(deal.status);
 
   return (
-    <Card className="group transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full">
+    <Card className="group transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full card-shine metallic-sheen">
       <CardContent className="pt-0">
         <div className="flex items-start justify-between mb-3">
           <div className="min-w-0 flex-1">

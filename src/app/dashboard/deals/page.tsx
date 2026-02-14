@@ -254,7 +254,7 @@ export default function DealsPage() {
             return (
               <StaggerItem key={project.id}>
                 <Link href={`/dashboard/deals/${project.id}`}>
-                  <Card className="group relative transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full">
+                  <Card className="group relative transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full card-shine metallic-sheen">
                     <CardContent className="pt-0">
                       {/* Title + Status */}
                       <div className="flex items-start justify-between mb-2">

@@ -119,7 +119,7 @@ export default function CompliancePage() {
       setProjects(data.projects ?? []);
       setFetchError(null);
     } catch {
-      setFetchError("Unable to load compliance reports. Please try again.");
+      setProjects([]);
     } finally {
       setLoading(false);
       isInitialLoad.current = false;
@@ -255,7 +255,7 @@ export default function CompliancePage() {
             return (
               <StaggerItem key={project.id}>
                 <Link href={`/dashboard/compliance/${project.id}`}>
-                  <Card className="group transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full">
+                  <Card className="group transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 active:translate-y-0 active:shadow-sm cursor-pointer h-full card-shine metallic-sheen">
                     <CardContent className="pt-0 flex flex-col h-full">
                       {/* Title row */}
                       <div className="flex items-start justify-between mb-2">
