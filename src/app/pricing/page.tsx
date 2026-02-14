@@ -23,11 +23,11 @@ import {
 } from "lucide-react";
 
 const MODULE_PRICING = [
-  { modules: 1, license: "$250,000", monthly: "$14,999", year1: "$429,988" },
-  { modules: 2, license: "$325,000", monthly: "$19,999", year1: "$564,988" },
-  { modules: 3, license: "$400,000", monthly: "$24,999", year1: "$699,988" },
-  { modules: 4, license: "$475,000", monthly: "$29,999", year1: "$834,988" },
-  { modules: 5, license: "$550,000", monthly: "$34,999", year1: "$969,988" },
+  { modules: 1, license: "$250,000", monthly: "$14,999", year1: "$429,988", year2: "$179,988" },
+  { modules: 2, license: "$325,000", monthly: "$19,999", year1: "$564,988", year2: "$239,988" },
+  { modules: 3, license: "$400,000", monthly: "$24,999", year1: "$699,988", year2: "$299,988" },
+  { modules: 4, license: "$475,000", monthly: "$29,999", year1: "$834,988", year2: "$359,988" },
+  { modules: 5, license: "$550,000", monthly: "$34,999", year1: "$969,988", year2: "$419,988" },
 ];
 
 const MODULES = [
@@ -219,6 +219,7 @@ export default function PricingPage() {
                       <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">License (one-time)</th>
                       <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Monthly</th>
                       <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Year 1 Total</th>
+                      <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Year 2 Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -231,6 +232,7 @@ export default function PricingPage() {
                         <td className="py-4 px-4 text-right text-sm text-foreground tabular-nums">{row.license}</td>
                         <td className="py-4 px-4 text-right text-sm text-foreground tabular-nums">{row.monthly}</td>
                         <td className="py-4 px-4 text-right text-sm text-foreground tabular-nums">{row.year1}</td>
+                        <td className="py-4 px-4 text-right text-sm text-foreground tabular-nums">{row.year2}</td>
                       </tr>
                     ))}
                   </tbody>
