@@ -126,7 +126,7 @@ export default async function Home() {
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
                   <button className="btn-glow group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-300 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-1 active:scale-[0.97]">
-                    Start a Deal Free
+                    See a Sample Deal
                     <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                   </button>
                 </SignInButton>
@@ -138,7 +138,7 @@ export default async function Home() {
                 </Link>
               </div>
               <p className="mt-5 text-sm text-muted-foreground/70">
-                One project free in any module. No credit card required.
+                Explore sample output in any module. No credit card required.
               </p>
             </div>
           </FadeIn>
@@ -154,8 +154,8 @@ export default async function Home() {
                 How it works
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                Sign up and run your first deal in minutes. The free tier is the
-                full product with a one-project limit.
+                Sign up and explore a sample deal in minutes. See the full
+                document output before you buy.
               </p>
             </div>
           </FadeIn>
@@ -439,13 +439,13 @@ export default async function Home() {
                   Try it on a real deal.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  One project free in any module. Full output. No credit card
-                  required. Sign up and run a deal whenever you are ready.
+                  Pick any module and generate a sample deal with real output.
+                  See exactly what you get before you buy.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">
                     <button className="btn-glow group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-300 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-1 active:scale-[0.97]">
-                      Start a Deal Free
+                      See a Sample Deal
                       <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </button>
                   </SignInButton>

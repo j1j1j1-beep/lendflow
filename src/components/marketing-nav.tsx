@@ -118,7 +118,7 @@ export function MarketingNav() {
               </SignInButton>
               <SignInButton mode="modal">
                 <button className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md">
-                  Try It Free
+                  See a Demo
                 </button>
               </SignInButton>
             </>
@@ -185,7 +185,7 @@ export function MarketingNav() {
                 </SignInButton>
                 <SignInButton mode="modal">
                   <button className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary/90">
-                    Try It Free
+                    See a Demo
                   </button>
                 </SignInButton>
               </>

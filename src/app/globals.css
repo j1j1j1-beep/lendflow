@@ -351,24 +351,34 @@
      LANDING PAGE AMBIENT + METALLIC EFFECTS
      ═══════════════════════════════════════════════════ */
 
-  /* Subtle ambient background so the page isn't a void */
+  /* Ambient background - fine dot grid across whole page */
   .bg-ambient {
-    background:
-      radial-gradient(ellipse 80% 50% at 50% 0%, oklch(1 0 0 / 3%) 0%, transparent 50%),
-      radial-gradient(ellipse 60% 40% at 80% 60%, oklch(1 0 0 / 2%) 0%, transparent 50%),
-      radial-gradient(ellipse 50% 30% at 10% 80%, oklch(1 0 0 / 1.5%) 0%, transparent 50%);
+    position: relative;
+  }
+  .bg-ambient::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at center, oklch(1 0 0 / 8%) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .bg-ambient > * {
+    position: relative;
+    z-index: 1;
   }
 
-  /* Stronger ambient glow for hero */
+  /* Hero top glow */
   .hero-glow::after {
     content: '';
     position: absolute;
-    top: -20%;
+    top: -30%;
     left: 50%;
     transform: translateX(-50%);
-    width: 120%;
-    height: 70%;
-    background: radial-gradient(ellipse, oklch(1 0 0 / 5%) 0%, oklch(1 0 0 / 2%) 40%, transparent 70%);
+    width: 140%;
+    height: 80%;
+    background: radial-gradient(ellipse, oklch(1 0 0 / 6%) 0%, oklch(1 0 0 / 2%) 40%, transparent 65%);
     pointer-events: none;
     z-index: 0;
   }

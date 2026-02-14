@@ -129,7 +129,7 @@ const INTEGRATIONS = [
 
 export default function PlatformPage() {
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
+    <div className="flex min-h-[100dvh] flex-col bg-background bg-ambient relative overflow-x-hidden">
       <MarketingNav />
 
       {/* Hero */}
@@ -366,12 +366,12 @@ export default function PlatformPage() {
                   See it yourself.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  One free project in any module. Full document output.
+                  Pick any module and see the full document output on a sample deal.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">
                     <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                      Start a Deal Free
+                      See a Sample Deal
                       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                     </button>
                   </SignInButton>

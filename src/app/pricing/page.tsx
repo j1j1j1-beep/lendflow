@@ -50,8 +50,8 @@ const ENTERPRISE_FEATURES = [
 const FAQ = [
   { q: "What counts as a module?", a: "Each of the five products is one module: Lending, Capital, Deals/M&A, Syndication, and Compliance. Pick one to start. Add more anytime." },
   { q: "How does upgrading work?", a: "Pay the $75,000 license difference per module added, plus the $4,999/month increase. If you have 2 modules and want a third, that's $75,000 one-time and your monthly goes from $19,999 to $24,999." },
-  { q: "What does the free tier include?", a: "One project in any module. Full document generation, all compliance checks. The exact same output as the paid version." },
-  { q: "What happens after my free project?", a: "You need a license to create additional projects. Your first project and all its generated documents stay accessible." },
+  { q: "What does the sample deal include?", a: "Pick any module and generate a full document package using sample data. Same output, same compliance checks, same quality as production. You just can't upload your own documents until you subscribe." },
+  { q: "What happens after the sample deal?", a: "You need a license to create projects with your own data. Your sample deal stays accessible so you can reference the output." },
   { q: "Is the license fee a one-time payment?", a: "Yes. The license is paid once. Monthly fees cover ongoing platform access, updates, and support." },
   { q: "How do seats work on the standard plan?", a: "Up to 15 seats per organization. Any member can create projects, generate documents, and download packages. Need more than 15? Talk to us about Enterprise or add seats at $750/seat/month." },
   { q: "Is my data secure?", a: "All uploads are encrypted at rest and in transit. Expiring document links. Organization-level data isolation. Full audit trail. We don't use your data for training." },
@@ -71,11 +71,11 @@ export default function PricingPage() {
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem] leading-[1.1]">
               Per-module pricing.
               <br />
-              <span className="text-muted-foreground">Start free.</span>
+              <span className="text-muted-foreground">See it before you buy.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl mx-auto leading-relaxed">
-              Pick the modules your firm needs. One project free in any module.
-              Then license the modules you use.
+              Pick the modules your firm needs. Run a sample deal in any module
+              to see the full output. Then license the modules you use.
             </p>
           </FadeIn>
         </div>
@@ -109,7 +109,7 @@ export default function PricingPage() {
                 </SignInButton>
                 <div className="my-8 border-t border-border/50" />
                 <ul className="space-y-3">
-                  {["1 project in any module", "Full document generation", "All compliance checks", "No credit card required", "No time limit"].map((f) => (
+                  {["Sample deal in any module", "Full document output", "All compliance checks", "No credit card required", "No time limit"].map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm text-muted-foreground">
                       <CheckCircle2 className="h-4 w-4 text-foreground/30 mt-0.5 shrink-0" />
                       <span>{f}</span>
