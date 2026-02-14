@@ -1,6 +1,6 @@
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Handshake } from "lucide-react";
+import { ArrowRight, CheckCircle2, Handshake, ShieldCheck, Calculator } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
@@ -8,37 +8,39 @@ import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 const DOCUMENTS = [
   {
     name: "Letter of Intent",
-    desc: "Your opening offer. Purchase price, deal structure, exclusivity period, and the conditions before you move to a definitive agreement.",
+    desc: "Your opening offer. Purchase price, deal structure, exclusivity period, key conditions, and the terms that must be met before you move to a definitive agreement.",
   },
   {
     name: "Non-Disclosure Agreement",
-    desc: "Protects what gets shared during diligence. Financials, customer lists, trade secrets, and any other seller disclosures.",
+    desc: "Protects what gets shared during diligence. Financials, customer lists, trade secrets, employee information, and any other seller disclosures. Rule 10b-5 MNPI provisions included.",
   },
   {
     name: "Purchase Agreement",
-    desc: "The binding contract. 25 to 40 seller reps, working capital adjustment, escrow mechanics, indemnification caps, and a MAC clause with 9 standard carveouts. Adapts to your deal structure.",
+    desc: "The binding contract. 25 to 40 seller representations, working capital adjustment mechanics, escrow structure, indemnification with caps and baskets, MAC clause with 9 standard carveouts, and termination provisions. Adapts to your transaction structure.",
   },
   {
     name: "Due Diligence Checklist",
-    desc: "Structured list of everything your team reviews before close. Financial, legal, tax, environmental, IP, employment.",
+    desc: "25 categories, 200+ items across financial, legal, tax, environmental, IP, employment, real property, insurance, regulatory, and technology. Structured so your team can assign and track completion.",
   },
   {
     name: "Disclosure Schedules",
-    desc: "10 standard schedules: cap table, subsidiaries, material contracts, litigation, IP, real property, environmental, tax, insurance, employee benefits.",
+    desc: "10 standard schedules: cap table, subsidiaries, material contracts, pending litigation, intellectual property, real property, environmental matters, tax returns, insurance policies, and employee benefit plans.",
   },
   {
     name: "Closing Checklist",
-    desc: "Every deliverable, signature, and filing at close. Tracks status across workstreams.",
+    desc: "Every deliverable, signature, filing, and payoff at close. 11 categories covering corporate approvals, third-party consents, regulatory filings, employment matters, and post-closing obligations.",
   },
 ];
 
 const TRANSACTION_TYPES = [
-  { name: "Stock Purchase", desc: "Buy the entity. Simpler execution, but you inherit all liabilities." },
-  { name: "Asset Purchase", desc: "Pick which assets and liabilities you take on. More complex closing." },
-  { name: "Forward Merger", desc: "Target merges into your entity. Target ceases to exist." },
-  { name: "Reverse Triangular", desc: "Your subsidiary merges into the target. Target survives with its contracts." },
-  { name: "Tender Offer", desc: "Go directly to shareholders. Bypasses the board. Faster timeline." },
-  { name: "Section 363 Sale", desc: "Assets out of bankruptcy, court-supervised. Free and clear of most claims." },
+  { name: "Stock Purchase", desc: "Buy the entity. Simpler execution, but you inherit all liabilities including unknown ones. Most common for private company acquisitions." },
+  { name: "Asset Purchase", desc: "Pick which assets and liabilities you take on. More complex closing with individual transfer documents, but you control what you inherit." },
+  { name: "Forward Merger", desc: "Target merges into your entity. Target ceases to exist. Contracts transfer by operation of law. Requires target shareholder approval." },
+  { name: "Reverse Triangular Merger", desc: "Your subsidiary merges into the target. Target survives with its contracts, licenses, and permits intact. Most common for strategic acquisitions." },
+  { name: "Forward Triangular Merger", desc: "Target merges into your subsidiary. Keeps liability contained in the subsidiary. Good when you want the target's assets but not its entity." },
+  { name: "Reverse Merger", desc: "Your company merges into the target. Used when the target has licenses, permits, or contracts that cannot be transferred. Less common." },
+  { name: "Tender Offer", desc: "Go directly to shareholders. Bypasses the board. Faster timeline than a merger vote. Can be hostile or friendly. Subject to Williams Act disclosure rules." },
+  { name: "Section 363 Sale", desc: "Assets out of bankruptcy, court-supervised. Free and clear of most claims and encumbrances. Competitive bidding process. Stalking horse protections." },
 ];
 
 export default function DealsPage() {
@@ -134,7 +136,7 @@ export default function DealsPage() {
           <FadeIn>
             <div className="max-w-2xl mb-14">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                The purchase agreement follows the deal structure
+                8 transaction structures
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
                 Reps, closing conditions, indemnification, and tax treatment
@@ -145,10 +147,10 @@ export default function DealsPage() {
             </div>
           </FadeIn>
 
-          <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
+          <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2" staggerDelay={0.04} initialDelay={0.1}>
             {TRANSACTION_TYPES.map((type) => (
               <StaggerItem key={type.name}>
-                <div className="rounded-xl bg-card p-5 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
+                <div className="rounded-xl bg-card p-5 sm:p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-foreground/40" />
                     <h3 className="text-sm font-semibold text-card-foreground">{type.name}</h3>
@@ -173,42 +175,53 @@ export default function DealsPage() {
                 </h2>
                 <p className="text-muted-foreground leading-relaxed mb-10">
                   M&A deals trigger filing requirements, tax elections, and
-                  state law considerations that depend on deal size, structure,
-                  and jurisdiction. The system surfaces these before you sign.
+                  state law considerations that change based on deal size,
+                  structure, and jurisdiction. The system surfaces these
+                  before you sign.
                 </p>
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
                   {[
                     {
-                      title: "HSR filing thresholds",
+                      title: "HSR and antitrust",
+                      icon: ShieldCheck,
                       items: [
-                        "$119.5M minimum transaction size (2025)",
-                        "All 6 fee tiers calculated ($30K to $2.335M)",
-                        "30-day waiting period flagged",
-                        "$54,540/day gun-jumping penalty noted",
+                        "$119.5M minimum transaction size threshold (2025)",
+                        "6 filing fee tiers: $30K, $105K, $260K, $415K, $830K, $2.335M",
+                        "30-day waiting period flagged in timeline",
+                        "$54,540/day penalty for gun-jumping",
+                        "CFIUS mandatory filing for TID US businesses",
                       ],
                     },
                     {
                       title: "Tax structure",
+                      icon: Calculator,
                       items: [
-                        "Section 338(h)(10) election mechanics",
-                        "Section 453 installment treatment",
-                        "Section 280G golden parachute calculations",
-                        "Tax-free reorg continuity requirements",
+                        "Section 338(h)(10) stock-to-asset election mechanics",
+                        "Section 453 installment sale treatment",
+                        "Section 280G golden parachute (3x base amount)",
+                        "Section 368 tax-free reorganization continuity requirements",
+                        "Section 197 goodwill amortization (15-year schedule)",
+                        "QSBS Section 1202 exclusion where applicable",
                       ],
                     },
                     {
                       title: "Deal mechanics",
+                      icon: Handshake,
                       items: [
-                        "MAC clause with 9 standard carveouts",
-                        "Indemnification caps, baskets, survival periods",
-                        "Non-compete: sale-of-business exception + state bans",
-                        "CFIUS mandatory filing for TID businesses",
+                        "MAC clause with 9 standard carveouts (pandemics, cyber, credit markets)",
+                        "Indemnification: 10-20% caps, 0.5-1.5% baskets, 12-18mo survival",
+                        "Non-compete: sale-of-business exception + state bans (CA, MN, ND, OK)",
+                        "WARN Act (100 employees, 60 days) + state mini-WARNs",
+                        "Working capital adjustment and earnout mechanics",
                       ],
                     },
                   ].map((col) => (
                     <div key={col.title} className="rounded-xl bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine">
-                      <h3 className="text-sm font-semibold text-foreground mb-4">{col.title}</h3>
+                      <div className="flex items-center gap-2 mb-4">
+                        <col.icon className="h-4 w-4 text-foreground/50" />
+                        <h3 className="text-sm font-semibold text-foreground">{col.title}</h3>
+                      </div>
                       <ul className="space-y-2.5">
                         {col.items.map((item) => (
                           <li key={item} className="flex items-start gap-2">
@@ -232,9 +245,9 @@ export default function DealsPage() {
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-3" staggerDelay={0.08} initialDelay={0.1}>
             {[
-              { n: "01", title: "Enter the deal terms", desc: "Target, price, structure, tax elections, and key terms. A few minutes." },
-              { n: "02", title: "Get all 6 documents", desc: "LOI, NDA, purchase agreement, DD checklist, disclosure schedules, and closing checklist." },
-              { n: "03", title: "Edit, export, close", desc: "Make changes inline. Download as Word or PDF. Your attorney reviews instead of drafts." },
+              { n: "01", title: "Enter the deal terms", desc: "Target company, purchase price, structure, tax elections, and key terms. Upload the target's financials, tax returns, and material contracts." },
+              { n: "02", title: "Get all 6 documents", desc: "LOI, NDA, purchase agreement, due diligence checklist, disclosure schedules, and closing checklist. All generated from the same terms." },
+              { n: "03", title: "Edit, export, close", desc: "Make changes inline. Download as Word or PDF. Your attorney reviews a complete first draft instead of starting from scratch." },
             ].map((step) => (
               <StaggerItem key={step.n}>
                 <div className="text-center">

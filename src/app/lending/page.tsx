@@ -1,34 +1,113 @@
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Landmark, FileText, Calculator } from "lucide-react";
+import { ArrowRight, CheckCircle2, Landmark, FileText, Calculator, ShieldCheck, MapPin } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 
+const PROGRAMS = [
+  {
+    name: "SBA 7(a)",
+    amount: "Up to $5M",
+    details: "4-tier rate caps per SBA SOP 50 10 8. Guaranty fees from 0% to 3.75% based on loan size and maturity. Up to 27 documents per deal including all required SBA forms.",
+  },
+  {
+    name: "SBA 504",
+    amount: "Up to $5M / $5.5M",
+    details: "Two-part structure: conventional bank loan plus a fixed-rate CDC debenture. $5.5M cap for energy and manufacturing. Real estate and heavy equipment only.",
+  },
+  {
+    name: "Commercial CRE",
+    amount: "No cap",
+    details: "Office, retail, industrial, mixed-use. 75% max LTV, 1.25x minimum DSCR. Purchase, refinance, or cash-out. Rates priced off the property cash flow and borrower credit.",
+  },
+  {
+    name: "DSCR",
+    amount: "Varies",
+    details: "Qualified on property income, not personal tax returns. Tiers at 1.0x, 1.15x, and 1.25x with different LTV and rate treatment at each level. Popular for investors with complex returns.",
+  },
+  {
+    name: "Bank Statement",
+    amount: "Varies",
+    details: "12 or 24 months of bank deposits replace tax return requirements. The system calculates average monthly deposits and applies the expense factor for the borrower's industry.",
+  },
+  {
+    name: "Conventional",
+    amount: "No cap",
+    details: "Full financial underwriting with tax returns, P&L, and balance sheet. Term loans, working capital, or acquisition financing. Standard 5/1 and 7/1 ARM structures.",
+  },
+  {
+    name: "Line of Credit",
+    amount: "Varies",
+    details: "Revolving facility against a borrowing base. Typically 80% of eligible accounts receivable and 50% of eligible inventory. Monthly borrowing base certificate required.",
+  },
+  {
+    name: "Equipment Finance",
+    amount: "Up to equipment value",
+    details: "The equipment itself serves as collateral. 3 to 7 year terms matched to the asset's useful life. UCC filing on the specific equipment. Self-liquidating structure.",
+  },
+  {
+    name: "Bridge",
+    amount: "Varies",
+    details: "6 to 24 months of interest-only payments while permanent financing closes. Higher rates offset by short duration. Exit strategy documented in the commitment letter.",
+  },
+  {
+    name: "Multifamily",
+    amount: "No cap",
+    details: "5-unit minimum through large apartment complexes. Assignment of leases and rents. Rent roll analysis with unit-level detail. DSCR calculated from net operating income.",
+  },
+  {
+    name: "Mezzanine",
+    amount: "Varies",
+    details: "Sits behind senior debt in the capital stack. Secured by equity pledge, not real property. Intercreditor agreement governs payment priority and cure rights with the senior lender.",
+  },
+  {
+    name: "Construction",
+    amount: "Varies",
+    details: "Ground-up or gut rehab. Draw schedule tied to completion milestones with inspection requirements at each draw. Interest reserve built into the loan. Converts to permanent on completion.",
+  },
+  {
+    name: "Hard Money",
+    amount: "Varies",
+    details: "Asset-based underwriting, 6 to 36 month terms. Fix-and-flip, land acquisition, time-sensitive closings. LTV based on as-is or after-repair value depending on the deal.",
+  },
+  {
+    name: "Crypto-Collateralized",
+    amount: "Varies",
+    details: "Bitcoin, Ethereum, and other digital assets held in qualified custody. Margin call triggers at defined LTV thresholds. Automatic liquidation if the borrower doesn't post additional collateral.",
+  },
+];
+
 const CORE_DOCS = [
-  { name: "Promissory Note", desc: "Borrower's binding repayment obligation" },
-  { name: "Loan Agreement", desc: "Rate, term, covenants, default triggers" },
-  { name: "Security Agreement", desc: "Claim on business assets as collateral" },
-  { name: "Guaranty Agreement", desc: "Personal or third-party guarantee" },
-  { name: "Commitment Letter", desc: "Formal offer with all lending terms" },
-  { name: "Deed of Trust", desc: "Real property lien for the lender" },
-  { name: "Assignment of Leases & Rents", desc: "Lender collects rent on default" },
-  { name: "SNDA", desc: "Protects tenants and lender in foreclosure" },
-  { name: "Subordination Agreement", desc: "Priority between multiple lenders" },
-  { name: "Tenant Estoppel Certificate", desc: "Tenant confirms lease terms" },
-  { name: "Intercreditor Agreement", desc: "Senior/junior debt payment order" },
-  { name: "Environmental Indemnity", desc: "Borrower covers cleanup costs" },
-  { name: "Borrowing Base Agreement", desc: "Formula controlling line availability" },
-  { name: "UCC Financing Statement", desc: "Public notice of collateral claim" },
-  { name: "Loan Estimate", desc: "Borrower's first cost estimate" },
-  { name: "Closing Disclosure", desc: "Final locked-in numbers at closing" },
-  { name: "Amortization Schedule", desc: "Month-by-month payment breakdown" },
-  { name: "Settlement Statement", desc: "Every charge at closing, line by line" },
+  { name: "Promissory Note", desc: "Borrower's binding repayment obligation with rate, term, and payment schedule" },
+  { name: "Loan Agreement", desc: "Complete lending terms: rate, covenants, reporting requirements, events of default, and remedies" },
+  { name: "Security Agreement", desc: "Lender's claim on business assets, inventory, receivables, or equipment as collateral" },
+  { name: "Guaranty Agreement", desc: "Personal or third-party guarantee with unlimited or capped liability" },
+  { name: "Commitment Letter", desc: "Formal offer from the lender with all material terms, conditions precedent, and expiration" },
+  { name: "Deed of Trust", desc: "Real property lien recorded in the county where the property sits" },
+  { name: "Assignment of Leases & Rents", desc: "Lender collects rent directly if the borrower defaults" },
+  { name: "SNDA", desc: "Subordination, non-disturbance, and attornment. Protects tenants and lender in foreclosure" },
+  { name: "Subordination Agreement", desc: "Establishes payment priority between multiple lenders on the same collateral" },
+  { name: "Tenant Estoppel Certificate", desc: "Tenant confirms lease terms, rent amount, and any landlord defaults" },
+  { name: "Intercreditor Agreement", desc: "Senior/junior lender payment order, cure rights, and standstill provisions" },
+  { name: "Environmental Indemnity", desc: "Borrower assumes responsibility for environmental cleanup costs" },
+  { name: "Borrowing Base Agreement", desc: "Formula controlling how much the borrower can draw on a revolving facility" },
+  { name: "UCC Financing Statement", desc: "Public notice of the lender's security interest filed with the Secretary of State" },
+  { name: "Loan Estimate", desc: "Borrower's first look at estimated rates, fees, and closing costs" },
+  { name: "Closing Disclosure", desc: "Final locked-in numbers delivered before closing" },
+  { name: "Amortization Schedule", desc: "Month-by-month principal, interest, and remaining balance for the full loan term" },
+  { name: "Settlement Statement", desc: "Every charge at closing itemized line by line" },
 ];
 
 const SBA_DOCS = [
-  "SBA Form 1919", "SBA Form 159", "SBA Form 148", "SBA Form 1050",
-  "SBA Authorization", "CDC Debenture", "IRS Form 4506-C", "IRS Form W-9",
+  { name: "SBA Form 1919", desc: "Borrower information" },
+  { name: "SBA Form 159", desc: "Fee disclosure and compensation" },
+  { name: "SBA Form 148", desc: "Unconditional guarantee" },
+  { name: "SBA Form 1050", desc: "Settlement sheet" },
+  { name: "SBA Authorization", desc: "Loan authorization and agreement" },
+  { name: "CDC Debenture", desc: "504 program debenture note" },
+  { name: "IRS Form 4506-C", desc: "Tax transcript request" },
+  { name: "IRS Form W-9", desc: "Taxpayer identification" },
 ];
 
 const OTHER_DOCS = [
@@ -38,21 +117,37 @@ const OTHER_DOCS = [
   "Disbursement Authorization", "Digital Asset Pledge Agreement",
 ];
 
-const PROGRAMS = [
-  { name: "SBA 7(a)", highlight: "Up to 27 documents per deal. Government-backed, 4-tier rate caps per SBA SOP." },
-  { name: "SBA 504", highlight: "Fixed-rate CDC debenture structure for real estate and heavy equipment." },
-  { name: "Commercial CRE", highlight: "Office, retail, industrial, mixed-use. Purchase, refinance, or cash-out." },
-  { name: "DSCR", highlight: "Qualified on property income instead of personal tax returns." },
-  { name: "Bank Statement", highlight: "12 or 24 months of deposits replace tax return requirements." },
-  { name: "Conventional", highlight: "Full financials underwriting. Term, working capital, or acquisition." },
-  { name: "Line of Credit", highlight: "Revolving draw against a borrowing base." },
-  { name: "Equipment", highlight: "The equipment itself serves as collateral." },
-  { name: "Bridge", highlight: "6 to 24 months while permanent financing closes." },
-  { name: "Multifamily", highlight: "5-unit to large complexes with assignment of leases." },
-  { name: "Mezzanine", highlight: "Behind senior debt in the capital stack. Higher rate, more leverage." },
-  { name: "Construction", highlight: "Ground-up or gut rehab with draw schedules and inspection requirements." },
-  { name: "Hard Money", highlight: "Asset-based, fast close. Fix-and-flip, land, time-sensitive deals." },
-  { name: "Crypto-Collateralized", highlight: "Bitcoin, Ethereum, digital assets with custody and liquidation terms." },
+const ANALYSIS_ITEMS = [
+  {
+    title: "Income and cash flow",
+    items: [
+      "Gross and net income from tax returns, P&L, or bank statements",
+      "Monthly and annual cash flow with seasonal adjustments",
+      "Debt service coverage ratio calculated from actual NOI",
+      "Debt-to-income ratio across all borrower obligations",
+      "Global cash flow analysis for multi-entity borrowers",
+    ],
+  },
+  {
+    title: "Collateral and risk",
+    items: [
+      "Loan-to-value against appraised or as-is value",
+      "Collateral coverage ratio across all pledged assets",
+      "Liquidity analysis: cash reserves relative to debt service",
+      "49 risk flags checked per deal (fraud patterns, concentration, tenant quality)",
+      "Borrowing base calculations for revolving facilities",
+    ],
+  },
+  {
+    title: "Program eligibility",
+    items: [
+      "SBA size standards by NAICS code",
+      "Owner-occupancy requirements (51% for SBA 7(a), 60% for 504)",
+      "Use of proceeds restrictions per program",
+      "Rate cap compliance for government-backed programs",
+      "Guaranty fee calculations based on loan size and maturity",
+    ],
+  },
 ];
 
 export default function LendingPage() {
@@ -78,12 +173,10 @@ export default function LendingPage() {
                 </span>
               </h1>
               <p className="mt-8 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
-                Your team spends days assembling loan packages that follow the
-                same rules every time. Pick the program, upload the borrower's
-                financials, and OpenShut generates everything from the commitment
-                letter through the closing disclosure. 36 document types across
-                14 loan programs, with rates and fees calculated from the actual
-                program rules for your state.
+                Pick the program, upload the borrower&apos;s financials, and get
+                the full loan package back. 36 document types across 14 loan
+                programs, with rates and fees calculated from the actual program
+                requirements for your state.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -140,22 +233,22 @@ export default function LendingPage() {
                 14 loan programs built in
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                Each program has its own document set, rate calculations, and
-                compliance requirements. You pick the program and the system
-                handles everything downstream.
+                Each program has its own document set, rate calculations,
+                eligibility rules, and compliance requirements. You pick the
+                program, the system handles everything else.
               </p>
             </div>
           </FadeIn>
 
-          <Stagger className="grid grid-cols-1 sm:grid-cols-2 gap-3.5" staggerDelay={0.03} initialDelay={0.1}>
+          <Stagger className="grid grid-cols-1 sm:grid-cols-2 gap-4" staggerDelay={0.03} initialDelay={0.1}>
             {PROGRAMS.map((program) => (
               <StaggerItem key={program.name}>
-                <div className="rounded-xl bg-card p-5 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
-                  <div className="flex items-center gap-2.5 mb-1.5">
-                    <div className="h-1.5 w-1.5 rounded-full bg-foreground/40" />
+                <div className="rounded-xl bg-card p-5 sm:p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
+                  <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-semibold text-card-foreground">{program.name}</h3>
+                    <span className="text-xs font-medium text-muted-foreground tabular-nums">{program.amount}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed pl-4">{program.highlight}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{program.details}</p>
                 </div>
               </StaggerItem>
             ))}
@@ -171,11 +264,12 @@ export default function LendingPage() {
             <FadeIn>
               <div className="max-w-2xl mb-14">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Up to 36 document types per generation
+                  36 document types
                 </h2>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
-                  The system pulls exactly what the program and state require for
-                  your deal.
+                  The system pulls the right documents for your program, deal
+                  structure, and state. An SBA 7(a) deal can generate up to 27
+                  documents. A simple bridge loan might generate 8.
                 </p>
               </div>
             </FadeIn>
@@ -192,7 +286,7 @@ export default function LendingPage() {
                       <CheckCircle2 className="h-3.5 w-3.5 text-foreground/40 mt-0.5 shrink-0" />
                       <div>
                         <span className="text-sm font-medium text-card-foreground">{doc.name}</span>
-                        <span className="text-sm text-muted-foreground ml-1.5">{doc.desc}</span>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{doc.desc}</p>
                       </div>
                     </div>
                   </div>
@@ -200,69 +294,178 @@ export default function LendingPage() {
               ))}
             </Stagger>
 
-            {/* SBA + Other */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
-              <FadeIn delay={0.15}>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">SBA-specific forms</h3>
-                <div className="flex flex-wrap gap-2">
-                  {SBA_DOCS.map((doc) => (
-                    <span key={doc} className="inline-flex items-center gap-1.5 rounded-lg bg-muted border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground">
-                      <FileText className="h-3 w-3" />
-                      {doc}
-                    </span>
-                  ))}
-                </div>
-              </FadeIn>
-              <FadeIn delay={0.2}>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Additional documents</h3>
-                <div className="flex flex-wrap gap-2">
-                  {OTHER_DOCS.map((doc) => (
-                    <span key={doc} className="inline-flex items-center rounded-md bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
-                      {doc}
-                    </span>
-                  ))}
-                </div>
-              </FadeIn>
-            </div>
+            {/* SBA docs */}
+            <FadeIn delay={0.15}>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4 mt-12">SBA-specific forms</h3>
+            </FadeIn>
+            <Stagger className="grid grid-cols-2 sm:grid-cols-4 gap-3" staggerDelay={0.02} initialDelay={0.15}>
+              {SBA_DOCS.map((doc) => (
+                <StaggerItem key={doc.name}>
+                  <div className="rounded-lg bg-card px-4 py-3 transition-all duration-200 hover:-translate-y-0.5 card-shine h-full">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-3 w-3 text-foreground/40 shrink-0" />
+                      <span className="text-xs font-medium text-card-foreground">{doc.name}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{doc.desc}</p>
+                  </div>
+                </StaggerItem>
+              ))}
+            </Stagger>
+
+            {/* Other docs */}
+            <FadeIn delay={0.2}>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4 mt-12">Additional documents</h3>
+              <div className="flex flex-wrap gap-2">
+                {OTHER_DOCS.map((doc) => (
+                  <span key={doc} className="inline-flex items-center rounded-md bg-muted border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                    {doc}
+                  </span>
+                ))}
+              </div>
+            </FadeIn>
           </div>
         </div>
         <div className="section-divider" />
       </section>
 
-      {/* Compliance */}
+      {/* Financial Analysis */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <FadeIn>
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-6">
-                Compliance checks that run before you see anything
+            <div className="max-w-2xl mb-14">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                Financial analysis built into every deal
               </h2>
-              <p className="text-muted-foreground leading-relaxed mb-10">
-                The system checks your documents against the lending laws that
-                apply to your specific deal, program, and state. If something
-                is off, it gets flagged for your review before you download.
+              <p className="mt-4 text-muted-foreground leading-relaxed">
+                Upload the borrower&apos;s financials and the system extracts
+                the numbers, calculates the ratios, and checks program
+                eligibility before generating documents. Every figure in the
+                output is calculated, not estimated.
               </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  { label: "State usury limits", detail: "TX 28% commercial, GA 60% criminal cap, CA Art XV exemptions, and 47 more" },
-                  { label: "OFAC screening", detail: "Full Consolidated Sanctions List: SDN, SSI, FSE" },
-                  { label: "SBA compliance", detail: "Rate caps per SOP 50 10 8, size standards, guaranty fee tiers" },
-                  { label: "Required disclosures", detail: "Commercial financing disclosure in 11 states, TRID, GLBA, BSA/AML" },
-                  { label: "Flood zone checks", detail: "National Flood Insurance Act requirements" },
-                  { label: "Number verification", detail: "Two independent systems check every figure, flagged if they disagree by more than $1" },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-start gap-3 rounded-xl bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 card-shine">
-                    <Calculator className="h-4 w-4 text-foreground/50 mt-0.5 shrink-0" />
-                    <div>
-                      <span className="text-sm font-medium text-card-foreground">{item.label}</span>
-                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.detail}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </FadeIn>
+
+          <Stagger className="grid grid-cols-1 gap-5 sm:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
+            {ANALYSIS_ITEMS.map((col) => (
+              <StaggerItem key={col.title}>
+                <div className="rounded-xl bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine metallic-sheen h-full">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Calculator className="h-4 w-4 text-foreground/50" />
+                    <h3 className="text-sm font-semibold text-foreground">{col.title}</h3>
+                  </div>
+                  <ul className="space-y-2.5">
+                    {col.items.map((item) => (
+                      <li key={item} className="flex items-start gap-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
+                        <span className="text-xs text-muted-foreground leading-relaxed">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </div>
+      </section>
+
+      {/* Compliance */}
+      <section className="w-full relative">
+        <div className="section-divider" />
+        <div className="bg-muted/20">
+          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+            <FadeIn>
+              <div className="max-w-3xl mx-auto">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
+                  Compliance checks on every document
+                </h2>
+                <p className="text-muted-foreground leading-relaxed mb-10">
+                  After documents are generated, they run through regulatory
+                  checks for your specific deal, program, and state. Anything
+                  out of compliance gets flagged before you download.
+                </p>
+
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                  {[
+                    {
+                      title: "Federal requirements",
+                      icon: ShieldCheck,
+                      items: [
+                        "OFAC Consolidated Sanctions List: SDN, SSI, FSE",
+                        "BSA/AML identification and record-keeping",
+                        "USA PATRIOT Act customer identification",
+                        "TRID disclosure timing and tolerances",
+                        "National Flood Insurance Act checks",
+                        "SBA SOP rate caps, size standards, and guaranty fees",
+                      ],
+                    },
+                    {
+                      title: "State regulations",
+                      icon: MapPin,
+                      items: [
+                        "Usury limits (TX 28%, GA 60%, CA Art XV exemptions)",
+                        "Commercial financing disclosure in 11 states",
+                        "Community property rules in 9 states",
+                        "State-specific mortgage and deed of trust requirements",
+                        "Recording and filing requirements by county",
+                        "UCC filing requirements by state",
+                      ],
+                    },
+                    {
+                      title: "Number verification",
+                      icon: Calculator,
+                      items: [
+                        "Every rate, fee, and payment independently calculated",
+                        "Figures checked against program maximums",
+                        "Amortization schedules verified to the penny",
+                        "Guaranty fees matched to SBA fee tiers",
+                        "Closing costs cross-referenced with loan estimate",
+                        "DSCR and LTV validated against program floors",
+                      ],
+                    },
+                  ].map((col) => (
+                    <div key={col.title} className="rounded-xl bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine">
+                      <div className="flex items-center gap-2 mb-4">
+                        <col.icon className="h-4 w-4 text-foreground/50" />
+                        <h3 className="text-sm font-semibold text-foreground">{col.title}</h3>
+                      </div>
+                      <ul className="space-y-2.5">
+                        {col.items.map((item) => (
+                          <li key={item} className="flex items-start gap-2">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
+                            <span className="text-xs text-muted-foreground leading-relaxed">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+        <div className="section-divider" />
+      </section>
+
+      {/* How It Works */}
+      <section className="w-full">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-3" staggerDelay={0.08} initialDelay={0.1}>
+            {[
+              { n: "01", title: "Pick the program and upload", desc: "Choose one of 14 loan programs, enter the deal terms, and upload the borrower's financials. Tax returns, bank statements, rent rolls, or whatever the program requires." },
+              { n: "02", title: "Get the full loan package", desc: "Every document your deal requires is generated together. Rates, fees, and payments are calculated from the program rules. Legal language is written around those numbers." },
+              { n: "03", title: "Review, edit, and close", desc: "Read everything in the editor. Make changes inline. Download as Word or PDF and hand it to your attorney. They review a complete first draft instead of starting from scratch." },
+            ].map((step) => (
+              <StaggerItem key={step.n}>
+                <div className="text-center">
+                  <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-muted text-foreground text-sm font-bold font-mono inset-shine">
+                    {step.n}
+                  </div>
+                  <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
+                </div>
+              </StaggerItem>
+            ))}
+          </Stagger>
         </div>
       </section>
 

@@ -1,6 +1,6 @@
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Building, Calculator } from "lucide-react";
+import { ArrowRight, CheckCircle2, Building, Calculator, ShieldCheck } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
@@ -8,24 +8,24 @@ import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 const DOCUMENTS = [
   {
     name: "Private Placement Memorandum",
-    desc: "Property details, deal structure, projected returns, risk factors, and legal disclosures. What your investors read before committing.",
+    desc: "Property details, deal structure, projected returns, 19 sections of risk factors, sponsor track record, fee disclosure, tax considerations, and legal disclosures. What your investors read before committing.",
   },
   {
     name: "LLC Operating Agreement",
-    desc: "The syndication entity. Management, capital contributions, waterfall distributions, transfers, and dissolution.",
+    desc: "The syndication entity. Management authority, capital contributions, distribution waterfall with preferred return and promote tiers, transfer restrictions, and dissolution provisions.",
   },
   {
     name: "Subscription Agreement",
-    desc: "Each investor signs this to commit capital. Investment amount, accreditation reps, suitability confirmations.",
+    desc: "Each investor signs this to commit capital. Investment amount, accreditation representations, suitability confirmations, and the terms they agree to. Adjusts for 506(b) or 506(c).",
   },
   {
     name: "Investor Questionnaire",
-    desc: "Accreditation status, tax ID, entity type. Collected for every investor before accepting capital.",
+    desc: "Accreditation status, tax ID, entity type, identity verification. Collected for every investor before accepting capital. Pure template, no AI.",
   },
   {
     name: "Pro Forma Financial Projections",
-    desc: "Year-by-year model from your inputs. Revenue, expenses, debt service, waterfall distributions, exit proceeds. IRR calculated with Newton-Raphson iteration. 100% math, zero AI.",
     highlight: true,
+    desc: "Year-by-year model from your inputs. Revenue, expenses by category, debt service, NOI, waterfall distributions, exit proceeds, and sensitivity analysis. IRR calculated with Newton-Raphson iteration. 100% math, zero AI.",
   },
 ];
 
@@ -139,9 +139,9 @@ export default function SyndicationPage() {
                 The pro forma is 100% math
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                The financial model doesn't use AI at all. Every line is
-                calculated from your inputs using the same methods your Excel
-                model uses.
+                The financial model does not use AI at all. Every line is
+                calculated from your inputs using the same methods your
+                Excel model uses.
               </p>
             </div>
           </FadeIn>
@@ -150,25 +150,25 @@ export default function SyndicationPage() {
             {[
               {
                 title: "Year-by-year projections",
-                items: ["Revenue and vacancy", "Operating expenses by category", "NOI and debt service", "Depreciation (27.5yr or 39yr by property type)", "Free cash flow per year"],
+                items: ["Gross potential rent with vacancy and concessions", "Operating expenses broken out by category", "Net operating income and debt service coverage", "Depreciation (27.5yr residential or 39yr commercial)", "Free cash flow per year through the hold"],
               },
               {
                 title: "Waterfall distributions",
-                items: ["Preferred return hurdle", "GP catch-up (100% to GP during catch-up)", "Promote tiers you define", "Cumulative tracking across the hold", "LP/GP split at every level"],
+                items: ["Preferred return hurdle (6-8% typical)", "GP catch-up phase (100% to GP until caught up)", "Promote tiers you define (70/30, 60/40, 50/50)", "Cumulative return tracking across the full hold", "LP and GP split calculated at every level"],
               },
               {
                 title: "Return metrics",
-                items: ["IRR (Newton-Raphson iteration)", "Equity multiple / MOIC", "Cash-on-cash return", "DPI, RVPI, TVPI", "Sensitivity on exit cap rate and occupancy"],
+                items: ["IRR calculated with Newton-Raphson iteration", "Equity multiple / MOIC", "Cash-on-cash return by year", "DPI, RVPI, and TVPI", "Sensitivity tables on exit cap rate and occupancy"],
               },
             ].map((col) => (
               <StaggerItem key={col.title}>
-                <div className="rounded-xl bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine h-full">
+                <div className="rounded-xl bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine metallic-sheen h-full">
                   <h3 className="text-sm font-semibold text-foreground mb-4">{col.title}</h3>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2.5">
                     {col.items.map((item) => (
                       <li key={item} className="flex items-start gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
-                        <span className="text-sm text-muted-foreground">{item}</span>
+                        <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
                       </li>
                     ))}
                   </ul>
@@ -224,13 +224,110 @@ export default function SyndicationPage() {
         <div className="section-divider" />
       </section>
 
+      {/* Tax Considerations */}
+      <section className="w-full">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <FadeIn>
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
+                Tax structures reflected in the documents
+              </h2>
+              <p className="text-muted-foreground leading-relaxed mb-10">
+                Real estate syndications have specific tax treatment that
+                changes the PPM disclosures, operating agreement provisions,
+                and pro forma projections. The system accounts for all of these.
+              </p>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                {[
+                  {
+                    title: "Depreciation and deductions",
+                    icon: Calculator,
+                    items: [
+                      "Bonus depreciation tracked at current rates (TCJA phase-down schedule)",
+                      "Cost segregation study assumptions by property type",
+                      "Passive loss rules: $100K/$150K phase-out (Section 469)",
+                      "Real Estate Professional Status: 750+ hours qualification noted in PPM",
+                    ],
+                  },
+                  {
+                    title: "Exchange and deferral",
+                    icon: Building,
+                    items: [
+                      "1031 exchange: 45-day identification, 180-day close, QI requirements",
+                      "Qualified Opportunity Zone: 10-year hold, 90% asset test, substantial improvement",
+                      "UBTI threshold ($1K) flagged for IRA and trust investors",
+                      "FIRPTA withholding noted for foreign investors",
+                    ],
+                  },
+                ].map((col) => (
+                  <div key={col.title} className="rounded-xl bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 card-shine metallic-sheen h-full">
+                    <div className="flex items-center gap-2 mb-4">
+                      <col.icon className="h-4 w-4 text-foreground/50" />
+                      <h3 className="text-sm font-semibold text-foreground">{col.title}</h3>
+                    </div>
+                    <ul className="space-y-2.5">
+                      {col.items.map((item) => (
+                        <li key={item} className="flex items-start gap-2">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
+                          <span className="text-xs text-muted-foreground leading-relaxed">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Compliance Checks */}
+      <section className="w-full relative">
+        <div className="section-divider" />
+        <div className="bg-muted/20 bg-dot-pattern">
+          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+            <FadeIn>
+              <div className="max-w-3xl mx-auto">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
+                  Deal feasibility checks
+                </h2>
+                <p className="text-muted-foreground leading-relaxed mb-10">
+                  Before you send anything to investors, the system checks
+                  your deal against standard underwriting thresholds.
+                </p>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {[
+                    "DSCR minimum 1.25x on the senior debt",
+                    "LTV maximum 75% against appraised value",
+                    "Exit cap rate vs. going-in cap rate sanity check",
+                    "Breakeven occupancy calculated and flagged if above 85%",
+                    "Capital stack balance (equity + debt = total capitalization)",
+                    "IRR plausibility check against the property type",
+                    "Reg D 506(b) vs. 506(c) requirements applied to all investor docs",
+                    "Waterfall distributions verified against operating agreement terms",
+                  ].map((item) => (
+                    <div key={item} className="flex items-start gap-2.5 p-3 rounded-lg transition-colors hover:bg-muted/50">
+                      <ShieldCheck className="h-4 w-4 text-foreground/40 mt-0.5 shrink-0" />
+                      <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+        <div className="section-divider" />
+      </section>
+
       {/* How It Works */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-3" staggerDelay={0.08} initialDelay={0.1}>
             {[
-              { n: "01", title: "Enter the deal", desc: "Property type, purchase price, financing, hold period, rent growth, and waterfall structure. About 10 minutes." },
-              { n: "02", title: "Get 5 docs and a full model", desc: "PPM, operating agreement, subscription docs, investor questionnaire, and year-by-year pro forma projections." },
+              { n: "01", title: "Enter the deal", desc: "Property type, purchase price, financing terms, hold period, rent growth assumptions, and waterfall structure. About 10 minutes." },
+              { n: "02", title: "Get 5 docs and a full model", desc: "PPM, operating agreement, subscription agreement, investor questionnaire, and year-by-year pro forma with sensitivity analysis." },
               { n: "03", title: "Review, edit, download", desc: "Read everything in the editor. Make changes. Download individually or as a ZIP. Send to your attorney, then to investors." },
             ].map((step) => (
               <StaggerItem key={step.n}>

@@ -1,6 +1,6 @@
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, ShieldCheck, FileText, Calculator } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck, FileText, Calculator, Clock } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
@@ -9,34 +9,34 @@ const DOCUMENTS = [
   {
     name: "LP Quarterly Report",
     description:
-      "NAV, contributions, distributions, IRR, TVPI, DPI, RVPI, and portfolio company detail. Formatted to ILPA standards so institutional LPs recognize the layout without asking questions.",
+      "ILPA-format report covering fund overview, financial summary, performance metrics (IRR, TVPI, DPI, RVPI), portfolio company detail by investment, cash flow summary, fee disclosure, GP commitment tracking, and ASC 820 fair value hierarchy. The layout institutional LPs recognize without asking questions.",
   },
   {
     name: "Capital Call Notice",
     description:
-      "Per-investor amounts, due date with minimum 10 business days, wire instructions, default penalties, and purpose of the call. Ready to send the day you generate it.",
+      "Per-investor amounts with pro rata calculations, due date with minimum 10 business days notice (excluding federal holidays), wire instructions, purpose of the call, overcall protection, and default penalties: grace period, default interest, forced sale of interest, and commitment reduction.",
   },
   {
     name: "Distribution Notice",
     description:
-      "Breaks down the source, walks through the waterfall, and calculates tax withholding per investor type. 30% for foreign LPs, 15% FIRPTA, 24% backup withholding.",
+      "Breaks down the source of the distribution, walks through the waterfall per the operating agreement, and calculates tax withholding by investor type: 30% for foreign LPs, 15% FIRPTA (Section 1445), 10% for partnership transfers (Section 1446(f)), 24% backup withholding, plus state withholding where applicable.",
   },
   {
     name: "K-1 Summary Report",
     tag: "23 boxes",
     description:
-      "All 23 IRS boxes from ordinary income through QBI deduction. Late K-1s cost $260 per partner per month. This gets them done before the penalties start.",
+      "All 23 IRS boxes from ordinary business income (Box 1) through the QBI deduction (Box 20, Code Z). Includes rental income, guaranteed payments, interest, dividends, short and long-term capital gains, Section 1250 gain, Section 1231 gain, Section 179 deduction, foreign taxes, AMT adjustments, tax-exempt income, distributions, and UBTI. Late K-1s cost $260 per partner per month.",
   },
   {
     name: "Annual Report",
     description:
-      "Balance sheet, statement of operations, cash flows, schedule of investments, and ASC 820 fair value hierarchy. Everything an auditor or institutional LP expects at year-end.",
+      "16 sections: balance sheet, statement of operations, statement of cash flows, schedule of investments, ASC 820 fair value hierarchy (Level 1 quoted prices, Level 2 observable inputs, Level 3 unobservable inputs), performance summary, management discussion, and risk factors. Everything an auditor or institutional LP expects at year-end.",
   },
   {
     name: "Form ADV Part 2A Summary",
     tag: "SEC",
     description:
-      "All 18 SEC-required items in plain language: fees, conflicts, disciplinary history, custody practices. Must be delivered within 120 days of fiscal year end.",
+      "All 18 SEC-required items in plain language: advisory business description, fees and compensation, performance-based fees, types of clients, methods of analysis, disciplinary information, other financial industry activities, code of ethics, brokerage practices, review of accounts, client referrals, custody, investment discretion, voting client securities, financial information, and more. Must be delivered within 120 days of fiscal year end.",
   },
 ];
 
@@ -162,7 +162,6 @@ export default function CompliancePage() {
                   When the quarterly report matches ILPA standards, the K-1
                   covers all 23 boxes with correct withholding rates, and
                   everything arrives on time, your next fundraise gets easier.
-                  These are the standards the system enforces.
                 </p>
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
@@ -171,30 +170,36 @@ export default function CompliancePage() {
                       title: "LP reporting",
                       icon: FileText,
                       items: [
-                        "ILPA-standard quarterly layout",
+                        "ILPA-standard quarterly layout and terminology",
                         "IRR, TVPI, DPI, RVPI calculated consistently",
                         "Portfolio company detail by investment",
-                        "NAV bridge with attribution",
+                        "NAV bridge with attribution analysis",
+                        "Fee and expense disclosure per ILPA guidelines",
+                        "GP commitment tracking and co-investment reporting",
                       ],
                     },
                     {
                       title: "Tax compliance",
                       icon: Calculator,
                       items: [
-                        "All 23 K-1 boxes, ordinary income through QBI",
+                        "All 23 K-1 boxes, ordinary income through QBI (199A)",
                         "$260/partner/month late penalty avoided",
-                        "Withholding: domestic, foreign, tax-exempt",
-                        "FIRPTA 15%, backup 24%, foreign 30%",
+                        "Domestic withholding by investor type",
+                        "Foreign withholding at 30% (NRA/foreign entity)",
+                        "FIRPTA 15% (Section 1445) and 10% (Section 1446(f))",
+                        "Backup withholding 24%, state withholding (NY 10.9%)",
                       ],
                     },
                     {
-                      title: "Regulatory",
+                      title: "Regulatory filings",
                       icon: ShieldCheck,
                       items: [
                         "Form ADV with all 18 SEC-required items",
-                        "Capital call: 10-day notice + default terms",
-                        "ASC 820 fair value hierarchy in annual report",
-                        "120-day delivery window tracked",
+                        "Form PF: $150M annual, $1.5B quarterly, 72-hour current events",
+                        "Capital call: business day calculations with holiday exclusions",
+                        "ASC 820 Level 1/2/3 fair value hierarchy in annual report",
+                        "120-day Form ADV delivery window tracked",
+                        "GP clawback provisions per ILPA best practices",
                       ],
                     },
                   ].map((col) => (
@@ -221,64 +226,106 @@ export default function CompliancePage() {
         <div className="section-divider" />
       </section>
 
-      {/* How It Works */}
+      {/* Filing Deadlines */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-3" staggerDelay={0.08} initialDelay={0.1}>
-            {[
-              { n: "01", title: "Enter the fund data", desc: "NAV, cash flows, investor list, portfolio positions. If you have it in a spreadsheet, this takes minutes." },
-              { n: "02", title: "Get all 6 documents", desc: "LP report, capital call notice, distribution notice, K-1 summaries, annual report, and Form ADV. Generated together from the same data." },
-              { n: "03", title: "Review, edit, distribute", desc: "Read everything in the editor. Make changes. Download as Word or PDF and send to your LPs." },
-            ].map((step) => (
-              <StaggerItem key={step.n}>
-                <div className="text-center">
-                  <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-muted text-foreground text-sm font-bold font-mono inset-shine">
-                    {step.n}
-                  </div>
-                  <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
+          <FadeIn>
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
+                Filing deadlines the system tracks
+              </h2>
+              <p className="text-muted-foreground leading-relaxed mb-10">
+                Miss a deadline and you pay a penalty or lose LP trust.
+                The system knows when each document is due.
+              </p>
+
+              <Stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2" staggerDelay={0.04} initialDelay={0.1}>
+                {[
+                  { doc: "K-1 Summaries", deadline: "March 15 (partnerships)", penalty: "$260/partner/month late" },
+                  { doc: "Form ADV Annual Update", deadline: "Within 90 days of fiscal year end", penalty: "SEC enforcement action" },
+                  { doc: "Form ADV Delivery to Clients", deadline: "Within 120 days of fiscal year end", penalty: "Compliance deficiency" },
+                  { doc: "Form PF (Large Advisors)", deadline: "60 days after quarter end", penalty: "SEC enforcement" },
+                  { doc: "Form PF (Current Events)", deadline: "72 hours after triggering event", penalty: "SEC enforcement" },
+                  { doc: "LP Quarterly Reports", deadline: "45-60 days after quarter end (industry standard)", penalty: "LP dissatisfaction, fundraising impact" },
+                  { doc: "Capital Call Notices", deadline: "Minimum 10 business days before due date", penalty: "Invalid call, LP dispute" },
+                  { doc: "Distribution Notices", deadline: "With or before distribution payment", penalty: "Withholding errors, LP complaints" },
+                ].map((item) => (
+                  <StaggerItem key={item.doc}>
+                    <div className="rounded-xl bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 card-shine h-full">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="h-3.5 w-3.5 text-foreground/40 shrink-0" />
+                        <h3 className="text-sm font-semibold text-card-foreground">{item.doc}</h3>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{item.deadline}</p>
+                      <p className="text-xs text-muted-foreground/60 mt-1">{item.penalty}</p>
+                    </div>
+                  </StaggerItem>
+                ))}
+              </Stagger>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
-      {/* Bottom CTA */}
+      {/* How It Works */}
       <section className="w-full relative">
         <div className="section-divider" />
         <div className="bg-muted/20">
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-            <FadeIn>
-              <div className="relative rounded-2xl bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 card-shine hero-light bg-noise">
-                <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-                <div className="relative z-10">
-                  <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                    Run one reporting period. Check every number.
-                  </h2>
-                  <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                    Enter your fund data, get all 6 documents back. If the
-                    output is better than what your team is doing now, you will
-                    know immediately.
-                  </p>
-                  <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                    <SignInButton mode="modal">
-                      <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                        Run a Period Free
-                        <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                      </button>
-                    </SignInButton>
-                    <Link
-                      href="/pricing"
-                      className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted hover:border-foreground/15"
-                    >
-                      See Pricing
-                    </Link>
+            <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-3" staggerDelay={0.08} initialDelay={0.1}>
+              {[
+                { n: "01", title: "Enter the fund data", desc: "NAV, cash flows, investor list with entity types, portfolio positions, and fee calculations. If you have it in a spreadsheet, this takes minutes." },
+                { n: "02", title: "Get all 6 documents", desc: "LP report, capital call notice, distribution notice, K-1 summaries, annual report, and Form ADV. Generated together from the same data set." },
+                { n: "03", title: "Review, edit, distribute", desc: "Read everything in the editor. Make changes. Download as Word or PDF and send to your LPs." },
+              ].map((step) => (
+                <StaggerItem key={step.n}>
+                  <div className="text-center">
+                    <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-muted text-foreground text-sm font-bold font-mono inset-shine">
+                      {step.n}
+                    </div>
+                    <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
                   </div>
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </div>
+        </div>
+        <div className="section-divider" />
+      </section>
+
+      {/* Bottom CTA */}
+      <section className="w-full">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+          <FadeIn>
+            <div className="relative rounded-2xl bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 card-shine hero-light bg-noise">
+              <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+              <div className="relative z-10">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  Run one reporting period. Check every number.
+                </h2>
+                <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
+                  Enter your fund data, get all 6 documents back. If the
+                  output is better than what your team is doing now, you will
+                  know immediately.
+                </p>
+                <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+                  <SignInButton mode="modal">
+                    <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
+                      Run a Period Free
+                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                    </button>
+                  </SignInButton>
+                  <Link
+                    href="/pricing"
+                    className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted hover:border-foreground/15"
+                  >
+                    See Pricing
+                  </Link>
                 </div>
               </div>
-            </FadeIn>
-          </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
