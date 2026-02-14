@@ -442,7 +442,7 @@ export default function PricingPage() {
                 59 document types across 5 modules
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Each module generates production-ready legal documents with deterministic compliance checks.
+                Each module generates production-ready legal documents, checked against federal and state regulations.
               </p>
             </div>
           </FadeIn>

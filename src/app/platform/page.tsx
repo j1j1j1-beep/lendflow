@@ -20,49 +20,49 @@ import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 
 const SECURITY_ITEMS = [
   {
-    title: "Encryption at rest",
-    desc: "Every file is encrypted with AES-256 server-side encryption in AWS S3. Your documents are unreadable without the decryption key, which is managed by AWS KMS.",
+    title: "AES-256 encryption at rest",
+    desc: "Every file you upload is encrypted before it hits disk. The decryption keys are managed separately from the files themselves. Your documents are unreadable at the storage level.",
     icon: Lock,
   },
   {
-    title: "Encryption in transit",
-    desc: "All data transmitted over HTTPS/TLS. No exceptions. Every API call, every file upload, every document download is encrypted end to end.",
+    title: "HTTPS/TLS in transit",
+    desc: "Every API call, file upload, and document download goes over HTTPS/TLS. No exceptions. Nothing travels in the clear.",
     icon: ShieldCheck,
   },
   {
-    title: "Expiring document links",
-    desc: "Download links expire after 1 hour. Upload links expire in 10 minutes. There are no permanent URLs to your documents. If someone intercepts a link, it stops working.",
+    title: "Links that expire",
+    desc: "Download links stop working after 1 hour. Upload links expire in 10 minutes. There are no permanent URLs to your documents.",
     icon: Eye,
   },
   {
-    title: "Organization-level data isolation",
-    desc: "Every database query is scoped to your organization. No cross-tenant data access is possible. Your deals, documents, and financial data are invisible to every other firm on the platform.",
+    title: "Org-level data isolation",
+    desc: "Every database query is scoped to your organization. There is no way for one firm to see another firm's deals, documents, or financials.",
     icon: Building2,
   },
   {
     title: "Append-only audit trail",
-    desc: "Every action is logged with the user's identity, IP address, and timestamp. Logs are immutable. Nobody can delete or edit an audit entry after the fact.",
+    desc: "Every action is logged with user identity, IP address, and timestamp. Logs are append-only. Nobody can go back and edit or delete an entry.",
     icon: FileText,
   },
   {
-    title: "We do not train on your data",
-    desc: "Your uploads are encrypted and processed only for your organization. We do not use your documents, deal data, or any uploaded files for model training.",
+    title: "We don't train on your data",
+    desc: "Documents are processed for your organization only. We do not use your files, deal data, or uploads for model training. Your data stays yours.",
     icon: Scale,
   },
 ];
 
 const ACCURACY_POINTS = [
   {
-    title: "Numbers come from a rules engine, not from AI",
-    desc: "Interest rates, LTV ratios, fee structures, tax withholding rates, and deal terms are calculated by a deterministic rules engine that follows program rules exactly. The AI never picks a number. If the SBA 7(a) guarantee fee is 3.5% on a $1.2M loan, that number comes from the program rules, not a language model.",
+    title: "Numbers come from program rules, not AI",
+    desc: "Every number in your documents, including interest rates, LTV ratios, fee structures, and tax withholding rates, is calculated from the actual program rules. The AI never picks a number. Example: if the SBA 7(a) guarantee fee is 3.5% on a $1.2M loan, that number comes from the SBA's published fee schedule, not a language model making something up.",
   },
   {
-    title: "AI writes legal language, and cites its sources",
-    desc: "The AI writes the prose: default provisions, risk factors, indemnification clauses, tax considerations. Every clause it writes cites the specific law or regulation by section number. If a risk factor references Regulation D, it cites 17 CFR 230.506(b). You can check every citation against the actual statute.",
+    title: "Legal language is checked against real statutes",
+    desc: "After the AI writes default provisions, risk factors, and indemnification clauses, every clause is checked against the specific federal and state regulations for your deal. Citations point to actual statute sections so you can look them up yourself.",
   },
   {
-    title: "Two independent systems verify every number",
-    desc: "When you upload documents, two independent extraction systems read every figure. If the two extractions disagree by more than $1, the system flags it for manual review. No number makes it into your final documents without passing this check.",
+    title: "You verify everything against your own uploads",
+    desc: "When you upload financials, two independent systems extract every figure. If they disagree by more than $1, the system flags it for your review. You always have your original uploaded documents to check against. Nothing enters a final document unchecked.",
   },
 ];
 
@@ -200,13 +200,12 @@ export default function PlatformPage() {
           <FadeIn>
             <div className="max-w-3xl">
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Security, compliance, and accuracy.{" "}
-                <span className="text-primary">The details.</span>
+                How we handle{" "}
+                <span className="text-primary">your data.</span>
               </h1>
               <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
-                This page is for your compliance team, your CTO, or anyone who
-                needs to know exactly how OpenShut handles your data and verifies
-                your documents.
+                For your compliance team, your CTO, or anyone who wants to know
+                exactly how OpenShut protects data and gets the numbers right.
               </p>
             </div>
           </FadeIn>
@@ -222,7 +221,7 @@ export default function PlatformPage() {
                 Security
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Six layers of protection between your data and the outside world.
+                Six things standing between your data and the outside world.
               </p>
             </div>
           </FadeIn>
@@ -260,8 +259,8 @@ export default function PlatformPage() {
                 How accuracy works
               </h2>
               <p className="mt-4 text-muted-foreground">
-                This is how we get to a 0% hallucination rate. The system is
-                designed so that AI never has the opportunity to make up a number.
+                AI writes the legal language. It never picks a number. Here is
+                how that works and why it matters.
               </p>
             </div>
           </FadeIn>
@@ -298,14 +297,14 @@ export default function PlatformPage() {
                 <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-1">
-                    The result: 0% hallucination rate
+                    The result: no made-up numbers
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Because financial figures come from a rules engine and not from
-                    AI, and because every extracted number is verified by two
-                    independent systems, the AI cannot hallucinate a number into
-                    your documents. It writes the words. The rules engine writes the
-                    numbers. And two systems make sure the numbers match.
+                    Financial figures come from program rules. Extracted numbers
+                    are cross-checked automatically and flagged if anything looks
+                    off. The AI handles legal language. Math is handled
+                    separately. And you always have your original uploads to
+                    verify against.
                   </p>
                 </div>
               </div>
@@ -323,9 +322,8 @@ export default function PlatformPage() {
                 Regulatory coverage
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Every document OpenShut generates is checked against the statutes
-                and regulations that apply to that deal type. Here is the full list
-                of what the system covers.
+                Every document is checked against the statutes and regulations
+                that apply to that specific deal type and state.
               </p>
             </div>
           </FadeIn>
@@ -377,9 +375,8 @@ export default function PlatformPage() {
                 Enterprise integrations
               </h2>
               <p className="mt-4 text-muted-foreground">
-                For enterprise clients, we build direct integrations with your
-                existing systems. No rip-and-replace. OpenShut fits into the stack
-                you already have.
+                For enterprise clients, we plug into your existing systems. No
+                rip-and-replace. OpenShut fits into the tools you already use.
               </p>
             </div>
           </FadeIn>
@@ -432,10 +429,9 @@ export default function PlatformPage() {
                     Where your data lives
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    All files are stored in AWS S3 with AES-256 server-side
-                    encryption. Database records are stored in a managed PostgreSQL
-                    instance with encryption at rest. All infrastructure runs in AWS
-                    US regions.
+                    Files are stored with AES-256 encryption. The database is
+                    encrypted at rest. All infrastructure runs in US-based data
+                    centers.
                   </p>
                 </div>
                 <div className="rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15">
@@ -443,11 +439,9 @@ export default function PlatformPage() {
                     What happens during AI processing
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    When the system generates a document, relevant data is sent to
-                    the AI provider over an encrypted connection. The AI provider
-                    processes the request and returns the result. We do not use
-                    your data for training. Your documents are generated for your
-                    organization only.
+                    When you generate a document, relevant data goes to the AI
+                    provider over an encrypted connection. We don't train on your
+                    data. Documents are processed for your organization only.
                   </p>
                 </div>
                 <div className="rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15">
@@ -455,22 +449,20 @@ export default function PlatformPage() {
                     Who can access your data
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Only authenticated members of your organization can access your
-                    data. Every API request is scoped to your organization ID. There
-                    is no admin backdoor. OpenShut support staff cannot view your
-                    documents unless you explicitly grant temporary access.
+                    Only authenticated members of your org. No admin backdoor.
+                    Support staff cannot view your documents unless you
+                    explicitly grant temporary access.
                   </p>
                 </div>
                 <div className="rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15">
                   <h3 className="text-sm font-semibold text-card-foreground mb-2">
-                    What happens when you delete a project
+                    What happens when you delete
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    When you delete a project, all associated files are permanently
-                    removed from S3 and all database records are hard-deleted. This
-                    is not a soft delete. The data is gone. Audit log entries are
-                    retained for compliance purposes, but they contain no document
-                    content.
+                    Delete means delete. Files are removed from storage and
+                    database records are hard-deleted. Not a soft delete. The
+                    data is gone. Audit logs are retained for compliance, but
+                    they contain no document content.
                   </p>
                 </div>
               </div>
@@ -490,11 +482,11 @@ export default function PlatformPage() {
 
               <div className="relative">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Try it free. See the platform for yourself.
+                  See it yourself.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  One project free in any module. Full output. No credit card. No
-                  sales call.
+                  One free project in any module. Full document output. No
+                  credit card. No sales call.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">

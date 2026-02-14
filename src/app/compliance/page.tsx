@@ -9,53 +9,53 @@ const DOCUMENTS = [
   {
     name: "LP Quarterly Report",
     description:
-      "Performance report sent to limited partners every quarter. Fund returns, portfolio summary, cash flow activity, and manager commentary. Formatted to meet ILPA reporting standards.",
+      "What your LPs actually want to see every quarter. NAV, contributions, distributions, IRR, TVPI/DPI/RVPI, and portfolio company detail. Formatted to ILPA standards so institutional LPs recognize the layout.",
   },
   {
     name: "Capital Call Notice",
     description:
-      "Formal notice to LPs requesting their committed capital. Includes the call amount per investor, due date, wire instructions, and the purpose of the call.",
+      "The formal notice to draw down committed capital. Per-investor amounts, due date (minimum 10 business days), wire instructions, default penalties, and purpose of the call. Ready to send.",
   },
   {
     name: "Distribution Notice",
     description:
-      "Notifies LPs of a distribution from the fund. Breaks down the amount per investor, the source (income, return of capital, gain), and tax implications.",
+      "Tells each LP what they are getting and why. Breaks down the source, walks through the waterfall, and calculates tax withholding per investor type: 30% for foreign LPs, 15% FIRPTA, 24% backup withholding.",
   },
   {
     name: "K-1 Summary Report",
     description:
-      "Summary of each investor's tax information mapped to IRS Form 1065 Schedule K-1. All 19 required fields populated. Includes federal and state tax withholding calculations.",
+      "Covers all 23 IRS boxes from ordinary income through QBI deduction. Late K-1s cost $260 per partner per month in penalties. This gets them done on time.",
   },
   {
     name: "Annual Report",
     description:
-      "Year-end fund report covering performance, portfolio activity, financial statements, and outlook. More detailed than quarterly reports.",
+      "Balance sheet, statement of operations, cash flows, schedule of investments, and ASC 820 fair value hierarchy. Everything an auditor or institutional LP expects in a year-end report.",
   },
   {
     name: "Form ADV Part 2A Summary",
     description:
-      "The SEC-required disclosure document for registered investment advisers. Covers fees, conflicts of interest, disciplinary history, and all 18 required items in plain language.",
+      "SEC requires this for registered advisers. All 18 required items in plain language: fees, conflicts, disciplinary history, custody practices. Must be delivered within 120 days of fiscal year end.",
   },
 ];
 
 const STEPS = [
   {
     number: "1",
-    title: "Enter your fund data",
+    title: "Enter the fund data for the period",
     description:
-      "Reporting period, NAV, cash flows, investor details, and portfolio positions.",
+      "NAV, cash flows, investor list, portfolio positions. If you have the data in a spreadsheet, this takes minutes.",
   },
   {
     number: "2",
-    title: "We generate all 6 documents",
+    title: "Get all 6 documents back",
     description:
-      "LP report, capital call, distribution notice, K-1 summary, annual report, and Form ADV summary.",
+      "LP report, capital call notice, distribution notice, K-1 summaries, annual report, and Form ADV. Generated together from the same data.",
   },
   {
     number: "3",
-    title: "Review, edit, and send to your LPs",
+    title: "Review, edit, send to your LPs",
     description:
-      "Make changes in the editor. Download as Word or PDF. Distribute to your investors.",
+      "Read everything in the editor. Fix what needs fixing. Download as Word or PDF and distribute.",
   },
 ];
 
@@ -77,16 +77,17 @@ export default function CompliancePage() {
                 Compliance
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Fund administration documents.
+                Stop doing fund admin by hand.
                 <br />
                 <span className="text-cyan-500">
-                  Quarterly reports, capital calls, K-1s, and more.
+                  LP reports, K-1s, capital calls. Done.
                 </span>
               </h1>
               <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
-                Enter your fund data for the period and get back 6 documents covering
-                LP reporting, capital calls, distributions, tax summaries, and regulatory
-                filings. Everything your LPs expect, formatted and ready to send.
+                K-1s are late. LP reports look different every quarter. Capital call notices
+                get copy-pasted from last time. You know the problem. Enter your fund data
+                once and get back 6 documents, formatted correctly, with the right numbers
+                in the right places.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -103,7 +104,7 @@ export default function CompliancePage() {
                 </Link>
               </div>
               <p className="mt-6 text-sm text-muted-foreground">
-                One reporting period free. Full output. No credit card.
+                One reporting period free. All 6 documents. No credit card.
               </p>
             </div>
           </FadeIn>
@@ -119,8 +120,8 @@ export default function CompliancePage() {
               <div className="mt-1.5 text-sm text-muted-foreground">document types</div>
             </FadeIn>
             <FadeIn delay={0.05}>
-              <div className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">19</div>
-              <div className="mt-1.5 text-sm text-muted-foreground">K-1 fields mapped</div>
+              <div className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">23</div>
+              <div className="mt-1.5 text-sm text-muted-foreground">K-1 boxes covered</div>
             </FadeIn>
             <FadeIn delay={0.1}>
               <div className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">ILPA</div>
@@ -136,11 +137,11 @@ export default function CompliancePage() {
           <FadeIn>
             <div className="max-w-2xl mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                6 documents. One reporting period.
+                The 6 documents every fund manager dreads
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Every document a fund manager needs to keep LPs informed and stay
-                compliant. Enter your fund data once and get the full package back.
+                These are the ones that eat your quarter-end. Enter the fund data once
+                and get them all back, formatted and consistent.
               </p>
             </div>
           </FadeIn>
@@ -171,22 +172,22 @@ export default function CompliancePage() {
           <FadeIn>
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Built to match the standards your LPs expect
+                Your LPs have seen bad reports. These are not that.
               </h2>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                LP reports are formatted to meet ILPA standards. K-1 fields map directly
-                to the IRS form. Tax withholding rates are calculated per investor type,
-                whether they are domestic, foreign, or tax-exempt. Fund return metrics
-                like TVPI, DPI, and RVPI are calculated and cross-checked.
+                Institutional LPs expect a specific format. ILPA layout for quarterly reports.
+                All 23 IRS boxes on the K-1. Correct withholding rates for domestic, foreign,
+                and tax-exempt investors. If your reports look professional and arrive on time,
+                your next fundraise gets easier.
               </p>
               <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 max-w-xl mx-auto text-left">
                 {[
-                  "ILPA-compliant LP reporting format",
-                  "All 19 K-1 fields mapped to IRS Form 1065",
-                  "TVPI, DPI, and RVPI calculated and verified",
-                  "Tax withholding by investor type",
-                  "Form ADV covers all 18 required items",
-                  "Capital call and distribution accounting",
+                  "ILPA-standard LP report layout",
+                  "All 23 K-1 boxes, ordinary income through QBI",
+                  "IRR, TVPI, DPI, RVPI calculated consistently",
+                  "Withholding rates by investor type (domestic, foreign, tax-exempt)",
+                  "Form ADV with all 18 SEC-required items",
+                  "Capital call with 10-day notice and default terms",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-2.5">
                     <CheckCircle2 className="h-4 w-4 text-cyan-500 mt-0.5 shrink-0" />
@@ -241,11 +242,11 @@ export default function CompliancePage() {
 
               <div className="relative">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Try it free. One reporting period, full output, no credit card.
+                  Run one reporting period for free. See what comes out.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  Sign up and enter your fund data for a single period. All 6 documents
-                  generated. Review them, then send to your LPs.
+                  No credit card. Enter your fund data, get all 6 documents back.
+                  If the output is better than what you are doing now, you will know immediately.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">

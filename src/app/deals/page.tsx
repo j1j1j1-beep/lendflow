@@ -8,72 +8,72 @@ import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 const DOCUMENTS = [
   {
     name: "Letter of Intent (LOI)",
-    desc: "The initial offer outlining key deal terms. Purchase price, structure, exclusivity period, conditions.",
+    desc: "Your opening offer. Lays out the purchase price, deal structure, exclusivity period, and the conditions that must be met before you sign a definitive agreement.",
   },
   {
     name: "Non-Disclosure Agreement (NDA)",
-    desc: "Protects confidential information shared during due diligence.",
+    desc: "Protects what gets shared during diligence. Covers confidential financials, customer lists, trade secrets, and anything else the seller discloses to you.",
   },
   {
     name: "Purchase Agreement",
-    desc: "The definitive agreement that governs the acquisition. Representations, warranties, indemnification, closing conditions.",
+    desc: "The binding contract. Changes shape based on your deal type. Includes 25 to 40 seller reps, working capital adjustment, escrow mechanics, indemnification caps, and a MAC clause with standard carveouts.",
   },
   {
     name: "Due Diligence Checklist",
-    desc: "Organized list of everything that needs to be reviewed before closing. Financial, legal, operational, tax, environmental.",
+    desc: "A structured list of everything your team needs to review before closing. Financial, legal, tax, environmental, IP, employment. No AI involved. Pure checklist.",
   },
   {
     name: "Disclosure Schedules",
-    desc: "The exceptions to the seller's representations and warranties. Where known issues are documented.",
+    desc: "10 standard schedules where the seller documents exceptions to their reps. Cap table, subsidiaries, material contracts, litigation, IP, real property, environmental, tax, insurance, and employee benefits.",
   },
   {
     name: "Closing Checklist",
-    desc: "Every item that needs to be completed, signed, or delivered at closing. Tracks status of each.",
+    desc: "Every deliverable, signature, and filing that needs to happen at close. Tracks what is done and what is outstanding. No AI. Just organized task tracking.",
   },
 ];
 
 const TRANSACTION_TYPES = [
   {
     name: "Stock Purchase",
-    desc: "Buy the entity's shares.",
+    desc: "You buy the entity's shares. Simpler to execute, but you inherit all liabilities. The purchase agreement reflects that.",
   },
   {
     name: "Asset Purchase",
-    desc: "Buy specific assets and liabilities.",
+    desc: "You pick which assets and liabilities to acquire. More complex closing, but you choose what you take on.",
   },
   {
     name: "Forward Merger",
-    desc: "Target merges into buyer.",
+    desc: "Target merges into your entity. Target ceases to exist. Good for absorbing a company completely.",
   },
   {
     name: "Reverse Triangular Merger",
-    desc: "Buyer's subsidiary merges into target.",
+    desc: "Your subsidiary merges into the target. Target survives. Preserves the target's contracts and licenses.",
   },
   {
     name: "Tender Offer",
-    desc: "Direct offer to shareholders.",
+    desc: "You go directly to shareholders with an offer to buy their shares. Bypasses the board. Faster timeline.",
   },
   {
     name: "Section 363 Sale",
-    desc: "Acquisition out of bankruptcy.",
+    desc: "Buying assets out of bankruptcy. Court-supervised process. Buyer gets the assets free and clear of most claims.",
   },
 ];
 
 const STEPS = [
   {
     number: "1",
-    title: "Enter your deal details",
-    desc: "Target company, purchase price, deal structure, key terms.",
+    title: "Describe the deal",
+    desc: "Target company, purchase price, transaction type, tax structure, and key terms. Takes a few minutes.",
   },
   {
     number: "2",
-    title: "We generate all 6 documents",
-    desc: "LOI, NDA, purchase agreement, DD checklist, disclosure schedules, closing checklist.",
+    title: "Get all 6 documents",
+    desc: "LOI, NDA, purchase agreement, diligence checklist, disclosure schedules, and closing checklist. Generated together so the terms are consistent.",
   },
   {
     number: "3",
-    title: "Review, edit, and download",
-    desc: "View inline, make changes, download individually or as a ZIP.",
+    title: "Edit, export, send to counsel",
+    desc: "Make changes inline. Download as Word or PDF. Your attorney reviews a first draft instead of starting from scratch.",
   },
 ];
 
@@ -101,16 +101,17 @@ export default function DealsPage() {
                 </span>
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Structure your acquisition.
+                Your acquisition docs.
                 <br />
                 <span className="text-primary">
-                  Get every document from LOI to closing.
+                  LOI through closing. One generation.
                 </span>
               </h1>
               <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
-                You define the deal. OpenShut generates the 6 documents you need to take it from
-                letter of intent through closing. Filing thresholds calculated. Tax structures
-                validated. Ready to review and sign.
+                Tell us the target, the price, and how you want to structure it. We generate the
+                LOI, NDA, purchase agreement, diligence checklist, disclosure schedules, and closing
+                checklist. Your counsel gets a complete first draft instead of a blank page. That
+                alone saves weeks of billable hours.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -127,7 +128,7 @@ export default function DealsPage() {
                 </Link>
               </div>
               <p className="mt-6 text-sm text-muted-foreground">
-                One project free. Full output. No credit card.
+                First deal free. All 6 documents. No credit card required.
               </p>
             </div>
           </FadeIn>
@@ -140,11 +141,12 @@ export default function DealsPage() {
           <FadeIn>
             <div className="max-w-2xl mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                6 documents. Every deal.
+                Everything you need from offer to close
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                From the first offer to the final signature. Each document is generated from your
-                deal terms and reviewed for compliance before you download it.
+                Four of these are legal documents with real language your attorneys will review. Two are
+                pure checklists with no legal language at all. All six are generated from the same
+                deal terms so nothing contradicts.
               </p>
             </div>
           </FadeIn>
@@ -179,11 +181,12 @@ export default function DealsPage() {
           <FadeIn>
             <div className="max-w-2xl mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Supports every transaction structure
+                Pick your deal structure. The docs follow.
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                Pick your deal type. The documents adjust to match the structure,
-                including the purchase agreement, representations, and closing conditions.
+                The purchase agreement changes shape based on the transaction type you select. Reps,
+                closing conditions, and indemnification all reflect whether you are buying stock,
+                assets, or running a merger.
               </p>
             </div>
           </FadeIn>
@@ -218,26 +221,26 @@ export default function DealsPage() {
           <FadeIn>
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Compliance built in
+                The regulatory checks you would do anyway
               </h2>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Filing thresholds are calculated at current rates so you know if a federal filing
-                is required before you close. Tax structures are validated. State corporate law
-                requirements are met.
+                Before you close, someone on your team has to check filing thresholds, tax elections,
+                and state law requirements. We surface those issues upfront so nothing gets missed.
+                You still verify. We just make sure you are looking at the right things.
               </p>
               <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3 text-left">
                 {[
                   {
-                    title: "HSR filing thresholds",
-                    desc: "Hart-Scott-Rodino thresholds calculated at current rates. You see immediately whether your deal requires a federal filing.",
+                    title: "Federal filing thresholds",
+                    desc: "We calculate whether your deal size triggers a Hart-Scott-Rodino filing at current 2026 thresholds. You know before you sign the LOI.",
                   },
                   {
-                    title: "Tax structure validation",
-                    desc: "Stock vs. asset purchase tax implications surfaced. Section 338(h)(10) elections flagged where applicable.",
+                    title: "Tax structure options",
+                    desc: "7 tax election options surfaced based on your deal type. Stock vs. asset implications, QSBS eligibility, and reorganization structures identified.",
                   },
                   {
-                    title: "State corporate law",
-                    desc: "Board approvals, shareholder consents, and appraisal rights requirements identified based on entity state of incorporation.",
+                    title: "State corporate requirements",
+                    desc: "Board approvals, shareholder votes, and appraisal rights flagged based on where the target is incorporated. Foreign acquirer considerations included.",
                   },
                 ].map((item) => (
                   <div
@@ -270,7 +273,7 @@ export default function DealsPage() {
                 How it works
               </h2>
               <p className="mt-4 text-muted-foreground">
-                No demo call. No sales pitch. No credit card.
+                Sign up, describe the deal, download your docs. No sales call. No demo. No credit card.
               </p>
             </div>
           </FadeIn>
@@ -310,10 +313,11 @@ export default function DealsPage() {
 
               <div className="relative">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Try it on your next deal.
+                  Your next acquisition starts here.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  One project free. Full output. No credit card.
+                  Generate all 6 documents for your first deal. Hand your attorney a first draft
+                  instead of a retainer. Free, no credit card.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">
@@ -332,15 +336,15 @@ export default function DealsPage() {
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1.5">
                     <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                    No credit card
+                    No credit card required
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Handshake className="h-3.5 w-3.5 text-primary" />
-                    6 documents per deal
+                    6 documents included
                   </span>
                   <span className="flex items-center gap-1.5">
                     <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                    All 6 transaction types
+                    Download as Word or PDF
                   </span>
                 </div>
               </div>

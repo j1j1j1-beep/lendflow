@@ -8,92 +8,92 @@ import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 const DOCUMENTS = [
   {
     name: "Private Placement Memorandum (PPM)",
-    desc: "The offering document for your investors. Describes the property, the deal structure, projected returns, risks, and legal disclosures.",
+    desc: "The document you hand to investors. Property details, deal structure, projected returns, risk factors, and every required legal disclosure. Ready for counsel review.",
   },
   {
     name: "LLC Operating Agreement",
-    desc: "Governs the syndication entity. Management rights, voting, capital contributions, distribution waterfalls, transfer restrictions.",
+    desc: "Sets up the syndication entity. Who manages, who votes, how capital comes in, how distributions go out, and what happens on a transfer or dissolution.",
   },
   {
     name: "Subscription Agreement",
-    desc: "The contract each investor signs to commit capital. Includes the investment amount, representations, and suitability confirmations.",
+    desc: "What each investor signs to commit money. Investment amount, accreditation reps, suitability confirmations. One per investor.",
   },
   {
     name: "Investor Questionnaire",
-    desc: "Collects investor information for accreditation, tax reporting, and compliance. Required before accepting capital.",
+    desc: "Collects the info you need before accepting capital. Accreditation status, tax ID, entity type, address. You need this for every investor.",
   },
   {
     name: "Pro Forma Financial Projections",
-    desc: "Year-by-year financial model for the deal. Rental income, operating expenses, debt service, distributions, sale proceeds. IRR, equity multiple, and cash-on-cash return calculated automatically.",
+    desc: "Pure math. Year-by-year projections from your actual inputs. Revenue, expenses, debt service, waterfall distributions, exit proceeds. IRR calculated with Newton-Raphson iteration. Zero AI involved.",
   },
 ];
 
 const PROPERTY_TYPES = [
   {
     name: "Multifamily",
-    desc: "Apartment buildings, garden-style communities, mid-rise and high-rise residential.",
+    desc: "Apartments, garden-style, mid-rise, high-rise. Expense ratio built for residential operations.",
   },
   {
     name: "Office",
-    desc: "Class A, B, and C office buildings. Single-tenant or multi-tenant.",
+    desc: "Class A through C. Single-tenant or multi-tenant. TI and leasing commissions modeled separately.",
   },
   {
     name: "Retail",
-    desc: "Strip centers, power centers, neighborhood retail, single-tenant outparcels.",
+    desc: "Strip centers, power centers, neighborhood retail. NNN and gross lease structures supported.",
   },
   {
     name: "Industrial",
-    desc: "Warehouses, distribution centers, flex space, light manufacturing.",
+    desc: "Warehouses, distribution, flex space. Lower expense ratios reflected in the model.",
   },
   {
     name: "Mixed Use",
-    desc: "Ground-floor retail with residential or office above. Multiple income streams.",
+    desc: "Retail plus residential or office. Each component modeled with its own income and expense assumptions.",
   },
   {
     name: "Self Storage",
-    desc: "Climate-controlled and drive-up units. Low operating costs, high margins.",
+    desc: "Climate-controlled and drive-up. High-margin operations with property-specific expense categories.",
   },
   {
     name: "Manufactured Housing",
-    desc: "Mobile home parks. Residents own the homes, you own the land.",
+    desc: "Mobile home parks. Lot rent income, low capex. Residents own the homes, you own the land.",
   },
   {
     name: "Hotel",
-    desc: "Limited-service, full-service, or extended-stay hospitality properties.",
+    desc: "Limited-service, full-service, extended-stay. Highest expense ratio (up to 65%) built into projections.",
   },
   {
     name: "Triple Net (NNN)",
-    desc: "Single-tenant properties where the tenant pays taxes, insurance, and maintenance.",
+    desc: "Single-tenant. Tenant pays taxes, insurance, maintenance. Expense ratio as low as 15%.",
   },
   {
     name: "Senior Living",
-    desc: "Independent living, assisted living, memory care, and continuing care communities.",
+    desc: "Independent living, assisted living, memory care. Specialized operating expense categories.",
   },
   {
     name: "Student Housing",
-    desc: "Purpose-built housing near universities. Leased by the bed or by the unit.",
+    desc: "Purpose-built near universities. By-the-bed or by-the-unit leasing. Seasonal occupancy modeled.",
   },
   {
     name: "Build-to-Rent",
-    desc: "New construction single-family homes built specifically for rental income.",
+    desc: "New construction single-family built for rental income. Construction draw schedule supported.",
   },
 ];
 
 const STEPS = [
   {
     number: "1",
-    title: "Enter your property details, deal structure, and assumptions",
-    desc: "Property type, purchase price, financing terms, hold period, rent growth, and waterfall structure.",
+    title: "Tell us about the deal",
+    desc: "Property type, purchase price, financing, hold period, rent growth, and how you want the waterfall structured. Takes about 10 minutes.",
   },
   {
     number: "2",
-    title: "We generate all 5 documents plus the financial model",
-    desc: "PPM, operating agreement, subscription agreement, investor questionnaire, and pro forma projections.",
+    title: "Get 5 documents and a full financial model",
+    desc: "PPM, operating agreement, subscription docs, investor questionnaire, and year-by-year pro forma projections. All generated together.",
   },
   {
     number: "3",
-    title: "Review, edit, and download",
-    desc: "View inline, make changes, download individually or as a ZIP. Send to counsel for final review.",
+    title: "Review, edit, download",
+    desc: "Read everything in the editor. Make changes. Download individually or as a ZIP. Send to your attorney before you send to investors.",
   },
 ];
 
@@ -121,16 +121,16 @@ export default function SyndicationPage() {
                 </span>
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Model your real estate deal.
+                PPM, operating agreement, and financial model.
                 <br />
                 <span className="text-emerald-500">
-                  Get investor-ready documents and a complete financial model.
+                  From one set of deal inputs.
                 </span>
               </h1>
               <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
-                You enter the property, the deal structure, and your assumptions. OpenShut generates
-                all 5 syndication documents plus a year-by-year financial model with waterfall
-                distributions, IRR, and equity multiples.
+                Enter the property, the structure, and your assumptions. Get back 5 investor-ready
+                documents and a year-by-year pro forma with waterfall distributions, IRR,
+                equity multiples, and sensitivity analysis. The financial model is pure math. No AI touches the numbers.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -147,7 +147,7 @@ export default function SyndicationPage() {
                 </Link>
               </div>
               <p className="mt-6 text-sm text-muted-foreground">
-                One deal free. Full output. No credit card.
+                First deal free. All 5 documents plus pro forma. No credit card.
               </p>
             </div>
           </FadeIn>
@@ -160,11 +160,11 @@ export default function SyndicationPage() {
           <FadeIn>
             <div className="max-w-2xl mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                5 documents. One generation.
+                Everything you need before you talk to investors
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                Enter your deal once. Get back a PPM, operating agreement, subscription agreement,
-                investor questionnaire, and a full pro forma financial model.
+                5 documents generated from one set of inputs. PPM, operating agreement,
+                subscription agreement, investor questionnaire, and a complete financial model.
               </p>
             </div>
           </FadeIn>
@@ -199,12 +199,12 @@ export default function SyndicationPage() {
           <FadeIn>
             <div className="max-w-2xl mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Works for any property type
+                12 property types. Each one modeled differently.
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                Select the asset class. The documents and financial model adjust to match the
-                property type, including the right operating expense categories and market
-                assumptions.
+                Pick your asset class. The financial model adjusts expense ratios, depreciation
+                schedules, and operating assumptions to match. A hotel does not run like a
+                triple net lease, and the numbers should reflect that.
               </p>
             </div>
           </FadeIn>
@@ -239,27 +239,27 @@ export default function SyndicationPage() {
           <FadeIn>
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                The financial model runs on math, not AI
+                The pro forma is 100% math. Zero AI.
               </h2>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Rental income, vacancy, operating expenses, debt service, and distributions are
-                calculated year by year. Waterfall distributions follow the structure you set:
-                preferred return, catch-up, promote splits. IRR is computed with actual cash flow
-                timing.
+                This is the part most people ask about. The financial model does not use AI at all.
+                Every number is calculated from your inputs. Revenue, vacancy, expenses, debt
+                service, distributions, exit proceeds. IRR uses Newton-Raphson iteration, the same
+                method your Excel model uses. You can check every line.
               </p>
               <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3 text-left">
                 {[
                   {
                     title: "Year-by-year projections",
-                    desc: "Revenue, expenses, NOI, debt service, and cash flow for each year of the hold period. No black boxes.",
+                    desc: "Revenue, expenses, NOI, debt service, and free cash flow for every year of the hold. Depreciation on a 27.5 or 39-year schedule depending on property type.",
                   },
                   {
-                    title: "Waterfall distributions",
-                    desc: "Preferred return, catch-up, and promote splits calculated based on actual cash flows. You define the tiers.",
+                    title: "Multi-tier waterfall",
+                    desc: "Preferred return, catch-up, promote splits. Cumulative hurdle tracking across the entire hold period. You set the tiers.",
                   },
                   {
-                    title: "Return metrics",
-                    desc: "IRR, equity multiple, and cash-on-cash return computed from the projected cash flows and sale proceeds.",
+                    title: "Every return metric that matters",
+                    desc: "IRR, equity multiple (MOIC), cash-on-cash, DPI, RVPI, TVPI. Plus sensitivity analysis on exit cap rates and breakeven occupancy.",
                   },
                 ].map((item) => (
                   <div
@@ -292,7 +292,7 @@ export default function SyndicationPage() {
                 How it works
               </h2>
               <p className="mt-4 text-muted-foreground">
-                No demo call. No sales pitch. No credit card.
+                Sign up, enter your deal, get your documents. No demo call required.
               </p>
             </div>
           </FadeIn>
@@ -332,11 +332,11 @@ export default function SyndicationPage() {
 
               <div className="relative">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Try it free. One deal, full output, no credit card.
+                  Model a deal for free. See what you get.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  Sign up and model your first syndication. All 5 documents generated plus the
-                  financial model. Download and send to counsel for review.
+                  One deal, no credit card. You get all 5 documents and the full financial model.
+                  Download everything and send it to your attorney.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">

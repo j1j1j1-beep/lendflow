@@ -9,77 +9,77 @@ const DOCUMENTS = [
   {
     name: "Private Placement Memorandum (PPM)",
     description:
-      "The offering document your investors read before committing capital. Describes the fund's strategy, terms, risks, and legal disclosures.",
+      "This is the document your investors actually read. It lays out the fund strategy, fee structure, risk factors, and every disclosure they need before writing a check.",
   },
   {
     name: "Subscription Agreement",
     description:
-      "The contract an investor signs to commit capital to the fund. Includes representations, warranties, and the subscription amount.",
+      "The contract each investor signs to commit money to the fund. Covers how much they are investing, their representations, and the terms they are agreeing to.",
   },
   {
     name: "Operating Agreement",
     description:
-      "Defines how the fund entity is governed. Management rights, voting, distributions, removal provisions.",
+      "Governs the fund entity itself. Who manages it, how distributions work, voting rights, key person provisions, and how an LP can remove the GP.",
   },
   {
     name: "Investor Questionnaire",
     description:
-      "Collects investor information for accreditation verification, tax reporting, and anti-money laundering compliance.",
+      "Gathers what you need from each investor: income and net worth for accreditation, tax info for K-1 reporting, and identity verification for AML.",
   },
   {
     name: "Side Letter",
     description:
-      "Negotiated terms for specific investors. Fee discounts, co-investment rights, most-favored-nation clauses.",
+      "Custom terms for specific investors. Fee discounts, co-investment rights, information rights, most-favored-nation clauses. One per investor.",
   },
   {
     name: "Form D Draft",
     description:
-      "The SEC filing required when raising capital under Regulation D. Pre-filled with your fund's details.",
+      "Pre-filled SEC notice of sale. Must be filed within 15 days of your first close. We fill in the fund details so you can file on EDGAR immediately.",
   },
 ];
 
 const FUND_TYPES = [
   {
     name: "Private Equity",
-    description: "Buyout, growth equity, or turnaround funds acquiring controlling stakes in private companies.",
+    description: "Buyouts, growth equity, turnarounds. The PPM reflects your hold period, deal-by-deal vs. blind pool structure, and carry waterfall.",
   },
   {
     name: "Venture Capital",
-    description: "Early-stage or growth-stage funds investing in startups and high-growth companies.",
+    description: "Seed through growth stage. Documents handle pro rata rights, follow-on reserves, and the longer fund life VCs typically need.",
   },
   {
     name: "Real Estate",
-    description: "Funds acquiring, developing, or managing commercial and residential properties.",
+    description: "Acquisition, development, or value-add. Property-specific risk factors, capital call schedules, and distribution waterfalls built in.",
   },
   {
     name: "Hedge Fund",
-    description: "Multi-strategy, long/short, or event-driven funds trading public and private markets.",
+    description: "Long/short, macro, multi-strategy. Redemption terms, lockup periods, gates, and high-water marks reflected across all docs.",
   },
   {
     name: "Credit",
-    description: "Direct lending, mezzanine, or distressed debt funds providing capital to borrowers.",
+    description: "Direct lending, mezzanine, distressed. Docs cover interest rate mechanics, default provisions, and the shorter duration typical of credit funds.",
   },
   {
     name: "Infrastructure",
-    description: "Funds investing in transportation, energy, utilities, and public works projects.",
+    description: "Energy, transport, utilities, public-private. Longer fund lives, regulatory risk factors, and government contract considerations included.",
   },
 ];
 
 const STEPS = [
   {
     number: "1",
-    title: "Enter your fund details",
-    description: "Fund type, target size, terms, fee structure, and key parties.",
+    title: "Tell us about the fund",
+    description: "Fund type, target raise, management fee, carry, preferred return, GP commitment, and key people. Takes about five minutes.",
   },
   {
     number: "2",
-    title: "We generate all 6 documents",
-    description: "PPM, subscription agreement, operating agreement, investor questionnaire, side letter, and Form D draft.",
+    title: "Get all 6 documents back",
+    description: "PPM, sub agreement, operating agreement, investor questionnaire, side letter template, and Form D. Generated together so the terms match across every doc.",
   },
   {
     number: "3",
-    title: "Review, edit, and download",
-    description: "Make changes in the editor. Download as Word or PDF. Share with counsel for final review.",
+    title: "Edit, download, send to counsel",
+    description: "Make changes inline. Export as Word or PDF. Your attorney reviews final docs instead of drafting from scratch. That is where the time savings come from.",
   },
 ];
 
@@ -101,14 +101,15 @@ export default function CapitalPage() {
                 Capital
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Configure your fund.
+                Your fund formation docs.
                 <br />
-                <span className="text-violet-500">Get back a complete set of formation documents.</span>
+                <span className="text-violet-500">All six. Ready to send to counsel.</span>
               </h1>
               <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
-                You tell us the fund type, target size, and terms. We generate all 6 documents
-                you need to start raising capital. Securities exemptions, accreditation requirements,
-                and state filings are handled automatically.
+                Enter your fund terms once. Get back the PPM, subscription agreement, operating agreement,
+                investor questionnaire, side letter, and Form D draft. The numbers, disclosures, and
+                compliance language are consistent across every document. Your counsel reviews instead
+                of drafting from zero.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -125,7 +126,7 @@ export default function CapitalPage() {
                 </Link>
               </div>
               <p className="mt-6 text-sm text-muted-foreground">
-                One fund free. Full document package. No credit card.
+                First fund free. All 6 documents. No credit card required.
               </p>
             </div>
           </FadeIn>
@@ -138,11 +139,11 @@ export default function CapitalPage() {
           <FadeIn>
             <div className="max-w-2xl mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                6 documents. One generation.
+                The 6 documents every fund needs
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Every fund formation requires the same core documents. Enter your fund details once
-                and get all six back, formatted and cross-referenced.
+                These are the same docs your attorney would draft. We generate them as a set so
+                the terms, definitions, and numbers stay consistent from the PPM through the Form D.
               </p>
             </div>
           </FadeIn>
@@ -169,11 +170,12 @@ export default function CapitalPage() {
           <FadeIn>
             <div className="max-w-2xl mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Works for any fund structure
+                Built for 6 fund types
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Select your fund type and the documents adjust automatically. Terms, disclosures,
-                and risk factors reflect the strategy you are actually running.
+                Pick your fund type and the documents change to match. Risk factors, distribution
+                waterfalls, redemption terms, and disclosure language all reflect what you are
+                actually building.
               </p>
             </div>
           </FadeIn>
@@ -200,21 +202,22 @@ export default function CapitalPage() {
           <FadeIn>
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Securities compliance is built in
+                Compliance checks you would otherwise do by hand
               </h2>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Securities exemptions are handled automatically. Whether you are raising under
-                506(b) or 506(c), the documents reflect the right exemption. Investor accreditation
-                is verified. State filing requirements are tracked.
+                About 30 checks run across your documents before you download them. The right
+                exemption type is applied. Accreditation requirements match the offering. Investor
+                limits are enforced. You still verify everything, but you start from a clean baseline
+                instead of a blank page.
               </p>
               <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 max-w-xl mx-auto text-left">
                 {[
-                  "Regulation D exemptions (506(b) and 506(c))",
-                  "Investor accreditation verification",
-                  "State blue sky filing requirements",
-                  "Anti-money laundering checks",
-                  "Qualified purchaser thresholds",
-                  "Form D pre-filled for SEC filing",
+                  "506(b) self-certification vs. 506(c) verification handled correctly",
+                  "Accreditation criteria: income, net worth, and professional certifications",
+                  "100-investor limit for 3(c)(1) funds enforced",
+                  "Qualified purchaser thresholds for 3(c)(7) funds",
+                  "State blue sky filing requirements tracked",
+                  "Form D pre-filled and ready to file on EDGAR",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-2.5">
                     <CheckCircle2 className="h-4 w-4 text-violet-500 mt-0.5 shrink-0" />
@@ -233,7 +236,7 @@ export default function CapitalPage() {
           <FadeIn>
             <div className="max-w-2xl mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Three steps. All your docs.
+                Five minutes of input. Six documents out.
               </h2>
             </div>
           </FadeIn>
@@ -265,11 +268,11 @@ export default function CapitalPage() {
 
               <div className="relative">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Try it free. One fund, full document package, no credit card.
+                  Stop paying counsel to draft from scratch.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  Sign up and configure your first fund. All 6 documents generated. Download and
-                  send to counsel for review.
+                  Generate your full document package. Hand your attorney a first draft instead
+                  of a blank engagement letter. First fund is free, no credit card.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">

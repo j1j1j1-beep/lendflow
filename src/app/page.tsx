@@ -24,7 +24,7 @@ const MODULES = [
     color: "text-blue-500",
     bg: "bg-blue-500/10",
     docs: 36,
-    what: "Upload your borrower's financials. Get back a promissory note, loan agreement, deed of trust, and 33 more documents. Checked against federal and state lending laws in all 50 states.",
+    what: "Upload your borrower's financials. Get back a promissory note, loan agreement, deed of trust, and 33 more documents. Every rate, fee, and term calculated from the actual program rules. Checked against federal and state lending laws in all 50 states.",
   },
   {
     name: "Capital",
@@ -33,7 +33,7 @@ const MODULES = [
     color: "text-violet-500",
     bg: "bg-violet-500/10",
     docs: 6,
-    what: "Set up your fund. Get a PPM, subscription agreement, operating agreement, investor questionnaire, side letter, and Form D draft. Securities exemptions and accreditation handled.",
+    what: "Set up your fund. Get a PPM, subscription agreement, operating agreement, investor questionnaire, side letter, and Form D draft. 506(b) or 506(c). Accreditation handled.",
   },
   {
     name: "Deals / M&A",
@@ -42,7 +42,7 @@ const MODULES = [
     color: "text-amber-500",
     bg: "bg-amber-500/10",
     docs: 6,
-    what: "Structure your acquisition. Get an LOI, NDA, purchase agreement, due diligence checklist, disclosure schedules, and closing checklist. Filing thresholds calculated at current rates.",
+    what: "Structure your acquisition. LOI, NDA, purchase agreement, due diligence checklist, disclosure schedules, closing checklist. HSR thresholds calculated at current rates. 8 transaction types.",
   },
   {
     name: "Syndication",
@@ -51,7 +51,7 @@ const MODULES = [
     color: "text-emerald-500",
     bg: "bg-emerald-500/10",
     docs: 5,
-    what: "Model your real estate deal. Get a PPM, operating agreement, subscription agreement, investor questionnaire, and a year-by-year financial model with waterfall distributions.",
+    what: "Model your real estate deal. PPM, operating agreement, subscription agreement, investor questionnaire, and a year-by-year financial model. Waterfall distributions, IRR, equity multiples. The financial model is pure math, not AI.",
   },
   {
     name: "Compliance",
@@ -60,7 +60,7 @@ const MODULES = [
     color: "text-cyan-500",
     bg: "bg-cyan-500/10",
     docs: 6,
-    what: "Run your fund admin. Get quarterly LP reports, capital call notices, distribution notices, K-1 summaries, annual reports, and Form ADV. All mapped to current reporting standards.",
+    what: "Run your fund admin. Quarterly LP reports, capital call notices, distribution notices, K-1 summaries, annual reports, Form ADV. ILPA-compliant. Tax withholding rates calculated per investor type.",
   },
 ];
 
@@ -87,10 +87,10 @@ export default async function Home() {
               </h1>
               <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
                 OpenShut generates the legal documents that PE firms, lenders, and fund managers
-                produce for every deal. You fill in the details. We give you the docs. Every number
-                verified, every clause checked against the actual laws for your deal and your state.
-                Then a second pass reviews everything the AI wrote for accuracy and compliance.
-                No hallucination, guaranteed.
+                produce for every deal. Enter your deal details, hit generate, and get the
+                full package back. Every number is calculated from the actual program rules.
+                Everything is checked against the real laws for your deal and state before
+                you see it. Nothing ships unchecked.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -229,13 +229,13 @@ export default async function Home() {
 
           <Stagger className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
             {[
-              { title: "Your data is encrypted", desc: "Every file uploaded is encrypted at rest and in transit. Download links expire automatically." },
-              { title: "Your uploads are encrypted and private", desc: "We do not use your data for training. Your documents are processed, generated, and stored for your organization only." },
+              { title: "Your data is encrypted", desc: "Every file is encrypted at rest and in transit. Download links expire automatically." },
+              { title: "We don't train on your data", desc: "Your documents are processed, generated, and stored for your organization only. We never use your data for model training." },
               { title: "Your firm's data is isolated", desc: "Every query is scoped to your organization. No other firm can see your deals, documents, or data." },
               { title: "Full audit trail", desc: "Every action is logged with timestamps and user identity. You can see who generated what, when." },
               { title: "50-state regulatory compliance", desc: "Documents are checked against the actual federal and state laws that apply to your deal." },
               { title: "Every number is verified twice", desc: "Two independent systems check every figure in your documents. If they disagree, the system flags it." },
-              { title: "AI output is reviewed for compliance", desc: "After the AI writes, a second pass checks every clause against the regulations for your specific deal and state. Nothing goes out unchecked." },
+              { title: "AI output is checked for compliance", desc: "After the AI writes the legal language, every clause is checked against the regulations for your specific deal and state. Nothing ships until it passes." },
             ].map((item) => (
               <StaggerItem key={item.title}>
                 <div className="rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 h-full">

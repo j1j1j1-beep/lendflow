@@ -6,76 +6,76 @@ import { MarketingFooter } from "@/components/marketing-footer";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 
 const DOCUMENTS = [
-  { name: "Promissory Note", desc: "The borrower's written promise to repay the loan" },
-  { name: "Loan Agreement", desc: "The full terms of the loan between lender and borrower" },
-  { name: "Security Agreement", desc: "Grants the lender a security interest in the borrower's assets" },
-  { name: "Guaranty Agreement", desc: "A third party guarantees repayment if the borrower defaults" },
-  { name: "Commitment Letter", desc: "The lender's formal offer to provide the loan" },
-  { name: "Deed of Trust", desc: "Secures the loan against real property" },
-  { name: "Assignment of Leases & Rents", desc: "Gives the lender rights to rental income if the borrower defaults" },
-  { name: "SNDA", desc: "Protects tenants and lenders during foreclosure" },
-  { name: "Subordination Agreement", desc: "Establishes priority between multiple lenders" },
-  { name: "Tenant Estoppel Certificate", desc: "Confirms lease terms with existing tenants" },
-  { name: "Intercreditor Agreement", desc: "Defines rights and priorities between senior and junior lenders" },
-  { name: "Environmental Indemnity Agreement", desc: "Borrower indemnifies lender for environmental liability" },
-  { name: "Borrowing Base Agreement", desc: "Sets the formula for how much the borrower can draw" },
-  { name: "UCC Financing Statement", desc: "Public filing that perfects the lender's security interest" },
-  { name: "SBA Form 1919", desc: "Borrower Information Form for SBA loans" },
-  { name: "SBA Form 159", desc: "Fee Disclosure and Compensation Agreement" },
-  { name: "SBA Form 148", desc: "Unconditional Guarantee for SBA loans" },
-  { name: "SBA Form 1050", desc: "Settlement Sheet for SBA loans" },
-  { name: "IRS Form 4506-C", desc: "Authorizes release of tax transcripts" },
-  { name: "IRS Form W-9", desc: "Taxpayer identification and certification" },
-  { name: "Flood Determination", desc: "Standard flood hazard determination for the property" },
-  { name: "SBA Authorization", desc: "SBA's formal authorization to fund the loan" },
-  { name: "CDC Debenture", desc: "Funding instrument for SBA 504 loans" },
-  { name: "Settlement Statement", desc: "Itemized breakdown of all charges at closing" },
-  { name: "Loan Estimate", desc: "Initial disclosure of estimated loan costs" },
-  { name: "Closing Disclosure", desc: "Final disclosure of actual loan costs" },
-  { name: "Borrower's Certificate", desc: "Borrower certifies representations are true at closing" },
-  { name: "Compliance Certificate", desc: "Certifies ongoing compliance with loan covenants" },
-  { name: "Legal Opinion Letter", desc: "Attorney's opinion on enforceability and compliance" },
-  { name: "Corporate Borrowing Resolution", desc: "Board authorization for the entity to borrow" },
-  { name: "Amortization Schedule", desc: "Payment schedule showing principal and interest over the loan term" },
-  { name: "Privacy Notice (GLBA)", desc: "Required notice about how borrower data is shared" },
-  { name: "USA PATRIOT Act Notice", desc: "Required anti-money laundering disclosure" },
-  { name: "Commercial Financing Disclosure", desc: "State-required disclosure of financing terms" },
-  { name: "Disbursement Authorization", desc: "Authorizes how loan proceeds are distributed" },
-  { name: "Digital Asset Pledge Agreement", desc: "Secures loans collateralized by cryptocurrency" },
+  { name: "Promissory Note", desc: "The borrower's signed promise to pay back the loan on the agreed schedule" },
+  { name: "Loan Agreement", desc: "All the terms of the deal in one place: rate, term, covenants, default triggers" },
+  { name: "Security Agreement", desc: "Gives the lender a claim on the borrower's business assets as collateral" },
+  { name: "Guaranty Agreement", desc: "A personal or third-party guarantee that the loan gets repaid" },
+  { name: "Commitment Letter", desc: "Your formal offer to the borrower, spelling out what you will lend and on what terms" },
+  { name: "Deed of Trust", desc: "Ties the loan to the real property so the lender has a lien" },
+  { name: "Assignment of Leases & Rents", desc: "Lets the lender collect rent payments if the borrower stops paying" },
+  { name: "SNDA", desc: "Keeps tenants in place and protects lender rights if the property goes to foreclosure" },
+  { name: "Subordination Agreement", desc: "Sets the pecking order when there is more than one lender on a deal" },
+  { name: "Tenant Estoppel Certificate", desc: "Gets existing tenants on record confirming their lease terms" },
+  { name: "Intercreditor Agreement", desc: "Spells out who gets paid first when senior and junior debt are both on the table" },
+  { name: "Environmental Indemnity Agreement", desc: "Borrower takes responsibility for any environmental cleanup costs on the property" },
+  { name: "Borrowing Base Agreement", desc: "Defines the formula that controls how much the borrower can draw on a line" },
+  { name: "UCC Financing Statement", desc: "Filed publicly so everyone knows the lender has a claim on the collateral" },
+  { name: "SBA Form 1919", desc: "Borrower information form required on every SBA loan" },
+  { name: "SBA Form 159", desc: "Discloses all fees and compensation paid to agents or packagers" },
+  { name: "SBA Form 148", desc: "The unconditional personal guarantee the SBA requires from owners" },
+  { name: "SBA Form 1050", desc: "Settlement sheet showing exactly how SBA loan funds are distributed" },
+  { name: "IRS Form 4506-C", desc: "Lets you pull the borrower's tax transcripts directly from the IRS" },
+  { name: "IRS Form W-9", desc: "Collects the borrower's taxpayer ID and certification" },
+  { name: "Flood Determination", desc: "Checks whether the property sits in a flood zone" },
+  { name: "SBA Authorization", desc: "The SBA's green light to fund the loan" },
+  { name: "CDC Debenture", desc: "The funding instrument that makes SBA 504 loans work" },
+  { name: "Settlement Statement", desc: "Line-by-line breakdown of every charge at closing" },
+  { name: "Loan Estimate", desc: "The borrower's first look at what the loan will actually cost" },
+  { name: "Closing Disclosure", desc: "Final, locked-in numbers the borrower signs at closing" },
+  { name: "Borrower's Certificate", desc: "Borrower confirms everything they told you is still true at closing" },
+  { name: "Compliance Certificate", desc: "Ongoing confirmation that the borrower is meeting loan covenants" },
+  { name: "Legal Opinion Letter", desc: "Outside counsel's sign-off that the docs are enforceable" },
+  { name: "Corporate Borrowing Resolution", desc: "Board resolution authorizing the company to take on the debt" },
+  { name: "Amortization Schedule", desc: "Month-by-month payment table showing principal, interest, and balance" },
+  { name: "Privacy Notice (GLBA)", desc: "Required notice telling borrowers how their data is used and shared" },
+  { name: "USA PATRIOT Act Notice", desc: "Anti-money laundering notice required on every loan" },
+  { name: "Commercial Financing Disclosure", desc: "State-level disclosure of rates and terms, required in many jurisdictions" },
+  { name: "Disbursement Authorization", desc: "Tells the closer exactly where to send the loan proceeds" },
+  { name: "Digital Asset Pledge Agreement", desc: "Pledges cryptocurrency as collateral and covers custody and liquidation" },
 ];
 
 const PROGRAMS = [
-  { name: "SBA 7(a)", desc: "Small business loans backed by the federal government, up to $5M" },
-  { name: "SBA 504", desc: "Long-term fixed-rate financing for major assets like real estate and equipment" },
-  { name: "Commercial CRE", desc: "Loans for purchasing or refinancing commercial real estate" },
-  { name: "DSCR", desc: "Loans underwritten based on the property's cash flow, not the borrower's income" },
-  { name: "Bank Statement", desc: "Loans for self-employed borrowers using bank deposits instead of tax returns" },
-  { name: "Conventional Business", desc: "Standard business loans with traditional underwriting" },
-  { name: "Line of Credit", desc: "Revolving credit facility the borrower can draw from as needed" },
-  { name: "Equipment Financing", desc: "Loans specifically for purchasing business equipment" },
-  { name: "Bridge", desc: "Short-term loans to bridge the gap until permanent financing is secured" },
-  { name: "Multifamily", desc: "Loans for apartment buildings and multifamily residential properties" },
-  { name: "Mezzanine", desc: "Subordinated debt that sits between senior debt and equity" },
-  { name: "Construction", desc: "Loans for ground-up construction or major renovations" },
-  { name: "Hard Money", desc: "Asset-based loans with fast funding, typically for fix-and-flip" },
-  { name: "Crypto-Collateralized", desc: "Loans secured by digital assets like Bitcoin or Ethereum" },
+  { name: "SBA 7(a)", desc: "The most common SBA loan. Up to $5M, government-backed, with all required SBA forms included. A single deal can produce up to 27 documents." },
+  { name: "SBA 504", desc: "Fixed-rate, long-term financing for real estate and heavy equipment. Uses a CDC debenture structure with separate docs for each piece." },
+  { name: "Commercial CRE", desc: "Purchase, refinance, or cash-out on office, retail, industrial, and mixed-use properties." },
+  { name: "DSCR", desc: "Qualified on the property's rental income, not the borrower's personal tax returns. Popular for investor-owned rentals." },
+  { name: "Bank Statement", desc: "Built for self-employed borrowers. Uses 12 or 24 months of bank deposits to prove income instead of tax returns." },
+  { name: "Conventional Business", desc: "Traditional underwriting with full financials. Term loans, working capital, or acquisition financing." },
+  { name: "Line of Credit", desc: "Revolving credit the borrower draws against as needed, with a borrowing base that controls availability." },
+  { name: "Equipment Financing", desc: "Finances the purchase of specific equipment. The equipment itself serves as collateral." },
+  { name: "Bridge", desc: "Short-term financing to cover the gap while permanent financing or a sale closes. Usually 6 to 24 months." },
+  { name: "Multifamily", desc: "Loans for apartment buildings, from small 5-unit properties to large complexes. Includes assignment of leases and rents." },
+  { name: "Mezzanine", desc: "Sits behind the senior lender in the capital stack. Higher rate, but lets the borrower get more leverage on a deal." },
+  { name: "Construction", desc: "Finances ground-up builds or gut renovations. Draw schedules, inspection requirements, and completion guarantees built in." },
+  { name: "Hard Money", desc: "Asset-based, fast-close loans. Common for fix-and-flip, land, and deals that need to fund in days, not weeks." },
+  { name: "Crypto-Collateralized", desc: "Loans backed by Bitcoin, Ethereum, or other digital assets. Includes custody terms and liquidation triggers." },
 ];
 
 const STEPS = [
   {
     number: "1",
-    title: "Fill in your deal details",
-    desc: "Enter the loan terms, borrower info, and upload their financials. Tax returns, bank statements, entity docs. The system reads them automatically.",
+    title: "Enter the deal and upload financials",
+    desc: "Pick your loan program, enter the terms, and upload the borrower's documents. Tax returns, bank statements, entity docs, personal financial statements. The system reads and extracts the numbers for you.",
   },
   {
     number: "2",
-    title: "We generate the full loan package",
-    desc: "Every document for your loan program is generated at once. Rates, fees, and disclosures are set by the rules for your state and program type. Nothing is made up.",
+    title: "Get the full loan package back",
+    desc: "Every document your program requires is generated together. Rates, LTVs, fees, and payments are calculated from the program rules for your state. The legal language is written around those numbers. Nothing is guessed.",
   },
   {
     number: "3",
-    title: "Review, edit, and download",
-    desc: "Read through everything. Make changes directly. Download the full package as PDFs or Word docs when you are ready to close.",
+    title: "Review it, edit it, close the deal",
+    desc: "Read through the package. Make edits directly in the platform. When you are satisfied, download everything as PDFs or Word docs and take it to closing.",
   },
 ];
 
@@ -97,15 +97,16 @@ export default function LendingPage() {
                 Lending
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Upload your borrower's financials.
+                Upload the financials.
                 <br />
-                <span className="text-blue-500">Get a complete loan package back.</span>
+                <span className="text-blue-500">Get the entire loan package back.</span>
               </h1>
               <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
-                You fill in the deal details and upload the borrower's documents. OpenShut generates
-                up to 36 legal documents for your loan, checked against federal and state lending laws.
-                Promissory notes, loan agreements, SBA forms, closing disclosures. The whole package,
-                ready to review.
+                You pick the loan program and upload the borrower's documents. OpenShut generates
+                up to 27 documents for a single deal: promissory notes, loan agreements, SBA forms,
+                guarantees, closing disclosures, amortization schedules, and every required filing.
+                Every number is calculated from program rules. Every document is checked against
+                the lending laws for your state. You review it, edit it, and close.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -122,7 +123,7 @@ export default function LendingPage() {
                 </Link>
               </div>
               <p className="mt-6 text-sm text-muted-foreground">
-                One project free. Full output. No credit card.
+                First project free. Full document output. No credit card.
               </p>
             </div>
           </FadeIn>
@@ -155,12 +156,13 @@ export default function LendingPage() {
           <FadeIn>
             <div className="max-w-2xl mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                36 documents. One upload.
+                36 document types. One upload.
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Every document a lender needs from commitment letter to closing disclosure.
-                The system picks the right ones based on your loan program and generates
-                the full package at once.
+                From the commitment letter all the way through closing disclosure. You pick
+                the program and the system pulls the right documents for that deal type.
+                An SBA 7(a) might need 27. A bridge loan might need 12. You get exactly
+                what the deal requires.
               </p>
             </div>
           </FadeIn>
@@ -193,11 +195,13 @@ export default function LendingPage() {
           <FadeIn>
             <div className="max-w-2xl mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                14 loan programs
+                14 loan programs built in
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Pick your program. The system knows which documents that program requires,
-                which SBA forms to include, and which state and federal rules apply.
+                Each program has its own document set, its own compliance rules, and its own
+                calculations. Pick the program, and the system handles the rest. SBA forms
+                for SBA deals. DSCR math for investor loans. State-specific disclosures
+                wherever they are required.
               </p>
             </div>
           </FadeIn>
@@ -225,34 +229,35 @@ export default function LendingPage() {
           <FadeIn>
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Every document is checked before you close
+                23 compliance checks run on every deal
               </h2>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Every document is checked against the actual lending laws that apply to your deal
-                and your state. If your interest rate exceeds the legal limit, if a required
-                disclosure is missing, or if an SBA form has an error, the system catches it
-                before you close.
+                Before you download anything, the system checks your documents against the
+                lending laws that actually apply to your deal. If the rate exceeds the usury
+                limit in your state, you will know. If a required disclosure is missing, you
+                will know. If an SBA form has a number that does not match the loan agreement,
+                you will know. You review every flagged item before closing.
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
-                  Federal lending laws
+                  50-state usury validation
                 </span>
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
-                  State-specific rules
+                  OFAC screening
                 </span>
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
-                  SBA program requirements
+                  SBA size and eligibility
                 </span>
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
-                  Usury limits
+                  Flood zone checks
                 </span>
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
-                  Disclosure requirements
+                  Required disclosures
                 </span>
               </div>
             </div>
@@ -302,10 +307,10 @@ export default function LendingPage() {
 
               <div className="relative">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Try it on a real deal.
+                  Run a real deal through it.
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  One project free, full output, no credit card.
+                  Your first project is free. Full document output, all 14 programs, no credit card required.
                 </p>
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                   <SignInButton mode="modal">
