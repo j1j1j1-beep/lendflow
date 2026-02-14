@@ -145,7 +145,7 @@ export default function PricingPage() {
                   First module. Each additional adds $75,000 to the license and $4,999/month.
                 </p>
                 <p className="text-xs text-muted-foreground/70 mb-8">25 seats included. $499/seat/month after that.</p>
-                <SignInButton mode="modal">
+                <SignInButton mode="modal" forceRedirectUrl="/dashboard/settings">
                   <button className="w-full inline-flex h-11 items-center justify-center gap-2 rounded-lg text-sm font-medium bg-foreground text-background shadow-sm transition-all duration-150 ease-out hover:bg-foreground/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
                     Get Started
                     <ArrowRight className="h-4 w-4" />
