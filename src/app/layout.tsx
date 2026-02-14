@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OpenShut AI",
+  title: "OpenShut | Legal Document Automation for PE, Lending & Fund Management",
   description:
-    "Triple-verified AI credit analysis for loan officers. Upload documents, get verified numbers, download credit memos.",
+    "Generate complete legal document packages for lending, fund formation, M&A, syndication, and compliance. 59 document types. Numbers from program rules. 50-state regulatory coverage.",
 };
 
 export const viewport: Viewport = {

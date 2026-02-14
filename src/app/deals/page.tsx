@@ -7,116 +7,77 @@ import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 
 const DOCUMENTS = [
   {
-    name: "Letter of Intent (LOI)",
-    desc: "Your opening offer. Lays out the purchase price, deal structure, exclusivity period, and the conditions that must be met before you sign a definitive agreement.",
+    name: "Letter of Intent",
+    desc: "Your opening offer. Purchase price, deal structure, exclusivity period, and the conditions before definitive agreement.",
   },
   {
-    name: "Non-Disclosure Agreement (NDA)",
-    desc: "Protects what gets shared during diligence. Covers confidential financials, customer lists, trade secrets, and anything else the seller discloses to you.",
+    name: "Non-Disclosure Agreement",
+    desc: "Protects what gets shared during diligence. Financials, customer lists, trade secrets, and any other seller disclosures.",
   },
   {
     name: "Purchase Agreement",
-    desc: "The binding contract. Changes shape based on your deal type. Includes 25 to 40 seller reps, working capital adjustment, escrow mechanics, indemnification caps, and a MAC clause with standard carveouts.",
+    desc: "The binding contract. 25 to 40 seller reps, working capital adjustment, escrow mechanics, indemnification caps, and a MAC clause with 9 standard carveouts. Changes shape based on deal type.",
   },
   {
     name: "Due Diligence Checklist",
-    desc: "A structured list of everything your team needs to review before closing. Financial, legal, tax, environmental, IP, employment. No AI involved. Pure checklist.",
+    desc: "Structured list of everything your team reviews before close. Financial, legal, tax, environmental, IP, employment. Pure checklist, no AI language.",
   },
   {
     name: "Disclosure Schedules",
-    desc: "10 standard schedules where the seller documents exceptions to their reps. Cap table, subsidiaries, material contracts, litigation, IP, real property, environmental, tax, insurance, and employee benefits.",
+    desc: "10 standard schedules: cap table, subsidiaries, material contracts, litigation, IP, real property, environmental, tax, insurance, employee benefits.",
   },
   {
     name: "Closing Checklist",
-    desc: "Every deliverable, signature, and filing that needs to happen at close. Tracks what is done and what is outstanding. No AI. Just organized task tracking.",
+    desc: "Every deliverable, signature, and filing at close. Tracks status. No AI, just organized task tracking.",
   },
 ];
 
 const TRANSACTION_TYPES = [
-  {
-    name: "Stock Purchase",
-    desc: "You buy the entity's shares. Simpler to execute, but you inherit all liabilities. The purchase agreement reflects that.",
-  },
-  {
-    name: "Asset Purchase",
-    desc: "You pick which assets and liabilities to acquire. More complex closing, but you choose what you take on.",
-  },
-  {
-    name: "Forward Merger",
-    desc: "Target merges into your entity. Target ceases to exist. Good for absorbing a company completely.",
-  },
-  {
-    name: "Reverse Triangular Merger",
-    desc: "Your subsidiary merges into the target. Target survives. Preserves the target's contracts and licenses.",
-  },
-  {
-    name: "Tender Offer",
-    desc: "You go directly to shareholders with an offer to buy their shares. Bypasses the board. Faster timeline.",
-  },
-  {
-    name: "Section 363 Sale",
-    desc: "Buying assets out of bankruptcy. Court-supervised process. Buyer gets the assets free and clear of most claims.",
-  },
-];
-
-const STEPS = [
-  {
-    number: "1",
-    title: "Describe the deal",
-    desc: "Target company, purchase price, transaction type, tax structure, and key terms. Takes a few minutes.",
-  },
-  {
-    number: "2",
-    title: "Get all 6 documents",
-    desc: "LOI, NDA, purchase agreement, diligence checklist, disclosure schedules, and closing checklist. Generated together so the terms are consistent.",
-  },
-  {
-    number: "3",
-    title: "Edit, export, send to counsel",
-    desc: "Make changes inline. Download as Word or PDF. Your attorney reviews a first draft instead of starting from scratch.",
-  },
+  { name: "Stock Purchase", desc: "Buy the entity. Simpler execution, but you inherit all liabilities." },
+  { name: "Asset Purchase", desc: "Pick which assets and liabilities you take on. More complex closing." },
+  { name: "Forward Merger", desc: "Target merges into your entity. Target ceases to exist." },
+  { name: "Reverse Triangular", desc: "Your subsidiary merges into the target. Target survives with its contracts." },
+  { name: "Tender Offer", desc: "Go directly to shareholders. Bypasses the board. Faster timeline." },
+  { name: "Section 363 Sale", desc: "Assets out of bankruptcy, court-supervised. Free and clear of most claims." },
 ];
 
 export default function DealsPage() {
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background relative overflow-x-hidden">
-      {/* Gradient orbs */}
-      <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-primary/5 blur-3xl" />
-      <div className="pointer-events-none absolute top-1/3 -left-40 h-[500px] w-[500px] rounded-full bg-primary/3 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-1/4 right-1/4 h-[400px] w-[400px] rounded-full bg-primary/4 blur-3xl" />
-
       <MarketingNav />
 
       {/* Hero */}
-      <section className="relative w-full">
-        <div className="mx-auto max-w-6xl px-6 pt-24 pb-20 sm:pt-32 sm:pb-28 lg:pt-40 lg:pb-32">
+      <section className="relative w-full hero-glow hero-glow-amber">
+        <div className="absolute inset-0 bg-grid-pattern opacity-50" />
+        <div className="mx-auto max-w-6xl px-6 pt-28 pb-20 sm:pt-36 sm:pb-28 lg:pt-44 lg:pb-32 relative z-10">
           <FadeIn>
             <div className="max-w-3xl">
               <div className="flex items-center gap-3 mb-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
                   <Handshake className="h-5 w-5" />
                 </div>
-                <span className="text-sm font-semibold uppercase tracking-widest text-amber-500">
+                <span className="text-sm font-semibold uppercase tracking-widest text-amber-400">
                   Deals / M&A
                 </span>
               </div>
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Your acquisition docs.
+              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem] leading-[1.1]">
+                You found a target.
                 <br />
-                <span className="text-primary">
-                  LOI through closing. One generation.
+                <span className="text-gradient-amber">
+                  Get the docs done before the deal slips.
                 </span>
               </h1>
-              <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
-                Tell us the target, the price, and how you want to structure it. We generate the
-                LOI, NDA, purchase agreement, diligence checklist, disclosure schedules, and closing
-                checklist. Your counsel gets a complete first draft instead of a blank page. That
-                alone saves weeks of billable hours.
+              <p className="mt-8 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
+                Speed matters in M&A. The longer it takes to produce an LOI,
+                the longer someone else has to outbid you. OpenShut generates
+                all six acquisition documents from one set of deal terms, with
+                regulatory thresholds calculated at current rates and the
+                purchase agreement tailored to your transaction structure.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
                   <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                    Try It Free
+                    Start a Deal Free
                     <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </button>
                 </SignInButton>
@@ -124,11 +85,11 @@ export default function DealsPage() {
                   href="/pricing"
                   className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted hover:border-foreground/15"
                 >
-                  View Pricing
+                  See Pricing
                 </Link>
               </div>
-              <p className="mt-6 text-sm text-muted-foreground">
-                First deal free. All 6 documents. No credit card required.
+              <p className="mt-5 text-sm text-muted-foreground/70">
+                First acquisition free. All 6 documents. 8 transaction types.
               </p>
             </div>
           </FadeIn>
@@ -136,78 +97,67 @@ export default function DealsPage() {
       </section>
 
       {/* Documents */}
-      <section className="w-full border-t border-border/50 bg-muted/30">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <FadeIn>
-            <div className="max-w-2xl mb-16">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Everything you need from offer to close
-              </h2>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                Four of these are legal documents with real language your attorneys will review. Two are
-                pure checklists with no legal language at all. All six are generated from the same
-                deal terms so nothing contradicts.
-              </p>
-            </div>
-          </FadeIn>
+      <section className="w-full relative">
+        <div className="section-glow-divider" />
+        <div className="bg-muted/20 bg-dot-pattern">
+          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+            <FadeIn>
+              <div className="max-w-2xl mb-14">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  Six documents, from offer to close
+                </h2>
+                <p className="mt-4 text-muted-foreground leading-relaxed">
+                  Four are legal documents with real language. Two are pure
+                  checklists. All six are generated from the same deal terms so
+                  nothing contradicts.
+                </p>
+              </div>
+            </FadeIn>
 
-          <Stagger
-            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
-            staggerDelay={0.06}
-            initialDelay={0.1}
-          >
-            {DOCUMENTS.map((doc) => (
-              <StaggerItem key={doc.name}>
-                <div className="group rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 h-full">
-                  <div className="flex items-center gap-2.5 mb-3">
-                    <CheckCircle2 className="h-4 w-4 text-amber-500 shrink-0" />
-                    <h3 className="text-sm font-semibold text-card-foreground">
-                      {doc.name}
-                    </h3>
+            <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
+              {DOCUMENTS.map((doc) => (
+                <StaggerItem key={doc.name}>
+                  <div className="rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-amber-500/20 card-glow-border h-full">
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <CheckCircle2 className="h-4 w-4 text-amber-500 shrink-0" />
+                      <h3 className="text-sm font-semibold text-card-foreground">{doc.name}</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{doc.desc}</p>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {doc.desc}
-                  </p>
-                </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </div>
         </div>
+        <div className="section-glow-divider" />
       </section>
 
       {/* Transaction Types */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <FadeIn>
-            <div className="max-w-2xl mb-16">
+            <div className="max-w-2xl mb-14">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Pick your deal structure. The docs follow.
+                The purchase agreement follows the deal structure
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                The purchase agreement changes shape based on the transaction type you select. Reps,
-                closing conditions, and indemnification all reflect whether you are buying stock,
-                assets, or running a merger.
+                Reps, closing conditions, indemnification, and tax treatment
+                all change depending on whether you are buying stock, buying
+                assets, or running a merger. Pick the structure and the
+                documents adapt.
               </p>
             </div>
           </FadeIn>
 
-          <Stagger
-            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
-            staggerDelay={0.06}
-            initialDelay={0.1}
-          >
+          <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.06} initialDelay={0.1}>
             {TRANSACTION_TYPES.map((type) => (
               <StaggerItem key={type.name}>
-                <div className="group rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 h-full">
-                  <div className="flex items-center gap-2.5 mb-3">
-                    <Handshake className="h-4 w-4 text-primary shrink-0" />
-                    <h3 className="text-sm font-semibold text-card-foreground">
-                      {type.name}
-                    </h3>
+                <div className="rounded-xl border bg-card p-5 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 card-glow-border h-full">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    <h3 className="text-sm font-semibold text-card-foreground">{type.name}</h3>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {type.desc}
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed pl-4">{type.desc}</p>
                 </div>
               </StaggerItem>
             ))}
@@ -215,86 +165,96 @@ export default function DealsPage() {
         </div>
       </section>
 
-      {/* Compliance */}
-      <section className="w-full border-y border-border/50 bg-muted/30">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <FadeIn>
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                The regulatory checks you would do anyway
-              </h2>
-              <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Before you close, someone on your team has to check filing thresholds, tax elections,
-                and state law requirements. We surface those issues upfront so nothing gets missed.
-                You still verify. We just make sure you are looking at the right things.
-              </p>
-              <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3 text-left">
-                {[
-                  {
-                    title: "Federal filing thresholds",
-                    desc: "We calculate whether your deal size triggers a Hart-Scott-Rodino filing at current 2026 thresholds. You know before you sign the LOI.",
-                  },
-                  {
-                    title: "Tax structure options",
-                    desc: "7 tax election options surfaced based on your deal type. Stock vs. asset implications, QSBS eligibility, and reorganization structures identified.",
-                  },
-                  {
-                    title: "State corporate requirements",
-                    desc: "Board approvals, shareholder votes, and appraisal rights flagged based on where the target is incorporated. Foreign acquirer considerations included.",
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.title}
-                    className="rounded-xl border bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15"
-                  >
-                    <div className="flex items-center gap-2.5 mb-3">
-                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                      <h3 className="text-sm font-semibold text-card-foreground">
-                        {item.title}
-                      </h3>
+      {/* Regulatory */}
+      <section className="w-full relative">
+        <div className="section-glow-divider" />
+        <div className="bg-muted/20">
+          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+            <FadeIn>
+              <div className="max-w-3xl mx-auto">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
+                  Regulatory thresholds calculated, not guessed
+                </h2>
+                <p className="text-muted-foreground leading-relaxed mb-10">
+                  M&A deals trigger filing requirements, tax elections, and
+                  state law considerations that depend on deal size, structure,
+                  and jurisdiction. The system surfaces these before you sign.
+                </p>
+
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                  {[
+                    {
+                      title: "HSR filing thresholds",
+                      items: [
+                        "$119.5M minimum transaction size (2025)",
+                        "All 6 fee tiers calculated ($30K to $2.335M)",
+                        "30-day waiting period flagged",
+                        "$54,540/day gun-jumping penalty noted",
+                      ],
+                    },
+                    {
+                      title: "Tax structure",
+                      items: [
+                        "Section 338(h)(10) election mechanics",
+                        "Section 453 installment treatment",
+                        "Section 280G golden parachute calculations",
+                        "Tax-free reorg continuity requirements",
+                      ],
+                    },
+                    {
+                      title: "Deal mechanics",
+                      items: [
+                        "MAC clause with 9 standard carveouts",
+                        "Indemnification caps, baskets, survival periods",
+                        "Non-compete: sale-of-business exception + state bans",
+                        "CFIUS mandatory filing for TID businesses",
+                      ],
+                    },
+                  ].map((col) => (
+                    <div key={col.title} className="rounded-xl border bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/15 card-glow-border">
+                      <h3 className="text-sm font-semibold text-amber-400 mb-4">{col.title}</h3>
+                      <ul className="space-y-2.5">
+                        {col.items.map((item) => (
+                          <li key={item} className="flex items-start gap-2">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-amber-500 mt-0.5 shrink-0" />
+                            <span className="text-xs text-muted-foreground leading-relaxed">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {item.desc}
-                    </p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          </FadeIn>
+            </FadeIn>
+          </div>
         </div>
+        <div className="section-glow-divider" />
       </section>
 
       {/* How It Works */}
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <FadeIn>
-            <div className="max-w-2xl mx-auto text-center mb-16">
+            <div className="max-w-2xl mx-auto text-center mb-14">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                How it works
+                Describe the deal. Get the docs.
               </h2>
-              <p className="mt-4 text-muted-foreground">
-                Sign up, describe the deal, download your docs. No sales call. No demo. No credit card.
-              </p>
             </div>
           </FadeIn>
 
-          <Stagger
-            className="grid grid-cols-1 gap-6 sm:grid-cols-3"
-            staggerDelay={0.08}
-            initialDelay={0.1}
-          >
-            {STEPS.map((step) => (
-              <StaggerItem key={step.number}>
+          <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-3" staggerDelay={0.08} initialDelay={0.1}>
+            {[
+              { n: "01", title: "Enter the deal terms", desc: "Target, price, structure, tax elections, and key terms. A few minutes." },
+              { n: "02", title: "Get all 6 documents", desc: "LOI, NDA, purchase agreement, DD checklist, disclosure schedules, and closing checklist." },
+              { n: "03", title: "Edit, export, close", desc: "Make changes inline. Download as Word or PDF. Your attorney reviews instead of drafts." },
+            ].map((step) => (
+              <StaggerItem key={step.n}>
                 <div className="text-center">
-                  <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
-                    {step.number}
+                  <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-amber-500/15 text-amber-400 text-sm font-bold font-mono">
+                    {step.n}
                   </div>
-                  <h3 className="text-base font-semibold text-foreground mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {step.desc}
-                  </p>
+                  <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
                 </div>
               </StaggerItem>
             ))}
@@ -303,53 +263,39 @@ export default function DealsPage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="w-full border-t border-border/50">
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <FadeIn>
-            <div className="relative rounded-2xl border bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 hover:border-foreground/15 hover:shadow-xl">
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
-              </div>
-
-              <div className="relative">
-                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Your next acquisition starts here.
-                </h2>
-                <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                  Generate all 6 documents for your first deal. Hand your attorney a first draft
-                  instead of a retainer. Free, no credit card.
-                </p>
-                <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                  <SignInButton mode="modal">
-                    <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
-                      Try It Free
-                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                    </button>
-                  </SignInButton>
-                  <Link
-                    href="/pricing"
-                    className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted hover:border-foreground/15"
-                  >
-                    View Pricing
-                  </Link>
-                </div>
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                    No credit card required
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Handshake className="h-3.5 w-3.5 text-primary" />
-                    6 documents included
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                    Download as Word or PDF
-                  </span>
+      <section className="w-full relative">
+        <div className="section-glow-divider" />
+        <div className="bg-muted/20">
+          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+            <FadeIn>
+              <div className="relative rounded-2xl border bg-card p-12 sm:p-16 text-center overflow-hidden transition-all duration-300 hover:border-foreground/15 hover:shadow-xl hero-glow hero-glow-amber">
+                <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+                <div className="relative z-10">
+                  <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                    Your next acquisition starts here.
+                  </h2>
+                  <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
+                    Run a real deal through it. All 6 documents, all 8
+                    transaction types. First deal free.
+                  </p>
+                  <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+                    <SignInButton mode="modal">
+                      <button className="group inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-200 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-[0.98]">
+                        Start a Deal Free
+                        <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                      </button>
+                    </SignInButton>
+                    <Link
+                      href="/pricing"
+                      className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted hover:border-foreground/15"
+                    >
+                      See Pricing
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          </FadeIn>
+            </FadeIn>
+          </div>
         </div>
       </section>
 
