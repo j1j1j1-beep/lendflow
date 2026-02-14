@@ -270,7 +270,7 @@ export default function DealsPage() {
                 How it works
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Three steps. No demo call. No onboarding.
+                No demo call. No sales pitch. No credit card.
               </p>
             </div>
           </FadeIn>

@@ -88,7 +88,7 @@ export default async function Home() {
               <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
                 OpenShut generates the legal documents that PE firms, lenders, and fund managers
                 produce for every deal. You fill in the details. We give you the docs. Every number
-                verified, every clause compliant.
+                verified, every clause compliant. No hallucination, guaranteed.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
@@ -105,7 +105,7 @@ export default async function Home() {
                 </Link>
               </div>
               <p className="mt-6 text-sm text-muted-foreground">
-                No demo call. No sales pitch. Sign up and run a deal.
+                No demo call. No sales pitch. No credit card.
               </p>
             </div>
           </FadeIn>
