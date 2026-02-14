@@ -13,6 +13,7 @@ import {
   FileText,
   Plug,
   Scale,
+  ChevronDown,
 } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
@@ -53,8 +54,8 @@ const SECURITY_ITEMS = [
 
 const ACCURACY_POINTS = [
   {
-    title: "Numbers come from program rules",
-    desc: "Every number in your documents is calculated from the actual program rules. If the SBA 7(a) guarantee fee is 3.5% on a $1.2M loan, that comes from the SBA's published fee schedule. The AI writes legal language around those numbers but never picks one.",
+    title: "Every number is calculated, not generated",
+    desc: "Every financial figure in your documents comes from what you enter or upload. Loan amounts, rates, fees, allocations, tax withholding. The math is hardcoded to the exact specification of each document type. AI writes the legal language around those figures but never touches the numbers.",
   },
   {
     title: "Legal language is checked against real statutes",
@@ -70,32 +71,32 @@ const REGULATIONS = [
   {
     category: "Federal Lending",
     icon: Landmark,
-    items: ["TILA / Regulation Z", "RESPA / Regulation X", "ECOA / Regulation B", "Dodd-Frank ATR/QM Rule", "TRID Integrated Disclosures", "HMDA / Regulation C"],
+    items: ["TILA / Regulation Z (12 CFR 1026)", "RESPA / Regulation X (12 CFR 1024)", "ECOA / Regulation B (12 CFR 1002)", "Dodd-Frank ATR/QM Rule (12 CFR 1026.43)", "TRID Integrated Disclosures", "HMDA / Regulation C (12 CFR 1003)", "HPML (12 CFR 1026.35)", "FIRREA Appraisal Requirements", "CRA (Community Reinvestment Act)", "Flood Disaster Protection Act (42 USC 4012a)", "UCC Article 9", "State Usury Laws (50 states + DC)", "State Commercial Financing Disclosure Laws"],
   },
   {
     category: "SBA Programs",
     icon: Landmark,
-    items: ["13 CFR 120", "SBA SOP 50 10 8", "13 CFR 121", "SBA Guaranty Fee Tiers", "CDC/504 Debenture Requirements", "SBA Use of Proceeds Rules"],
+    items: ["13 CFR 120 (SBA Loan Programs)", "SBA SOP 50 10 8", "13 CFR 121 (Size Standards)", "SBA Guaranty Fee Tiers", "CDC/504 Debenture Requirements", "SBA Use of Proceeds Rules", "SBA Affiliation Rules", "SBA Credit Elsewhere Test", "SBA 504 Eligibility Requirements", "SBA Job Creation Requirements"],
   },
   {
     category: "Securities & Fund Formation",
     icon: Building2,
-    items: ["Reg D 506(b) / 506(c)", "Investment Company Act 3(c)(1) / 3(c)(7)", "Form ADV Part 2A", "NSMIA / Blue Sky", "17 CFR 230.501(a)", "ILPA Reporting Template"],
+    items: ["Reg D 506(b) / 506(c) (17 CFR 230.506)", "Securities Act of 1933", "Investment Company Act 3(c)(1) / 3(c)(7)", "Form ADV Part 2A (17 CFR 275.203-1)", "NSMIA / Blue Sky Filings", "17 CFR 230.501(a) (Accredited Investor)", "ILPA Reporting Template v2.0", "Rule 10b-5 Anti-Fraud (17 CFR 240.10b-5)", "Section 17(a) Securities Fraud (15 USC 77q)", "Form D / Rule 503 (17 CFR 239.500)", "ERISA (29 CFR 2510.3-101)", "Volcker Rule (12 CFR 248)", "SEC Marketing Rule 206(4)-1", "Form PF (17 CFR 279.9)", "ASC 820 / IPEV Valuation Guidelines"],
   },
   {
     category: "M&A",
     icon: Handshake,
-    items: ["DGCL Section 251 / 262 / 271", "HSR Act (15 USC 18a)", "IRC 338(h)(10) / 368", "CFIUS Filing Requirements", "IRC 280G", "IRC 382"],
+    items: ["DGCL Section 251 / 262 / 271", "HSR Act (15 USC 18a)", "IRC 338(h)(10) / 368 (Tax Elections)", "CFIUS Filing Requirements (31 CFR Part 800)", "IRC 280G (Golden Parachutes)", "IRC 382 (Net Operating Losses)", "WARN Act (29 USC 2101)", "State Mini-WARN Acts (CA, NY, NJ, IL)", "CCPA/CPRA (Data Privacy)", "EU AI Act Compliance", "Supply Chain Transparency Laws", "D&O Tail Coverage Requirements"],
   },
   {
     category: "Tax",
     icon: Scale,
-    items: ["IRC 1031", "IRC 1400Z-2", "IRC 469", "IRC 1446 / 1445 / 3406", "IRC 199A", "IRC 1061"],
+    items: ["IRC 704(b) (Partnership Allocations)", "IRC 754 (Basis Adjustments)", "IRC 1031 (Like-Kind Exchange)", "IRC 1400Z-2 (Opportunity Zones)", "IRC 469 (Passive Activity Rules)", "IRC 1446 / 1445 / 3406 (Withholding)", "IRC 199A (QBI Deduction)", "IRC 1061 (Carried Interest)", "IRC 511-514 (UBTI)", "IRC 1250 (Depreciation Recapture)", "IRC 6698 (Late Filing Penalties)", "FIRPTA (IRC 897/1445)", "OBBBA Bonus Depreciation (2025)"],
   },
   {
     category: "AML & Sanctions",
     icon: ShieldCheck,
-    items: ["BSA (31 USC 5311)", "FinCEN CDD Rule", "OFAC Consolidated Sanctions List", "USA PATRIOT Act", "GENIUS Act", "FinCEN Guidance FIN-2019-G001"],
+    items: ["BSA (31 USC 5311-5332)", "FinCEN CDD Rule (31 CFR 1010.230)", "OFAC Consolidated Sanctions List", "USA PATRIOT Act", "GENIUS Act (P.L. 119-27)", "FinCEN Guidance FIN-2019-G001", "FinCEN BOI Rule (31 CFR 1010.380)", "FATF Recommendation 10", "Source of Funds Requirements", "State Money Transmitter Laws"],
   },
 ];
 
@@ -162,7 +163,7 @@ export default function PlatformPage() {
                   Security
                 </h2>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
-                  Six layers between your data and the outside world.
+                  How your data is protected at every step.
                 </p>
               </div>
             </FadeIn>
@@ -194,7 +195,7 @@ export default function PlatformPage() {
                 How accuracy works
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                AI writes the legal language. It never picks a number. Here is
+                AI writes the legal language. It never handles the numbers. Here is
                 how that separation works in practice.
               </p>
             </div>
@@ -259,21 +260,23 @@ export default function PlatformPage() {
             <Stagger className="grid grid-cols-1 gap-4 lg:grid-cols-2" staggerDelay={0.08} initialDelay={0.1}>
               {REGULATIONS.map((reg) => (
                 <StaggerItem key={reg.category}>
-                  <div className="rounded-xl bg-card p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 card-shine metallic-sheen h-full">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-foreground inset-shine">
+                  <details className="group rounded-xl bg-card card-shine metallic-sheen h-full">
+                    <summary className="flex items-center gap-3 p-6 cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground inset-shine">
                         <reg.icon className="h-4 w-4" />
                       </div>
-                      <h3 className="text-sm font-semibold text-card-foreground">{reg.category}</h3>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
+                      <h3 className="text-sm font-semibold text-card-foreground flex-1">{reg.category}</h3>
+                      <span className="text-xs text-muted-foreground tabular-nums mr-2">{reg.items.length}</span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
+                    </summary>
+                    <div className="px-6 pb-6 pt-0 flex flex-wrap gap-2">
                       {reg.items.map((item) => (
                         <span key={item} className="inline-flex items-center rounded-md bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
                           {item}
                         </span>
                       ))}
                     </div>
-                  </div>
+                  </details>
                 </StaggerItem>
               ))}
             </Stagger>
@@ -333,7 +336,7 @@ export default function PlatformPage() {
                 <Stagger className="space-y-4" staggerDelay={0.06} initialDelay={0.1}>
                   {[
                     { title: "Where your data lives", text: "Files are stored with AES-256 encryption. The database is encrypted at rest. All infrastructure runs in US-based data centers." },
-                    { title: "What happens during AI processing", text: "When you generate a document, relevant data goes to the AI provider over an encrypted connection. We don't train on your data. Documents are processed for your organization only." },
+                    { title: "Your data stays yours", text: "We do not train on your data. Your documents, deal terms, and uploaded financials are never used to improve models or shared with third parties. Everything is processed for your organization only." },
                     { title: "Who can access your data", text: "Only authenticated members of your org. Support staff cannot view your documents unless you explicitly grant temporary access." },
                     { title: "What happens when you delete", text: "Delete means delete. Files are removed from storage and database records are hard-deleted. Audit logs are retained for compliance, but they contain no document content." },
                   ].map((item) => (

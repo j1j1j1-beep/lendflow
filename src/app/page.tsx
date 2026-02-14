@@ -14,6 +14,9 @@ import {
   FileCheck,
   Calculator,
   Scale,
+  Clock,
+  AlertTriangle,
+  Zap,
 } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
@@ -167,12 +170,12 @@ export default async function Home() {
               {
                 n: "02",
                 title: "Generate the package",
-                desc: "Every document your deal requires is generated as a set. Financial figures are calculated exactly to the specification of each document type. Interest rates, fees, allocations, and thresholds are all hardcoded math. AI writes the legal language around those figures, not the other way around.",
+                desc: "Every document your deal requires is generated as a complete set. Review each document against our compliance checklist for required legal clauses, and edit anything inline right on the website.",
               },
               {
                 n: "03",
-                title: "Review and close",
-                desc: "Read through everything in the editor. Make changes inline. Download as Word or PDF. Your loan officer or deal lead reviews the final output before it goes out.",
+                title: "Download and close",
+                desc: "Download ready-to-sign documents as Word or PDF.",
               },
             ].map((step) => (
               <StaggerItem key={step.n}>
@@ -291,7 +294,7 @@ export default async function Home() {
                 How accuracy works
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                AI writes the legal language. It never picks a number.
+                AI writes the legal language. It never handles the numbers.
               </p>
             </div>
           </FadeIn>
@@ -300,8 +303,8 @@ export default async function Home() {
             {[
               {
                 n: "01",
-                title: "Numbers come from your documents",
-                desc: "Every financial figure in your output is pulled directly from what you upload or enter. Loan amounts, purchase prices, investor commitments, fund sizes. The system calculates rates, fees, and allocations using hardcoded math specific to that document type. It cannot get an answer wrong.",
+                title: "Every number is calculated, not generated",
+                desc: "Every financial figure in your documents comes from what you enter or upload. Loan amounts, rates, fees, allocations, tax withholding. The math is hardcoded to the exact specification of each document type. AI writes the legal language around those figures but never touches the numbers.",
               },
               {
                 n: "02",
@@ -349,6 +352,80 @@ export default async function Home() {
             </div>
           </FadeIn>
         </div>
+      </section>
+
+      {/* Comparison */}
+      <section className="w-full relative">
+        <div className="section-divider" />
+        <div className="bg-muted/20 scan-lines">
+          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+            <FadeIn>
+              <div className="max-w-2xl mx-auto text-center mb-14">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  The old way vs. OpenShut
+                </h2>
+              </div>
+            </FadeIn>
+
+            <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-2 max-w-4xl mx-auto" staggerDelay={0.1} initialDelay={0.1}>
+              {/* Old way */}
+              <StaggerItem>
+                <div className="rounded-xl bg-card p-6 sm:p-8 card-glow h-full">
+                  <h3 className="text-base font-semibold text-card-foreground mb-6">Outside counsel / internal legal</h3>
+                  <div className="space-y-5">
+                    <div className="flex items-start gap-3">
+                      <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Days to weeks per document set. Longer if the firm is busy or the deal is complex.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Scale className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Significantly more expensive. Outside counsel bills by the hour. Internal teams carry overhead whether deals are closing or not.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Human error on financials. Loan officers transpose numbers. Associates miss state-specific requirements. Mistakes get caught in review if you are lucky.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </StaggerItem>
+
+              {/* OpenShut */}
+              <StaggerItem>
+                <div className="rounded-xl bg-card p-6 sm:p-8 card-glow metallic-sheen h-full relative overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
+                  <h3 className="text-base font-semibold text-card-foreground mb-6">With OpenShut</h3>
+                  <div className="space-y-5">
+                    <div className="flex items-start gap-3">
+                      <Zap className="h-4 w-4 text-foreground mt-0.5 shrink-0" />
+                      <p className="text-sm text-foreground/80 leading-relaxed">
+                        Minutes. Enter the deal, generate the full document set, review and download.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Scale className="h-4 w-4 text-foreground mt-0.5 shrink-0" />
+                      <p className="text-sm text-foreground/80 leading-relaxed">
+                        A fraction of the cost. One platform replaces the back-and-forth with outside counsel on routine document work.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-4 w-4 text-foreground mt-0.5 shrink-0" />
+                      <p className="text-sm text-foreground/80 leading-relaxed">
+                        Every number is calculated, not typed. No transposition errors. No missed state rules. 200+ compliance checks run automatically on every document.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </StaggerItem>
+            </Stagger>
+          </div>
+        </div>
+        <div className="section-divider" />
       </section>
 
       {/* Bottom CTA */}
