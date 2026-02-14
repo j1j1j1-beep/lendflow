@@ -114,11 +114,11 @@ export default async function Home() {
                 </span>
               </h1>
               <p className="mt-8 text-lg text-muted-foreground sm:text-xl max-w-2xl leading-relaxed">
-                59 document types across lending, fund formation, M&A,
-                syndication, and compliance. Zero hallucination on financials.
-                Rates, fees, and thresholds come from the actual program rules
-                for your deal and your state. AI writes the legal language
-                around verified numbers.
+                Enter your deal terms, upload financials, and get back every
+                document your deal requires. Every output is checked three
+                times: once for legal language and clauses, once for financial
+                accuracy, and once for regulatory compliance in your state.
+                Zero hallucination, guaranteed.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <SignInButton mode="modal">
