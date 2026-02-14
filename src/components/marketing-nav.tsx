@@ -7,39 +7,28 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { MarketingLogo } from "@/components/product-switcher";
 
-const LENDING_NAV_LINKS = [
-  { href: "/#features", label: "Features" },
+const NAV_LINKS = [
+  { href: "/#suite", label: "Suite" },
   { href: "/#how-it-works", label: "How It Works" },
-  { href: "/#programs", label: "Programs" },
-  { href: "/#pricing", label: "Pricing" },
-];
-
-const BIO_NAV_LINKS = [
-  { href: "/bio#features", label: "Features" },
-  { href: "/bio#how-it-works", label: "How It Works" },
-  { href: "/bio#documents", label: "Documents" },
-  { href: "/bio#pricing", label: "Pricing" },
+  { href: "/pricing", label: "Pricing" },
 ];
 
 export function MarketingNav() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isBio = pathname.startsWith("/bio");
-  const navLinks = isBio ? BIO_NAV_LINKS : LENDING_NAV_LINKS;
 
   return (
     <nav className="w-full border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="mx-auto max-w-6xl flex items-center justify-between px-6 py-4">
-        {/* Logo (dropdown) + Desktop Links */}
         <div className="flex items-center gap-8">
           <MarketingLogo />
           <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  pathname === link.href || pathname === link.href.replace("/#", "/")
+                  pathname === link.href
                     ? "text-foreground bg-muted"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
@@ -50,7 +39,6 @@ export function MarketingNav() {
           </div>
         </div>
 
-        {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-3">
           <SignInButton mode="modal">
             <button className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
@@ -64,7 +52,6 @@ export function MarketingNav() {
           </SignInButton>
         </div>
 
-        {/* Mobile Hamburger */}
         <button
           className="md:hidden p-2 text-muted-foreground hover:text-foreground"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -73,17 +60,16 @@ export function MarketingNav() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-border/50 bg-background px-6 pb-4 pt-2">
           <div className="flex flex-col gap-1">
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
                 className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  pathname === link.href || pathname === link.href.replace("/#", "/")
+                  pathname === link.href
                     ? "text-foreground bg-muted"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}

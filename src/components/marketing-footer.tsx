@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { Landmark, TestTubes } from "lucide-react";
+import {
+  Landmark,
+  Building2,
+  Handshake,
+  Building,
+  ShieldCheck,
+} from "lucide-react";
 
 export function MarketingFooter() {
   return (
@@ -17,59 +23,67 @@ export function MarketingFooter() {
               </span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-xs">
-              AI-powered platforms for lending and biopharma regulatory submissions.
+              Document automation for private equity, lending, and fund administration.
             </p>
           </div>
 
-          {/* Products */}
+          {/* Modules */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3">Products</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-3">Modules</h4>
             <ul className="space-y-2">
-              <li>
-                <Link href="/" className="group flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
-                  <Landmark className="h-3 w-3 transition-transform duration-150 group-hover:scale-110" />
-                  OpenShut Lending
-                </Link>
-              </li>
-              <li>
-                <Link href="/bio" className="group flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-150 hover:text-emerald-500">
-                  <TestTubes className="h-3 w-3 transition-transform duration-150 group-hover:scale-110" />
-                  OpenShut Bio
-                </Link>
-              </li>
+              {[
+                { label: "Lending", icon: Landmark, href: "/#suite" },
+                { label: "Capital", icon: Building2, href: "/#suite" },
+                { label: "Deals / M&A", icon: Handshake, href: "/#suite" },
+                { label: "Syndication", icon: Building, href: "/#suite" },
+                { label: "Compliance", icon: ShieldCheck, href: "/#suite" },
+              ].map((mod) => (
+                <li key={mod.label}>
+                  <Link
+                    href={mod.href}
+                    className="group flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
+                  >
+                    <mod.icon className="h-3 w-3 transition-transform duration-150 group-hover:scale-110" />
+                    {mod.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Lending */}
+          {/* Platform */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3">Lending</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-3">Platform</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/#features" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
-                  Features
+                <Link href="/#how-it-works" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                  How It Works
                 </Link>
               </li>
               <li>
-                <Link href="/#programs" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
-                  Loan Programs
-                </Link>
-              </li>
-              <li>
-                <Link href="/#pricing" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                <Link href="/pricing" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
                   Pricing
                 </Link>
               </li>
+              <li>
+                <Link href="/#security" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                  Security
+                </Link>
+              </li>
+              <li>
+                <Link href="/#regulations" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                  Regulations
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Bio */}
+          {/* Company */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3">Bio</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-3">Company</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/bio" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-emerald-500">
-                  OpenShut Bio
-                </Link>
+                <span className="text-sm text-muted-foreground">OpenShut LLC</span>
               </li>
             </ul>
           </div>
@@ -91,7 +105,7 @@ export function MarketingFooter() {
         <div className="mt-10 pt-6 border-t border-border/50">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <span className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} OpenShut. All rights reserved.
+              &copy; {new Date().getFullYear()} OpenShut LLC. All rights reserved.
             </span>
           </div>
           <p className="mt-4 text-xs text-muted-foreground/60 max-w-3xl">
