@@ -1,12 +1,12 @@
 import Link from "next/link";
 import {
-  Briefcase,
   Landmark,
   Building2,
   Handshake,
   Building,
   ShieldCheck,
 } from "lucide-react";
+import { MarketingLogo } from "@/components/product-switcher";
 
 export function MarketingFooter() {
   return (
@@ -15,14 +15,7 @@ export function MarketingFooter() {
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-1">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Briefcase className="h-4 w-4" />
-              </div>
-              <span className="text-lg font-semibold tracking-tight text-foreground">
-                OpenShut
-              </span>
-            </div>
+            <MarketingLogo />
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-xs">
               Legal document automation for private equity, lending, and fund administration.
             </p>

@@ -102,7 +102,6 @@ export const syndicationGenerateDocs = inngest.createFunction(
         const label = SYNDICATION_DOC_TYPE_LABELS[docType] ?? docType;
 
         await step.run(`generate-${docType}`, async () => {
-          console.log(`[Syndication] Generating ${label} for project ${projectId}`);
 
           // Reload project fresh to get latest data
           const freshProject = await prisma.syndicationProject.findUniqueOrThrow({
@@ -161,9 +160,6 @@ export const syndicationGenerateDocs = inngest.createFunction(
               },
             });
 
-            console.log(
-              `[Syndication] ${label} v${version} generated — ${complianceChecks.filter((c) => c.passed).length}/${complianceChecks.length} checks passed`,
-            );
           } catch (error) {
             console.error(`[Syndication] Failed to generate ${label}:`, error);
 
@@ -235,9 +231,6 @@ export const syndicationGenerateDocs = inngest.createFunction(
           },
         });
 
-        console.log(
-          `[Syndication] Project ${projectId} generation complete — status: ${hasFlagged ? "NEEDS_REVIEW" : "COMPLETE"}`,
-        );
       });
 
       return { success: true, projectId };

@@ -221,7 +221,6 @@ export const analysisPipeline = inngest.createFunction(
       ];
 
       if (processingStatuses.includes(deal.status)) {
-        console.log(`[idempotency] Deal ${dealId} already in ${deal.status}, skipping duplicate`);
         return { skip: true };
       }
 
@@ -456,7 +455,6 @@ export const analysisPipeline = inngest.createFunction(
 
               if (keywordResult.docType && validDocTypes.includes(keywordResult.docType)) {
                 docType = keywordResult.docType;
-                console.log(`[classify] ${doc.id}: keyword classifier → ${docType} (${keywordResult.confidence}, ${keywordResult.method})`);
 
                 // Try to extract year from OCR text
                 if (!docYear && ocrText) {
@@ -483,7 +481,6 @@ export const analysisPipeline = inngest.createFunction(
                   ? classification.docType
                   : "OTHER";
                 docYear = classification.year ?? null;
-                console.log(`[classify] ${doc.id}: Grok AI → ${docType}`);
               }
             }
 
@@ -1402,7 +1399,6 @@ export const resumeAfterReview = inngest.createFunction(
       const deal = await prisma.deal.findUnique({ where: { id: dealId } });
       if (!deal) return { skip: true };
       if (deal.status !== "NEEDS_REVIEW") {
-        console.log(`[idempotency] Deal ${dealId} not in expected state (${deal.status}), skipping`);
         return { skip: true };
       }
       return { skip: false };
@@ -1992,7 +1988,6 @@ export const resumeAfterTermReview = inngest.createFunction(
       const deal = await prisma.deal.findUnique({ where: { id: dealId } });
       if (!deal) return { skip: true };
       if (deal.status !== "NEEDS_TERM_REVIEW") {
-        console.log(`[idempotency] Deal ${dealId} not in expected state (${deal.status}), skipping`);
         return { skip: true };
       }
       return { skip: false };

@@ -170,9 +170,6 @@ export const maGenerateDocs = inngest.createFunction(
             });
 
             generatedDocs.push(resolvedDocType);
-            console.log(
-              `[M&A] ${label} v${version} generated — ${complianceChecks.filter((c) => c.passed).length}/${complianceChecks.length} checks passed`,
-            );
           } catch (error) {
             console.error(`[M&A] Failed to generate ${label}:`, error);
 

@@ -59,7 +59,6 @@ export const bioPipeline = inngest.createFunction(
       ];
 
       if (processingStatuses.includes(program.status)) {
-        console.log(`[bio-idempotency] Program ${programId} already in ${program.status}, skipping`);
         return { skip: true };
       }
       return { skip: false, drugClass: program.drugClass, drugName: program.drugName };

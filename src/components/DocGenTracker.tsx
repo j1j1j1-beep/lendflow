@@ -29,7 +29,6 @@ export function DocGenTracker({
   expectedDocs,
   completedDocTypes,
   status,
-  errorStep,
   errorMessage,
   typeAliases,
 }: DocGenTrackerProps) {
@@ -74,11 +73,6 @@ export function DocGenTracker({
   const total = expectedDocs.length;
   const percent = total > 0 ? Math.round((completedCount / total) * 100) : 0;
 
-  // Find index of current doc being generated
-  const currentIdx = isProcessing
-    ? expectedDocs.findIndex((d) => !isDocCompleted(d.type))
-    : -1;
-
   // Bar color
   const barClass = isError
     ? "from-red-500 via-red-400 to-rose-500"
@@ -93,7 +87,6 @@ export function DocGenTracker({
 
   return (
     <div className="space-y-4 animate-in fade-in-0 slide-in-from-top-2 duration-300">
-      {/* Progress header */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -106,12 +99,12 @@ export function DocGenTracker({
             {isError && <XCircle className="h-4 w-4 text-destructive" />}
             <span className="text-sm font-medium">
               {isProcessing
-                ? `Generating document ${Math.min(completedCount + 1, total)} of ${total}...`
+                ? "Preparing your documents..."
                 : isComplete
-                  ? `All ${total} documents generated`
+                  ? "Your documents are ready"
                   : isError
-                    ? "Generation failed"
-                    : `${completedCount} of ${total} documents`}
+                    ? "Something went wrong"
+                    : "Processing..."}
             </span>
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -154,99 +147,11 @@ export function DocGenTracker({
         </div>
       </div>
 
-      {/* Document steps */}
-      <div className="space-y-0.5" role="list" aria-label="Document generation progress">
-        {expectedDocs.map((doc, i) => {
-          const isDone = isDocCompleted(doc.type);
-          const isCurrent = i === currentIdx;
-          const isFailed = isError && errorStep === doc.type;
-
-          return (
-            <div
-              key={doc.type}
-              role="listitem"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
-                isDone
-                  ? "bg-emerald-500/5"
-                  : isCurrent
-                    ? "bg-primary/5"
-                    : isFailed
-                      ? "bg-destructive/5"
-                      : ""
-              }`}
-              style={{
-                animationDelay: `${i * 50}ms`,
-              }}
-            >
-              {/* Status icon */}
-              <div className="flex-shrink-0">
-                {isDone ? (
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 transition-all duration-300">
-                    <Check className="h-3 w-3 text-white" />
-                  </div>
-                ) : isCurrent ? (
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-primary">
-                    <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                  </div>
-                ) : isFailed ? (
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-destructive">
-                    <XCircle className="h-3 w-3 text-white" />
-                  </div>
-                ) : (
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-muted-foreground/20">
-                    <span className="text-[9px] text-muted-foreground/40 tabular-nums font-medium">
-                      {i + 1}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Label */}
-              <span
-                className={
-                  isDone
-                    ? "text-emerald-700 dark:text-emerald-400"
-                    : isCurrent
-                      ? "font-medium text-foreground"
-                      : isFailed
-                        ? "text-destructive font-medium"
-                        : "text-muted-foreground"
-                }
-              >
-                {doc.label}
-              </span>
-
-              {/* Status text */}
-              <span className="ml-auto text-[10px] font-medium">
-                {isDone && (
-                  <span className="text-emerald-600 dark:text-emerald-400">
-                    Complete
-                  </span>
-                )}
-                {isCurrent && (
-                  <span className="text-primary animate-pulse">
-                    Generating...
-                  </span>
-                )}
-                {isFailed && (
-                  <span className="text-destructive">Failed</span>
-                )}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
       {/* Error detail */}
       {isError && errorMessage && (
         <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2.5">
           <p className="text-xs text-destructive">
             <span className="font-medium">Error:</span> {errorMessage}
-            {errorStep && (
-              <span className="ml-1 opacity-75">
-                (Step: {errorStep})
-              </span>
-            )}
           </p>
         </div>
       )}

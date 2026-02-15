@@ -122,7 +122,6 @@ export const complianceGenerateDocs = inngest.createFunction(
       // Step 5: Generate the single document
       lastStep = `generate-${docType}`;
       await step.run(`generate-${docType}`, async () => {
-        console.log(`[Compliance] Generating ${label} for project ${projectId}`);
 
         // Reload project fresh to get latest data
         const freshProject = await prisma.complianceProject.findUniqueOrThrow({
@@ -178,9 +177,6 @@ export const complianceGenerateDocs = inngest.createFunction(
             },
           });
 
-          console.log(
-            `[Compliance] ${label} v${version} generated — ${complianceChecks.filter((c) => c.passed).length}/${complianceChecks.length} checks passed`,
-          );
         } catch (error) {
           console.error(`[Compliance] Failed to generate ${label}:`, error);
 
@@ -251,9 +247,6 @@ export const complianceGenerateDocs = inngest.createFunction(
           },
         });
 
-        console.log(
-          `[Compliance] Project ${projectId} generation complete — status: ${hasFlagged ? "NEEDS_REVIEW" : "COMPLETE"}`,
-        );
       });
 
       return { success: true, projectId, docType };

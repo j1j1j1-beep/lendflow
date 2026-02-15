@@ -101,7 +101,6 @@ export const capitalGenerateDocs = inngest.createFunction(
         const label = CAPITAL_DOC_TYPE_LABELS[docType] ?? docType;
 
         await step.run(`generate-${docType}`, async () => {
-          console.log(`[Capital] Generating ${label} for project ${projectId}`);
 
           // Reload project fresh to get latest data (in case prior step updated something)
           const freshProject = await prisma.capitalProject.findUniqueOrThrow({
@@ -159,9 +158,6 @@ export const capitalGenerateDocs = inngest.createFunction(
               },
             });
 
-            console.log(
-              `[Capital] ${label} v${version} generated — ${complianceChecks.filter((c) => c.passed).length}/${complianceChecks.length} checks passed`,
-            );
           } catch (error) {
             console.error(`[Capital] Failed to generate ${label}:`, error);
 
@@ -233,9 +229,6 @@ export const capitalGenerateDocs = inngest.createFunction(
           },
         });
 
-        console.log(
-          `[Capital] Project ${projectId} generation complete — status: ${hasFlagged ? "NEEDS_REVIEW" : "COMPLETE"}`,
-        );
       });
 
       return { success: true, projectId };
