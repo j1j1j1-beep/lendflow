@@ -19,13 +19,13 @@ export function ProductSwitcher() {
   return (
     <SidebarMenuButton size="lg" asChild>
       <Link href="/dashboard" className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-accent shadow-sm overflow-hidden">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm overflow-hidden">
           <Image
             src="/logo.png"
             alt="OpenShut"
-            width={28}
-            height={28}
-            className="dark:invert"
+            width={48}
+            height={48}
+            className="object-contain scale-150"
           />
         </div>
         <div className="flex flex-col gap-0.5 leading-none">
@@ -43,13 +43,13 @@ export function ProductSwitcher() {
 export function MarketingLogo() {
   return (
     <Link href="/" className="flex items-center gap-2.5">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary overflow-hidden">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm overflow-hidden">
         <Image
           src="/logo.png"
           alt="OpenShut"
-          width={28}
-          height={28}
-          className="invert"
+          width={48}
+          height={48}
+          className="object-contain scale-150"
         />
       </div>
       <span className="text-lg font-semibold tracking-tight text-foreground">
