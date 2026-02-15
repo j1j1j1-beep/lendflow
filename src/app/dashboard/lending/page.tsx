@@ -156,7 +156,10 @@ function LoanOriginationPage() {
       params.set("page", String(page));
 
       const res = await fetch(`/api/deals?${params}`);
-      if (!res.ok) throw new Error("Failed to load deals");
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.error || `Failed to load deals (${res.status})`);
+      }
       const data = await res.json();
       const newDeals = data.deals ?? [];
       setDeals(newDeals);
@@ -180,9 +183,9 @@ function LoanOriginationPage() {
         pollIntervalRef.current = 10000;
       }
       prevDealsRef.current = dealsFingerprint;
-    } catch {
+    } catch (err) {
       pollErrorCount.current += 1;
-      setFetchError("Unable to load deals. Please try again.");
+      setFetchError(err instanceof Error ? err.message : "Unable to load deals. Please try again.");
     } finally {
       setLoading(false);
       isInitialLoad.current = false;

@@ -168,9 +168,10 @@ export async function GET(request: NextRequest) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.error("GET /api/deals error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("GET /api/deals error:", msg, error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: `Internal server error: ${msg}` },
       { status: 500 }
     );
   }
