@@ -54,7 +54,7 @@ export async function checkPaywall(orgId: string): Promise<PaywallResult> {
     if (totalProjects >= TRIAL_PROJECT_LIMIT) {
       return {
         allowed: false,
-        reason: "Free project used. Subscribe to create more projects.",
+        reason: "Sample deal used. Subscribe to create projects with your own data.",
       };
     }
     return { allowed: true };

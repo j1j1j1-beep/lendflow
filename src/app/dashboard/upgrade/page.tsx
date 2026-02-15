@@ -86,11 +86,11 @@ export default function UpgradePage() {
 
               <FadeIn delay={0.2}>
                 <h1 className="text-2xl font-semibold tracking-tight mb-2">
-                  Your free project is ready
+                  Your sample deal is ready
                 </h1>
                 <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-8">
-                  Subscribe to create unlimited projects across all modules. Your
-                  existing project and documents stay accessible.
+                  Subscribe to create projects with your own data across all modules. Your
+                  sample deal and documents stay accessible.
                 </p>
               </FadeIn>
 

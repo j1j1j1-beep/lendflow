@@ -134,7 +134,7 @@ export default function SyndicationPage() {
                   <div>
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Return metrics</h3>
                     <ul className="space-y-2">
-                      {["IRR (Newton-Raphson iteration)", "Equity multiple / MOIC", "Cash-on-cash return by year", "DPI, RVPI, and TVPI", "Sensitivity on exit cap + occupancy"].map((item) => (
+                      {["IRR calculated to 6 decimal places", "Equity multiple / MOIC", "Cash-on-cash return by year", "DPI, RVPI, and TVPI", "Sensitivity on exit cap + occupancy"].map((item) => (
                         <li key={item} className="flex items-start gap-2">
                           <CheckCircle2 className="h-3.5 w-3.5 text-foreground/30 mt-0.5 shrink-0" />
                           <span className="text-sm text-muted-foreground">{item}</span>

@@ -83,10 +83,14 @@ export function MarketingFooter() {
             <h4 className="text-sm font-semibold text-foreground mb-3">Legal</h4>
             <ul className="space-y-2">
               <li>
-                <span className="text-sm text-muted-foreground">Privacy Policy</span>
+                <Link href="/privacy" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                  Privacy Policy
+                </Link>
               </li>
               <li>
-                <span className="text-sm text-muted-foreground">Terms of Service</span>
+                <Link href="/terms" className="text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                  Terms of Service
+                </Link>
               </li>
             </ul>
           </div>
