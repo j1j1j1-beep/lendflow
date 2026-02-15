@@ -79,4 +79,28 @@ export async function checkPaywall(orgId: string): Promise<PaywallResult> {
   return { allowed: true };
 }
 
+/**
+ * Check if an org can upload their own documents (not sample data).
+ * Only active paid subscriptions can upload.
+ */
+export async function checkUploadAllowed(orgId: string): Promise<PaywallResult> {
+  const sub = await prisma.subscription.findUnique({ where: { orgId } });
+
+  if (!sub || sub.plan === "trial" || sub.status === "trialing") {
+    return {
+      allowed: false,
+      reason: "Subscribe to upload your own documents. Sample deals are available on the free tier.",
+    };
+  }
+
+  if (sub.status === "active") {
+    return { allowed: true };
+  }
+
+  return {
+    allowed: false,
+    reason: "Active subscription required to upload documents.",
+  };
+}
+
 export { countAllProjects, TRIAL_PROJECT_LIMIT };

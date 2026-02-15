@@ -35,6 +35,7 @@ import {
   Headphones,
   Globe,
   KeyRound,
+  Zap,
 } from "lucide-react";
 
 const MODULE_PRICING = [
@@ -63,10 +64,12 @@ const ENTERPRISE_FEATURES = [
 ];
 
 const FAQ = [
+  { q: "What is Early Access?", a: "Pay $3,000 per deal instead of a full module license. You get full access to all 5 modules, all compliance checks, and can upload your own documents. Available to the first firms who join before general availability pricing takes effect." },
+  { q: "When does Early Access end?", a: "Early access pricing is available for a limited time. When it ends, new deals will require a per-module license. Any deals you've already paid for are yours forever." },
   { q: "What counts as a module?", a: "Each of the five products is one module: Lending, Capital, Deals/M&A, Syndication, and Compliance. Pick one to start. Add more anytime." },
   { q: "How does adding a module work?", a: "Pay the $250,000 license for the new module and add $7,499/month to your subscription. Unlimited usage from day one. No change to your existing modules." },
   { q: "What does the sample deal include?", a: "Pick any module and generate a full document package using sample data. Same output, same compliance checks, same quality as production. You just can't upload your own documents until you subscribe." },
-  { q: "What happens after the sample deal?", a: "You need a license to create projects with your own data. Your sample deal stays accessible so you can reference the output." },
+  { q: "What happens after the sample deal?", a: "You need a license or early access to create projects with your own data. Your sample deal stays accessible so you can reference the output." },
   { q: "Is usage really unlimited?", a: "Yes. No per-deal fees, no caps, no overage charges. Generate as many document packages as your firm needs. The monthly fee covers everything." },
   { q: "How do seats work?", a: "Up to 10 seats per organization. Any member can create projects, generate documents, and download packages. Need more than 10? Talk to us about Enterprise or add seats at $750/seat/month." },
   { q: "Is my data secure?", a: "All uploads are encrypted at rest and in transit. Expiring document links. Organization-level data isolation. Full audit trail. We don't use your data for training." },
@@ -90,9 +93,53 @@ export default function PricingPage() {
               <span className="text-muted-foreground">See it before you buy.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl mx-auto leading-relaxed">
-              Pick the modules your firm needs. Run a sample deal in any module
-              to see the full output. Then license what you use. Unlimited.
+              Early access: $3,000 per deal, any module. Run a sample deal first to see the full output.
+              Per-module licensing available at general availability.
             </p>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Early Access */}
+      <section className="w-full">
+        <div className="mx-auto max-w-4xl px-6 pb-16">
+          <FadeIn>
+            <div className="relative rounded-2xl border-2 border-primary/30 bg-primary/[0.03] p-8 sm:p-10 overflow-hidden">
+              <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-4 py-1.5 rounded-bl-xl text-xs font-semibold tracking-wide uppercase">
+                Limited Time
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <Zap className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-semibold text-primary uppercase tracking-wide">Early Access Program</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
+                    $3,000 per deal
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-lg">
+                    Full platform access. Any module. Pay per deal instead of a license.
+                    Available until May 10th. After that, per-module licensing only.
+                  </p>
+                  <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+                    {["All 5 modules", "Full document package", "All compliance checks", "Upload your own documents"].map((f) => (
+                      <li key={f} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-primary/50 shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="shrink-0">
+                  <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                    <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
+                      Get Early Access
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </SignInButton>
+                </div>
+              </div>
+            </div>
           </FadeIn>
         </div>
       </section>
@@ -101,40 +148,6 @@ export default function PricingPage() {
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 pb-24 sm:pb-32">
           <Stagger className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start" staggerDelay={0.08} initialDelay={0.1}>
-            {/* Free */}
-            <StaggerItem>
-              <div className="rounded-2xl bg-card p-8 sm:p-10 transition-all duration-200 hover:-translate-y-1 card-shine metallic-sheen">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-foreground inset-shine">
-                    <Sparkles className="h-5 w-5" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-card-foreground">Free</h3>
-                </div>
-                <div className="mb-2">
-                  <span className="text-4xl font-bold tracking-tight text-foreground">$0</span>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-8">
-                  Free demo in any module. Full document output. See exactly
-                  what the platform does before you buy anything.
-                </p>
-                <SignInButton mode="modal">
-                  <button className="w-full inline-flex h-11 items-center justify-center gap-2 rounded-lg text-sm font-medium border border-border bg-background text-foreground shadow-sm transition-all duration-150 ease-out hover:bg-muted hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
-                    See a Sample Deal
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </SignInButton>
-                <div className="my-8 border-t border-border/50" />
-                <ul className="space-y-3">
-                  {["Sample deal in any module", "Full document output", "All compliance checks", "No credit card required", "No time limit"].map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-foreground/30 mt-0.5 shrink-0" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </StaggerItem>
-
             {/* Per-Module */}
             <StaggerItem>
               <div className="relative rounded-2xl border border-foreground/20 bg-card p-8 sm:p-10 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
@@ -213,6 +226,27 @@ export default function PricingPage() {
               </div>
             </StaggerItem>
           </Stagger>
+
+          {/* Free - below the paid tiers */}
+          <FadeIn delay={0.3}>
+            <div className="mt-8 mx-auto max-w-md">
+              <div className="rounded-2xl bg-card p-8 text-center card-shine metallic-sheen">
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <Sparkles className="h-5 w-5 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold text-card-foreground">Try it first</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                  Run a sample deal in any module. Full document output, all compliance checks. No credit card, no time limit.
+                </p>
+                <SignInButton mode="modal">
+                  <button className="inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-medium border border-border bg-background text-foreground px-6 shadow-sm transition-all duration-150 ease-out hover:bg-muted hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
+                    See a Sample Deal
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </SignInButton>
+              </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
 

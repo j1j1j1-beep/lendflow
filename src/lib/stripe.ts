@@ -24,6 +24,7 @@ export const stripe = new Proxy({} as Stripe, {
 export const STRIPE_PRICES = {
   get license() { return process.env.STRIPE_LICENSE_PRICE_ID ?? ""; },
   get monthly() { return process.env.STRIPE_MONTHLY_PRICE_ID ?? ""; },
+  get earlyAccess() { return process.env.STRIPE_EARLY_ACCESS_PRICE_ID ?? ""; },
 };
 
 export const STRIPE_BIO_PRICES = {

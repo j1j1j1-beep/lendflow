@@ -11,11 +11,11 @@ export async function POST(request: NextRequest) {
     const { user, org } = await requireAuth();
 
     const body = await request.json();
-    const { type } = body as { type: "license" | "subscription" };
+    const { type } = body as { type: "license" | "subscription" | "early_access" };
 
-    if (type !== "license" && type !== "subscription") {
+    if (type !== "license" && type !== "subscription" && type !== "early_access") {
       return NextResponse.json(
-        { error: 'Invalid type. Must be "license" or "subscription".' },
+        { error: 'Invalid type. Must be "license", "subscription", or "early_access".' },
         { status: 400 }
       );
     }
@@ -48,7 +48,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate that the required Stripe price ID is configured
-    const priceId = type === "license" ? STRIPE_PRICES.license : STRIPE_PRICES.monthly;
+    const priceId =
+      type === "early_access"
+        ? STRIPE_PRICES.earlyAccess
+        : type === "license"
+          ? STRIPE_PRICES.license
+          : STRIPE_PRICES.monthly;
     if (!priceId || typeof priceId !== "string") {
       return NextResponse.json(
         { error: "Valid price ID is required. Check Stripe environment configuration." },
@@ -65,18 +70,25 @@ export async function POST(request: NextRequest) {
       metadata: { orgId: org.id },
     };
 
-    const session = type === "license"
-      ? await stripe.checkout.sessions.create({
-          ...common,
-          mode: "payment" as const,
-          line_items: [{ price: priceId, quantity: 1 }],
-        })
-      : await stripe.checkout.sessions.create({
-          ...common,
-          mode: "subscription" as const,
-          line_items: [{ price: priceId, quantity: 1 }],
-          subscription_data: { metadata: { orgId: org.id } },
-        });
+    let session;
+    if (type === "subscription") {
+      session = await stripe.checkout.sessions.create({
+        ...common,
+        mode: "subscription" as const,
+        payment_method_types: ["card", "us_bank_account"],
+        line_items: [{ price: priceId, quantity: 1 }],
+        subscription_data: { metadata: { orgId: org.id } },
+      });
+    } else {
+      // license and early_access are both one-time payments
+      session = await stripe.checkout.sessions.create({
+        ...common,
+        mode: "payment" as const,
+        payment_method_types: ["card", "us_bank_account"],
+        line_items: [{ price: priceId, quantity: 1 }],
+        invoice_creation: { enabled: true },
+      });
+    }
 
     void logAudit({
       orgId: org.id,

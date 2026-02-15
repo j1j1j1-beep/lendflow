@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
+import { checkUploadAllowed } from "@/lib/paywall";
 import { uploadToS3 } from "@/lib/s3";
 import { withRateLimit } from "@/lib/with-rate-limit";
 import { writeLimit } from "@/lib/rate-limit";
@@ -29,6 +30,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const { org, user } = await requireAuth();
+
+    const uploadCheck = await checkUploadAllowed(org.id);
+    if (!uploadCheck.allowed) {
+      return NextResponse.json({ error: uploadCheck.reason }, { status: 402 });
+    }
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

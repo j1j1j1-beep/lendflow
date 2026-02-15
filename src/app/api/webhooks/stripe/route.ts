@@ -103,7 +103,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // Only handle license (one-time) payments here
+  // Handle one-time payments (license or early access)
   if (session.mode === "payment") {
     await prisma.subscription.upsert({
       where: { orgId },
@@ -112,13 +112,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         stripeCustomerId: customerId,
         licensePaid: true,
         licensePaymentId: session.payment_intent as string | null,
-        plan: "trial",
-        status: "trialing",
+        plan: "active",
+        status: "active",
       },
       update: {
         stripeCustomerId: customerId,
         licensePaid: true,
         licensePaymentId: session.payment_intent as string | null,
+        plan: "active",
+        status: "active",
       },
     });
   }

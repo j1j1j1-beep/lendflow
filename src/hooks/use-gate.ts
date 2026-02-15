@@ -12,6 +12,7 @@ interface BillingResponse {
     cancelAtPeriodEnd: boolean;
   } | null;
   trialProjectsRemaining: number | null;
+  canUpload: boolean;
 }
 
 interface GateState {
@@ -23,6 +24,8 @@ interface GateState {
   subscription: BillingResponse["subscription"];
   /** Number of trial projects remaining (null if subscribed) */
   trialProjectsRemaining: number | null;
+  /** True if org has active paid subscription (can upload own documents) */
+  canUpload: boolean;
 }
 
 export function useGate(): GateState {
@@ -62,5 +65,7 @@ export function useGate(): GateState {
     trialProjectsRemaining !== null &&
     trialProjectsRemaining === 0;
 
-  return { isGated, isLoading, subscription, trialProjectsRemaining };
+  const canUpload = data?.canUpload ?? false;
+
+  return { isGated, isLoading, subscription, trialProjectsRemaining, canUpload };
 }

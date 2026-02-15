@@ -7,7 +7,12 @@ const globalForPg = globalThis as unknown as { pgPool?: import("pg").Pool };
 
 function createPrismaClient() {
   if (!globalForPg.pgPool) {
-    globalForPg.pgPool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+    globalForPg.pgPool = new pg.Pool({
+      connectionString: process.env.DATABASE_URL,
+      max: 5,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    });
   }
   const pool = globalForPg.pgPool;
   const adapter = new PrismaPg(pool);

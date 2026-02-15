@@ -49,7 +49,7 @@ export default function UpgradePage() {
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "license" }),
+        body: JSON.stringify({ type: "early_access" }),
       });
       const data = await res.json();
       if (data.url) {
@@ -89,8 +89,8 @@ export default function UpgradePage() {
                   Your sample deal is ready
                 </h1>
                 <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-8">
-                  Subscribe to create projects with your own data across all modules. Your
-                  sample deal and documents stay accessible.
+                  Get early access for $3,000 per deal. Full platform access, any module,
+                  upload your own documents. Available until May 10th.
                 </p>
               </FadeIn>
 
@@ -101,7 +101,7 @@ export default function UpgradePage() {
                     disabled={checkoutLoading}
                     className="w-full h-11 gap-2"
                   >
-                    {checkoutLoading ? "Redirecting..." : "Purchase License"}
+                    {checkoutLoading ? "Redirecting..." : "Get Early Access — $3,000"}
                     <ArrowRight className="h-4 w-4" />
                   </Button>
 

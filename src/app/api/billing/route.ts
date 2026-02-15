@@ -32,6 +32,11 @@ export async function GET() {
       trialProjectsRemaining = Math.max(0, TRIAL_PROJECT_LIMIT - totalProjects);
     }
 
+    const canUpload =
+      !!subscription &&
+      subscription.status === "active" &&
+      subscription.plan !== "trial";
+
     return NextResponse.json({
       subscription: subscription
         ? {
@@ -53,6 +58,7 @@ export async function GET() {
         max: subscription?.maxSeats ?? 10,
       },
       trialProjectsRemaining,
+      canUpload,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {

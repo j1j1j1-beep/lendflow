@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Handshake } from "lucide-react";
+import { ArrowLeft, Loader2, Handshake, Lock } from "lucide-react";
+import { useGate } from "@/hooks/use-gate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,6 +61,7 @@ function parseNumber(value: string): number {
 
 export default function NewDealPage() {
   const router = useRouter();
+  const { canUpload } = useGate();
   const [submitting, setSubmitting] = useState(false);
 
   /* Required fields */
@@ -595,7 +597,7 @@ export default function NewDealPage() {
             docs={sampleSourceDocs}
             onClear={handleClearSample}
           />
-        ) : (
+        ) : canUpload ? (
           <Card className="transition-shadow duration-200 hover:shadow-md">
             <CardHeader>
               <CardTitle>Source Documents</CardTitle>
@@ -606,6 +608,19 @@ export default function NewDealPage() {
             </CardHeader>
             <CardContent>
               <DocumentUploader files={files} onFilesSelected={setFiles} />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <Lock className="h-8 w-8 text-muted-foreground mb-3" />
+              <p className="text-sm font-medium">Document upload requires a subscription</p>
+              <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                Select a sample deal above to see the full pipeline in action, or subscribe to upload your own documents.
+              </p>
+              <Button asChild size="sm" className="mt-4">
+                <Link href="/dashboard/upgrade">View Plans</Link>
+              </Button>
             </CardContent>
           </Card>
         )}

@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, Lock } from "lucide-react";
 import Link from "next/link";
+import { useGate } from "@/hooks/use-gate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,6 +53,7 @@ function parseNumber(value: string): string {
 
 export default function NewDealPage() {
   const router = useRouter();
+  const { canUpload } = useGate();
   const [submitting, setSubmitting] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
 
@@ -360,7 +362,7 @@ export default function NewDealPage() {
             documents={sampleExtractions.documents}
             onClear={handleClearSample}
           />
-        ) : (
+        ) : canUpload ? (
           <Card>
             <CardHeader>
               <CardTitle>Document Upload</CardTitle>
@@ -386,6 +388,19 @@ export default function NewDealPage() {
                   />
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <Lock className="h-8 w-8 text-muted-foreground mb-3" />
+              <p className="text-sm font-medium">Document upload requires a subscription</p>
+              <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                Select a sample deal above to see the full pipeline in action, or subscribe to upload your own documents.
+              </p>
+              <Button asChild size="sm" className="mt-4">
+                <Link href="/dashboard/upgrade">View Plans</Link>
+              </Button>
             </CardContent>
           </Card>
         )}
