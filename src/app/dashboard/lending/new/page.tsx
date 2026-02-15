@@ -39,6 +39,17 @@ const LOAN_PURPOSES = [
   { value: "bridge", label: "Bridge" },
 ];
 
+function formatNumber(value: string): string {
+  const digits = value.replace(/[^\d.]/g, "");
+  const parts = digits.split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.length > 1 ? `${parts[0]}.${parts[1]}` : parts[0];
+}
+
+function parseNumber(value: string): string {
+  return value.replace(/,/g, "");
+}
+
 export default function NewDealPage() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -65,7 +76,7 @@ export default function NewDealPage() {
     if (!sample) return;
     setSampleDealId(dealId);
     setBorrowerName(sample.borrowerName);
-    setLoanAmount(String(sample.loanAmount));
+    setLoanAmount(formatNumber(String(sample.loanAmount)));
     setLoanPurpose(sample.loanPurpose);
     setLoanProgramId(sample.loanProgramId);
     setPropertyAddress(sample.propertyAddress);
@@ -143,7 +154,7 @@ export default function NewDealPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           borrowerName: borrowerName.trim(),
-          loanAmount: loanAmount ? parseFloat(loanAmount) : null,
+          loanAmount: loanAmount ? parseFloat(parseNumber(loanAmount)) : null,
           loanPurpose: loanPurpose || null,
           loanProgramId: loanProgramId || null,
           loanType: selectedProgram?.category ?? null,
@@ -254,13 +265,12 @@ export default function NewDealPage() {
                   </span>
                   <Input
                     id="loanAmount"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={loanAmount}
-                    onChange={(e) => setLoanAmount(e.target.value)}
-                    placeholder="500000"
+                    onChange={(e) => setLoanAmount(formatNumber(e.target.value))}
+                    placeholder="500,000"
                     className="pl-7"
-                    min={0}
-                    step={1000}
                   />
                 </div>
               </div>
