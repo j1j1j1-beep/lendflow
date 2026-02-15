@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Landmark } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 
 export function useActiveProduct() {
@@ -20,7 +20,7 @@ export function ProductSwitcher() {
     <SidebarMenuButton size="lg" asChild>
       <Link href="/dashboard" className="flex items-center gap-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-accent-foreground shadow-sm">
-          <Landmark className="h-4 w-4" />
+          <Briefcase className="h-4 w-4" />
         </div>
         <div className="flex flex-col gap-0.5 leading-none">
           <span className="font-semibold tracking-tight">OpenShut</span>
@@ -38,7 +38,7 @@ export function MarketingLogo() {
   return (
     <Link href="/" className="flex items-center gap-2.5">
       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-        <Landmark className="h-4 w-4" />
+        <Briefcase className="h-4 w-4" />
       </div>
       <span className="text-lg font-semibold tracking-tight text-foreground">
         OpenShut

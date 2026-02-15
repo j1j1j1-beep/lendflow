@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  Briefcase,
   Landmark,
   Building2,
   Handshake,
@@ -16,7 +17,7 @@ export function MarketingFooter() {
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Landmark className="h-4 w-4" />
+                <Briefcase className="h-4 w-4" />
               </div>
               <span className="text-lg font-semibold tracking-tight text-foreground">
                 OpenShut
