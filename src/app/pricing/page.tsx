@@ -22,12 +22,12 @@ import {
   KeyRound,
 } from "lucide-react";
 
-const MODULE_PRICING = [
-  { modules: 1, license: "$300,000", monthly: "$20,000", year1: "$540,000", year2: "$268,800" },
-  { modules: 2, license: "$350,000", monthly: "$28,500", year1: "$692,000", year2: "$383,040" },
-  { modules: 3, license: "$400,000", monthly: "$37,000", year1: "$844,000", year2: "$497,280" },
-  { modules: 4, license: "$450,000", monthly: "$45,500", year1: "$996,000", year2: "$611,520" },
-  { modules: 5, license: "$500,000", monthly: "$54,000", year1: "$1,148,000", year2: "$725,760" },
+const DEAL_PRICING = [
+  { module: "Lending", icon: Landmark, perDeal: "$2,500", unit: "per deal", avgCounsel: "$15,000", docs: "Up to 27 documents per loan package" },
+  { module: "Capital", icon: Building2, perDeal: "$10,000", unit: "per fund", avgCounsel: "$100,000", docs: "6 fund formation documents" },
+  { module: "Deals / M&A", icon: Handshake, perDeal: "$15,000", unit: "per deal", avgCounsel: "$350,000", docs: "6 acquisition documents" },
+  { module: "Syndication", icon: Building, perDeal: "$3,500", unit: "per deal", avgCounsel: "$35,000", docs: "5 investor documents + pro forma" },
+  { module: "Compliance", icon: ShieldCheck, perDeal: "$7,500", unit: "per period", avgCounsel: "$75,000/yr", docs: "6 reporting documents per period" },
 ];
 
 const MODULES = [
@@ -49,13 +49,13 @@ const ENTERPRISE_FEATURES = [
 
 const FAQ = [
   { q: "What counts as a module?", a: "Each of the five products is one module: Lending, Capital, Deals/M&A, Syndication, and Compliance. Pick one to start. Add more anytime." },
-  { q: "How does upgrading work?", a: "Pay the $75,000 license difference per module added, plus the $4,999/month increase. If you have 2 modules and want a third, that's $75,000 one-time and your monthly goes from $19,999 to $24,999." },
+  { q: "How does adding a module work?", a: "Pay the $500,000 license for the new module. You then pay per-deal fees for that module whenever you use it. No change to your existing modules." },
   { q: "What does the sample deal include?", a: "Pick any module and generate a full document package using sample data. Same output, same compliance checks, same quality as production. You just can't upload your own documents until you subscribe." },
   { q: "What happens after the sample deal?", a: "You need a license to create projects with your own data. Your sample deal stays accessible so you can reference the output." },
-  { q: "Is the license fee a one-time payment?", a: "Yes. The license is paid once. Monthly fees cover ongoing platform access, updates, and support." },
-  { q: "How do seats work on the standard plan?", a: "Up to 15 seats per organization. Any member can create projects, generate documents, and download packages. Need more than 15? Talk to us about Enterprise or add seats at $750/seat/month." },
+  { q: "Is the license fee a one-time payment?", a: "Yes. The license is paid once per module. After that, you only pay per-deal fees when you generate documents. No monthly subscription." },
+  { q: "How do seats work?", a: "Up to 15 seats per organization. Any member can create projects, generate documents, and download packages. Need more than 15? Talk to us about Enterprise or add seats at $750/seat/month." },
   { q: "Is my data secure?", a: "All uploads are encrypted at rest and in transit. Expiring document links. Organization-level data isolation. Full audit trail. We don't use your data for training." },
-  { q: "How does payment work?", a: "License fee paid via wire transfer or ACH. Monthly fees billed automatically." },
+  { q: "How does payment work?", a: "License fee paid via wire transfer or ACH. Per-deal fees billed monthly based on usage." },
 ];
 
 export default function PricingPage() {
@@ -133,15 +133,14 @@ export default function PricingPage() {
                   <h3 className="text-lg font-semibold text-card-foreground">Per-Module License</h3>
                 </div>
                 <div className="mb-1">
-                  <span className="text-4xl font-bold tracking-tight text-foreground">$300,000</span>
-                  <span className="text-base text-muted-foreground ml-1">license</span>
+                  <span className="text-4xl font-bold tracking-tight text-foreground">$500,000</span>
+                  <span className="text-base text-muted-foreground ml-1">per module</span>
                 </div>
                 <div className="mb-2">
-                  <span className="text-xl font-semibold text-foreground">$20,000</span>
-                  <span className="text-sm text-muted-foreground">/month</span>
+                  <span className="text-xl font-semibold text-foreground">+ per-deal fees</span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-2">
-                  First module. Each additional adds $50,000 to the license and $8,500/month.
+                  One-time license per module. Then pay per deal generated. No monthly subscription.
                 </p>
                 <p className="text-xs text-muted-foreground/70 mb-8">15 seats included. $750/seat/month after that.</p>
                 <SignInButton mode="modal" forceRedirectUrl="/dashboard">
@@ -152,7 +151,7 @@ export default function PricingPage() {
                 </SignInButton>
                 <div className="my-8 border-t border-border/50" />
                 <ul className="space-y-3">
-                  {["Unlimited projects", "Up to 15 seats", "Full document generation per module", "All compliance checks", "Full audit trail", "Inline document editing", "Download packages (ZIP)", "Team management", "Onboarding included", "Wire or ACH payment"].map((f) => (
+                  {["Pay only when you generate", "Up to 15 seats", "Full document package per deal", "All compliance checks", "Full audit trail", "Inline document editing", "Download packages (ZIP)", "Team management", "Onboarding included", "Wire or ACH payment"].map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm text-muted-foreground">
                       <CheckCircle2 className="h-4 w-4 text-foreground/30 mt-0.5 shrink-0" />
                       <span>{f}</span>
@@ -206,43 +205,41 @@ export default function PricingPage() {
           <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <FadeIn>
               <div className="text-center max-w-2xl mx-auto mb-14">
-                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Add modules as you grow</h2>
-                <p className="mt-4 text-muted-foreground leading-relaxed">Start with one module. Add more when you need them. $50,000 license and $8,500/month per additional module.</p>
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Per-deal pricing by module</h2>
+                <p className="mt-4 text-muted-foreground leading-relaxed">$500,000 license per module. Then pay per deal. No monthly subscription, no annual fees. You only pay when you generate.</p>
               </div>
             </FadeIn>
             <FadeIn delay={0.1}>
               <div className="overflow-x-auto">
-                <table className="w-full max-w-3xl mx-auto">
+                <table className="w-full max-w-4xl mx-auto">
                   <thead>
                     <tr className="border-b border-border/50">
-                      <th className="py-4 px-4 text-left text-sm font-semibold text-foreground">Modules</th>
-                      <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">License (one-time)</th>
-                      <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Monthly</th>
-                      <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Year 1 Total</th>
-                      <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Year 2</th>
+                      <th className="py-4 px-4 text-left text-sm font-semibold text-foreground">Module</th>
+                      <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Per Deal</th>
+                      <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Avg. Outside Counsel</th>
+                      <th className="py-4 px-4 text-left text-sm font-semibold text-foreground pl-8">What You Get</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {MODULE_PRICING.map((row) => (
-                      <tr key={row.modules} className={`border-b border-border/30 transition-colors hover:bg-muted/50 ${row.modules === 5 ? "font-medium" : ""}`}>
+                    {DEAL_PRICING.map((row) => (
+                      <tr key={row.module} className="border-b border-border/30 transition-colors hover:bg-muted/50">
                         <td className="py-4 px-4 text-sm text-foreground">
-                          {row.modules}
-                          {row.modules === 5 && <span className="ml-2 text-xs text-muted-foreground font-normal">Full suite</span>}
+                          <div className="flex items-center gap-2">
+                            <row.icon className="h-4 w-4 text-foreground/50 shrink-0" />
+                            {row.module}
+                          </div>
                         </td>
-                        <td className="py-4 px-4 text-right text-sm text-foreground tabular-nums">{row.license}</td>
-                        <td className="py-4 px-4 text-right text-sm text-foreground tabular-nums">{row.monthly}</td>
-                        <td className="py-4 px-4 text-right text-sm text-foreground tabular-nums">{row.year1}</td>
-                        <td className="py-4 px-4 text-right text-sm text-foreground tabular-nums">{row.year2}</td>
+                        <td className="py-4 px-4 text-right text-sm text-foreground font-semibold tabular-nums">
+                          {row.perDeal}
+                          <span className="text-xs text-muted-foreground font-normal ml-1">{row.unit}</span>
+                        </td>
+                        <td className="py-4 px-4 text-right text-sm text-muted-foreground tabular-nums line-through decoration-muted-foreground/40">{row.avgCounsel}</td>
+                        <td className="py-4 px-4 text-left text-sm text-muted-foreground pl-8">{row.docs}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            </FadeIn>
-            <FadeIn delay={0.15}>
-              <p className="mt-8 text-center text-sm text-muted-foreground max-w-2xl mx-auto">
-                12% annual escalator on the monthly fee beginning year 2. Year 2 column reflects the first increase.
-              </p>
             </FadeIn>
           </div>
         </div>
