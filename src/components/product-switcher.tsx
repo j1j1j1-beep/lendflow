@@ -39,7 +39,7 @@ export function ProductSwitcher() {
           alt="OpenShut"
           width={isCollapsed ? 32 : 80}
           height={isCollapsed ? 18 : 46}
-          className={`flex-shrink-0 ${isCollapsed ? "" : "-mr-3"}`}
+          className={`flex-shrink-0 dark:invert ${isCollapsed ? "" : "-mr-3"}`}
         />
         {!isCollapsed && (
           <div className="flex flex-col gap-0 leading-none">
@@ -67,7 +67,7 @@ export function MarketingLogo() {
         alt="OpenShut"
         width={72}
         height={42}
-        className="flex-shrink-0 -mr-3"
+        className="flex-shrink-0 -mr-3 dark:invert"
       />
       <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent text-lg font-bold tracking-tight">
         OpenShut
