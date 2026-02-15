@@ -162,7 +162,40 @@ export default function PricingPage() {
       <section className="w-full">
         <div className="mx-auto max-w-6xl px-6 pb-24 sm:pb-32">
           <Stagger className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start" staggerDelay={0.08} initialDelay={0.1}>
-            {/* Per-Module */}
+            {/* Try it first - left */}
+            <StaggerItem>
+              <div className="rounded-2xl bg-card p-8 sm:p-10 transition-all duration-200 hover:-translate-y-1 card-shine metallic-sheen h-full">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-foreground inset-shine">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-card-foreground">Try it first</h3>
+                </div>
+                <div className="mb-2">
+                  <span className="text-4xl font-bold tracking-tight text-foreground">Free</span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-8">
+                  Run a sample deal in any module. Full document output, all compliance checks. No credit card, no time limit.
+                </p>
+                <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                  <button className="w-full inline-flex h-11 items-center justify-center gap-2 rounded-lg text-sm font-medium border border-border bg-background text-foreground shadow-sm transition-all duration-150 ease-out hover:bg-muted hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
+                    See a Sample Deal
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </SignInButton>
+                <div className="my-8 border-t border-border/50" />
+                <ul className="space-y-3">
+                  {["Any module", "Full document package", "All compliance checks", "Sample data only", "No uploads", "No time limit"].map((f) => (
+                    <li key={f} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-foreground/30 mt-0.5 shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </StaggerItem>
+
+            {/* Per-Module - center */}
             <StaggerItem>
               <div className="relative rounded-2xl border border-foreground/20 bg-card p-8 sm:p-10 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
@@ -206,9 +239,9 @@ export default function PricingPage() {
               </div>
             </StaggerItem>
 
-            {/* Enterprise */}
+            {/* Enterprise - right */}
             <StaggerItem>
-              <div className="rounded-2xl bg-card p-8 sm:p-10 transition-all duration-200 hover:-translate-y-1 card-shine metallic-sheen">
+              <div className="rounded-2xl bg-card p-8 sm:p-10 transition-all duration-200 hover:-translate-y-1 card-shine metallic-sheen h-full">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-foreground inset-shine">
                     <Phone className="h-5 w-5" />
@@ -240,27 +273,6 @@ export default function PricingPage() {
               </div>
             </StaggerItem>
           </Stagger>
-
-          {/* Free - below the paid tiers */}
-          <FadeIn delay={0.3}>
-            <div className="mt-8 mx-auto max-w-md">
-              <div className="rounded-2xl bg-card p-8 text-center card-shine metallic-sheen">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <Sparkles className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold text-card-foreground">Try it first</h3>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                  Run a sample deal in any module. Full document output, all compliance checks. No credit card, no time limit.
-                </p>
-                <SignInButton mode="modal">
-                  <button className="inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-medium border border-border bg-background text-foreground px-6 shadow-sm transition-all duration-150 ease-out hover:bg-muted hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
-                    See a Sample Deal
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </SignInButton>
-              </div>
-            </div>
-          </FadeIn>
         </div>
       </section>
 
