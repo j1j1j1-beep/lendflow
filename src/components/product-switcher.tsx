@@ -15,7 +15,6 @@ const MODULE_LABELS: Record<string, string> = {
 
 function useActiveModule(): string {
   const pathname = usePathname();
-  // Match /dashboard/{module}/...
   const match = pathname.match(/^\/dashboard\/([^/]+)/);
   if (match && MODULE_LABELS[match[1]]) {
     return MODULE_LABELS[match[1]];
@@ -31,13 +30,14 @@ export function ProductSwitcher() {
   const activeModule = useActiveModule();
 
   return (
-    <SidebarMenuButton size="lg" asChild className="h-auto py-2">
-      <Link href="/dashboard" className="flex items-center gap-3">
+    <SidebarMenuButton size="lg" asChild className="h-auto py-3">
+      <Link href="/dashboard" className="flex items-center gap-2">
         <Image
           src="/logo.png"
           alt="OpenShut"
-          width={48}
-          height={48}
+          width={80}
+          height={46}
+          className="flex-shrink-0"
         />
         <div className="flex flex-col gap-0.5 leading-none">
           <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent font-bold tracking-tight">
@@ -57,12 +57,13 @@ export function ProductSwitcher() {
  */
 export function MarketingLogo() {
   return (
-    <Link href="/" className="flex items-center gap-2.5">
+    <Link href="/" className="flex items-center gap-2">
       <Image
         src="/logo.png"
         alt="OpenShut"
-        width={40}
-        height={40}
+        width={72}
+        height={42}
+        className="flex-shrink-0"
       />
       <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent text-lg font-bold tracking-tight">
         OpenShut
