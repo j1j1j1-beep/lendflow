@@ -6,11 +6,11 @@ import { usePathname } from "next/navigation";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 
 const MODULE_LABELS: Record<string, string> = {
-  lending: "Lending",
-  capital: "Capital",
-  deals: "Deals",
-  syndication: "Syndication",
-  compliance: "Compliance",
+  lending: "lending",
+  capital: "capital",
+  deals: "deals",
+  syndication: "syndication",
+  compliance: "compliance",
 };
 
 function useActiveModule(): string {
@@ -19,7 +19,7 @@ function useActiveModule(): string {
   if (match && MODULE_LABELS[match[1]]) {
     return MODULE_LABELS[match[1]];
   }
-  return "Suite";
+  return "suite";
 }
 
 /**
@@ -31,19 +31,19 @@ export function ProductSwitcher() {
 
   return (
     <SidebarMenuButton size="lg" asChild className="h-auto py-3">
-      <Link href="/dashboard" className="flex items-center gap-2">
+      <Link href="/dashboard" className="flex items-center gap-1">
         <Image
           src="/logo.png"
           alt="OpenShut"
           width={80}
           height={46}
-          className="flex-shrink-0"
+          className="flex-shrink-0 -mr-1"
         />
-        <div className="flex flex-col gap-0.5 leading-none">
+        <div className="flex flex-col gap-0 leading-none">
           <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent font-bold tracking-tight">
             OpenShut
           </span>
-          <span className="text-[11px] font-medium text-muted-foreground tracking-wide uppercase">
+          <span className="text-[10px] text-muted-foreground">
             {activeModule}
           </span>
         </div>
@@ -57,13 +57,13 @@ export function ProductSwitcher() {
  */
 export function MarketingLogo() {
   return (
-    <Link href="/" className="flex items-center gap-2">
+    <Link href="/" className="flex items-center gap-1">
       <Image
         src="/logo.png"
         alt="OpenShut"
         width={72}
         height={42}
-        className="flex-shrink-0"
+        className="flex-shrink-0 -mr-1"
       />
       <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent text-lg font-bold tracking-tight">
         OpenShut
