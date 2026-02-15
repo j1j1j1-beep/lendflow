@@ -24,7 +24,14 @@ export const stripe = new Proxy({} as Stripe, {
 export const STRIPE_PRICES = {
   get license() { return process.env.STRIPE_LICENSE_PRICE_ID ?? ""; },
   get monthly() { return process.env.STRIPE_MONTHLY_PRICE_ID ?? ""; },
-  get earlyAccess() { return process.env.STRIPE_EARLY_ACCESS_PRICE_ID ?? ""; },
+};
+
+export const STRIPE_EA_PRICES: Record<string, string> = {
+  get lending() { return process.env.STRIPE_EA_LENDING_PRICE_ID ?? ""; },
+  get capital() { return process.env.STRIPE_EA_CAPITAL_PRICE_ID ?? ""; },
+  get ma() { return process.env.STRIPE_EA_MA_PRICE_ID ?? ""; },
+  get syndication() { return process.env.STRIPE_EA_SYNDICATION_PRICE_ID ?? ""; },
+  get compliance() { return process.env.STRIPE_EA_COMPLIANCE_PRICE_ID ?? ""; },
 };
 
 export const STRIPE_BIO_PRICES = {

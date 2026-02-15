@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-helpers";
-import { stripe, STRIPE_PRICES } from "@/lib/stripe";
+import { stripe, STRIPE_PRICES, STRIPE_EA_PRICES } from "@/lib/stripe";
 import { logAudit } from "@/lib/audit";
 
 // POST /api/billing/checkout — create a Stripe checkout session
@@ -11,11 +11,21 @@ export async function POST(request: NextRequest) {
     const { user, org } = await requireAuth();
 
     const body = await request.json();
-    const { type } = body as { type: "license" | "subscription" | "early_access" };
+    const { type, module } = body as {
+      type: "license" | "subscription" | "early_access";
+      module?: string;
+    };
 
     if (type !== "license" && type !== "subscription" && type !== "early_access") {
       return NextResponse.json(
         { error: 'Invalid type. Must be "license", "subscription", or "early_access".' },
+        { status: 400 }
+      );
+    }
+
+    if (type === "early_access" && (!module || !STRIPE_EA_PRICES[module])) {
+      return NextResponse.json(
+        { error: "Valid module required for early access. Must be lending, capital, ma, syndication, or compliance." },
         { status: 400 }
       );
     }
@@ -50,7 +60,7 @@ export async function POST(request: NextRequest) {
     // Validate that the required Stripe price ID is configured
     const priceId =
       type === "early_access"
-        ? STRIPE_PRICES.earlyAccess
+        ? STRIPE_EA_PRICES[module!]
         : type === "license"
           ? STRIPE_PRICES.license
           : STRIPE_PRICES.monthly;

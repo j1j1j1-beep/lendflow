@@ -9,7 +9,7 @@ import { FAQSchema, SoftwareApplicationSchema } from "@/components/structured-da
 export const metadata: Metadata = {
   title: "Pricing for Legal Automation & PE Deal Tools",
   description:
-    "Per-module licensing for legal automation and deal tools. $250,000 per module, $20,000/month unlimited usage. Generate deal terms, loan packages, PPMs, and compliance reports.",
+    "Early access from $2,500 per deal. Per-module licensing at $250,000 per module + $20,000/month unlimited usage. Generate deal terms, loan packages, PPMs, and compliance reports.",
   keywords: ["legal automation pricing", "PE tools pricing", "deal tools cost", "legal document automation pricing", "enterprise legal software"],
   alternates: { canonical: "https://openshut.me/pricing" },
   openGraph: {
@@ -64,8 +64,8 @@ const ENTERPRISE_FEATURES = [
 ];
 
 const FAQ = [
-  { q: "What is Early Access?", a: "Pay $3,000 per deal instead of a full module license. You get full access to all 5 modules, all compliance checks, and can upload your own documents. Available to the first firms who join before general availability pricing takes effect." },
-  { q: "When does Early Access end?", a: "Early access pricing is available for a limited time. When it ends, new deals will require a per-module license. Any deals you've already paid for are yours forever." },
+  { q: "What is Early Access?", a: "Pay per deal instead of a full module license. Prices range from $2,500 (Compliance) to $8,500 (Capital or M&A) depending on the module. You get full access, all compliance checks, and can upload your own documents. Available until May 10th." },
+  { q: "When does Early Access end?", a: "May 10th. After that, new deals require a per-module license ($250,000 + $20,000/mo). Any deals you've already paid for during early access are yours forever." },
   { q: "What counts as a module?", a: "Each of the five products is one module: Lending, Capital, Deals/M&A, Syndication, and Compliance. Pick one to start. Add more anytime." },
   { q: "How does adding a module work?", a: "Pay the $250,000 license for the new module and add $7,499/month to your subscription. Unlimited usage from day one. No change to your existing modules." },
   { q: "What does the sample deal include?", a: "Pick any module and generate a full document package using sample data. Same output, same compliance checks, same quality as production. You just can't upload your own documents until you subscribe." },
@@ -93,8 +93,8 @@ export default function PricingPage() {
               <span className="text-muted-foreground">See it before you buy.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground sm:text-xl max-w-2xl mx-auto leading-relaxed">
-              Early access: $3,000 per deal, any module. Run a sample deal first to see the full output.
-              Per-module licensing available at general availability.
+              Early access: pay per deal until May 10th. Run a sample deal first to see the full output.
+              Per-module licensing at general availability.
             </p>
           </FadeIn>
         </div>
@@ -106,39 +106,53 @@ export default function PricingPage() {
           <FadeIn>
             <div className="relative rounded-2xl border-2 border-primary/30 bg-primary/[0.03] p-8 sm:p-10 overflow-hidden">
               <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-4 py-1.5 rounded-bl-xl text-xs font-semibold tracking-wide uppercase">
-                Limited Time
+                Until May 10th
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2.5 mb-3">
-                    <Zap className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-semibold text-primary uppercase tracking-wide">Early Access Program</span>
+              <div className="flex items-center gap-2.5 mb-3">
+                <Zap className="h-5 w-5 text-primary" />
+                <span className="text-sm font-semibold text-primary uppercase tracking-wide">Early Access Program</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
+                Pay per deal. No license required.
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-lg mb-6">
+                Full document package, all compliance checks, upload your own documents.
+                Available until May 10th. After that, per-module licensing only.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                {[
+                  { name: "Lending", price: "$3,000", icon: Landmark },
+                  { name: "Capital", price: "$8,500", icon: Building2 },
+                  { name: "Deals / M&A", price: "$8,500", icon: Handshake },
+                  { name: "Syndication", price: "$5,000", icon: Building },
+                  { name: "Compliance", price: "$2,500", icon: ShieldCheck },
+                ].map((mod) => (
+                  <div key={mod.name} className="flex items-center justify-between rounded-lg border border-primary/15 bg-background/50 px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <mod.icon className="h-4 w-4 text-primary/60" />
+                      <span className="text-sm font-medium text-foreground">{mod.name}</span>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground tabular-nums">{mod.price}<span className="text-xs text-muted-foreground font-normal"> / deal</span></span>
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
-                    $3,000 per deal
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed max-w-lg">
-                    Full platform access. Any module. Pay per deal instead of a license.
-                    Available until May 10th. After that, per-module licensing only.
-                  </p>
-                  <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-                    {["All 5 modules", "Full document package", "All compliance checks", "Upload your own documents"].map((f) => (
-                      <li key={f} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-primary/50 shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="shrink-0">
-                  <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                    <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
-                      Get Early Access
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                  </SignInButton>
-                </div>
+                ))}
               </div>
+
+              <ul className="flex flex-wrap gap-x-6 gap-y-2 mb-6">
+                {["Full document package", "All compliance checks", "Upload your own documents", "No license commitment"].map((f) => (
+                  <li key={f} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-primary/50 shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                <button className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150 ease-out hover:bg-primary/90 hover:shadow-md hover:-translate-y-px active:scale-[0.98]">
+                  Get Early Access
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </SignInButton>
             </div>
           </FadeIn>
         </div>
