@@ -36,7 +36,7 @@ export default function UpgradePage() {
       .finally(() => setLoadingProject(false));
   }, []);
 
-  // If not gated (active sub or hasn't used free project), redirect to dashboard
+  // If not gated (active sub or hasn't used sample deal), redirect to dashboard
   useEffect(() => {
     if (!gateLoading && !isGated) {
       router.replace("/dashboard");

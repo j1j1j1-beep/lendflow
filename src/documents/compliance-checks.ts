@@ -8,6 +8,7 @@
 
 import type { DocumentInput } from "./types";
 import { LOAN_PROGRAMS } from "@/config/loan-programs";
+import { getCachedRates } from "@/lib/market-rates";
 
 // Types
 
@@ -363,20 +364,13 @@ function checkFloodZone(_input: DocumentInput): ComplianceCheckResult {
 
 function checkHpml(input: DocumentInput): ComplianceCheckResult {
   // HPML threshold: first lien rate > APOR + 1.5%, subordinate lien > APOR + 3.5%
-  // We cannot look up the current APOR, so flag if the rate is above a conservative
-  // threshold that would likely trigger HPML.
+  // APOR is estimated as 10-year Treasury + 1.75% (conventional 30-year approximation).
+  // When FRED_API_KEY is configured, the Treasury rate is fetched live daily.
+  // For exact APOR, verify against FFIEC tables at ffiec.gov/ratespread.
   const rate = input.terms.interestRate;
-
-  // HPML triggers at APOR + 1.5% for first liens, APOR + 3.5% for subordinate liens.
-  // Current APOR ~6.1% (as of 2025) -> first-lien threshold ~7.6%.
-  // TODO: Replace with dynamic APOR lookup from FFIEC/CFPB weekly table for production use.
-  // Using 7.6% as conservative threshold — should be recalculated as APOR + 1.5% for first-lien.
-  // WARNING: The APOR-based threshold changes weekly. This hardcoded value is a
-  // conservative estimate. In production, integrate with FFIEC APOR table API
-  // at https://www.ffiec.gov/ratespread/aportables.htm for accurate checks.
-  // TODO: For production, implement dynamic APOR lookup from FFIEC (ffiec.gov/ratespread). Current 7.6% is based on 2025 rates.
-  const conservativeHpmlThreshold = 0.076;
-  const isLikelyHpml = rate > conservativeHpmlThreshold;
+  const rates = getCachedRates();
+  const hpmlThreshold = rates.aporEstimate + 0.015; // APOR + 1.5% for first lien
+  const isLikelyHpml = rate > hpmlThreshold;
 
   return {
     name: "Higher-Priced Mortgage Loan (HPML) Check",

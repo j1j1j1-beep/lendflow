@@ -7,6 +7,7 @@
 
 import type { FullAnalysis } from "@/analysis/analyze";
 import type { LoanProgram } from "@/config/loan-programs";
+import { getCachedRates } from "@/lib/market-rates";
 
 // Types
 
@@ -81,23 +82,14 @@ export interface RulesEngineOutput {
   projectedDscrWithProposedPayment: number | null;
 }
 
-// IMPORTANT: These base rates are static fallbacks as of Feb 2026.
-// In production, these should be fetched from a live rate feed (FRED API, Bloomberg, or similar).
-// Stale rates directly impact loan pricing for every deal.
-// Last updated: 2026-02-11
-// WARNING: These rates are hardcoded approximations for development/demo only.
-// In production, fetch live rates from FRED API (https://fred.stlouisfed.org/)
-// or a market data provider. Stale rates will mis-price loans.
-
-const BASE_RATES: Record<string, number> = {
-  prime: 0.0675,    // WSJ Prime Rate (updated Feb 2026)
-  sofr: 0.0430,     // Secured Overnight Financing Rate (updated Feb 2026)
-  treasury: 0.0415, // 10-year Treasury (updated Feb 2026)
-};
-
-/** Get the current base rate. In production, this would call a rate API. */
+/**
+ * Get the current base rate from the live market rate feed.
+ * Reads from the cached rates populated by refreshMarketRates().
+ * If FRED_API_KEY is not configured, returns static fallback rates.
+ */
 export function getBaseRate(type: "prime" | "sofr" | "treasury"): number {
-  return BASE_RATES[type];
+  const rates = getCachedRates();
+  return rates[type];
 }
 
 // Eligibility check

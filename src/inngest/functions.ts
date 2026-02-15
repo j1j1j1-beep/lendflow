@@ -1087,6 +1087,9 @@ export const analysisPipeline = inngest.createFunction(
         });
 
         const { structureDeal } = await import("@/structuring/structure-deal");
+        const { refreshMarketRates } = await import("@/lib/market-rates");
+        await refreshMarketRates();
+
         const fullAnalysis = analysis.fullResults as any;
 
         // Extract state from property address if available
@@ -1670,6 +1673,9 @@ export const resumeAfterReview = inngest.createFunction(
         });
 
         const { structureDeal } = await import("@/structuring/structure-deal");
+        const { refreshMarketRates } = await import("@/lib/market-rates");
+        await refreshMarketRates();
+
         const fullAnalysis = analysis.fullResults as any;
 
         // Extract state from property address if available
@@ -2262,6 +2268,9 @@ export const sampleDealPipeline = inngest.createFunction(
         });
 
         const { structureDeal } = await import("@/structuring/structure-deal");
+        const { refreshMarketRates } = await import("@/lib/market-rates");
+        await refreshMarketRates();
+
         const fullAnalysis = analysis.fullResults as any;
 
         // Extract state from property address if available
