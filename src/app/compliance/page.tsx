@@ -1,8 +1,22 @@
+import type { Metadata } from "next";
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, ShieldCheck, FileText, Calculator, Clock, AlertTriangle, ChevronDown } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
+
+export const metadata: Metadata = {
+  title: "Fund Compliance Automation & LP Reporting Tools",
+  description:
+    "PE compliance tools. Automate LP quarterly reports, capital calls, distribution notices, K-1 summaries, and Form ADV. ILPA-compliant. 73 regulatory requirements covered.",
+  keywords: ["fund compliance automation", "LP reporting tools", "capital call automation", "K-1 generator", "Form ADV automation", "PE compliance tools", "fund administration software", "ILPA compliance"],
+  alternates: { canonical: "https://openshut.me/compliance" },
+  openGraph: {
+    title: "Fund Compliance Automation & LP Reporting Tools | OpenShut",
+    description: "Automate LP reports, capital calls, distributions, and K-1s. ILPA-compliant.",
+    url: "https://openshut.me/compliance",
+  },
+};
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 
 export default function CompliancePage() {

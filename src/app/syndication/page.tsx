@@ -1,8 +1,22 @@
+import type { Metadata } from "next";
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Building, Calculator, ShieldCheck, AlertTriangle, TrendingUp } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
+
+export const metadata: Metadata = {
+  title: "Real Estate Syndication Deal Tools & Document Automation",
+  description:
+    "Deal tools for real estate syndication. Generate PPMs, operating agreements, investor docs, and pro formas with IRR calculations for 12 property types. Deal terms ready in minutes.",
+  keywords: ["syndication deal tools", "real estate syndication documents", "syndication PPM generator", "pro forma generator", "IRR calculator", "investor documents", "deal terms syndication"],
+  alternates: { canonical: "https://openshut.me/syndication" },
+  openGraph: {
+    title: "Real Estate Syndication Deal Tools | OpenShut",
+    description: "Generate syndication PPMs, investor docs, and pro formas for 12 property types.",
+    url: "https://openshut.me/syndication",
+  },
+};
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 
 const DOCUMENTS = [

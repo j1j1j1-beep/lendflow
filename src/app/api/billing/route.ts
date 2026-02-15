@@ -50,7 +50,7 @@ export async function GET() {
       },
       members: {
         count: memberCount,
-        max: subscription?.maxSeats ?? 15,
+        max: subscription?.maxSeats ?? 10,
       },
       trialProjectsRemaining,
     });

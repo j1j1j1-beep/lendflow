@@ -1,8 +1,22 @@
+import type { Metadata } from "next";
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Landmark, FileText, Calculator, ShieldCheck, MapPin, ChevronDown, AlertTriangle } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
+
+export const metadata: Metadata = {
+  title: "Lending Deal Tools & Loan Document Automation",
+  description:
+    "Legal automation for lending. Generate loan packages, deal terms, and closing docs across 14 programs: SBA 7(a), SBA 504, CRE, DSCR, bridge, and more. 36 document types. 50-state compliance.",
+  keywords: ["loan document automation", "lending deal tools", "SBA loan documents", "loan package generator", "CRE loan documents", "DSCR loan automation", "deal terms lending"],
+  alternates: { canonical: "https://openshut.me/lending" },
+  openGraph: {
+    title: "Lending Deal Tools & Loan Document Automation | OpenShut",
+    description: "Generate loan packages and deal terms across 14 programs. 36 document types ready in minutes.",
+    url: "https://openshut.me/lending",
+  },
+};
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 
 const PROGRAMS = [

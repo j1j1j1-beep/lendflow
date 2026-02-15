@@ -21,7 +21,7 @@ export async function GET() {
 
     return NextResponse.json({
       members,
-      maxSeats: sub?.maxSeats ?? 15,
+      maxSeats: sub?.maxSeats ?? 10,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       select: { maxSeats: true },
     });
 
-    const maxSeats = sub?.maxSeats ?? 15;
+    const maxSeats = sub?.maxSeats ?? 10;
     const currentCount = await prisma.user.count({ where: { orgId: org.id } });
 
     if (currentCount >= maxSeats) {

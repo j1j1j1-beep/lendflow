@@ -1,8 +1,22 @@
+import type { Metadata } from "next";
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Handshake, ShieldCheck, Calculator, AlertTriangle, ChevronDown } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
+
+export const metadata: Metadata = {
+  title: "M&A Deal Tools & Deal Terms Generation",
+  description:
+    "Deal tools for M&A. Generate deal terms, LOIs, NDAs, purchase agreements, due diligence checklists, and closing docs. 8 transaction types. HSR thresholds calculated automatically.",
+  keywords: ["M&A deal tools", "deal terms generation", "acquisition document automation", "LOI generator", "due diligence checklist", "closing checklist automation", "PE deal tools", "deal structuring"],
+  alternates: { canonical: "https://openshut.me/deals" },
+  openGraph: {
+    title: "M&A Deal Tools & Deal Terms Generation | OpenShut",
+    description: "Generate deal terms, LOIs, purchase agreements, and closing checklists for 8 transaction types.",
+    url: "https://openshut.me/deals",
+  },
+};
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 
 const TIMELINE_DOCS = [

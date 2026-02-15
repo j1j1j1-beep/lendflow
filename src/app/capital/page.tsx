@@ -1,8 +1,22 @@
+import type { Metadata } from "next";
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Building2, ShieldCheck, Scale, ChevronDown, AlertTriangle } from "lucide-react";
 import { MarketingNav } from "@/components/marketing-nav";
 import { MarketingFooter } from "@/components/marketing-footer";
+
+export const metadata: Metadata = {
+  title: "Fund Formation & Capital Raising Deal Tools",
+  description:
+    "PE deal tools for fund formation. Generate PPMs, subscription agreements, operating agreements, and deal terms for 506(b) and 506(c) offerings. 6 fund types supported.",
+  keywords: ["fund formation automation", "PPM generator", "PE deal tools", "capital raising software", "subscription agreement generator", "private equity fund formation", "deal terms generation"],
+  alternates: { canonical: "https://openshut.me/capital" },
+  openGraph: {
+    title: "Fund Formation & Capital Raising Deal Tools | OpenShut",
+    description: "Generate PPMs, sub agreements, and deal terms for PE, VC, real estate, and hedge funds.",
+    url: "https://openshut.me/capital",
+  },
+};
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 
 const DOCUMENTS = [

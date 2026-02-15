@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import {
@@ -126,6 +127,19 @@ const INTEGRATIONS = [
     desc: "Trigger document generation from any event in your stack, or push completed documents into downstream systems for review and signature.",
   },
 ];
+
+export const metadata: Metadata = {
+  title: "Enterprise Security for PE Deal Tools",
+  description:
+    "Enterprise-grade security for legal automation. Encrypted document handling, org-level isolation, full audit trail. 73 regulatory requirements covered. Built for PE firms handling sensitive deal terms.",
+  keywords: ["PE security", "legal automation security", "deal tools security", "encrypted document handling", "SOC 2 compliance", "enterprise legal software"],
+  alternates: { canonical: "https://openshut.me/platform" },
+  openGraph: {
+    title: "Enterprise Security for PE Deal Tools | OpenShut",
+    description: "Enterprise-grade security for legal automation. 73 regulatory requirements covered.",
+    url: "https://openshut.me/platform",
+  },
+};
 
 export default function PlatformPage() {
   return (
