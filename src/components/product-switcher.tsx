@@ -36,8 +36,8 @@ export function ProductSwitcher() {
         <Image
           src="/logo.png"
           alt="OpenShut"
-          width={40}
-          height={40}
+          width={48}
+          height={48}
         />
         <div className="flex flex-col gap-0.5 leading-none">
           <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent font-bold tracking-tight">
@@ -61,8 +61,8 @@ export function MarketingLogo() {
       <Image
         src="/logo.png"
         alt="OpenShut"
-        width={36}
-        height={36}
+        width={40}
+        height={40}
       />
       <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent text-lg font-bold tracking-tight">
         OpenShut
