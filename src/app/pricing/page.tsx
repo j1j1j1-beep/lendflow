@@ -23,11 +23,11 @@ import {
 } from "lucide-react";
 
 const MODULE_PRICING = [
-  { modules: 1, license: "$250,000", monthly: "$14,999", year1: "$429,988", year2: "$179,988" },
-  { modules: 2, license: "$325,000", monthly: "$19,999", year1: "$564,988", year2: "$239,988" },
-  { modules: 3, license: "$400,000", monthly: "$24,999", year1: "$699,988", year2: "$299,988" },
-  { modules: 4, license: "$475,000", monthly: "$29,999", year1: "$834,988", year2: "$359,988" },
-  { modules: 5, license: "$550,000", monthly: "$34,999", year1: "$969,988", year2: "$419,988" },
+  { modules: 1, license: "$300,000", monthly: "$23,999", year1: "$587,988", year2: "$287,988" },
+  { modules: 2, license: "$350,000", monthly: "$32,499", year1: "$739,988", year2: "$389,988" },
+  { modules: 3, license: "$400,000", monthly: "$40,999", year1: "$891,988", year2: "$491,988" },
+  { modules: 4, license: "$450,000", monthly: "$49,499", year1: "$1,043,988", year2: "$593,988" },
+  { modules: 5, license: "$500,000", monthly: "$57,999", year1: "$1,195,988", year2: "$695,988" },
 ];
 
 const MODULES = [
@@ -133,15 +133,15 @@ export default function PricingPage() {
                   <h3 className="text-lg font-semibold text-card-foreground">Per-Module License</h3>
                 </div>
                 <div className="mb-1">
-                  <span className="text-4xl font-bold tracking-tight text-foreground">$250,000</span>
+                  <span className="text-4xl font-bold tracking-tight text-foreground">$300,000</span>
                   <span className="text-base text-muted-foreground ml-1">license</span>
                 </div>
                 <div className="mb-2">
-                  <span className="text-xl font-semibold text-foreground">$14,999</span>
+                  <span className="text-xl font-semibold text-foreground">$23,999</span>
                   <span className="text-sm text-muted-foreground">/month</span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-2">
-                  First module. Each additional adds $75,000 to the license and $4,999/month.
+                  First module. Each additional adds $50,000 to the license and $8,500/month.
                 </p>
                 <p className="text-xs text-muted-foreground/70 mb-8">15 seats included. $750/seat/month after that.</p>
                 <SignInButton mode="modal" forceRedirectUrl="/dashboard">
@@ -207,7 +207,7 @@ export default function PricingPage() {
             <FadeIn>
               <div className="text-center max-w-2xl mx-auto mb-14">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Add modules as you grow</h2>
-                <p className="mt-4 text-muted-foreground leading-relaxed">Start with one module. Add more when you need them. $75,000 license and $4,999/month per additional module.</p>
+                <p className="mt-4 text-muted-foreground leading-relaxed">Start with one module. Add more when you need them. $50,000 license and $8,500/month per additional module.</p>
               </div>
             </FadeIn>
             <FadeIn delay={0.1}>
@@ -241,7 +241,7 @@ export default function PricingPage() {
             </FadeIn>
             <FadeIn delay={0.15}>
               <p className="mt-8 text-center text-sm text-muted-foreground max-w-2xl mx-auto">
-                Year 2+ is just the monthly. A firm running all 5 modules pays $550,000 in year one, then $419,988/year after that.
+                Year 2+ is just the monthly. A firm running all 5 modules pays $1.2M in year one, then $695,988/year after that.
               </p>
             </FadeIn>
           </div>
