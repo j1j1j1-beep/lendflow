@@ -24,7 +24,6 @@ export function ProductSwitcher() {
           alt="OpenShut"
           width={32}
           height={32}
-          className="rounded-lg"
         />
         <div className="flex flex-col gap-0.5 leading-none">
           <span className="font-semibold tracking-tight">OpenShut</span>
@@ -46,7 +45,6 @@ export function MarketingLogo() {
         alt="OpenShut"
         width={32}
         height={32}
-        className="rounded-lg"
       />
       <span className="text-lg font-semibold tracking-tight text-foreground">
         OpenShut
