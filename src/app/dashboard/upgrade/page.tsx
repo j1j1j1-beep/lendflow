@@ -2,12 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Lock, ArrowRight, Home, Eye, Landmark, Building2, Handshake, Building, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGate } from "@/hooks/use-gate";
 import { FadeIn, ScaleIn } from "@/components/motion";
 
 const EA_MODULES = [
@@ -21,8 +19,6 @@ const EA_MODULES = [
 type ProjectLink = { module: string; id: string; name: string } | null;
 
 export default function UpgradePage() {
-  const router = useRouter();
-  const { isGated, isLoading: gateLoading } = useGate();
   const [project, setProject] = useState<ProjectLink>(null);
   const [loadingProject, setLoadingProject] = useState(true);
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
@@ -46,13 +42,6 @@ export default function UpgradePage() {
       .catch(() => {})
       .finally(() => setLoadingProject(false));
   }, []);
-
-  // If not gated (active sub or hasn't used sample deal), redirect to dashboard
-  useEffect(() => {
-    if (!gateLoading && !isGated) {
-      router.replace("/dashboard");
-    }
-  }, [gateLoading, isGated, router]);
 
   const handleCheckout = async () => {
     if (!selectedModule) return;
@@ -79,14 +68,6 @@ export default function UpgradePage() {
   }
 
   const selected = EA_MODULES.find((m) => m.key === selectedModule);
-
-  if (gateLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Skeleton className="h-64 w-full max-w-lg rounded-2xl" />
-      </div>
-    );
-  }
 
   return (
     <div className="flex items-center justify-center min-h-[60vh] p-6">
