@@ -23,11 +23,11 @@ import {
 } from "lucide-react";
 
 const MODULE_PRICING = [
-  { modules: 1, license: "$300,000", monthly: "$23,999", year1: "$587,988", year2: "$287,988" },
-  { modules: 2, license: "$350,000", monthly: "$32,499", year1: "$739,988", year2: "$389,988" },
-  { modules: 3, license: "$400,000", monthly: "$40,999", year1: "$891,988", year2: "$491,988" },
-  { modules: 4, license: "$450,000", monthly: "$49,499", year1: "$1,043,988", year2: "$593,988" },
-  { modules: 5, license: "$500,000", monthly: "$57,999", year1: "$1,195,988", year2: "$695,988" },
+  { modules: 1, license: "$300,000", monthly: "$20,000", year1: "$540,000", year2: "$268,800" },
+  { modules: 2, license: "$350,000", monthly: "$28,500", year1: "$692,000", year2: "$383,040" },
+  { modules: 3, license: "$400,000", monthly: "$37,000", year1: "$844,000", year2: "$497,280" },
+  { modules: 4, license: "$450,000", monthly: "$45,500", year1: "$996,000", year2: "$611,520" },
+  { modules: 5, license: "$500,000", monthly: "$54,000", year1: "$1,148,000", year2: "$725,760" },
 ];
 
 const MODULES = [
@@ -137,7 +137,7 @@ export default function PricingPage() {
                   <span className="text-base text-muted-foreground ml-1">license</span>
                 </div>
                 <div className="mb-2">
-                  <span className="text-xl font-semibold text-foreground">$23,999</span>
+                  <span className="text-xl font-semibold text-foreground">$20,000</span>
                   <span className="text-sm text-muted-foreground">/month</span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-2">
@@ -219,7 +219,7 @@ export default function PricingPage() {
                       <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">License (one-time)</th>
                       <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Monthly</th>
                       <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Year 1 Total</th>
-                      <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Year 2+</th>
+                      <th className="py-4 px-4 text-right text-sm font-semibold text-foreground">Year 2</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -241,7 +241,7 @@ export default function PricingPage() {
             </FadeIn>
             <FadeIn delay={0.15}>
               <p className="mt-8 text-center text-sm text-muted-foreground max-w-2xl mx-auto">
-                Year 2+ is just the monthly. A firm running all 5 modules pays $1.2M in year one, then $695,988/year after that.
+                12% annual escalator on the monthly fee beginning year 2. Year 2 column reflects the first increase.
               </p>
             </FadeIn>
           </div>
