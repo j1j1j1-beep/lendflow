@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { SidebarMenuButton } from "@/components/ui/sidebar";
+import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 
 const MODULE_LABELS: Record<string, string> = {
   lending: "Lending",
@@ -28,6 +28,8 @@ function useActiveModule(): string {
  */
 export function ProductSwitcher() {
   const activeModule = useActiveModule();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   return (
     <SidebarMenuButton size="lg" asChild className="h-auto py-3">
@@ -35,18 +37,20 @@ export function ProductSwitcher() {
         <Image
           src="/logo.png"
           alt="OpenShut"
-          width={80}
-          height={46}
-          className="flex-shrink-0 -mr-3"
+          width={isCollapsed ? 32 : 80}
+          height={isCollapsed ? 18 : 46}
+          className={`flex-shrink-0 ${isCollapsed ? "" : "-mr-3"}`}
         />
-        <div className="flex flex-col gap-0 leading-none">
-          <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent font-bold tracking-tight">
-            OpenShut
-          </span>
-          <span className="text-[10px] text-muted-foreground">
-            {activeModule}
-          </span>
-        </div>
+        {!isCollapsed && (
+          <div className="flex flex-col gap-0 leading-none">
+            <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent text-base font-bold tracking-tight">
+              OpenShut
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              {activeModule}
+            </span>
+          </div>
+        )}
       </Link>
     </SidebarMenuButton>
   );
